@@ -24,6 +24,7 @@
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.98.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "typescript": "^5.9.3"
