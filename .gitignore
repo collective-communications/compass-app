@@ -3,6 +3,7 @@
 .claude
 .mcp.json
 claude.local.md
+.koji
 
 # OS
 .DS_Store
