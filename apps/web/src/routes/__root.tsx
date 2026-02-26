@@ -9,6 +9,8 @@ import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { createResultsRoutes } from '../features/results/routes';
 import { createAdminRoutes } from '../features/admin/routes';
+import { createDashboardRoutes } from '../features/dashboard/routes';
+import { createReportsRoutes } from '../features/reports/routes';
 import { SurveyProvider, useSurveyContext } from '../features/survey/context/survey-context';
 import { useDeployment } from '../features/survey/hooks/use-deployment';
 import { useQuestions } from '../features/survey/hooks/use-questions';
@@ -556,40 +558,12 @@ const forgotPasswordSentRoute = createRoute({
   },
 });
 
-/* ── Authenticated routes ──────────────────────────────────────── */
-
-const clientsRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/clients',
-  component: function ClientsPage(): React.ReactElement {
-    return (
-      <AppShell>
-        <div className="flex items-center justify-center py-12">
-          <p className="text-[var(--grey-500)]">Clients — coming soon</p>
-        </div>
-      </AppShell>
-    );
-  },
-});
-
-const dashboardRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/dashboard',
-  component: function DashboardPage(): React.ReactElement {
-    return (
-      <AppShell>
-        <div className="flex items-center justify-center py-12">
-          <p className="text-[var(--grey-500)]">Dashboard — coming soon</p>
-        </div>
-      </AppShell>
-    );
-  },
-});
-
-/* ── Results & Admin route trees ──────────────────────────────── */
+/* ── Feature route trees ──────────────────────────────────────── */
 
 const resultsRoutes = createResultsRoutes(rootRoute);
 const adminRoutes = createAdminRoutes(rootRoute);
+const dashboardRoutes = createDashboardRoutes(rootRoute);
+const reportsRoutes = createReportsRoutes(rootRoute);
 
 /* ── Not Found ─────────────────────────────────────────────────── */
 
@@ -620,7 +594,7 @@ export const routeTree = rootRoute.addChildren([
   authRoute.addChildren([loginRoute, callbackRoute, forgotPasswordSentRoute, forgotPasswordRoute]),
   resultsRoutes,
   adminRoutes,
-  clientsRoute,
-  dashboardRoute,
+  dashboardRoutes,
+  reportsRoutes,
   notFoundRoute,
 ]);
