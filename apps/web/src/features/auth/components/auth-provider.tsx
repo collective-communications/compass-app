@@ -46,6 +46,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
   const { setSession, clearSession, setInitialized, setError, isInitialized } = useAuthStore();
 
   useEffect(() => {
+    // Restore session on mount — this is the primary initialization path.
+    // getSession() reads the persisted session from storage.
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
         try {
@@ -58,15 +60,17 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
       setInitialized();
     });
 
+    // Listen for subsequent auth changes (sign-in, sign-out, token refresh).
+    // Skip INITIAL_SESSION since getSession() above handles initialization.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-        if (session?.user) {
-          try {
-            const user = await resolveUser(session.user.id, session.user.email ?? '');
-            setSession(buildSessionContext(session, user));
-          } catch {
-            setError('Failed to resolve user profile');
-          }
+      if (event === 'INITIAL_SESSION') return;
+
+      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
+        try {
+          const user = await resolveUser(session.user.id, session.user.email ?? '');
+          setSession(buildSessionContext(session, user));
+        } catch {
+          setError('Failed to resolve user profile');
         }
       } else if (event === 'SIGNED_OUT') {
         clearSession();
