@@ -1,7 +1,7 @@
 -- Scoring Tables & Views (S6)
 
 CREATE TABLE scores (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
   dimension_id UUID NOT NULL REFERENCES dimensions(id),
   segment_type TEXT,
@@ -15,7 +15,7 @@ CREATE TABLE scores (
 );
 
 CREATE TABLE archetypes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   description TEXT NOT NULL,
@@ -32,7 +32,7 @@ INSERT INTO archetypes (code, name, description, target_vectors, display_order) 
   ('busy_but_burned', 'Busy but Burned Out', 'Low scores across dimensions, especially connection. High activity masks cultural dysfunction — people are working hard but not working well together.', '{"core": 30, "clarity": 35, "connection": 25, "collaboration": 40}', 5);
 
 CREATE TABLE recommendations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
   dimension_id UUID REFERENCES dimensions(id),
   priority INT NOT NULL DEFAULT 0,
@@ -50,7 +50,7 @@ CREATE TRIGGER recommendations_updated_at
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE dialogue_keywords (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
   dimension_id UUID REFERENCES dimensions(id),
   keyword TEXT NOT NULL,
@@ -60,7 +60,7 @@ CREATE TABLE dialogue_keywords (
 );
 
 CREATE TABLE score_recalculations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
   triggered_by TEXT NOT NULL,
   reason TEXT NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE score_recalculations (
 );
 
 CREATE TABLE reports (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
   organization_id UUID NOT NULL REFERENCES organizations(id),
   title TEXT NOT NULL,

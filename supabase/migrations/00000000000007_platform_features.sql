@@ -6,7 +6,7 @@
 -- ============================================================================
 
 CREATE TABLE admin_notes (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   author_name TEXT NOT NULL,
   content TEXT NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE admin_notes (
 );
 
 CREATE TABLE invitations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   email TEXT NOT NULL,
   role user_role NOT NULL,
   organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE,
@@ -35,7 +35,7 @@ CREATE TABLE user_profiles (
 );
 
 CREATE TABLE organization_settings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL UNIQUE REFERENCES organizations(id) ON DELETE CASCADE,
   metadata_departments JSONB NOT NULL DEFAULT '[]',
   metadata_roles JSONB NOT NULL DEFAULT '[]',
@@ -52,14 +52,14 @@ CREATE TRIGGER organization_settings_updated_at
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE organization_consultants (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   consultant_name TEXT NOT NULL,
   assigned_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE platform_settings (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   anonymity_threshold INT NOT NULL DEFAULT 5,
   default_duration_days INT NOT NULL DEFAULT 14,
   welcome_message TEXT NOT NULL DEFAULT 'Welcome to the Culture Compass survey.',

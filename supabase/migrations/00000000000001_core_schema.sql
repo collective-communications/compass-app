@@ -19,7 +19,7 @@ CREATE TYPE user_role AS ENUM (
 
 -- Organizations
 CREATE TABLE organizations (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   settings JSONB NOT NULL DEFAULT '{}',
@@ -35,7 +35,7 @@ CREATE TRIGGER organizations_updated_at
 
 -- Org Members
 CREATE TABLE org_members (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   role user_role NOT NULL DEFAULT 'client_user',
@@ -52,7 +52,7 @@ CREATE TRIGGER org_members_updated_at
 
 -- Dimensions (the 4 Culture Compass dimensions)
 CREATE TABLE dimensions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   code TEXT NOT NULL UNIQUE,
   name TEXT NOT NULL,
   description TEXT,
@@ -65,7 +65,7 @@ CREATE TABLE dimensions (
 
 -- Survey Templates
 CREATE TABLE survey_templates (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL,
   description TEXT,
   is_system BOOLEAN NOT NULL DEFAULT false,

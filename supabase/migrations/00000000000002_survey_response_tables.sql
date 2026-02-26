@@ -6,7 +6,7 @@ CREATE TYPE question_type AS ENUM ('likert_4', 'open_text');
 CREATE TYPE deployment_type AS ENUM ('anonymous_link', 'tracked_link', 'email_invite', 'sso_gated');
 
 CREATE TABLE surveys (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   template_id UUID REFERENCES survey_templates(id),
   title TEXT NOT NULL,
@@ -26,7 +26,7 @@ CREATE TRIGGER surveys_updated_at
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 CREATE TABLE questions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
   type question_type NOT NULL DEFAULT 'likert_4',
@@ -45,9 +45,9 @@ CREATE TABLE question_dimensions (
 );
 
 CREATE TABLE deployments (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   survey_id UUID NOT NULL REFERENCES surveys(id) ON DELETE CASCADE,
-  token UUID NOT NULL DEFAULT uuid_generate_v4() UNIQUE,
+  token UUID NOT NULL DEFAULT gen_random_uuid() UNIQUE,
   type deployment_type NOT NULL DEFAULT 'anonymous_link',
   opens_at TIMESTAMPTZ,
   closes_at TIMESTAMPTZ,
@@ -63,7 +63,7 @@ CREATE TRIGGER deployments_updated_at
 
 -- NO user_id column — structural anonymity
 CREATE TABLE responses (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   deployment_id UUID NOT NULL REFERENCES deployments(id) ON DELETE CASCADE,
   session_token TEXT NOT NULL,
   ip_hash TEXT,
@@ -78,7 +78,7 @@ CREATE TABLE responses (
 );
 
 CREATE TABLE answers (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   response_id UUID NOT NULL REFERENCES responses(id) ON DELETE CASCADE,
   question_id UUID NOT NULL REFERENCES questions(id) ON DELETE CASCADE,
   likert_value INT CHECK (likert_value >= 1 AND likert_value <= 4),
