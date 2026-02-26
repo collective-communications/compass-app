@@ -1,0 +1,136 @@
+/**
+ * Report preview panel (desktop 35% right column).
+ * Shows selected report details and download action.
+ * Empty state when no report is selected.
+ */
+
+import type { ReactElement } from 'react';
+import { Download, FileText } from 'lucide-react';
+import type { ReportStatus } from '@compass/types';
+
+interface ReportPreviewProps {
+  report: ReportStatus | null;
+}
+
+/** Format bytes into a readable string */
+function formatFileSize(bytes: number | null): string {
+  if (bytes === null || bytes === 0) return '--';
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  return date.toLocaleDateString('en-CA', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+/** Map section IDs to readable labels */
+const SECTION_LABELS: Record<string, string> = {
+  cover: 'Cover Page',
+  executive_summary: 'Executive Summary',
+  compass_overview: 'Compass Overview',
+  dimension_deep_dives: 'Dimension Deep Dives',
+  segment_analysis: 'Segment Analysis',
+  recommendations: 'Recommendations',
+};
+
+export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
+  if (report === null) {
+    return (
+      <aside
+        aria-label="Report preview"
+        className="flex flex-col items-center justify-center gap-3 rounded-lg border border-[#E5E4E0] bg-white p-8 text-center lg:sticky lg:top-6"
+      >
+        <FileText size={40} className="text-[#E5E4E0]" aria-hidden="true" />
+        <p className="text-sm text-[#9E9E9E]">
+          Select a report to preview details
+        </p>
+      </aside>
+    );
+  }
+
+  const isReady = report.status === 'complete';
+
+  return (
+    <aside
+      aria-label="Report preview"
+      className="flex flex-col gap-4 rounded-lg border border-[#E5E4E0] bg-white p-6 lg:sticky lg:top-6"
+    >
+      {/* Header */}
+      <div className="flex items-center gap-2">
+        <span className="inline-flex items-center rounded-full bg-[#F5F5F5] px-2 py-0.5 text-xs font-medium uppercase text-[#616161]">
+          {report.format}
+        </span>
+        <span
+          className={`text-xs font-medium ${
+            isReady ? 'text-[#2E7D32]' : report.status === 'failed' ? 'text-[#D32F2F]' : 'text-[#757575]'
+          }`}
+        >
+          {report.status === 'complete' ? 'Ready' : report.status === 'failed' ? 'Failed' : 'In progress'}
+        </span>
+      </div>
+
+      {/* Metadata */}
+      <dl className="flex flex-col gap-2 text-sm">
+        <div className="flex justify-between">
+          <dt className="text-[#757575]">Generated</dt>
+          <dd className="text-[#424242]">{formatDate(report.createdAt)}</dd>
+        </div>
+        {report.fileSize !== null && (
+          <div className="flex justify-between">
+            <dt className="text-[#757575]">File size</dt>
+            <dd className="text-[#424242]">{formatFileSize(report.fileSize)}</dd>
+          </div>
+        )}
+        {report.pageCount !== null && (
+          <div className="flex justify-between">
+            <dt className="text-[#757575]">Pages</dt>
+            <dd className="text-[#424242]">{report.pageCount}</dd>
+          </div>
+        )}
+      </dl>
+
+      {/* Included sections */}
+      {report.sections.length > 0 && (
+        <div>
+          <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-[#9E9E9E]">
+            Included Sections
+          </h4>
+          <ul className="flex flex-col gap-1">
+            {report.sections.map((sectionId) => (
+              <li key={sectionId} className="text-sm text-[#616161]">
+                {SECTION_LABELS[sectionId] ?? sectionId}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Error detail */}
+      {report.status === 'failed' && report.error !== null && (
+        <p className="rounded-md bg-[#FFF5F5] px-3 py-2 text-xs text-[#D32F2F]">
+          {report.error}
+        </p>
+      )}
+
+      {/* Download button */}
+      {isReady && report.fileUrl !== null && (
+        <a
+          href={report.fileUrl}
+          download
+          className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
+        >
+          <Download size={16} aria-hidden="true" />
+          Download {report.format.toUpperCase()}
+        </a>
+      )}
+    </aside>
+  );
+}

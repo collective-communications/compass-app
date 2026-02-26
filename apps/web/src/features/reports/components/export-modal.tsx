@@ -1,0 +1,464 @@
+/**
+ * Export modal for generating a new report.
+ * Mobile: bottom sheet with drag handle and scrim.
+ * Desktop: 420px side sheet on the right with scrim.
+ *
+ * Three states:
+ * 1. Configuration — format + section selection
+ * 2. Generating — progress bar with step indicators, 2s polling
+ * 3. Complete — download link
+ *
+ * Focus trap is active while the modal is open. Escape closes.
+ */
+
+import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import { X, Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  ReportFormat,
+  getDefaultReportSections,
+  type ReportSection,
+  type ReportConfig,
+} from '@compass/types';
+import { useReportGeneration } from '../hooks/use-report-generation';
+
+// ─── Focus Trap ─────────────────────────────────────────────────────────────
+
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea, input:not([disabled]), select, [tabindex]:not([tabindex="-1"])';
+
+function useFocusTrap(
+  containerRef: React.RefObject<HTMLElement | null>,
+  isActive: boolean,
+): void {
+  useEffect(() => {
+    if (!isActive) return;
+    const container = containerRef.current;
+    if (container === null) return;
+
+    const firstFocusable = container.querySelector<HTMLElement>(FOCUSABLE_SELECTOR);
+    firstFocusable?.focus();
+
+    function handleKeyDown(e: KeyboardEvent): void {
+      if (e.key !== 'Tab' || container === null) return;
+      const focusables = container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR);
+      if (focusables.length === 0) return;
+
+      const first = focusables[0] as HTMLElement | undefined;
+      const last = focusables[focusables.length - 1] as HTMLElement | undefined;
+      if (first === undefined || last === undefined) return;
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [containerRef, isActive]);
+}
+
+// ─── Types ──────────────────────────────────────────────────────────────────
+
+type ModalState = 'configure' | 'generating' | 'complete';
+
+interface ExportModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  surveyId: string;
+  /** Called after a successful generation to refresh the reports list */
+  onGenerated?: () => void;
+}
+
+// ─── Generation Steps ───────────────────────────────────────────────────────
+
+const GENERATION_STEPS = [
+  { threshold: 0, label: 'Queued' },
+  { threshold: 20, label: 'Assembling data' },
+  { threshold: 50, label: 'Rendering report' },
+  { threshold: 80, label: 'Finalizing' },
+  { threshold: 100, label: 'Complete' },
+] as const;
+
+function getCurrentStep(progress: number): number {
+  let step = 0;
+  for (let i = GENERATION_STEPS.length - 1; i >= 0; i--) {
+    if (progress >= GENERATION_STEPS[i]!.threshold) {
+      step = i;
+      break;
+    }
+  }
+  return step;
+}
+
+// ─── Component ──────────────────────────────────────────────────────────────
+
+export function ExportModal({
+  isOpen,
+  onClose,
+  surveyId,
+  onGenerated,
+}: ExportModalProps): ReactElement {
+  const modalRef = useRef<HTMLDivElement>(null);
+  const [format, setFormat] = useState<ReportFormat>(ReportFormat.PDF);
+  const [sections, setSections] = useState<ReportSection[]>(getDefaultReportSections);
+
+  const generation = useReportGeneration();
+
+  // Derive modal state from generation status
+  const modalState: ModalState =
+    generation.status === 'complete'
+      ? 'complete'
+      : generation.isGenerating
+        ? 'generating'
+        : 'configure';
+
+  useFocusTrap(modalRef, isOpen);
+
+  // Prevent body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => {
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isOpen]);
+
+  // Escape to close (only in configure state)
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent): void => {
+      if (e.key === 'Escape' && modalState === 'configure') {
+        onClose();
+      }
+    },
+    [onClose, modalState],
+  );
+
+  /** Reset local state when modal closes */
+  const handleClose = useCallback((): void => {
+    if (modalState === 'generating') return; // Prevent closing during generation
+    generation.reset();
+    setFormat(ReportFormat.PDF);
+    setSections(getDefaultReportSections());
+    onClose();
+  }, [modalState, generation, onClose]);
+
+  /** Handle close after completion */
+  const handleDone = useCallback((): void => {
+    onGenerated?.();
+    handleClose();
+  }, [onGenerated, handleClose]);
+
+  /** Toggle a section's included state */
+  const toggleSection = useCallback((sectionId: string): void => {
+    setSections((prev) =>
+      prev.map((s) =>
+        s.id === sectionId && !s.locked ? { ...s, included: !s.included } : s,
+      ),
+    );
+  }, []);
+
+  /** Start generation */
+  const handleGenerate = useCallback(async (): Promise<void> => {
+    const config: ReportConfig = {
+      surveyId,
+      format,
+      sections,
+    };
+    await generation.generate(config);
+  }, [surveyId, format, sections, generation]);
+
+  const currentStep = getCurrentStep(generation.progress);
+
+  return (
+    <>
+      {/* Scrim */}
+      <div
+        className={`fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+        onClick={modalState === 'configure' ? handleClose : undefined}
+        aria-hidden="true"
+      />
+
+      {/* Modal — mobile: bottom sheet, desktop: 420px side sheet */}
+      <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Export report"
+        onKeyDown={handleKeyDown}
+        className={[
+          'fixed z-50 flex flex-col bg-white shadow-lg transition-transform duration-300 ease-in-out',
+          // Mobile: bottom sheet
+          'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl lg:inset-x-auto',
+          // Desktop: side sheet
+          'lg:inset-y-0 lg:right-0 lg:w-[420px] lg:max-h-none lg:rounded-none',
+          // Transform
+          isOpen
+            ? 'translate-y-0 lg:translate-x-0'
+            : 'translate-y-full lg:translate-y-0 lg:translate-x-full',
+        ].join(' ')}
+      >
+        {/* Drag handle (mobile) */}
+        <div className="flex justify-center pt-3 lg:hidden">
+          <div className="h-1 w-10 rounded-full bg-[#E5E4E0]" />
+        </div>
+
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[#E5E4E0] px-6 py-4">
+          <h2 className="text-lg font-semibold text-[#212121]">Export Report</h2>
+          {modalState !== 'generating' && (
+            <button
+              type="button"
+              onClick={handleClose}
+              className="rounded-md p-1 text-[#757575] hover:bg-[#F5F5F5] hover:text-[#424242]"
+              aria-label="Close export modal"
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+          )}
+        </div>
+
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto px-6 py-5">
+          {/* ── Configure State ── */}
+          {modalState === 'configure' && (
+            <div className="flex flex-col gap-6">
+              {/* Format selection */}
+              <fieldset>
+                <legend className="mb-3 text-sm font-medium text-[#424242]">
+                  Output Format
+                </legend>
+                <div className="flex flex-col gap-2">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-md border border-[#E5E4E0] px-4 py-3 transition-colors hover:bg-[#FAFAFA]">
+                    <input
+                      type="radio"
+                      name="report-format"
+                      value={ReportFormat.PDF}
+                      checked={format === ReportFormat.PDF}
+                      onChange={() => setFormat(ReportFormat.PDF)}
+                      className="h-4 w-4 text-[#0A3B4F] focus:ring-[#0A3B4F]"
+                    />
+                    <span className="text-sm text-[#424242]">PDF</span>
+                  </label>
+                  <label className="flex cursor-not-allowed items-center gap-3 rounded-md border border-[#E5E4E0] px-4 py-3 opacity-50">
+                    <input
+                      type="radio"
+                      name="report-format"
+                      value={ReportFormat.PPTX}
+                      disabled
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm text-[#9E9E9E]">
+                      PPTX
+                      <span className="ml-2 rounded bg-[#F5F5F5] px-1.5 py-0.5 text-xs text-[#9E9E9E]">
+                        Coming soon
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+
+              {/* Section selection */}
+              <fieldset>
+                <legend className="mb-3 text-sm font-medium text-[#424242]">
+                  Report Sections
+                </legend>
+                <div className="flex flex-col gap-2">
+                  {sections.map((section) => (
+                    <label
+                      key={section.id}
+                      className={[
+                        'flex items-center gap-3 rounded-md border border-[#E5E4E0] px-4 py-3 transition-colors',
+                        section.locked
+                          ? 'cursor-default bg-[#FAFAFA]'
+                          : 'cursor-pointer hover:bg-[#FAFAFA]',
+                      ].join(' ')}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={section.included}
+                        disabled={section.locked}
+                        onChange={() => toggleSection(section.id)}
+                        className="h-4 w-4 rounded text-[#0A3B4F] focus:ring-[#0A3B4F]"
+                      />
+                      <span
+                        className={`text-sm ${section.locked ? 'text-[#9E9E9E]' : 'text-[#424242]'}`}
+                      >
+                        {section.label}
+                        {section.locked && (
+                          <span className="ml-2 text-xs text-[#BDBDBD]">(required)</span>
+                        )}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+
+              {/* Generation error from previous attempt */}
+              {generation.error !== null && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-md bg-[#FFF5F5] px-3 py-2 text-sm text-[#D32F2F]"
+                >
+                  <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                  {generation.error}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Generating State ── */}
+          {modalState === 'generating' && (
+            <div className="flex flex-col gap-6">
+              {/* Progress bar */}
+              <div>
+                <div className="mb-2 flex items-center justify-between text-sm">
+                  <span className="text-[#424242]">Generating report</span>
+                  <span className="text-[#757575]">{generation.progress}%</span>
+                </div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[#F5F5F5]">
+                  <div
+                    className="h-full rounded-full bg-[#0A3B4F] transition-[width] duration-500 ease-out"
+                    style={{ width: `${generation.progress}%` }}
+                    role="progressbar"
+                    aria-valuenow={generation.progress}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label="Report generation progress"
+                  />
+                </div>
+              </div>
+
+              {/* Step indicators */}
+              <ol className="flex flex-col gap-3">
+                {GENERATION_STEPS.map((step, index) => {
+                  const isActive = index === currentStep;
+                  const isDone = index < currentStep;
+
+                  return (
+                    <li key={step.label} className="flex items-center gap-3">
+                      <div
+                        className={[
+                          'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs',
+                          isDone
+                            ? 'bg-[#2E7D32] text-white'
+                            : isActive
+                              ? 'bg-[#0A3B4F] text-white'
+                              : 'bg-[#F5F5F5] text-[#BDBDBD]',
+                        ].join(' ')}
+                      >
+                        {isDone ? (
+                          <CheckCircle2 size={14} aria-hidden="true" />
+                        ) : isActive ? (
+                          <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                        ) : (
+                          <span>{index + 1}</span>
+                        )}
+                      </div>
+                      <span
+                        className={`text-sm ${
+                          isDone
+                            ? 'text-[#2E7D32]'
+                            : isActive
+                              ? 'font-medium text-[#424242]'
+                              : 'text-[#BDBDBD]'
+                        }`}
+                      >
+                        {step.label}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
+
+          {/* ── Complete State ── */}
+          {modalState === 'complete' && (
+            <div className="flex flex-col items-center gap-4 py-6 text-center">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#E8F5E9]">
+                <CheckCircle2 size={32} className="text-[#2E7D32]" aria-hidden="true" />
+              </div>
+              <h3 className="text-lg font-semibold text-[#212121]">Report Ready</h3>
+              <p className="text-sm text-[#757575]">
+                Your report has been generated and is ready for download.
+              </p>
+              {generation.fileUrl !== null && (
+                <a
+                  href={generation.fileUrl}
+                  download
+                  className="flex items-center gap-2 rounded-md bg-[#0A3B4F] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
+                >
+                  <Download size={16} aria-hidden="true" />
+                  Download {format.toUpperCase()}
+                </a>
+              )}
+            </div>
+          )}
+
+          {/* Generation failure in generating state */}
+          {generation.status === 'failed' && modalState !== 'configure' && (
+            <div className="mt-4 flex flex-col items-center gap-3 text-center">
+              <AlertCircle size={32} className="text-[#D32F2F]" aria-hidden="true" />
+              <p className="text-sm text-[#D32F2F]">
+                {generation.error ?? 'Report generation failed.'}
+              </p>
+              <button
+                type="button"
+                onClick={generation.reset}
+                className="text-sm font-medium text-[#0A3B4F] underline hover:no-underline"
+              >
+                Try again
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-[#E5E4E0] px-6 py-4">
+          {modalState === 'configure' && (
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="flex-1 rounded-md border border-[#E5E4E0] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[#F5F5F5]"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleGenerate()}
+                disabled={sections.filter((s) => s.included).length === 0}
+                className="flex-1 rounded-md bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2 disabled:opacity-50"
+              >
+                Generate Report
+              </button>
+            </div>
+          )}
+
+          {modalState === 'generating' && (
+            <p className="text-center text-xs text-[#9E9E9E]">
+              Please wait while your report is being generated.
+            </p>
+          )}
+
+          {modalState === 'complete' && (
+            <button
+              type="button"
+              onClick={handleDone}
+              className="w-full rounded-md border border-[#E5E4E0] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[#F5F5F5]"
+            >
+              Done
+            </button>
+          )}
+        </div>
+      </div>
+    </>
+  );
+}
