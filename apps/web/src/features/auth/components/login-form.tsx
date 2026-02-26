@@ -1,0 +1,114 @@
+import { useState, useRef, useId, type FormEvent } from 'react';
+
+interface LoginFormProps {
+  onSubmit: (email: string, password: string) => Promise<void>;
+  isLoading: boolean;
+  error: string | null;
+}
+
+/**
+ * Email + password login form with inline validation and error display.
+ */
+export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React.ReactElement {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [emailTouched, setEmailTouched] = useState(false);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const errorId = useId();
+
+  const emailValid = email === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const canSubmit = email !== '' && password !== '' && emailValid && !isLoading;
+
+  async function handleSubmit(e: FormEvent<HTMLFormElement>): Promise<void> {
+    e.preventDefault();
+    if (!canSubmit) return;
+
+    const previousPassword = password;
+    await onSubmit(email, password);
+
+    // If error appeared (invalid credentials), clear password and focus it
+    // The parent will re-render with error; we clear optimistically
+    if (passwordRef.current && password === previousPassword) {
+      // Check after async — if error is set the component re-renders
+      // We handle this via useEffect-like behavior in the next render
+    }
+  }
+
+  // When error changes to invalid credentials, clear password and focus
+  const prevErrorRef = useRef<string | null>(null);
+  if (error && error !== prevErrorRef.current && error.includes('Invalid')) {
+    if (password !== '') {
+      setPassword('');
+    }
+    // Focus password field after render
+    queueMicrotask(() => {
+      passwordRef.current?.focus();
+    });
+  }
+  prevErrorRef.current = error;
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="login-email"
+          className="text-sm font-medium text-[var(--grey-700)]"
+        >
+          Email
+        </label>
+        <input
+          id="login-email"
+          type="email"
+          required
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          onBlur={() => setEmailTouched(true)}
+          disabled={isLoading}
+          aria-invalid={emailTouched && !emailValid ? true : undefined}
+          className="rounded-lg border border-[var(--grey-300)] bg-white px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+          placeholder="you@example.com"
+        />
+        {emailTouched && !emailValid && (
+          <p className="text-xs text-red-600">Enter a valid email address.</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-1.5">
+        <label
+          htmlFor="login-password"
+          className="text-sm font-medium text-[var(--grey-700)]"
+        >
+          Password
+        </label>
+        <input
+          id="login-password"
+          ref={passwordRef}
+          type="password"
+          required
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          disabled={isLoading}
+          className="rounded-lg border border-[var(--grey-300)] bg-white px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+          placeholder="Enter your password"
+        />
+      </div>
+
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        aria-describedby={error ? errorId : undefined}
+        className="mt-2 rounded-lg bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {isLoading ? 'Signing in\u2026' : 'Sign In'}
+      </button>
+
+      {error && (
+        <p id={errorId} role="alert" className="text-center text-sm text-red-600">
+          {error}
+        </p>
+      )}
+    </form>
+  );
+}
