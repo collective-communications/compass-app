@@ -12,6 +12,7 @@
     { "path": "../../packages/utils" },
     { "path": "../../packages/tokens" },
     { "path": "../../packages/ui" },
-    { "path": "../../packages/compass" }
+    { "path": "../../packages/compass" },
+    { "path": "../../packages/scoring" }
   ]
 }
