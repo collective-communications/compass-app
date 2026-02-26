@@ -1,6 +1,28 @@
+# Context Kit / Claude
 .context-kit
 .claude
 .mcp.json
 claude.local.md
 
-.ds_store
+# OS
+.DS_Store
+
+# Dependencies
+node_modules
+
+# Build
+dist
+*.tsbuildinfo
+
+# Environment
+.env.local
+.env.*.local
+
+# Supabase
+supabase/.temp/
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo

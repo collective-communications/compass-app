@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--grey-900);
+  background-color: var(--grey-50);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headings);
+}

@@ -1,0 +1,1 @@
+-- Seed data will be added in S7 (RLS Policies, Indexes & Seed Data)

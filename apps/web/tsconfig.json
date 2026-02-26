@@ -1,0 +1,17 @@
+{
+  "extends": "../../tooling/typescript/base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "noEmit": true,
+    "composite": false
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../../packages/types" },
+    { "path": "../../packages/utils" },
+    { "path": "../../packages/tokens" },
+    { "path": "../../packages/ui" },
+    { "path": "../../packages/compass" }
+  ]
+}
