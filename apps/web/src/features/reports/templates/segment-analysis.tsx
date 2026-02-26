@@ -75,7 +75,7 @@ export function SegmentAnalysis({
    * Segments with null scores from safe_segment_scores are excluded.
    */
   const visibleSegments = segmentKeys.filter((segKey) => {
-    const dimScores = segments[segKey];
+    const dimScores = segments[segKey] ?? {};
     // If all dimension scores are null/undefined, the segment is below threshold
     return Object.values(dimScores).some((s) => s !== null && s !== undefined);
   });
@@ -135,7 +135,7 @@ export function SegmentAnalysis({
         </thead>
         <tbody>
           {visibleSegments.map((segKey) => {
-            const dimScores = segments[segKey];
+            const dimScores = segments[segKey] ?? {};
             return (
               <tr key={segKey} style={{ borderBottom: '1px solid #F5F5F5' }}>
                 <td style={{ padding: '8px', fontWeight: 500, color: '#212121' }}>

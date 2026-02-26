@@ -72,11 +72,11 @@ function ResultsLayoutRoute(): ReactElement {
   const isContentLoading = scoresLoading || archetypeLoading || riskFlagsLoading;
 
   function handleTabChange(tabId: ResultsTabId): void {
-    void navigate({ to: '/results/$surveyId/$tabId', params: { surveyId, tabId } });
+    void navigate({ to: `/results/${surveyId}/${tabId}` });
   }
 
   function handleSurveyChange(newSurveyId: string): void {
-    void navigate({ to: '/results/$surveyId/$tabId', params: { surveyId: newSurveyId, tabId: activeTab } });
+    void navigate({ to: `/results/${newSurveyId}/${activeTab}` });
   }
 
   /** Resolve insights panel content based on active tab. */
@@ -85,9 +85,9 @@ function ResultsLayoutRoute(): ReactElement {
 
     switch (activeTab) {
       case 'compass':
-        return <CompassInsightsContent scores={scores} riskFlags={riskFlags} />;
+        return <CompassInsightsContent scores={scores} riskFlags={riskFlags} activeDimension="overview" />;
       case 'groups':
-        return <GroupsInsights surveyId={surveyId} />;
+        return <GroupsInsights surveyId={surveyId} segmentValue="" isBelowThreshold={false} />;
       case 'dialogue':
         return <DialogueInsightsContent />;
       case 'recommendations':

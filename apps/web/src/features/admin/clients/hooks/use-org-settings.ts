@@ -151,8 +151,8 @@ async function fetchMetadataUsage(orgId: string): Promise<Record<MetadataCategor
 
     if (error) continue;
 
-    for (const row of data ?? []) {
-      const value = (row as Record<string, unknown>)[column] as string | null;
+    for (const row of ((data ?? []) as unknown) as Record<string, unknown>[]) {
+      const value = row[column] as string | null;
       if (value) {
         result[category].add(value);
       }

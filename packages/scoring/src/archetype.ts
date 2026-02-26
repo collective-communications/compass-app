@@ -18,7 +18,7 @@ export function euclideanDistance(
 
   for (const key of keys) {
     const a = scores[key] ?? 0;
-    const b = target[key];
+    const b = target[key] ?? 0;
     sumSquared += (a - b) ** 2;
   }
 

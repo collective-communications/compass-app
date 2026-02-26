@@ -45,7 +45,7 @@ export const CompassLabels = memo(function CompassLabels(
               fontSize={11}
               fontWeight={600}
               fontFamily="sans-serif"
-              textTransform="uppercase"
+              style={{ textTransform: 'uppercase' }}
             >
               {s.label}
             </text>

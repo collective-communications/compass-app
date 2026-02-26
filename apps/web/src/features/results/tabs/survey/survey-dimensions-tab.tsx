@@ -34,7 +34,7 @@ export function SurveyDimensionsTab({
 }: SurveyDimensionsTabProps): ReactElement {
   const [activeDimension, setActiveDimension] = useState<DimensionCode>('core');
 
-  const activeMeta = DIMENSIONS.find((d) => d.code === activeDimension) ?? DIMENSIONS[0];
+  const activeMeta = DIMENSIONS.find((d) => d.code === activeDimension) ?? DIMENSIONS[0]!;
 
   const { data: questions, isLoading: questionsLoading } = useQuestionScores({
     surveyId,

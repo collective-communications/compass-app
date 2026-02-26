@@ -72,7 +72,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => adminLayoutRoute,
     path: '/surveys/$surveyId',
     component: function AdminSurveyBuilderPage(): ReactElement {
-      const { surveyId } = adminSurveyBuilderRoute.useParams();
+      const { surveyId } = adminSurveyBuilderRoute.useParams() as { surveyId: string };
       const navigate = useNavigate();
 
       return (
@@ -90,7 +90,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => adminLayoutRoute,
     path: '/surveys/$surveyId/deploy',
     component: function AdminSurveyDeployPage(): ReactElement {
-      const { surveyId } = adminSurveyDeployRoute.useParams();
+      const { surveyId } = adminSurveyDeployRoute.useParams() as { surveyId: string };
       const { deployment, deactivate, isPending } = useDeploymentManagement({ surveyId });
       const metricsQuery = useResponseTracking({ surveyId });
       const { connectionStatus } = useRealtimeResponses({ surveyId });
@@ -137,7 +137,10 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => adminLayoutRoute,
     path: '/clients',
     component: function AdminClientsPage(): ReactElement {
-      return <ClientListPage />;
+      const navigate = useNavigate();
+      return <ClientListPage onSelectClient={(orgId) => {
+        void navigate({ to: '/admin/clients/$orgId', params: { orgId } });
+      }} />;
     },
   });
 
@@ -145,7 +148,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => adminLayoutRoute,
     path: '/clients/$orgId',
     component: function AdminClientDetailPage(): ReactElement {
-      const { orgId } = adminClientDetailRoute.useParams();
+      const { orgId } = adminClientDetailRoute.useParams() as { orgId: string };
       const navigate = useNavigate();
 
       return (
@@ -163,7 +166,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => adminLayoutRoute,
     path: '/clients/$orgId/users',
     component: function AdminClientUsersPage(): ReactElement {
-      const { orgId } = adminClientUsersRoute.useParams();
+      const { orgId } = adminClientUsersRoute.useParams() as { orgId: string };
       return <ClientUsersTab organizationId={orgId} />;
     },
   });

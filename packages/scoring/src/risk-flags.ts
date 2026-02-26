@@ -39,7 +39,7 @@ export function evaluateRiskFlags(
   if (coreScore < t.coreCritical) {
     flags.push({
       dimensionCode: 'core',
-      dimensionName: DIMENSION_NAMES['core'],
+      dimensionName: DIMENSION_NAMES['core'] ?? 'Core',
       severity: 'critical',
       score: coreScore,
       message: 'Core foundation is broken — address before other dimensions',
@@ -48,7 +48,7 @@ export function evaluateRiskFlags(
     // Core medium check (between coreCritical and coreMedium inclusive)
     flags.push({
       dimensionCode: 'core',
-      dimensionName: DIMENSION_NAMES['core'],
+      dimensionName: DIMENSION_NAMES['core'] ?? 'Core',
       severity: 'medium',
       score: coreScore,
       message: 'Core foundation is fragile — monitor closely',

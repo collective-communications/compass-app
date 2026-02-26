@@ -109,7 +109,9 @@ export function MetadataConfig({
     (index: number): void => {
       if (index === 0) return;
       const updated = [...items];
-      [updated[index - 1], updated[index]] = [updated[index], updated[index - 1]];
+      const temp = updated[index]!;
+      updated[index] = updated[index - 1]!;
+      updated[index - 1] = temp;
       const reordered = updated.map((item, idx) => ({ ...item, sortOrder: idx }));
       onUpdate(reordered);
     },
@@ -120,7 +122,9 @@ export function MetadataConfig({
     (index: number): void => {
       if (index >= items.length - 1) return;
       const updated = [...items];
-      [updated[index], updated[index + 1]] = [updated[index + 1], updated[index]];
+      const temp = updated[index]!;
+      updated[index] = updated[index + 1]!;
+      updated[index + 1] = temp;
       const reordered = updated.map((item, idx) => ({ ...item, sortOrder: idx }));
       onUpdate(reordered);
     },

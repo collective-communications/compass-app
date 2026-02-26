@@ -14,7 +14,7 @@ export function createReportsRoutes<TParent extends AnyRoute>(parentRoute: TPare
     getParentRoute: () => parentRoute,
     path: '/reports/$surveyId',
     component: function ReportsLayout(): ReactElement {
-      const { surveyId } = reportsRoute.useParams();
+      const { surveyId } = reportsRoute.useParams() as { surveyId: string };
       return (
         <AppShell>
           <ReportsPage

@@ -79,7 +79,7 @@ export function calculateAllDimensionScores(answers: readonly AnswerWithMeta[]):
       throw new ScoringError('MISSING_DIMENSION', `No answers found for dimension "${code}"`);
     }
     // Use the dimensionId from the first answer in the group
-    result[code] = calculateDimensionScore(group[0].dimensionId, code, group);
+    result[code] = calculateDimensionScore(group[0]!.dimensionId, code, group);
   }
 
   return result;

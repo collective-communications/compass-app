@@ -43,7 +43,6 @@ export const DimensionCode = {
   CLARITY: 'clarity',
   CONNECTION: 'connection',
   COLLABORATION: 'collaboration',
-  SYSTEM: 'system',
 } as const;
 
 export type DimensionCode = (typeof DimensionCode)[keyof typeof DimensionCode];
