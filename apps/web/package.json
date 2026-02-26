@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@compass/compass": "workspace:*",
+    "@compass/scoring": "workspace:*",
     "@compass/tokens": "workspace:*",
     "@compass/types": "workspace:*",
     "@compass/ui": "workspace:*",

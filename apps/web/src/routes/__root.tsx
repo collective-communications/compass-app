@@ -7,6 +7,8 @@ import { BrandPanel, LoginForm, ForgotPasswordForm, SocialSignOnButtons } from '
 import { useAuth, usePasswordReset } from '../features/auth/hooks';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { createResultsRoutes } from '../features/results/routes';
+import { createAdminRoutes } from '../features/admin/routes';
 import { SurveyProvider, useSurveyContext } from '../features/survey/context/survey-context';
 import { useDeployment } from '../features/survey/hooks/use-deployment';
 import { useQuestions } from '../features/survey/hooks/use-questions';
@@ -584,6 +586,11 @@ const dashboardRoute = createRoute({
   },
 });
 
+/* ── Results & Admin route trees ──────────────────────────────── */
+
+const resultsRoutes = createResultsRoutes(rootRoute);
+const adminRoutes = createAdminRoutes(rootRoute);
+
 /* ── Not Found ─────────────────────────────────────────────────── */
 
 const notFoundRoute = createRoute({
@@ -611,6 +618,8 @@ export const routeTree = rootRoute.addChildren([
     surveySavedRoute,
   ]),
   authRoute.addChildren([loginRoute, callbackRoute, forgotPasswordSentRoute, forgotPasswordRoute]),
+  resultsRoutes,
+  adminRoutes,
   clientsRoute,
   dashboardRoute,
   notFoundRoute,
