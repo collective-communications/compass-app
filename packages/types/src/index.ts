@@ -16,6 +16,26 @@ export {
 } from './survey';
 
 export type {
+  Organization,
+  OrganizationSummary,
+  CreateOrganizationParams,
+} from './organization';
+
+export {
+  ReportFormat,
+  ReportGenerationStatus,
+  ReportSectionId,
+  getDefaultReportSections,
+} from './report';
+
+export type {
+  ReportSection,
+  ReportConfig,
+  ReportStatus,
+  ReportPayload,
+} from './report';
+
+export type {
   LikertValue,
   Dimension,
   SurveySettings,
