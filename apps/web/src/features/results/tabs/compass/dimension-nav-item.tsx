@@ -1,0 +1,63 @@
+/**
+ * Individual dimension navigation item with a score ring, name, and optional risk dot.
+ * Used in the sidebar (desktop) dimension nav.
+ */
+
+import type { ReactElement } from 'react';
+import type { RiskSeverity } from '@compass/scoring';
+import { ScoreRing } from './score-ring';
+
+export type DimensionNavId = 'overview' | 'core' | 'clarity' | 'connection' | 'collaboration';
+
+interface DimensionNavItemProps {
+  id: DimensionNavId;
+  label: string;
+  score: number;
+  color: string;
+  isActive: boolean;
+  severity?: RiskSeverity;
+  onClick: (id: DimensionNavId) => void;
+}
+
+const RISK_DOT_COLOR: Record<string, string> = {
+  critical: 'bg-[#B71C1C]',
+  high: 'bg-[#E65100]',
+  medium: 'bg-[#F9A825]',
+};
+
+export function DimensionNavItem({
+  id,
+  label,
+  score,
+  color,
+  isActive,
+  severity,
+  onClick,
+}: DimensionNavItemProps): ReactElement {
+  const showDot = severity && severity !== 'healthy' && RISK_DOT_COLOR[severity];
+
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(id)}
+      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+        isActive
+          ? 'border-l-[3px] border-l-[#424242] bg-[#F5F5F5]'
+          : 'hover:bg-[#FAFAFA]'
+      }`}
+      aria-current={isActive ? 'true' : undefined}
+    >
+      <ScoreRing score={score} color={color} size={36} strokeWidth={3} showLabel={false} />
+      <div className="flex flex-1 items-center gap-2">
+        <span className="text-sm font-medium text-[#424242]">{label}</span>
+        {showDot && (
+          <span
+            className={`h-2 w-2 rounded-full ${RISK_DOT_COLOR[severity]}`}
+            aria-label={`${severity} risk`}
+          />
+        )}
+      </div>
+      <span className="text-sm font-semibold text-[#616161]">{Math.round(score)}</span>
+    </button>
+  );
+}
