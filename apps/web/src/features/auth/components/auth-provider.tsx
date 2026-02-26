@@ -12,7 +12,7 @@ interface AuthProviderProps {
 async function resolveUser(userId: string, email: string): Promise<AuthUser> {
   const { data: member } = await supabase
     .from('org_members')
-    .select('role, org_id')
+    .select('role, organization_id')
     .eq('user_id', userId)
     .single();
 
@@ -25,7 +25,7 @@ async function resolveUser(userId: string, email: string): Promise<AuthUser> {
     fullName: null,
     avatarUrl: null,
     role,
-    organizationId: member?.org_id ?? null,
+    organizationId: member?.organization_id ?? null,
     tier,
   };
 }

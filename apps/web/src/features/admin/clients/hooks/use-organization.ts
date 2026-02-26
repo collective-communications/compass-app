@@ -108,14 +108,14 @@ async function fetchNotes(orgId: string): Promise<AdminNote[]> {
   const { data, error } = await supabase
     .from('admin_notes')
     .select('*')
-    .eq('org_id', orgId)
+    .eq('organization_id', orgId)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
 
   return (data ?? []).map((row) => ({
     id: row.id,
-    orgId: row.org_id,
+    orgId: row.organization_id,
     authorName: row.author_name,
     content: row.content,
     createdAt: row.created_at,
@@ -127,7 +127,7 @@ async function fetchConsultant(orgId: string): Promise<AssignedConsultant | null
   const { data, error } = await supabase
     .from('organization_consultants')
     .select('id, consultant_name, assigned_at')
-    .eq('org_id', orgId)
+    .eq('organization_id', orgId)
     .order('assigned_at', { ascending: false })
     .limit(1)
     .maybeSingle();
@@ -205,7 +205,7 @@ export function useAddNote(orgId: string): UseMutationResult<AdminNote, Error, {
       const { data, error } = await supabase
         .from('admin_notes')
         .insert({
-          org_id: orgId,
+          organization_id: orgId,
           author_name: params.authorName,
           content: params.content,
         })
@@ -216,7 +216,7 @@ export function useAddNote(orgId: string): UseMutationResult<AdminNote, Error, {
 
       return {
         id: data.id,
-        orgId: data.org_id,
+        orgId: data.organization_id,
         authorName: data.author_name,
         content: data.content,
         createdAt: data.created_at,

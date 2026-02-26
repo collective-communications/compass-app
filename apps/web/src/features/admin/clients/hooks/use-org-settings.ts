@@ -52,19 +52,19 @@ export const orgSettingsKeys = {
   metadataUsage: (orgId: string) => [...orgSettingsKeys.all, orgId, 'metadata-usage'] as const,
 };
 
-/** Map of metadata category to DB column names used in survey responses */
+/** Map of metadata category to DB column names on the responses table */
 const METADATA_USAGE_COLUMNS: Record<MetadataCategory, string> = {
-  departments: 'department',
-  roles: 'role',
-  locations: 'location',
-  tenureBands: 'tenure_band',
+  departments: 'metadata_department',
+  roles: 'metadata_role',
+  locations: 'metadata_location',
+  tenureBands: 'metadata_tenure',
 };
 
 async function fetchOrgSettings(orgId: string): Promise<OrgSettings> {
   const { data, error } = await supabase
     .from('organization_settings')
     .select('*')
-    .eq('org_id', orgId)
+    .eq('organization_id', orgId)
     .single();
 
   if (error) {
@@ -73,7 +73,7 @@ async function fetchOrgSettings(orgId: string): Promise<OrgSettings> {
 
   return {
     id: data.id,
-    orgId: data.org_id,
+    orgId: data.organization_id,
     metadata: {
       departments: data.metadata_departments ?? [],
       roles: data.metadata_roles ?? [],
@@ -104,7 +104,7 @@ async function updateOrgSettings(
   const { data, error } = await supabase
     .from('organization_settings')
     .update(updates)
-    .eq('org_id', orgId)
+    .eq('organization_id', orgId)
     .select('*')
     .single();
 
@@ -114,7 +114,7 @@ async function updateOrgSettings(
 
   return {
     id: data.id,
-    orgId: data.org_id,
+    orgId: data.organization_id,
     metadata: {
       departments: data.metadata_departments ?? [],
       roles: data.metadata_roles ?? [],
@@ -145,14 +145,14 @@ async function fetchMetadataUsage(orgId: string): Promise<Record<MetadataCategor
   for (const [category, column] of Object.entries(METADATA_USAGE_COLUMNS) as Array<[MetadataCategory, string]>) {
     const { data, error } = await supabase
       .from('responses')
-      .select(column)
-      .eq('org_id', orgId)
+      .select(`${column}, deployment:deployments!inner(survey:surveys!inner(organization_id))`)
+      .eq('deployments.surveys.organization_id', orgId)
       .not(column, 'is', null);
 
     if (error) continue;
 
     for (const row of data ?? []) {
-      const value = row[column] as string | null;
+      const value = (row as Record<string, unknown>)[column] as string | null;
       if (value) {
         result[category].add(value);
       }
