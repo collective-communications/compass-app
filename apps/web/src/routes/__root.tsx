@@ -40,7 +40,13 @@ const indexRoute = createRoute({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
         <div style={{ textAlign: 'center' }}>
           <h1 style={{ fontSize: '2.25rem', marginBottom: '0.5rem' }}>Culture Compass</h1>
-          <p style={{ color: 'var(--grey-500)' }}>COLLECTIVE culture + communication</p>
+          <p style={{ color: 'var(--grey-500)', marginBottom: '1.5rem' }}>COLLECTIVE culture + communication</p>
+          <Link
+            to="/auth/login"
+            className="inline-block rounded-lg bg-[var(--color-core,#0A3B4F)] px-6 py-2.5 text-sm font-medium text-white hover:opacity-90"
+          >
+            Sign in
+          </Link>
         </div>
       </div>
     );

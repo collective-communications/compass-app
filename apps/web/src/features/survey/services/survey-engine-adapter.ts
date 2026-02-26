@@ -170,7 +170,7 @@ export function createSurveyEngineAdapter(): Pick<
         .from('questions')
         .select('*, question_dimensions(id, question_id, dimension_id, weight)')
         .eq('survey_id', surveyId)
-        .order('display_order', { ascending: true });
+        .order('order_index', { ascending: true });
 
       if (error) {
         throw new Error(`Failed to load questions: ${error.message}`);
@@ -194,7 +194,7 @@ export function createSurveyEngineAdapter(): Pick<
           reverseScored: row.reverse_scored,
           options: row.options,
           required: row.required,
-          displayOrder: row.display_order,
+          displayOrder: row.order_index,
           diagnosticFocus: row.diagnostic_focus,
           recommendedAction: row.recommended_action,
           createdAt: row.created_at,

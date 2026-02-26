@@ -58,7 +58,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
 
       return (
         <SurveyListPage
-          organizationId={user?.organizationId ?? ''}
+          organizationId={user?.tier === 'tier_1' ? '' : user?.organizationId ?? ''}
           userId={user?.id ?? ''}
           onSelectSurvey={(surveyId: string) => {
             void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });

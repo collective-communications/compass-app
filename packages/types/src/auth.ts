@@ -46,5 +46,5 @@ export function getTierFromRole(role: UserRole): UserTier {
  * Get the home route for a tier.
  */
 export function getTierHomeRoute(tier: UserTier): string {
-  return tier === 'tier_1' ? '/clients' : '/dashboard';
+  return tier === 'tier_1' ? '/admin/surveys' : '/dashboard';
 }

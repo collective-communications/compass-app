@@ -32,6 +32,6 @@ export function useSurveys({
   return useQuery({
     queryKey: surveyListKeys.list(organizationId, statusFilter),
     queryFn: () => listSurveys(organizationId, statusFilter),
-    enabled: enabled && !!organizationId,
+    enabled,
   });
 }

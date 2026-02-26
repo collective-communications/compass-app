@@ -63,9 +63,13 @@ export async function listSurveys(
 ): Promise<SurveyListItem[]> {
   let query = supabase
     .from('surveys')
-    .select('*, responses:responses(count)')
-    .eq('organization_id', organizationId)
+    .select('*, deployments(responses(count))')
     .order('updated_at', { ascending: false });
+
+  // CC+C admins pass empty org ID to see all surveys (RLS enforces access)
+  if (organizationId) {
+    query = query.eq('organization_id', organizationId);
+  }
 
   if (statusFilter) {
     query = query.eq('status', statusFilter);
@@ -77,8 +81,10 @@ export async function listSurveys(
 
   return (data ?? []).map((row) => {
     const raw = row as Record<string, unknown>;
-    const responsesArr = raw['responses'] as Array<{ count: number }> | undefined;
-    const responseCount = responsesArr?.[0]?.count ?? 0;
+    const deployments = raw['deployments'] as Array<{ responses: Array<{ count: number }> }> | undefined;
+    const responseCount = deployments?.reduce(
+      (sum, d) => sum + (d.responses?.[0]?.count ?? 0), 0,
+    ) ?? 0;
     return {
       ...mapSurveyRow(raw),
       responseCount,
@@ -95,11 +101,11 @@ export async function getSurveyBuilderData(surveyId: string): Promise<SurveyBuil
       .from('questions')
       .select('*, question_dimensions(*)')
       .eq('survey_id', surveyId)
-      .order('display_order', { ascending: true }),
+      .order('order_index', { ascending: true }),
     supabase.from('dimensions').select('*').order('display_order', { ascending: true }),
     supabase
-      .from('responses')
-      .select('id', { count: 'exact', head: true })
+      .from('deployments')
+      .select('responses(id)', { count: 'exact', head: true })
       .eq('survey_id', surveyId),
   ]);
 
@@ -193,16 +199,16 @@ export async function updateQuestion(params: UpdateQuestionParams): Promise<Ques
   return mapQuestionRow(data as Record<string, unknown>);
 }
 
-/** Reorder questions by updating display_order values */
+/** Reorder questions by updating order_index values */
 export async function reorderQuestions(
   surveyId: string,
   reorders: ReorderQuestionParams[],
 ): Promise<void> {
-  // Update each question's display_order in a batch
+  // Update each question's order_index in a batch
   const updates = reorders.map(({ questionId, newOrder }) =>
     supabase
       .from('questions')
-      .update({ display_order: newOrder })
+      .update({ order_index: newOrder })
       .eq('id', questionId)
       .eq('survey_id', surveyId),
   );
@@ -276,7 +282,7 @@ async function copyQuestionsFromTemplate(
     type: (q['type'] as string) ?? 'likert_4',
     reverse_scored: (q['reverse_scored'] as boolean) ?? false,
     required: (q['required'] as boolean) ?? true,
-    display_order: index + 1,
+    order_index: index + 1,
     diagnostic_focus: (q['diagnostic_focus'] as string) ?? null,
     recommended_action: (q['recommended_action'] as string) ?? null,
   }));
@@ -315,7 +321,7 @@ async function copyQuestionsFromSurvey(
     .from('questions')
     .select('*, question_dimensions(*)')
     .eq('survey_id', sourceSurveyId)
-    .order('display_order', { ascending: true });
+    .order('order_index', { ascending: true });
 
   if (error || !sourceQuestions?.length) return;
 
@@ -328,7 +334,7 @@ async function copyQuestionsFromSurvey(
       type: (raw['type'] as string) ?? 'likert_4',
       reverse_scored: (raw['reverse_scored'] as boolean) ?? false,
       required: (raw['required'] as boolean) ?? true,
-      display_order: raw['display_order'] as number,
+      order_index: raw['order_index'] as number,
       diagnostic_focus: (raw['diagnostic_focus'] as string) ?? null,
       recommended_action: (raw['recommended_action'] as string) ?? null,
     };
@@ -390,7 +396,7 @@ function mapQuestionRow(raw: Record<string, unknown>): Question {
     reverseScored: (raw['reverse_scored'] as boolean) ?? false,
     options: raw['options'] ?? null,
     required: (raw['required'] as boolean) ?? true,
-    displayOrder: raw['display_order'] as number,
+    displayOrder: raw['order_index'] as number,
     diagnosticFocus: (raw['diagnostic_focus'] as string) ?? null,
     recommendedAction: (raw['recommended_action'] as string) ?? null,
     createdAt: raw['created_at'] as string,
