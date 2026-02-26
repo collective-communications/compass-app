@@ -4,4 +4,7 @@
  */
 
 export * from './surveys';
+export * from './clients';
+export * from './settings';
+export * from './users';
 export { createAdminRoutes } from './routes';

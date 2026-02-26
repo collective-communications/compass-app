@@ -20,6 +20,12 @@ import { useResponseTracking } from './surveys/hooks/use-response-tracking';
 import { useRealtimeResponses } from './surveys/hooks/use-realtime-responses';
 import { useSurveyBuilder } from './surveys/hooks/use-survey-builder';
 import { useAuthStore } from '../../stores/auth-store';
+import { ClientListPage } from './clients';
+import { ClientDetailPage } from './clients/pages/client-detail-page';
+import { ClientUsersTab } from './clients/components/client-users-tab';
+import { OrgSettingsPage } from './clients/pages/org-settings-page';
+import { SystemSettingsPage } from './settings';
+import { UsersPage } from './users';
 
 // TODO: Implement role-based route guard (admin role required).
 // Should redirect non-admin users to their tier home route.
@@ -127,9 +133,74 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
+  const adminClientsRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/clients',
+    component: function AdminClientsPage(): ReactElement {
+      return <ClientListPage />;
+    },
+  });
+
+  const adminClientDetailRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/clients/$orgId',
+    component: function AdminClientDetailPage(): ReactElement {
+      const { orgId } = adminClientDetailRoute.useParams();
+      const navigate = useNavigate();
+
+      return (
+        <ClientDetailPage
+          orgId={orgId}
+          onBack={() => {
+            void navigate({ to: '/admin/clients' });
+          }}
+        />
+      );
+    },
+  });
+
+  const adminClientUsersRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/clients/$orgId/users',
+    component: function AdminClientUsersPage(): ReactElement {
+      const { orgId } = adminClientUsersRoute.useParams();
+      return <ClientUsersTab organizationId={orgId} />;
+    },
+  });
+
+  const adminClientSettingsRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/clients/$orgId/settings',
+    component: function AdminClientSettingsPage(): ReactElement {
+      return <OrgSettingsPage />;
+    },
+  });
+
+  const adminSettingsRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/settings',
+    component: function AdminSettingsPage(): ReactElement {
+      return <SystemSettingsPage />;
+    },
+  });
+
+  const adminUsersRoute = createRoute({
+    getParentRoute: () => adminLayoutRoute,
+    path: '/settings/users',
+    component: function AdminUsersPage(): ReactElement {
+      return <UsersPage />;
+    },
+  });
+
   return adminLayoutRoute.addChildren([
     adminSurveysRoute,
     adminSurveyBuilderRoute,
     adminSurveyDeployRoute,
+    adminClientsRoute,
+    adminClientDetailRoute,
+    adminClientUsersRoute,
+    adminClientSettingsRoute,
+    adminSettingsRoute,
+    adminUsersRoute,
   ]);
 }
