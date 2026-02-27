@@ -4,7 +4,8 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "tooling/*"
+    "tooling/*",
+    "e2e"
   ],
   "scripts": {
     "dev": "supabase start && bun run --filter @compass/web dev",
@@ -19,7 +20,7 @@
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "test": "bun test",
-    "test:e2e": "echo 'e2e tests not yet configured'",
+    "test:e2e": "bun run --filter @compass/e2e test",
     "build-storybook": "echo 'storybook not yet configured'",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
   },

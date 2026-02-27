@@ -13,7 +13,7 @@ export function SurveyNotOpenScreen({ opensDate }: SurveyNotOpenScreenProps): Re
     : null;
 
   return (
-    <div className="flex min-h-[60vh] items-center justify-center px-4">
+    <div className="flex min-h-[60vh] items-center justify-center px-4" data-testid="survey-not-open">
       <div className="w-full max-w-md rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-8 text-center">
         <h1 className="mb-3 text-xl font-semibold text-[var(--grey-900)]">
           Survey Not Yet Open
