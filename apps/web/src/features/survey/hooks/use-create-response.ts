@@ -12,6 +12,7 @@ export interface CreateResponseParams {
   surveyId: string;
   deploymentId: string;
   metadata: RespondentMetadata;
+  sessionToken: string;
 }
 
 /** Create a new response record with metadata and empty answers. */
@@ -23,6 +24,7 @@ export function useCreateResponse() {
         deploymentId: params.deploymentId,
         answers: {},
         metadata: params.metadata,
+        sessionToken: params.sessionToken,
       }),
   });
 }

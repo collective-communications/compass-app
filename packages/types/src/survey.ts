@@ -298,6 +298,7 @@ export interface SurveyEngineService {
   saveResponse(
     response: Pick<SurveyResponse, 'surveyId' | 'deploymentId' | 'answers' | 'metadata'> & {
       responseId?: string;
+      sessionToken?: string;
     },
   ): Promise<{ responseId: string }>;
 

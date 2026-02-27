@@ -23,7 +23,7 @@ export interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): ReactNode {
-  const { survey, deployment } = useSurveyContext();
+  const { survey, deployment, sessionToken } = useSurveyContext();
   const { data: metadataConfig, isLoading: isConfigLoading } = useMetadataConfig(
     survey.organizationId,
   );
@@ -38,6 +38,7 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
           surveyId: survey.id,
           deploymentId: deployment.id,
           metadata,
+          sessionToken,
         },
         {
           onSuccess: ({ responseId }) => {
@@ -46,7 +47,7 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
         },
       );
     },
-    [createResponse, survey.id, deployment.id, onStart],
+    [createResponse, survey.id, deployment.id, sessionToken, onStart],
   );
 
   return (

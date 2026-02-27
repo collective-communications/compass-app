@@ -1,4 +1,4 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 
 export class SurveyPage {
   readonly page: Page;
@@ -37,7 +37,7 @@ export class SurveyPage {
     this.tenureSelect = page.locator('#metadata-tenure');
     this.startButton = page.getByRole('button', { name: /start survey/i });
     this.likertOptions = page.getByRole('radio');
-    this.nextButton = page.getByRole('button', { name: /next/i });
+    this.nextButton = page.getByRole('button', { name: /next|continue/i });
     this.openEndedTextarea = page.getByRole('textbox');
     this.submitButton = page.getByRole('button', { name: /submit/i });
     this.skipButton = page.getByRole('button', { name: /skip/i });
@@ -78,9 +78,20 @@ export class SurveyPage {
    * and advancing with the next button until no more likert options appear.
    */
   async answerAllLikertQuestions(): Promise<void> {
-    while (await this.likertOptions.first().isVisible({ timeout: 3000 }).catch(() => false)) {
+    // Wait for the first question to appear
+    await this.likertOptions.first().waitFor({ state: 'visible', timeout: 10000 });
+
+    // Loop through all likert questions
+    let hasRadios = true;
+    while (hasRadios) {
       await this.likertOptions.first().click();
+      await expect(this.nextButton).toBeEnabled({ timeout: 3000 });
       await this.nextButton.click();
+      // Check if we transitioned to a non-likert screen (open-ended or complete)
+      hasRadios = await this.likertOptions.first()
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .then(() => true)
+        .catch(() => false);
     }
   }
 }
