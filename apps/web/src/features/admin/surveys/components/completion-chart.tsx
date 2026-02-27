@@ -18,7 +18,7 @@ function formatShortDate(isoDate: string): string {
 export function CompletionChart({ dailyCompletions }: CompletionChartProps): ReactElement {
   if (dailyCompletions.length === 0) {
     return (
-      <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+      <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
         <h3 className="text-sm font-semibold text-[var(--grey-900)]">Daily Completions</h3>
         <p className="mt-4 text-sm text-[var(--grey-500)]">No completions yet</p>
       </div>
@@ -28,7 +28,7 @@ export function CompletionChart({ dailyCompletions }: CompletionChartProps): Rea
   const maxCount = Math.max(...dailyCompletions.map((d) => d.count), 1);
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <h3 className="text-sm font-semibold text-[var(--grey-900)]">Daily Completions</h3>
 
       <div className="mt-4 flex flex-col gap-2">

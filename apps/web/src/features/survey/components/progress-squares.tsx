@@ -59,7 +59,7 @@ export function ProgressSquares({
                   ? 'bg-[#0A3B4F] ring-2 ring-[#0A3B4F]/30'
                   : isAnswered
                     ? 'bg-[#0A3B4F]'
-                    : 'bg-[#E5E4E0]'
+                    : 'bg-[var(--grey-100)]'
               }
               cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#0A3B4F]`}
           />

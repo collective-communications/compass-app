@@ -53,7 +53,7 @@ export function DeploymentPanel({
   }, [surveyUrl]);
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[var(--grey-900)]">Active Deployment</h3>
         {daysRemaining !== null && (
@@ -73,13 +73,13 @@ export function DeploymentPanel({
 
       {/* Survey Link */}
       <div className="mt-4 flex items-center gap-2">
-        <div className="flex-1 overflow-hidden rounded-lg border border-[#E5E4E0] bg-[var(--grey-50)] px-3 py-2">
+        <div className="flex-1 overflow-hidden rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-2">
           <p className="truncate text-sm text-[var(--grey-700)] select-all">{surveyUrl}</p>
         </div>
         <button
           type="button"
           onClick={handleCopy}
-          className="shrink-0 rounded-lg border border-[#E5E4E0] bg-white px-3 py-2 text-sm font-medium text-[var(--grey-700)] hover:bg-[var(--grey-50)]"
+          className="shrink-0 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-2 text-sm font-medium text-[var(--grey-700)] hover:bg-[var(--grey-50)]"
         >
           {copied ? 'Copied!' : 'Copy'}
         </button>
@@ -106,12 +106,12 @@ export function DeploymentPanel({
       </div>
 
       {/* Deactivate */}
-      <div className="mt-6 border-t border-[#E5E4E0] pt-4">
+      <div className="mt-6 border-t border-[var(--grey-100)] pt-4">
         <button
           type="button"
           onClick={onDeactivate}
           disabled={isPending}
-          className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-red-200 bg-[var(--grey-50)] px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? 'Closing...' : 'Close Early'}
         </button>

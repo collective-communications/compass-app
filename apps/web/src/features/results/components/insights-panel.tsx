@@ -13,7 +13,7 @@ export function InsightsPanel({ children }: InsightsPanelProps): ReactElement {
   return (
     <aside
       aria-label="Insights panel"
-      className="w-full lg:sticky lg:top-0 lg:h-screen lg:w-[35%] lg:overflow-y-auto lg:border-l lg:border-[#E5E4E0] lg:pl-6"
+      className="w-full lg:sticky lg:top-0 lg:h-screen lg:w-[35%] lg:overflow-y-auto lg:border-l lg:border-[var(--grey-100)] lg:pl-6"
     >
       {children}
     </aside>

@@ -118,7 +118,7 @@ export function SurveyConfigModal({
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="w-full max-w-lg rounded-xl border border-[#E5E4E0] bg-white p-0 shadow-lg backdrop:bg-black/40"
+      className="w-full max-w-lg rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
     >
       <form onSubmit={handleSave} className="flex flex-col gap-6 p-6">
         <div className="flex items-center justify-between">
@@ -150,7 +150,7 @@ export function SurveyConfigModal({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+            className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
             required
           />
           {titleError && (
@@ -168,7 +168,7 @@ export function SurveyConfigModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)] resize-none"
+            className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)] resize-none"
           />
         </div>
 
@@ -183,7 +183,7 @@ export function SurveyConfigModal({
               type="date"
               value={opensAt}
               onChange={(e) => setOpensAt(e.target.value)}
-              className="rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+              className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
               required
             />
           </div>
@@ -196,7 +196,7 @@ export function SurveyConfigModal({
               type="date"
               value={closesAt}
               onChange={(e) => setClosesAt(e.target.value)}
-              className="rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+              className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
               required
             />
           </div>
@@ -220,12 +220,12 @@ export function SurveyConfigModal({
             max={50}
             value={anonymityThreshold}
             onChange={(e) => setAnonymityThreshold(Number(e.target.value))}
-            className="w-24 rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+            className="w-24 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
           />
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-end gap-3 border-t border-[#E5E4E0] pt-4">
+        <div className="flex items-center justify-end gap-3 border-t border-[var(--grey-100)] pt-4">
           <button
             type="button"
             onClick={onClose}
@@ -236,7 +236,7 @@ export function SurveyConfigModal({
           <button
             type="submit"
             disabled={!isValid || isPending}
-            className="rounded-lg border border-[#E5E4E0] bg-white px-4 py-2 text-sm font-medium text-[var(--grey-900)] hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-2 text-sm font-medium text-[var(--grey-900)] hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             Save as Draft
           </button>

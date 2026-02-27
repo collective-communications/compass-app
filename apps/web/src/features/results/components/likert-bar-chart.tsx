@@ -108,7 +108,7 @@ export function LikertBarChart({
         )}
       </div>
       {showLabels && (
-        <p className="mt-1 text-xs text-[#757575]">
+        <p className="mt-1 text-xs text-[var(--grey-500)]">
           {segments.map((s, i) => (
             <span key={s.key}>
               {i > 0 && <span className="mx-1">&middot;</span>}

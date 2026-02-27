@@ -142,7 +142,7 @@ export function UsersPage(): ReactElement {
           </h2>
 
           {members.length === 0 ? (
-            <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+            <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
               <p className="text-sm text-[var(--grey-500)]">No team members yet. Send an invite above.</p>
             </div>
           ) : (

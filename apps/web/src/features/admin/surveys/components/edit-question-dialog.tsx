@@ -121,7 +121,7 @@ export function EditQuestionDialog({
       ref={dialogRef}
       aria-labelledby={titleId}
       onClose={onClose}
-      className="w-full max-w-lg rounded-xl border border-[#E5E4E0] bg-white p-0 shadow-lg backdrop:bg-black/40"
+      className="w-full max-w-lg rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
     >
       <div className="p-6">
         <h2 id={titleId} className="text-lg font-semibold text-[var(--grey-900)]">
@@ -138,7 +138,7 @@ export function EditQuestionDialog({
               value={text}
               onChange={(e) => handleTextChange(e.target.value)}
               rows={3}
-              className="rounded-lg border border-[var(--grey-300)] bg-white px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20"
+              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20"
             />
           </div>
 
@@ -152,7 +152,7 @@ export function EditQuestionDialog({
               onChange={(e) => handleDescriptionChange(e.target.value)}
               rows={2}
               placeholder="Optional context shown to respondents"
-              className="rounded-lg border border-[var(--grey-300)] bg-white px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20"
+              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20"
             />
           </div>
 
@@ -166,7 +166,7 @@ export function EditQuestionDialog({
               value={diagnosticFocus}
               onChange={(e) => handleDiagnosticFocusChange(e.target.value)}
               placeholder="e.g., Leadership alignment"
-              className="rounded-lg border border-[var(--grey-300)] bg-white px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20"
+              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20"
             />
           </div>
 

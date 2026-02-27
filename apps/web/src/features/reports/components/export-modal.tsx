@@ -193,7 +193,7 @@ export function ExportModal({
         aria-label="Export report"
         onKeyDown={handleKeyDown}
         className={[
-          'fixed z-50 flex flex-col bg-white shadow-lg transition-transform duration-300 ease-in-out',
+          'fixed z-50 flex flex-col bg-[var(--grey-50)] shadow-lg transition-transform duration-300 ease-in-out',
           // Mobile: bottom sheet
           'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl lg:inset-x-auto',
           // Desktop: side sheet
@@ -206,17 +206,17 @@ export function ExportModal({
       >
         {/* Drag handle (mobile) */}
         <div className="flex justify-center pt-3 lg:hidden">
-          <div className="h-1 w-10 rounded-full bg-[#E5E4E0]" />
+          <div className="h-1 w-10 rounded-full bg-[var(--grey-100)]" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#E5E4E0] px-6 py-4">
-          <h2 className="text-lg font-semibold text-[#212121]">Export Report</h2>
+        <div className="flex items-center justify-between border-b border-[var(--grey-100)] px-6 py-4">
+          <h2 className="text-lg font-semibold text-[var(--grey-900)]">Export Report</h2>
           {modalState !== 'generating' && (
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-md p-1 text-[#757575] hover:bg-[#F5F5F5] hover:text-[#424242]"
+              className="rounded-md p-1 text-[var(--grey-500)] hover:bg-[var(--grey-50)] hover:text-[var(--grey-700)]"
               aria-label="Close export modal"
             >
               <X size={20} aria-hidden="true" />
@@ -231,11 +231,11 @@ export function ExportModal({
             <div className="flex flex-col gap-6">
               {/* Format selection */}
               <fieldset>
-                <legend className="mb-3 text-sm font-medium text-[#424242]">
+                <legend className="mb-3 text-sm font-medium text-[var(--grey-700)]">
                   Output Format
                 </legend>
                 <div className="flex flex-col gap-2">
-                  <label className="flex cursor-pointer items-center gap-3 rounded-md border border-[#E5E4E0] px-4 py-3 transition-colors hover:bg-[#FAFAFA]">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors hover:bg-[#FAFAFA]">
                     <input
                       type="radio"
                       name="report-format"
@@ -244,9 +244,9 @@ export function ExportModal({
                       onChange={() => setFormat(ReportFormat.PDF)}
                       className="h-4 w-4 text-[#0A3B4F] focus:ring-[#0A3B4F]"
                     />
-                    <span className="text-sm text-[#424242]">PDF</span>
+                    <span className="text-sm text-[var(--grey-700)]">PDF</span>
                   </label>
-                  <label className="flex cursor-not-allowed items-center gap-3 rounded-md border border-[#E5E4E0] px-4 py-3 opacity-50">
+                  <label className="flex cursor-not-allowed items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 opacity-50">
                     <input
                       type="radio"
                       name="report-format"
@@ -254,9 +254,9 @@ export function ExportModal({
                       disabled
                       className="h-4 w-4"
                     />
-                    <span className="text-sm text-[#9E9E9E]">
+                    <span className="text-sm text-[var(--grey-400)]">
                       PPTX
-                      <span className="ml-2 rounded bg-[#F5F5F5] px-1.5 py-0.5 text-xs text-[#9E9E9E]">
+                      <span className="ml-2 rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-xs text-[var(--grey-400)]">
                         Coming soon
                       </span>
                     </span>
@@ -266,7 +266,7 @@ export function ExportModal({
 
               {/* Section selection */}
               <fieldset>
-                <legend className="mb-3 text-sm font-medium text-[#424242]">
+                <legend className="mb-3 text-sm font-medium text-[var(--grey-700)]">
                   Report Sections
                 </legend>
                 <div className="flex flex-col gap-2">
@@ -274,7 +274,7 @@ export function ExportModal({
                     <label
                       key={section.id}
                       className={[
-                        'flex items-center gap-3 rounded-md border border-[#E5E4E0] px-4 py-3 transition-colors',
+                        'flex items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors',
                         section.locked
                           ? 'cursor-default bg-[#FAFAFA]'
                           : 'cursor-pointer hover:bg-[#FAFAFA]',
@@ -288,11 +288,11 @@ export function ExportModal({
                         className="h-4 w-4 rounded text-[#0A3B4F] focus:ring-[#0A3B4F]"
                       />
                       <span
-                        className={`text-sm ${section.locked ? 'text-[#9E9E9E]' : 'text-[#424242]'}`}
+                        className={`text-sm ${section.locked ? 'text-[var(--grey-400)]' : 'text-[var(--grey-700)]'}`}
                       >
                         {section.label}
                         {section.locked && (
-                          <span className="ml-2 text-xs text-[#BDBDBD]">(required)</span>
+                          <span className="ml-2 text-xs text-[var(--grey-300)]">(required)</span>
                         )}
                       </span>
                     </label>
@@ -319,10 +319,10 @@ export function ExportModal({
               {/* Progress bar */}
               <div>
                 <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="text-[#424242]">Generating report</span>
-                  <span className="text-[#757575]">{generation.progress}%</span>
+                  <span className="text-[var(--grey-700)]">Generating report</span>
+                  <span className="text-[var(--grey-500)]">{generation.progress}%</span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[#F5F5F5]">
+                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--grey-50)]">
                   <div
                     className="h-full rounded-full bg-[#0A3B4F] transition-[width] duration-500 ease-out"
                     style={{ width: `${generation.progress}%` }}
@@ -350,7 +350,7 @@ export function ExportModal({
                             ? 'bg-[#2E7D32] text-white'
                             : isActive
                               ? 'bg-[#0A3B4F] text-white'
-                              : 'bg-[#F5F5F5] text-[#BDBDBD]',
+                              : 'bg-[var(--grey-50)] text-[var(--grey-300)]',
                         ].join(' ')}
                       >
                         {isDone ? (
@@ -366,8 +366,8 @@ export function ExportModal({
                           isDone
                             ? 'text-[#2E7D32]'
                             : isActive
-                              ? 'font-medium text-[#424242]'
-                              : 'text-[#BDBDBD]'
+                              ? 'font-medium text-[var(--grey-700)]'
+                              : 'text-[var(--grey-300)]'
                         }`}
                       >
                         {step.label}
@@ -385,8 +385,8 @@ export function ExportModal({
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#E8F5E9]">
                 <CheckCircle2 size={32} className="text-[#2E7D32]" aria-hidden="true" />
               </div>
-              <h3 className="text-lg font-semibold text-[#212121]">Report Ready</h3>
-              <p className="text-sm text-[#757575]">
+              <h3 className="text-lg font-semibold text-[var(--grey-900)]">Report Ready</h3>
+              <p className="text-sm text-[var(--grey-500)]">
                 Your report has been generated and is ready for download.
               </p>
               {generation.fileUrl !== null && (
@@ -421,13 +421,13 @@ export function ExportModal({
         </div>
 
         {/* Footer */}
-        <div className="border-t border-[#E5E4E0] px-6 py-4">
+        <div className="border-t border-[var(--grey-100)] px-6 py-4">
           {modalState === 'configure' && (
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 rounded-md border border-[#E5E4E0] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[#F5F5F5]"
+                className="flex-1 rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
               >
                 Cancel
               </button>
@@ -443,7 +443,7 @@ export function ExportModal({
           )}
 
           {modalState === 'generating' && (
-            <p className="text-center text-xs text-[#9E9E9E]">
+            <p className="text-center text-xs text-[var(--grey-400)]">
               Please wait while your report is being generated.
             </p>
           )}
@@ -452,7 +452,7 @@ export function ExportModal({
             <button
               type="button"
               onClick={handleDone}
-              className="w-full rounded-md border border-[#E5E4E0] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[#F5F5F5]"
+              className="w-full rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
             >
               Done
             </button>

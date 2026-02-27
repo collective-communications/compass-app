@@ -30,7 +30,7 @@ export function AccessControlToggle({
   }, [enabled, onToggle]);
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <fieldset>
         <legend className="mb-4 flex w-full items-center justify-between">
           <span className="text-lg font-semibold text-[var(--grey-900)]">Client Access</span>
@@ -58,7 +58,7 @@ export function AccessControlToggle({
           >
             <span
               aria-hidden="true"
-              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transition-transform ${
+              className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-[var(--grey-50)] shadow transition-transform ${
                 enabled ? 'translate-x-5' : 'translate-x-0'
               }`}
             />
@@ -66,7 +66,7 @@ export function AccessControlToggle({
         </div>
 
         {/* Info panel explaining PB-005 presentation flow */}
-        <div className="rounded-lg border border-[#E5E4E0] bg-[var(--grey-50,#F5F5F5)] p-4">
+        <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50,#F5F5F5)] p-4">
           <p className="mb-2 text-sm font-medium text-[var(--grey-700)]">
             How client access works (PB-005)
           </p>

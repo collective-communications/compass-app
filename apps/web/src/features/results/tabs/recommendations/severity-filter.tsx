@@ -37,8 +37,8 @@ export function SeverityFilter({
             onClick={() => onFilterChange('all')}
             className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
               activeFilter === 'all'
-                ? 'bg-[#424242] text-white'
-                : 'text-[#757575] hover:bg-[#F5F5F5]'
+                ? 'bg-[var(--grey-700)] text-white'
+                : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
             }`}
             aria-current={activeFilter === 'all' ? 'true' : undefined}
             aria-label={`All recommendations (${totalCount})`}
@@ -57,8 +57,8 @@ export function SeverityFilter({
                 onClick={() => onFilterChange(level)}
                 className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
                   isActive
-                    ? 'bg-[#424242] text-white'
-                    : 'text-[#757575] hover:bg-[#F5F5F5]'
+                    ? 'bg-[var(--grey-700)] text-white'
+                    : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
                 }`}
                 aria-current={isActive ? 'true' : undefined}
                 aria-label={`${SEVERITY_LABELS[level]} (${count})`}

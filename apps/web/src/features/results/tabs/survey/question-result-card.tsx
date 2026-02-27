@@ -21,22 +21,22 @@ export function QuestionResultCard({
   const scorePercent = Math.round(question.meanScore * 100);
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="mb-3 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
-          <p className="text-sm font-medium text-[#424242]">
+          <p className="text-sm font-medium text-[var(--grey-700)]">
             {question.questionText}
           </p>
           {question.isReverseScored && (
             <span
-              className="inline-flex shrink-0 items-center rounded bg-[#F5F5F5] px-1.5 py-0.5 text-[10px] font-medium text-[#757575]"
+              className="inline-flex shrink-0 items-center rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--grey-500)]"
               title="Reverse-scored question"
             >
               (R)
             </span>
           )}
         </div>
-        <span className="shrink-0 text-sm font-semibold text-[#424242]">
+        <span className="shrink-0 text-sm font-semibold text-[var(--grey-700)]">
           {scorePercent}%
         </span>
       </div>

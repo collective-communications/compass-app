@@ -56,7 +56,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
     <button
       type="button"
       onClick={() => onClick(survey.id)}
-      className={`w-full cursor-pointer rounded-lg border border-[#E5E4E0] border-l-4 bg-white p-6 text-left transition-shadow hover:shadow-md ${STATUS_BORDER_COLOR[survey.status]}`}
+      className={`w-full cursor-pointer rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-6 text-left transition-shadow hover:shadow-md ${STATUS_BORDER_COLOR[survey.status]}`}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">

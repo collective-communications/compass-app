@@ -23,7 +23,7 @@ export function QuestionRow({ question, isLocked, onEdit }: QuestionRowProps): R
       type="button"
       onClick={() => !isLocked && onEdit(question.id)}
       disabled={isLocked}
-      className={`flex w-full items-start gap-3 rounded-lg border border-[#E5E4E0] bg-white px-4 py-3 text-left transition-shadow ${
+      className={`flex w-full items-start gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-left transition-shadow ${
         isLocked ? 'cursor-default opacity-70' : 'cursor-pointer hover:shadow-sm'
       }`}
     >

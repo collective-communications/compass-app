@@ -25,7 +25,7 @@ export function ThankYouScreen({
 }: ThankYouScreenProps): ReactNode {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] rounded-xl border border-[#E5E4E0] bg-white p-6 sm:p-8">
+      <div className="w-full max-w-[600px] rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
         {/* Checkmark */}
         <div className="mb-4 flex justify-center">
           <svg
@@ -47,7 +47,7 @@ export function ThankYouScreen({
           </svg>
         </div>
 
-        <h1 className="mb-2 text-center text-2xl font-semibold text-[#212121]">Thank You!</h1>
+        <h1 className="mb-2 text-center text-2xl font-semibold text-[var(--grey-900)]">Thank You!</h1>
         <p className="mb-8 text-center text-[#616161]">
           Your responses have been submitted. Here is what happens next:
         </p>

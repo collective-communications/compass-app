@@ -78,8 +78,8 @@ export function StackedComparisonChart({
   });
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
-      <h3 className="mb-4 text-sm font-semibold text-[#424242]">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+      <h3 className="mb-4 text-sm font-semibold text-[var(--grey-700)]">
         All Segments Comparison
       </h3>
 
@@ -91,10 +91,10 @@ export function StackedComparisonChart({
           return (
             <div key={dim}>
               <div className="mb-2 flex items-center justify-between">
-                <span className="text-xs font-medium text-[#424242]">
+                <span className="text-xs font-medium text-[var(--grey-700)]">
                   {DIMENSION_LABELS[dim]}
                 </span>
-                <span className="text-xs text-[#757575]">
+                <span className="text-xs text-[var(--grey-500)]">
                   Overall: {Math.round(overallScore)}%
                 </span>
               </div>
@@ -106,17 +106,17 @@ export function StackedComparisonChart({
 
                   return (
                     <div key={val} className="flex items-center gap-2">
-                      <span className="w-20 truncate text-right text-xs text-[#757575]">
+                      <span className="w-20 truncate text-right text-xs text-[var(--grey-500)]">
                         {val}
                       </span>
-                      <div className="relative h-4 flex-1 rounded bg-[#F5F5F5]">
+                      <div className="relative h-4 flex-1 rounded bg-[var(--grey-50)]">
                         {isBelowThreshold || score === null ? (
                           <>
                             <div
                               className="h-4 rounded bg-[#E0E0E0]"
                               style={{ width: '20%' }}
                             />
-                            <span className="absolute inset-0 flex items-center pl-2 text-[10px] text-[#9E9E9E]">
+                            <span className="absolute inset-0 flex items-center pl-2 text-[10px] text-[var(--grey-400)]">
                               n &lt; threshold
                             </span>
                           </>
@@ -131,13 +131,13 @@ export function StackedComparisonChart({
                         )}
                         {/* Overall reference line */}
                         <div
-                          className="absolute top-0 h-4 w-px bg-[#424242]"
+                          className="absolute top-0 h-4 w-px bg-[var(--grey-700)]"
                           style={{ left: `${Math.min(overallScore, 100)}%` }}
                           aria-hidden="true"
                         />
                       </div>
                       {!isBelowThreshold && score !== null && (
-                        <span className="w-8 text-right text-xs text-[#424242]">
+                        <span className="w-8 text-right text-xs text-[var(--grey-700)]">
                           {Math.round(score)}%
                         </span>
                       )}
@@ -154,7 +154,7 @@ export function StackedComparisonChart({
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-3 border-t border-[#E5E4E0] pt-3">
+      <div className="mt-4 flex flex-wrap gap-3 border-t border-[var(--grey-100)] pt-3">
         {segmentValues.map((val) => (
           <div key={val} className="flex items-center gap-1.5">
             <span
@@ -165,12 +165,12 @@ export function StackedComparisonChart({
                   : colorMap.get(val),
               }}
             />
-            <span className="text-xs text-[#757575]">{val}</span>
+            <span className="text-xs text-[var(--grey-500)]">{val}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5">
-          <span className="inline-block h-2.5 w-px bg-[#424242]" />
-          <span className="text-xs text-[#757575]">Overall</span>
+          <span className="inline-block h-2.5 w-px bg-[var(--grey-700)]" />
+          <span className="text-xs text-[var(--grey-500)]">Overall</span>
         </div>
       </div>
     </div>

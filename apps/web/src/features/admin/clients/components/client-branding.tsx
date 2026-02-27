@@ -32,7 +32,7 @@ export function ClientBranding({
   );
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <fieldset>
         <legend className="mb-4 flex w-full items-center justify-between">
           <span className="text-lg font-semibold text-[var(--grey-900)]">Branding</span>
@@ -57,7 +57,7 @@ export function ClientBranding({
             value={branding.displayName}
             onChange={handleDisplayNameChange}
             aria-label="Organization display name"
-            className="w-full max-w-md rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+            className="w-full max-w-md rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
           />
           <p className="mt-1 text-xs text-[var(--grey-500)]">
             Shown in survey headers and reports. Leave blank to use the organization name.
@@ -74,14 +74,14 @@ export function ClientBranding({
               <img
                 src={branding.logoUrl}
                 alt="Organization logo"
-                className="h-12 w-12 rounded-lg border border-[#E5E4E0] object-contain"
+                className="h-12 w-12 rounded-lg border border-[var(--grey-100)] object-contain"
               />
               <span className="text-xs text-[var(--grey-500)]">
                 Logo upload management coming soon.
               </span>
             </div>
           ) : (
-            <div className="flex h-24 w-full max-w-md items-center justify-center rounded-lg border-2 border-dashed border-[#E5E4E0] bg-[var(--grey-50,#F5F5F5)]">
+            <div className="flex h-24 w-full max-w-md items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50,#F5F5F5)]">
               <span className="text-sm text-[var(--grey-400)]">
                 Logo upload coming soon
               </span>

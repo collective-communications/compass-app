@@ -81,7 +81,7 @@ export function InfoPanel({ id, title, content, defaultOpen = false }: InfoPanel
         aria-expanded={isOpen}
         aria-controls={contentId}
         onClick={handleToggle}
-        className="inline-flex items-center gap-1 text-[#9E9E9E] hover:text-[#757575]"
+        className="inline-flex items-center gap-1 text-[var(--grey-400)] hover:text-[var(--grey-500)]"
       >
         <Info size={16} aria-hidden="true" />
         <span className="sr-only">{isOpen ? `Collapse ${title}` : `Expand ${title}`}</span>
@@ -92,7 +92,7 @@ export function InfoPanel({ id, title, content, defaultOpen = false }: InfoPanel
           id={contentId}
           role="region"
           aria-labelledby={titleId}
-          className="mt-2 rounded-md bg-[#F5F5F5] p-4 text-sm text-[#424242]"
+          className="mt-2 rounded-md bg-[var(--grey-50)] p-4 text-sm text-[var(--grey-700)]"
         >
           <p id={titleId} className="font-semibold">
             {title}

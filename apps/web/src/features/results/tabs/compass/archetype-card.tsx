@@ -20,8 +20,8 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[#9E9E9E]">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--grey-400)]">
         Culture Archetype
       </p>
       <button
@@ -31,8 +31,8 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
         aria-expanded={expanded}
         aria-controls="archetype-description"
       >
-        <h3 className="text-lg font-bold text-[#212121]">{match.archetype.name}</h3>
-        <p className="mt-0.5 text-sm text-[#757575]">{CONFIDENCE_LABEL[match.confidence]}</p>
+        <h3 className="text-lg font-bold text-[var(--grey-900)]">{match.archetype.name}</h3>
+        <p className="mt-0.5 text-sm text-[var(--grey-500)]">{CONFIDENCE_LABEL[match.confidence]}</p>
         <span className="mt-2 inline-block text-xs font-medium text-[#0A3B4F] underline">
           {expanded ? 'Show less' : 'Learn more'}
         </span>

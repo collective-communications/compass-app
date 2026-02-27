@@ -66,8 +66,8 @@ export function DimensionDetailPanel({
           strokeWidth={5}
         />
         <div>
-          <h3 className="text-lg font-bold text-[#212121]">{label}</h3>
-          <p className="text-sm text-[#757575]">{Math.round(score)}% score</p>
+          <h3 className="text-lg font-bold text-[var(--grey-900)]">{label}</h3>
+          <p className="text-sm text-[var(--grey-500)]">{Math.round(score)}% score</p>
         </div>
       </div>
 

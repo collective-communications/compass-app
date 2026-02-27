@@ -26,7 +26,7 @@ interface BottomTabBarProps {
 
 export function BottomTabBar({ tabs, activeTabId }: BottomTabBarProps): ReactElement {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-10 border-t border-[var(--grey-300)] bg-white lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-10 border-t border-[var(--grey-300)] bg-[var(--grey-50)] lg:hidden">
       <ul className="flex items-center justify-around py-2">
         {tabs.map((tab) => {
           const Icon = ICON_MAP[tab.icon];

@@ -46,7 +46,7 @@ export function RecalculateButton({
           type="button"
           onClick={handleRecalculate}
           disabled={state === 'loading'}
-          className="rounded-lg border border-[#E5E4E0] bg-white px-4 py-2 text-sm font-medium text-[var(--grey-900)] hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-2 text-sm font-medium text-[var(--grey-900)] hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {state === 'loading' ? 'Calculating...' : 'Recalculate Scores'}
         </button>

@@ -1,5 +1,36 @@
 @import 'tailwindcss';
 
+:root {
+  --color-core: #0A3B4F;
+  --color-clarity: #FF7F50;
+  --color-connection: #9FD7C3;
+  --color-collaboration: #E8B4A8;
+  --grey-50: #F5F5F5;
+  --grey-100: #E5E4E0;
+  --grey-300: #BDBDBD;
+  --grey-400: #9E9E9E;
+  --grey-500: #757575;
+  --grey-700: #424242;
+  --grey-900: #212121;
+  --font-headings: 'DM Serif Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+}
+
+/*
+ * Dark mode: invert the greyscale palette so surfaces become dark
+ * and text becomes light. Brand colors stay unchanged — they're
+ * designed to work on both light and dark backgrounds.
+ */
+.dark {
+  --grey-50: #212121;
+  --grey-100: #2E2E2E;
+  --grey-300: #424242;
+  --grey-400: #616161;
+  --grey-500: #9E9E9E;
+  --grey-700: #BDBDBD;
+  --grey-900: #F5F5F5;
+}
+
 body {
   margin: 0;
   font-family: var(--font-body);

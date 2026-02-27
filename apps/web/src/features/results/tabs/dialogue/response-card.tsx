@@ -13,9 +13,9 @@ interface ResponseCardProps {
 /** Individual anonymized dialogue response card. */
 export function ResponseCard({ response }: ResponseCardProps): ReactElement {
   return (
-    <article className="rounded-[10px] border border-[#E5E4E0] bg-white px-6 py-5">
-      <p className="mb-2 text-xs font-medium text-[#757575]">{response.questionText}</p>
-      <p className="text-sm leading-relaxed text-[#212121]">{response.responseText}</p>
+    <article className="rounded-[10px] border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-5">
+      <p className="mb-2 text-xs font-medium text-[var(--grey-500)]">{response.questionText}</p>
+      <p className="text-sm leading-relaxed text-[var(--grey-900)]">{response.responseText}</p>
     </article>
   );
 }

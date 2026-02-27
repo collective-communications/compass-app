@@ -62,8 +62,8 @@ export function SurveyDimensionsTab({
                 onClick={() => setActiveDimension(dim.code)}
                 className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
                   activeDimension === dim.code
-                    ? 'bg-[#424242] text-white'
-                    : 'text-[#757575] hover:bg-[#F5F5F5]'
+                    ? 'bg-[var(--grey-700)] text-white'
+                    : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
                 }`}
                 aria-current={activeDimension === dim.code ? 'true' : undefined}
               >
@@ -98,11 +98,11 @@ export function SurveyDimensionsTab({
 function LoadingSkeleton(): ReactElement {
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-32 animate-pulse rounded-lg border border-[#E5E4E0] bg-white" />
+      <div className="h-32 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
       {Array.from({ length: 3 }, (_, i) => (
         <div
           key={i}
-          className="h-24 animate-pulse rounded-lg border border-[#E5E4E0] bg-white"
+          className="h-24 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]"
         />
       ))}
     </div>

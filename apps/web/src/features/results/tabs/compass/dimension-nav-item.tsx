@@ -42,14 +42,14 @@ export function DimensionNavItem({
       onClick={() => onClick(id)}
       className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
         isActive
-          ? 'border-l-[3px] border-l-[#424242] bg-[#F5F5F5]'
+          ? 'border-l-[3px] border-l-[#424242] bg-[var(--grey-50)]'
           : 'hover:bg-[#FAFAFA]'
       }`}
       aria-current={isActive ? 'true' : undefined}
     >
       <ScoreRing score={score} color={color} size={36} strokeWidth={3} showLabel={false} />
       <div className="flex flex-1 items-center gap-2">
-        <span className="text-sm font-medium text-[#424242]">{label}</span>
+        <span className="text-sm font-medium text-[var(--grey-700)]">{label}</span>
         {showDot && (
           <span
             className={`h-2 w-2 rounded-full ${RISK_DOT_COLOR[severity]}`}

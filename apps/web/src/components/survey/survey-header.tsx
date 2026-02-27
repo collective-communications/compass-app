@@ -16,7 +16,7 @@ interface SurveyHeaderProps {
 export function SurveyHeader({ orgName, logoUrl }: SurveyHeaderProps): React.ReactElement {
   return (
     <header
-      className="sticky top-0 z-10 bg-white border-b border-[var(--grey-100)]"
+      className="sticky top-0 z-10 bg-[var(--grey-50)] border-b border-[var(--grey-100)]"
     >
       <div className="mx-auto flex max-w-[600px] items-center gap-3 px-4 py-3">
         <ClientLogo src={logoUrl} orgName={orgName} size="md" />

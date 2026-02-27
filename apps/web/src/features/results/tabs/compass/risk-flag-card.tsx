@@ -30,7 +30,7 @@ export function RiskFlagCard({ flag }: RiskFlagCardProps): ReactElement {
 
   return (
     <div
-      className={`rounded-lg border border-[#E5E4E0] border-l-4 bg-white p-4 ${borderClass}`}
+      className={`rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-4 ${borderClass}`}
       role="listitem"
     >
       <div className="flex items-center justify-between">
@@ -38,12 +38,12 @@ export function RiskFlagCard({ flag }: RiskFlagCardProps): ReactElement {
           <span className={`text-xs font-semibold uppercase tracking-wide ${labelClass}`}>
             {flag.severity}
           </span>
-          <span className="mx-2 text-[#9E9E9E]">&middot;</span>
-          <span className="text-sm font-medium text-[#424242]">{flag.dimensionName}</span>
+          <span className="mx-2 text-[var(--grey-400)]">&middot;</span>
+          <span className="text-sm font-medium text-[var(--grey-700)]">{flag.dimensionName}</span>
         </div>
         <span className="text-sm font-semibold text-[#616161]">{Math.round(flag.score)}</span>
       </div>
-      <p className="mt-1 text-sm text-[#757575]">{flag.message}</p>
+      <p className="mt-1 text-sm text-[var(--grey-500)]">{flag.message}</p>
     </div>
   );
 }

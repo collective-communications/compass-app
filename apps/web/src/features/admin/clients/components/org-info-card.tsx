@@ -22,7 +22,7 @@ function getInitials(name: string): string {
 
 export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactElement {
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
           {/* Logo or initials fallback */}
@@ -34,7 +34,7 @@ export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactEl
             />
           ) : (
             <div
-              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[#E5E4E0] text-lg font-semibold text-[var(--grey-700)]"
+              className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-lg font-semibold text-[var(--grey-700)]"
               aria-hidden="true"
             >
               {getInitials(organization.name)}

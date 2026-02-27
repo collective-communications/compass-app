@@ -33,7 +33,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
 
   return (
     <div className="flex flex-col gap-1.5">
-      <label htmlFor={fieldId} className="text-sm font-medium text-[#424242]">
+      <label htmlFor={fieldId} className="text-sm font-medium text-[var(--grey-700)]">
         {label}
         <span className="text-red-600"> *</span>
       </label>
@@ -42,8 +42,8 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
         value={field.value}
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
-        className={`h-10 w-full rounded-lg border bg-white px-3 text-sm text-[#212121] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A3B4F]/30 ${
-          showError ? 'border-red-500' : 'border-[#E5E4E0]'
+        className={`h-10 w-full rounded-lg border bg-[var(--grey-50)] px-3 text-sm text-[var(--grey-900)] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A3B4F]/30 ${
+          showError ? 'border-red-500' : 'border-[var(--grey-100)]'
         }`}
         aria-invalid={showError}
         aria-describedby={showError ? `${fieldId}-error` : undefined}
@@ -113,7 +113,7 @@ export function MetadataForm({ config, onSubmit, isSubmitting }: MetadataFormPro
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
-      <h2 className="text-base font-semibold text-[#212121]">About You</h2>
+      <h2 className="text-base font-semibold text-[var(--grey-900)]">About You</h2>
       <p className="text-sm text-[#616161]">
         This information helps group responses for meaningful insights. It is never used to identify
         individuals.

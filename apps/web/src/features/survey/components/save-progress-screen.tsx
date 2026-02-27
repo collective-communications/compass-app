@@ -50,16 +50,16 @@ export function SaveProgressScreen({
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] rounded-xl border border-[#E5E4E0] bg-white p-6 sm:p-8">
-        <h1 className="mb-2 text-2xl font-semibold text-[#212121]">Progress saved</h1>
+      <div className="w-full max-w-[600px] rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
+        <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Progress saved</h1>
 
         <p className="mb-6 text-[#616161]">
           You can return to this survey anytime on this device.
         </p>
 
         {/* Remaining info */}
-        <div className="mb-6 rounded-lg bg-[#F5F5F5] px-4 py-3">
-          <ul className="space-y-1 text-sm text-[#424242]">
+        <div className="mb-6 rounded-lg bg-[var(--grey-50)] px-4 py-3">
+          <ul className="space-y-1 text-sm text-[var(--grey-700)]">
             <li>
               {remainingCount} question{remainingCount !== 1 ? 's' : ''} remaining
             </li>
@@ -86,7 +86,7 @@ export function SaveProgressScreen({
           <button
             type="button"
             onClick={handleCopyLink}
-            className="w-full rounded-lg border border-[#E5E4E0] bg-white px-6 py-3 text-base font-medium text-[#424242] transition-colors hover:bg-[#F5F5F5]"
+            className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-3 text-base font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)]"
           >
             {copied ? 'Link copied' : 'Copy survey link'}
           </button>

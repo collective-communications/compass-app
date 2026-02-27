@@ -38,10 +38,10 @@ const SERVICES: ServiceLink[] = [
 export function ServiceLinksCard(): ReactElement {
   return (
     <section
-      className="rounded-lg border border-[#E5E4E0] bg-white p-6"
+      className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6"
       aria-labelledby="service-links-heading"
     >
-      <h3 id="service-links-heading" className="mb-4 text-sm font-semibold text-[#212121]">
+      <h3 id="service-links-heading" className="mb-4 text-sm font-semibold text-[var(--grey-900)]">
         How COLLECTIVE culture + communication Can Help
       </h3>
       <ul className="flex flex-col gap-3">
@@ -56,7 +56,7 @@ export function ServiceLinksCard(): ReactElement {
               <span className="text-sm font-medium text-[#0A3B4F] underline-offset-2 group-hover:underline">
                 {service.label}
               </span>
-              <p className="mt-0.5 text-xs leading-relaxed text-[#757575]">
+              <p className="mt-0.5 text-xs leading-relaxed text-[var(--grey-500)]">
                 {service.description}
               </p>
             </a>

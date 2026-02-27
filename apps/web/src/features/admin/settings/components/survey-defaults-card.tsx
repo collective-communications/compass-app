@@ -59,7 +59,7 @@ export function SurveyDefaultsCard({
   );
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <fieldset>
         <legend className="mb-4 flex w-full items-center justify-between">
           <span className="text-lg font-semibold text-[var(--grey-900)]">Survey Defaults</span>
@@ -86,7 +86,7 @@ export function SurveyDefaultsCard({
             value={settings.anonymity_threshold}
             onChange={handleThresholdChange}
             aria-label={`Anonymity threshold, current value ${settings.anonymity_threshold}, range 3 to 20`}
-            className="w-24 rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+            className="w-24 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
           />
           <p className="mt-1 text-xs text-[var(--grey-500)]">
             Minimum: 3. Applied as the default for all new surveys.
@@ -108,7 +108,7 @@ export function SurveyDefaultsCard({
             value={settings.default_duration_days}
             onChange={handleDurationChange}
             aria-label={`Default survey duration in days, current value ${settings.default_duration_days}`}
-            className="w-24 rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+            className="w-24 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
           />
         </div>
 
@@ -130,7 +130,7 @@ export function SurveyDefaultsCard({
               onChange={handleWelcomeChange}
               rows={3}
               aria-label="Welcome message"
-              className="w-full rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+              className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
             />
           ) : (
             <p className="rounded-lg bg-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-600)]">
@@ -157,7 +157,7 @@ export function SurveyDefaultsCard({
               onChange={handleCompletionChange}
               rows={3}
               aria-label="Completion message"
-              className="w-full rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+              className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
             />
           ) : (
             <p className="rounded-lg bg-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-600)]">

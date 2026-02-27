@@ -112,7 +112,7 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {
         aria-label="Help"
         onKeyDown={handleKeyDown}
         className={[
-          'fixed z-50 bg-white shadow-lg transition-transform duration-300 ease-in-out',
+          'fixed z-50 bg-[var(--grey-50)] shadow-lg transition-transform duration-300 ease-in-out',
           // Mobile: bottom sheet
           'inset-x-0 bottom-0 max-h-[80vh] rounded-t-2xl lg:inset-x-auto',
           // Desktop: side sheet
@@ -125,18 +125,18 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {
       >
         {/* Drag handle (mobile only) */}
         <div className="flex justify-center pt-3 lg:hidden">
-          <div className="h-1 w-10 rounded-full bg-[#E5E4E0]" />
+          <div className="h-1 w-10 rounded-full bg-[var(--grey-100)]" />
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-[#E5E4E0] px-6 py-4">
+        <div className="flex items-center justify-between border-b border-[var(--grey-100)] px-6 py-4">
           <h2 className="text-lg font-semibold">
             {helpContent !== null ? helpContent.title : 'Help'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-[#757575] hover:bg-[#F5F5F5] hover:text-[#424242]"
+            className="rounded-md p-1 text-[var(--grey-500)] hover:bg-[var(--grey-50)] hover:text-[var(--grey-700)]"
             aria-label="Close help"
           >
             <X size={20} aria-hidden="true" />
@@ -149,14 +149,14 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {
             <div className="flex flex-col gap-6">
               {helpContent.sections.map((section) => (
                 <section key={section.heading}>
-                  <h3 className="font-semibold text-[#424242]">{section.heading}</h3>
-                  <p className="mt-1 text-sm text-[#757575]">{section.content}</p>
+                  <h3 className="font-semibold text-[var(--grey-700)]">{section.heading}</h3>
+                  <p className="mt-1 text-sm text-[var(--grey-500)]">{section.content}</p>
                   {section.keyboardShortcuts !== undefined &&
                     section.keyboardShortcuts.length > 0 && (
                       <ul className="mt-2 flex flex-wrap gap-2">
                         {section.keyboardShortcuts.map((shortcut) => (
                           <li key={shortcut}>
-                            <kbd className="rounded border border-[#E5E4E0] bg-[#F5F5F5] px-2 py-0.5 text-xs text-[#424242]">
+                            <kbd className="rounded border border-[var(--grey-100)] bg-[var(--grey-50)] px-2 py-0.5 text-xs text-[var(--grey-700)]">
                               {shortcut}
                             </kbd>
                           </li>
@@ -167,7 +167,7 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-[#757575]">
+            <p className="text-sm text-[var(--grey-500)]">
               Need help? Contact your administrator.
             </p>
           )}

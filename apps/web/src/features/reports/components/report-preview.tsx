@@ -46,10 +46,10 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
     return (
       <aside
         aria-label="Report preview"
-        className="flex flex-col items-center justify-center gap-3 rounded-lg border border-[#E5E4E0] bg-white p-8 text-center lg:sticky lg:top-6"
+        className="flex flex-col items-center justify-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-8 text-center lg:sticky lg:top-6"
       >
-        <FileText size={40} className="text-[#E5E4E0]" aria-hidden="true" />
-        <p className="text-sm text-[#9E9E9E]">
+        <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
+        <p className="text-sm text-[var(--grey-400)]">
           Select a report to preview details
         </p>
       </aside>
@@ -61,16 +61,16 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
   return (
     <aside
       aria-label="Report preview"
-      className="flex flex-col gap-4 rounded-lg border border-[#E5E4E0] bg-white p-6 lg:sticky lg:top-6"
+      className="flex flex-col gap-4 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 lg:sticky lg:top-6"
     >
       {/* Header */}
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center rounded-full bg-[#F5F5F5] px-2 py-0.5 text-xs font-medium uppercase text-[#616161]">
+        <span className="inline-flex items-center rounded-full bg-[var(--grey-50)] px-2 py-0.5 text-xs font-medium uppercase text-[#616161]">
           {report.format}
         </span>
         <span
           className={`text-xs font-medium ${
-            isReady ? 'text-[#2E7D32]' : report.status === 'failed' ? 'text-[#D32F2F]' : 'text-[#757575]'
+            isReady ? 'text-[#2E7D32]' : report.status === 'failed' ? 'text-[#D32F2F]' : 'text-[var(--grey-500)]'
           }`}
         >
           {report.status === 'complete' ? 'Ready' : report.status === 'failed' ? 'Failed' : 'In progress'}
@@ -80,19 +80,19 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
       {/* Metadata */}
       <dl className="flex flex-col gap-2 text-sm">
         <div className="flex justify-between">
-          <dt className="text-[#757575]">Generated</dt>
-          <dd className="text-[#424242]">{formatDate(report.createdAt)}</dd>
+          <dt className="text-[var(--grey-500)]">Generated</dt>
+          <dd className="text-[var(--grey-700)]">{formatDate(report.createdAt)}</dd>
         </div>
         {report.fileSize !== null && (
           <div className="flex justify-between">
-            <dt className="text-[#757575]">File size</dt>
-            <dd className="text-[#424242]">{formatFileSize(report.fileSize)}</dd>
+            <dt className="text-[var(--grey-500)]">File size</dt>
+            <dd className="text-[var(--grey-700)]">{formatFileSize(report.fileSize)}</dd>
           </div>
         )}
         {report.pageCount !== null && (
           <div className="flex justify-between">
-            <dt className="text-[#757575]">Pages</dt>
-            <dd className="text-[#424242]">{report.pageCount}</dd>
+            <dt className="text-[var(--grey-500)]">Pages</dt>
+            <dd className="text-[var(--grey-700)]">{report.pageCount}</dd>
           </div>
         )}
       </dl>
@@ -100,7 +100,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
       {/* Included sections */}
       {report.sections.length > 0 && (
         <div>
-          <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-[#9E9E9E]">
+          <h4 className="mb-2 text-xs font-medium uppercase tracking-wide text-[var(--grey-400)]">
             Included Sections
           </h4>
           <ul className="flex flex-col gap-1">

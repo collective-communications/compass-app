@@ -28,13 +28,13 @@ export function OpenEndedScreen({
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] rounded-xl border border-[#E5E4E0] bg-white p-6 sm:p-8">
-        <h2 className="mb-2 text-xl font-semibold text-[#212121]">One more thing...</h2>
+      <div className="w-full max-w-[600px] rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
+        <h2 className="mb-2 text-xl font-semibold text-[var(--grey-900)]">One more thing...</h2>
         <p className="mb-4 text-[#616161]">{prompt}</p>
 
         <div className="mb-2">
           <textarea
-            className="w-full resize-y rounded-lg border border-[#E5E4E0] bg-white px-4 py-3 text-[#212121] placeholder-[#9E9E9E] transition-colors focus:border-[#0A3B4F] focus:outline-none"
+            className="w-full resize-y rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-[var(--grey-900)] placeholder-[#9E9E9E] transition-colors focus:border-[#0A3B4F] focus:outline-none"
             rows={5}
             maxLength={MAX_CHARS}
             value={text}
@@ -43,7 +43,7 @@ export function OpenEndedScreen({
             disabled={isSubmitting}
             aria-label="Open-ended feedback"
           />
-          <p className="text-right text-xs text-[#9E9E9E]" aria-live="polite">
+          <p className="text-right text-xs text-[var(--grey-400)]" aria-live="polite">
             {text.length} / {MAX_CHARS}
           </p>
         </div>
@@ -53,7 +53,7 @@ export function OpenEndedScreen({
             type="button"
             onClick={onSkip}
             disabled={isSubmitting}
-            className="flex-1 rounded-lg border border-[#E5E4E0] bg-white px-4 py-2.5 text-sm font-medium text-[#424242] transition-colors hover:bg-[#F5F5F5] disabled:opacity-50"
+            className="flex-1 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-2.5 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)] disabled:opacity-50"
           >
             Skip
           </button>

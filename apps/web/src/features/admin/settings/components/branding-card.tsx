@@ -19,7 +19,7 @@ const COLOR_LABELS: { key: keyof SystemSettings['brand_colors']; label: string }
 
 export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <fieldset>
         <legend className="mb-4 text-lg font-semibold text-[var(--grey-900)]">
           Branding
@@ -28,7 +28,7 @@ export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
         {/* Logo upload placeholder */}
         <div className="mb-5">
           <span className="mb-1 block text-sm font-medium text-[var(--grey-700)]">Logo</span>
-          <div className="flex h-28 items-center justify-center rounded-lg border-2 border-dashed border-[#E5E4E0] bg-[var(--grey-50)]">
+          <div className="flex h-28 items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50)]">
             <div className="text-center">
               <svg
                 className="mx-auto mb-1 h-6 w-6 text-[var(--grey-400)]"
@@ -60,7 +60,7 @@ export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
               return (
                 <div key={key} className="flex flex-col items-center gap-1">
                   <div
-                    className="h-10 w-10 rounded-lg border border-[#E5E4E0]"
+                    className="h-10 w-10 rounded-lg border border-[var(--grey-100)]"
                     style={{ backgroundColor: hex }}
                     aria-label={`${label}: ${hex}`}
                     role="img"

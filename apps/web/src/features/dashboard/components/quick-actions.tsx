@@ -47,7 +47,7 @@ export function QuickActions({
         onClick={handleCopy}
         disabled={!deploymentUrl}
         aria-label="Copy survey link to clipboard"
-        className="flex items-center justify-center gap-2 rounded-lg border border-[#E5E4E0] bg-white px-4 py-3 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex items-center justify-center gap-2 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Link2 className="h-4 w-4" aria-hidden="true" />
         {copied ? 'Copied!' : 'Copy Link'}
@@ -58,7 +58,7 @@ export function QuickActions({
           type="button"
           onClick={handleViewResults}
           aria-label="View survey results"
-          className="flex items-center justify-center gap-2 rounded-lg border border-[#E5E4E0] bg-white px-4 py-3 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)]"
+          className="flex items-center justify-center gap-2 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)]"
         >
           <BarChart3 className="h-4 w-4" aria-hidden="true" />
           View Results

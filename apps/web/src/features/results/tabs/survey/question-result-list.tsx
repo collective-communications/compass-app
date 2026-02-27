@@ -19,7 +19,7 @@ export function QuestionResultList({
 }: QuestionResultListProps): ReactElement {
   if (questions.length === 0) {
     return (
-      <p className="py-8 text-center text-sm text-[#9E9E9E]">
+      <p className="py-8 text-center text-sm text-[var(--grey-400)]">
         No question results available for this dimension.
       </p>
     );

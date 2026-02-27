@@ -61,8 +61,8 @@ export function KeywordBubbles({
             onClick={() => onKeywordClick(isActive ? null : keyword.text)}
             className={`inline-block cursor-pointer rounded-full px-3 py-1 transition-colors ${
               isActive
-                ? 'bg-[#424242] text-white'
-                : 'bg-[#F5F5F5] text-[#424242] hover:bg-[#E5E4E0]'
+                ? 'bg-[var(--grey-700)] text-white'
+                : 'bg-[var(--grey-50)] text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
             }`}
             style={{ fontSize: `${getFontSize(keyword.count)}px` }}
           >

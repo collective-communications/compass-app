@@ -73,7 +73,7 @@ export function DashboardPage(): ReactElement {
 
         {/* Empty state — no surveys at all */}
         {!isLoading && !error && !hasSurveys && (
-          <div className="rounded-lg border border-[#E5E4E0] bg-white p-6 text-center">
+          <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
             <p className="text-sm text-[var(--grey-600)]">
               No surveys yet. Your organization&apos;s first culture assessment is coming soon.
             </p>
@@ -96,7 +96,7 @@ export function DashboardPage(): ReactElement {
             )}
 
             {!activeSurvey && !resultsEnabled && (
-              <div className="rounded-lg border border-[#E5E4E0] bg-white p-6 text-center">
+              <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
                 <p className="text-sm text-[var(--grey-600)]">
                   Results are being prepared. Your consultant will let you know when they&apos;re
                   ready to review.

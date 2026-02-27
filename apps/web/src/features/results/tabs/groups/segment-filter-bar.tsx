@@ -43,7 +43,7 @@ export function SegmentFilterBar({
       <div className="flex items-center gap-3">
         <label
           htmlFor="segment-type-select"
-          className="text-sm font-medium text-[#424242]"
+          className="text-sm font-medium text-[var(--grey-700)]"
         >
           Segment
         </label>
@@ -51,7 +51,7 @@ export function SegmentFilterBar({
           id="segment-type-select"
           value={segmentType}
           onChange={(e) => onTypeChange(e.target.value as SegmentType)}
-          className="rounded-md border border-[#E5E4E0] bg-white px-3 py-1.5 text-sm text-[#424242] focus:outline-none focus:ring-2 focus:ring-[#0A3B4F]"
+          className="rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-1.5 text-sm text-[var(--grey-700)] focus:outline-none focus:ring-2 focus:ring-[#0A3B4F]"
         >
           {SEGMENT_TYPE_OPTIONS.map((type) => (
             <option key={type} value={type}>
@@ -75,8 +75,8 @@ export function SegmentFilterBar({
           onClick={() => onValueChange(ALL_VALUE)}
           className={`rounded-full px-3 py-1 text-sm transition-colors ${
             segmentValue === ALL_VALUE
-              ? 'bg-[#424242] text-white'
-              : 'text-[#424242] hover:bg-[#E5E4E0]'
+              ? 'bg-[var(--grey-700)] text-white'
+              : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
           }`}
         >
           All
@@ -100,8 +100,8 @@ export function SegmentFilterBar({
               onClick={() => onValueChange(value)}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-sm transition-colors ${
                 isActive
-                  ? 'bg-[#424242] text-white'
-                  : 'text-[#424242] hover:bg-[#E5E4E0]'
+                  ? 'bg-[var(--grey-700)] text-white'
+                  : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
               }`}
             >
               {isBelowThreshold && (

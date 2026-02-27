@@ -42,8 +42,8 @@ export function DimensionFilterPills({
               onClick={() => onChange(option.value)}
               className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
                 active === option.value
-                  ? 'bg-[#424242] text-white'
-                  : 'text-[#757575] hover:bg-[#F5F5F5]'
+                  ? 'bg-[var(--grey-700)] text-white'
+                  : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
               }`}
               aria-current={active === option.value ? 'true' : undefined}
             >

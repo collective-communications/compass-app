@@ -107,7 +107,7 @@ export function CompassTab({ scores, archetype, riskFlags }: CompassTabProps): R
 
           {/* Risk flags */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[#9E9E9E]">
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--grey-400)]">
               Risk Flags
             </h3>
             <RiskFlagList flags={riskFlags} />

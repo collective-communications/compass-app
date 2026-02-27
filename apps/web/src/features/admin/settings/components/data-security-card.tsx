@@ -7,7 +7,7 @@ import type { ReactElement } from 'react';
 
 export function DataSecurityCard(): ReactElement {
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <fieldset>
         <legend className="mb-4 text-lg font-semibold text-[var(--grey-900)]">
           Data &amp; Security
@@ -32,7 +32,7 @@ export function DataSecurityCard(): ReactElement {
             <button
               type="button"
               aria-disabled="true"
-              className="cursor-not-allowed rounded-lg border border-[#E5E4E0] px-4 py-2 text-sm text-[var(--grey-400)]"
+              className="cursor-not-allowed rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm text-[var(--grey-400)]"
               onClick={(e) => e.preventDefault()}
             >
               Export all data

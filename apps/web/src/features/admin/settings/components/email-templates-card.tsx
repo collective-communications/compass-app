@@ -41,13 +41,13 @@ export function EmailTemplatesCard(): ReactElement {
   }, []);
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <fieldset>
         <legend className="mb-4 text-lg font-semibold text-[var(--grey-900)]">
           Email Templates
         </legend>
 
-        <div className="flex flex-col divide-y divide-[#E5E4E0]">
+        <div className="flex flex-col divide-y divide-[var(--grey-100)]">
           {PLACEHOLDER_TEMPLATES.map((template) => {
             const isExpanded = expandedId === template.id;
             return (
@@ -83,7 +83,7 @@ export function EmailTemplatesCard(): ReactElement {
                         id={`subject-${template.id}`}
                         type="text"
                         defaultValue={template.subject}
-                        className="w-full rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+                        className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
                       />
                     </div>
                     <div>
@@ -97,7 +97,7 @@ export function EmailTemplatesCard(): ReactElement {
                         id={`body-${template.id}`}
                         defaultValue={template.body}
                         rows={5}
-                        className="w-full rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+                        className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
                       />
                     </div>
                     <p className="text-xs text-[var(--grey-400)]">

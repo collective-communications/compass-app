@@ -41,14 +41,14 @@ export function DialogueSearch({ value, onChange }: DialogueSearchProps): ReactE
         placeholder="Search responses..."
         value={localValue}
         onChange={(e) => handleChange(e.target.value)}
-        className="w-full rounded-lg border border-[#E5E4E0] bg-white px-4 py-2 pr-10 text-sm text-[#212121] placeholder:text-[#9E9E9E] focus:border-[#424242] focus:outline-none"
+        className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-2 pr-10 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--grey-700)] focus:outline-none"
       />
       {localValue.length > 0 && (
         <button
           type="button"
           aria-label="Clear search"
           onClick={() => handleChange('')}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-[#757575] hover:text-[#212121]"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--grey-500)] hover:text-[var(--grey-900)]"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
             <path

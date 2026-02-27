@@ -57,7 +57,7 @@ export function ProfileMenu({ user, tier, onSignOut }: ProfileMenuProps): ReactE
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border border-[var(--grey-300)] bg-white py-1 shadow-lg">
+        <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] py-1 shadow-lg">
           <div className="border-b border-[var(--grey-200)] px-3 py-2">
             <p className="text-sm font-medium text-[var(--grey-900)]">
               {user.fullName ?? user.email}

@@ -151,7 +151,7 @@ export function GroupsTab({ surveyId }: GroupsTabProps): ReactElement {
 
   if (!overallScores || !allSegmentRows) {
     return (
-      <p className="py-8 text-center text-sm text-[#757575]">
+      <p className="py-8 text-center text-sm text-[var(--grey-500)]">
         No segment data available.
       </p>
     );
@@ -203,7 +203,7 @@ export function GroupsTab({ surveyId }: GroupsTabProps): ReactElement {
               />
             </>
           ) : (
-            <p className="py-8 text-center text-sm text-[#757575]">
+            <p className="py-8 text-center text-sm text-[var(--grey-500)]">
               No data available for this segment.
             </p>
           )}

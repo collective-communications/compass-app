@@ -25,7 +25,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
   const { survey, responseCount, expectedCount, completionPercent, daysRemaining } = data;
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-semibold text-[var(--grey-900)]">{survey.title}</h2>
@@ -33,7 +33,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
             Closes {formatDate(survey.closesAt)}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-[#424242] px-3 py-1 text-xs font-semibold uppercase text-white">
+        <span className="shrink-0 rounded-full bg-[var(--grey-700)] px-3 py-1 text-xs font-semibold uppercase text-white">
           Active
         </span>
       </div>

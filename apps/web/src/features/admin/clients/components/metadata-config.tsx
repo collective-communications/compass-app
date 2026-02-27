@@ -134,7 +134,7 @@ export function MetadataConfig({
   const sorted = [...items].sort((a, b) => a.sortOrder - b.sortOrder);
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <fieldset>
         <legend className="mb-4 flex w-full items-center justify-between">
           <span className="text-lg font-semibold text-[var(--grey-900)]">{label}</span>
@@ -148,7 +148,7 @@ export function MetadataConfig({
           {sorted.map((item, index) => (
             <li
               key={item.id}
-              className="flex items-center gap-2 rounded-lg border border-[#E5E4E0] bg-[var(--grey-50,#F5F5F5)] px-3 py-2"
+              className="flex items-center gap-2 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50,#F5F5F5)] px-3 py-2"
             >
               {/* Reorder controls */}
               <div className="flex flex-col">
@@ -236,7 +236,7 @@ export function MetadataConfig({
             onKeyDown={handleKeyDown}
             placeholder={CATEGORY_PLACEHOLDER[category]}
             aria-label={`Add new ${label.toLowerCase().replace(/s$/, '')}`}
-            className="flex-1 rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+            className="flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
           />
           <button
             type="button"

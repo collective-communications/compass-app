@@ -22,17 +22,17 @@ export function TimelineStepper({ steps }: TimelineStepperProps): ReactNode {
           {/* Connecting line */}
           {index < steps.length - 1 && (
             <div
-              className="absolute left-[7px] top-4 h-full w-px bg-[#E5E4E0]"
+              className="absolute left-[7px] top-4 h-full w-px bg-[var(--grey-100)]"
               aria-hidden="true"
             />
           )}
           {/* Step circle */}
           <div
-            className="absolute left-0 top-1 flex h-[15px] w-[15px] items-center justify-center rounded-full border-2 border-[#9E9E9E] bg-white"
+            className="absolute left-0 top-1 flex h-[15px] w-[15px] items-center justify-center rounded-full border-2 border-[var(--grey-400)] bg-[var(--grey-50)]"
             aria-hidden="true"
           />
-          <p className="text-sm font-medium text-[#212121]">{step.title}</p>
-          <p className="mt-0.5 text-sm text-[#757575]">{step.subtitle}</p>
+          <p className="text-sm font-medium text-[var(--grey-900)]">{step.title}</p>
+          <p className="mt-0.5 text-sm text-[var(--grey-500)]">{step.subtitle}</p>
         </li>
       ))}
     </ol>

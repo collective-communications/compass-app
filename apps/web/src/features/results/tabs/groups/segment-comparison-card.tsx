@@ -54,8 +54,8 @@ export function SegmentComparisonCard({
   }
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
-      <h3 className="mb-4 text-sm font-semibold text-[#424242]">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+      <h3 className="mb-4 text-sm font-semibold text-[var(--grey-700)]">
         {segmentLabel} vs Overall
       </h3>
 
@@ -69,7 +69,7 @@ export function SegmentComparisonCard({
           return (
             <div key={dim} className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[#757575]">
+                <span className="text-xs font-medium text-[var(--grey-500)]">
                   {DIMENSION_LABELS[dim]}
                 </span>
                 <span
@@ -81,10 +81,10 @@ export function SegmentComparisonCard({
 
               {/* Segment bar */}
               <div className="flex items-center gap-2">
-                <span className="w-14 text-right text-xs text-[#757575]">
+                <span className="w-14 text-right text-xs text-[var(--grey-500)]">
                   {segmentLabel}
                 </span>
-                <div className="h-3 flex-1 rounded-full bg-[#F5F5F5]">
+                <div className="h-3 flex-1 rounded-full bg-[var(--grey-50)]">
                   <div
                     className="h-3 rounded-full"
                     style={{
@@ -93,23 +93,23 @@ export function SegmentComparisonCard({
                     }}
                   />
                 </div>
-                <span className="w-10 text-right text-xs text-[#424242]">
+                <span className="w-10 text-right text-xs text-[var(--grey-700)]">
                   {Math.round(segmentScore)}%
                 </span>
               </div>
 
               {/* Overall bar */}
               <div className="flex items-center gap-2">
-                <span className="w-14 text-right text-xs text-[#757575]">
+                <span className="w-14 text-right text-xs text-[var(--grey-500)]">
                   Overall
                 </span>
-                <div className="h-3 flex-1 rounded-full bg-[#F5F5F5]">
+                <div className="h-3 flex-1 rounded-full bg-[var(--grey-50)]">
                   <div
-                    className="h-3 rounded-full bg-[#9E9E9E]"
+                    className="h-3 rounded-full bg-[var(--grey-400)]"
                     style={{ width: `${Math.min(overallScore, 100)}%` }}
                   />
                 </div>
-                <span className="w-10 text-right text-xs text-[#424242]">
+                <span className="w-10 text-right text-xs text-[var(--grey-700)]">
                   {Math.round(overallScore)}%
                 </span>
               </div>

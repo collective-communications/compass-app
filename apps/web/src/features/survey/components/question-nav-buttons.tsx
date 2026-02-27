@@ -33,7 +33,7 @@ export function QuestionNavButtons({
           <button
             type="button"
             onClick={onPrevious}
-            className="rounded-lg border-2 border-[#E5E4E0] bg-white px-6 py-2.5 text-sm font-medium text-[#424242] transition-colors hover:border-[#9E9E9E] hover:bg-[#F5F5F5] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3B4F]"
+            className="rounded-lg border-2 border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-2.5 text-sm font-medium text-[var(--grey-700)] transition-colors hover:border-[var(--grey-400)] hover:bg-[var(--grey-50)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3B4F]"
           >
             Previous
           </button>

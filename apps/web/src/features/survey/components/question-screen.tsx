@@ -98,7 +98,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   if (isLoading) {
     return (
       <div className="mx-auto flex max-w-[600px] items-center justify-center py-24">
-        <div className="text-sm text-[#757575]">Loading questions...</div>
+        <div className="text-sm text-[var(--grey-500)]">Loading questions...</div>
       </div>
     );
   }
@@ -116,7 +116,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   if (likertQuestions.length === 0) {
     return (
       <div className="mx-auto flex max-w-[600px] items-center justify-center py-24">
-        <div className="text-sm text-[#757575]">No questions found for this survey.</div>
+        <div className="text-sm text-[var(--grey-500)]">No questions found for this survey.</div>
       </div>
     );
   }
@@ -128,12 +128,12 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   return (
     <div className="mx-auto flex max-w-[600px] flex-col gap-8 px-4 py-8">
       {/* Question counter */}
-      <div className="text-sm font-medium text-[#757575]">
+      <div className="text-sm font-medium text-[var(--grey-500)]">
         Question {currentIndex + 1} of {likertQuestions.length}
       </div>
 
       {/* Question text — no dimension label shown */}
-      <h2 className="text-lg font-semibold leading-snug text-[#212121]">
+      <h2 className="text-lg font-semibold leading-snug text-[var(--grey-900)]">
         {currentQuestion.text}
       </h2>
 

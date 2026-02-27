@@ -101,7 +101,7 @@ export function ReportsPage({
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-20 animate-pulse rounded-lg border border-[#E5E4E0] bg-[#F5F5F5]"
+              className="h-20 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]"
             />
           ))}
         </div>
@@ -109,9 +109,9 @@ export function ReportsPage({
 
       {/* Empty state */}
       {!isLoading && reports.length === 0 && activeSurveyId !== null && (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-[#E5E4E0] bg-white px-6 py-12 text-center">
-          <FileText size={40} className="text-[#E5E4E0]" aria-hidden="true" />
-          <p className="text-sm text-[#757575]">
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-12 text-center">
+          <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
+          <p className="text-sm text-[var(--grey-500)]">
             No reports yet. Reports will appear here once your consultant generates them.
           </p>
         </div>
@@ -119,9 +119,9 @@ export function ReportsPage({
 
       {/* No survey selected */}
       {!isLoading && activeSurveyId === null && (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-[#E5E4E0] bg-white px-6 py-12 text-center">
-          <FileText size={40} className="text-[#E5E4E0]" aria-hidden="true" />
-          <p className="text-sm text-[#757575]">
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-12 text-center">
+          <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
+          <p className="text-sm text-[var(--grey-500)]">
             Select a survey above to view its reports.
           </p>
         </div>

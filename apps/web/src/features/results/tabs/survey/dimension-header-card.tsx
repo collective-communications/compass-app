@@ -41,14 +41,14 @@ export function DimensionHeaderCard({
   const aggregate = aggregateDistribution(questions);
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="flex items-center gap-4">
         <ScoreRing score={score} color={color} size={64} strokeWidth={5} />
         <div className="flex-1">
-          <h3 className="text-base font-semibold text-[#212121]">
+          <h3 className="text-base font-semibold text-[var(--grey-900)]">
             {dimensionName}
           </h3>
-          <p className="text-sm text-[#757575]">
+          <p className="text-sm text-[var(--grey-500)]">
             {questions.length} question{questions.length !== 1 ? 's' : ''} &middot; Overall score: {Math.round(score)}%
           </p>
         </div>

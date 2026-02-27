@@ -32,7 +32,7 @@ export function ConsultantCard({ orgId }: ConsultantCardProps): ReactElement {
   const { data: consultant, isLoading } = useConsultant(orgId);
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
         Assigned Consultant
       </h3>
@@ -48,7 +48,7 @@ export function ConsultantCard({ orgId }: ConsultantCardProps): ReactElement {
       {!isLoading && consultant && (
         <div className="flex items-center gap-3">
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#E5E4E0] text-sm font-semibold text-[var(--grey-700)]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-sm font-semibold text-[var(--grey-700)]"
             aria-hidden="true"
           >
             {getInitials(consultant.name)}

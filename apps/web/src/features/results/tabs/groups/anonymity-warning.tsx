@@ -16,14 +16,14 @@ export function AnonymityWarning({ segmentValue }: AnonymityWarningProps): React
     <div
       role="status"
       aria-live="polite"
-      className="flex items-center gap-3 rounded-lg border border-[#E5E4E0] bg-amber-50 p-6"
+      className="flex items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-amber-50 p-6"
     >
       <Lock className="size-5 shrink-0 text-amber-600" aria-hidden="true" />
       <div>
-        <p className="text-sm font-medium text-[#424242]">
+        <p className="text-sm font-medium text-[var(--grey-700)]">
           Not enough responses to display this segment.
         </p>
-        <p className="mt-1 text-xs text-[#757575]">
+        <p className="mt-1 text-xs text-[var(--grey-500)]">
           Results for &ldquo;{segmentValue}&rdquo; are hidden to protect respondent anonymity.
         </p>
       </div>

@@ -92,7 +92,7 @@ export function UserCard({
   }, []);
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="flex items-start gap-4">
         {/* Avatar */}
         {member.avatarUrl ? (
@@ -133,7 +133,7 @@ export function UserCard({
                   value={member.role}
                   onChange={handleRoleChange}
                   disabled={isUpdating}
-                  className="rounded-lg border border-[#E5E4E0] bg-white px-3 py-1 text-xs font-medium text-[var(--grey-700)] disabled:opacity-50"
+                  className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-1 text-xs font-medium text-[var(--grey-700)] disabled:opacity-50"
                   aria-label={`Role for ${member.fullName}`}
                 >
                   {availableRoles.map((r) => (

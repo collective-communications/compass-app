@@ -67,7 +67,7 @@ const surveyLayoutRoute = createRoute({
       return (
         <SurveyShell orgName="">
           <div className="flex items-center justify-center py-24">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E5E4E0] border-t-[#0A3B4F]" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[#0A3B4F]" />
           </div>
         </SurveyShell>
       );
@@ -149,7 +149,7 @@ function SurveyLayoutInner(): React.ReactElement {
   if (resumeSession.isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#E5E4E0] border-t-[#0A3B4F]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[#0A3B4F]" />
       </div>
     );
   }

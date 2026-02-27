@@ -137,7 +137,7 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
 export function DialogueInsightsContent(): ReactElement {
   return (
     <div className="flex flex-col gap-4 py-4">
-      <h3 className="text-sm font-semibold text-[#212121]">About Dialogue</h3>
+      <h3 className="text-sm font-semibold text-[var(--grey-900)]">About Dialogue</h3>
       <p className="text-sm leading-relaxed text-[#616161]">
         Open-ended feedback provides qualitative depth beyond numeric scores.
         Use keyword bubbles and filters to explore common patterns across responses.
@@ -151,13 +151,13 @@ export function DialogueInsightsContent(): ReactElement {
 function LoadingSkeleton(): ReactElement {
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-16 animate-pulse rounded-lg border border-[#E5E4E0] bg-white" />
-      <div className="h-10 animate-pulse rounded-lg border border-[#E5E4E0] bg-white" />
-      <div className="h-10 animate-pulse rounded-lg border border-[#E5E4E0] bg-white" />
+      <div className="h-16 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
+      <div className="h-10 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
+      <div className="h-10 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
       {Array.from({ length: 3 }, (_, i) => (
         <div
           key={i}
-          className="h-24 animate-pulse rounded-lg border border-[#E5E4E0] bg-white"
+          className="h-24 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]"
         />
       ))}
     </div>

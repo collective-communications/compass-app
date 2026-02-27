@@ -25,7 +25,7 @@ function formatNoteDate(dateStr: string): string {
 
 function NoteItem({ note }: { note: AdminNote }): ReactElement {
   return (
-    <div className="border-b border-[#E5E4E0] py-3 last:border-b-0">
+    <div className="border-b border-[var(--grey-100)] py-3 last:border-b-0">
       <div className="flex items-baseline justify-between gap-2">
         <p className="text-sm font-medium text-[var(--grey-700)]">{note.authorName}</p>
         <time className="shrink-0 text-xs text-[var(--grey-400)]" dateTime={note.createdAt}>
@@ -66,11 +66,11 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
   );
 
   return (
-    <div className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
         Notes
       </h3>
-      <p className="mb-4 text-sm text-[#757575]">Notes are visible only to CC+C team</p>
+      <p className="mb-4 text-sm text-[var(--grey-500)]">Notes are visible only to CC+C team</p>
 
       {/* Add note form */}
       <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
@@ -82,7 +82,7 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
             setAddError(null);
           }}
           placeholder="Add a note..."
-          className="min-w-0 flex-1 rounded-lg border border-[#E5E4E0] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+          className="min-w-0 flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
           disabled={addNote.isPending}
         />
         <button

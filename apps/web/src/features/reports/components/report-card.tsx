@@ -40,7 +40,7 @@ function formatDate(iso: string): string {
 /** Map report format to display badge */
 function FormatBadge({ format }: { format: string }): ReactElement {
   return (
-    <span className="inline-flex items-center rounded-full bg-[#F5F5F5] px-2 py-0.5 text-xs font-medium uppercase text-[#616161]">
+    <span className="inline-flex items-center rounded-full bg-[var(--grey-50)] px-2 py-0.5 text-xs font-medium uppercase text-[#616161]">
       {format}
     </span>
   );
@@ -70,7 +70,7 @@ export function ReportCard({
       aria-selected={isSelected}
       aria-label={`Report generated ${formatDate(report.createdAt)}, format ${report.format.toUpperCase()}, ${report.status}`}
       className={[
-        'w-full rounded-lg border border-[#E5E4E0] border-l-4 bg-white p-4 text-left transition-colors',
+        'w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-4 text-left transition-colors',
         leftBorderColor,
         isSelected ? 'ring-2 ring-[#0A3B4F]' : 'hover:bg-[#FAFAFA]',
       ].join(' ')}
@@ -79,7 +79,7 @@ export function ReportCard({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FormatBadge format={report.format} />
-          <span className="text-sm text-[#757575]">{formatDate(report.createdAt)}</span>
+          <span className="text-sm text-[var(--grey-500)]">{formatDate(report.createdAt)}</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -91,7 +91,7 @@ export function ReportCard({
                 onDelete();
               }}
               aria-label="Delete report"
-              className="rounded-md p-1 text-[#9E9E9E] hover:bg-[#F5F5F5] hover:text-[#D32F2F]"
+              className="rounded-md p-1 text-[var(--grey-400)] hover:bg-[var(--grey-50)] hover:text-[#D32F2F]"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                 <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14" />
@@ -102,7 +102,7 @@ export function ReportCard({
       </div>
 
       {/* Bottom row: metadata */}
-      <div className="mt-2 flex items-center gap-4 text-xs text-[#9E9E9E]">
+      <div className="mt-2 flex items-center gap-4 text-xs text-[var(--grey-400)]">
         {isReady && (
           <>
             <span>{formatFileSize(report.fileSize)}</span>
@@ -115,7 +115,7 @@ export function ReportCard({
         )}
 
         {isInProgress && (
-          <span className="flex items-center gap-1 text-[#757575]">
+          <span className="flex items-center gap-1 text-[var(--grey-500)]">
             <Loader2 size={12} className="animate-spin" aria-hidden="true" />
             Generating ({report.progress}%)
           </span>

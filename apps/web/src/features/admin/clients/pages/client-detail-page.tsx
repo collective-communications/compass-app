@@ -117,7 +117,7 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
 
           {menuOpen && (
             <div
-              className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border border-[#E5E4E0] bg-white py-1 shadow-lg"
+              className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] py-1 shadow-lg"
               role="menu"
             >
               <button
@@ -154,7 +154,7 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
       </div>
 
       {/* Underline tab bar */}
-      <div className="mb-6 border-b border-[#E5E4E0]" role="tablist" aria-label="Client detail tabs">
+      <div className="mb-6 border-b border-[var(--grey-100)]" role="tablist" aria-label="Client detail tabs">
         <div className="flex gap-6">
           {TABS.map((tab) => (
             <button
@@ -171,7 +171,7 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
             >
               {tab.label}
               {activeTab === tab.id && (
-                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[#424242]" />
+                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[var(--grey-700)]" />
               )}
             </button>
           ))}
@@ -193,7 +193,7 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
             <ConsultantCard orgId={orgId} />
 
             {/* Quick Actions */}
-            <nav aria-label="Quick actions" className="rounded-xl border border-[#E5E4E0] bg-white p-6">
+            <nav aria-label="Quick actions" className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
                 Quick Actions
               </h3>
@@ -208,14 +208,14 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
                 <button
                   type="button"
                   onClick={() => setActiveTab('results')}
-                  className="w-full rounded-lg border border-[#E5E4E0] px-4 py-2 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
+                  className="w-full rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
                 >
                   View Results
                 </button>
                 <button
                   type="button"
                   onClick={() => setEditModalOpen(true)}
-                  className="w-full rounded-lg border border-[#E5E4E0] px-4 py-2 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
+                  className="w-full rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
                 >
                   Edit Client Info
                 </button>

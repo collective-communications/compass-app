@@ -66,7 +66,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
           onBlur={() => setEmailTouched(true)}
           disabled={isLoading}
           aria-invalid={emailTouched && !emailValid ? true : undefined}
-          className="rounded-lg border border-[var(--grey-300)] bg-white px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
           placeholder="you@example.com"
         />
         {emailTouched && !emailValid && (
@@ -90,7 +90,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           disabled={isLoading}
-          className="rounded-lg border border-[var(--grey-300)] bg-white px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
           placeholder="Enter your password"
         />
       </div>

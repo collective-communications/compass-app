@@ -51,9 +51,9 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] rounded-xl border border-[#E5E4E0] bg-white p-6 sm:p-8">
+      <div className="w-full max-w-[600px] rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
         {/* Greeting and survey info */}
-        <h1 className="mb-2 text-2xl font-semibold text-[#212121]">Hello.</h1>
+        <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Hello.</h1>
 
         <p className="mb-4 text-[#616161]">
           {survey.settings?.welcomeMessage ??
@@ -68,20 +68,20 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
         </div>
 
         {/* Privacy notice */}
-        <div className="mb-8 rounded-lg bg-[#F5F5F5] px-4 py-3">
-          <p className="text-sm text-[#424242]">
+        <div className="mb-8 rounded-lg bg-[var(--grey-50)] px-4 py-3">
+          <p className="text-sm text-[var(--grey-700)]">
             Your responses are anonymous and confidential. Individual answers are never shared with
             your organization.
           </p>
         </div>
 
         {/* Divider */}
-        <hr className="mb-6 border-[#E5E4E0]" />
+        <hr className="mb-6 border-[var(--grey-100)]" />
 
         {/* Metadata form */}
         {isConfigLoading || !metadataConfig ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[#E5E4E0] border-t-[#0A3B4F]" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[#0A3B4F]" />
           </div>
         ) : (
           <MetadataForm

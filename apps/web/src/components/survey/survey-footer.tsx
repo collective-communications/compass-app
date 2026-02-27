@@ -48,7 +48,7 @@ export function SurveyFooter({ onHelpClick }: SurveyFooterProps): React.ReactEle
   }, []);
 
   return (
-    <footer className="border-t border-[var(--grey-100)] bg-white">
+    <footer className="border-t border-[var(--grey-100)] bg-[var(--grey-50)]">
       <div className="mx-auto flex max-w-[600px] items-center justify-center gap-4 px-4 py-3">
         <button
           type="button"

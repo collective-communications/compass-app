@@ -28,8 +28,8 @@ export function ResponseList({
 
   if (!hasAnyResponses) {
     return (
-      <div className="rounded-[10px] border border-[#E5E4E0] bg-white px-6 py-10 text-center">
-        <p className="text-sm text-[#757575]">
+      <div className="rounded-[10px] border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-10 text-center">
+        <p className="text-sm text-[var(--grey-500)]">
           No open-ended responses were collected in this survey.
         </p>
       </div>
@@ -38,14 +38,14 @@ export function ResponseList({
 
   if (responses.length === 0) {
     return (
-      <div className="rounded-[10px] border border-[#E5E4E0] bg-white px-6 py-10 text-center">
-        <p className="mb-3 text-sm text-[#757575]">
+      <div className="rounded-[10px] border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-10 text-center">
+        <p className="mb-3 text-sm text-[var(--grey-500)]">
           No responses match your filters. Try adjusting your search or removing filters.
         </p>
         <button
           type="button"
           onClick={onClearFilters}
-          className="text-sm font-medium text-[#424242] underline hover:text-[#212121]"
+          className="text-sm font-medium text-[var(--grey-700)] underline hover:text-[var(--grey-900)]"
         >
           Clear all filters
         </button>
@@ -62,7 +62,7 @@ export function ResponseList({
         <button
           type="button"
           onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
-          className="mx-auto rounded-full border border-[#E5E4E0] bg-white px-6 py-2 text-sm font-medium text-[#424242] hover:bg-[#F5F5F5]"
+          className="mx-auto rounded-full border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-2 text-sm font-medium text-[var(--grey-700)] hover:bg-[var(--grey-50)]"
         >
           Load more
         </button>

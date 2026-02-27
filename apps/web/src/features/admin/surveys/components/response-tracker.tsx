@@ -44,7 +44,7 @@ export function ResponseTracker({
   const maxDeptCount = Math.max(...departmentBreakdown.map((d) => d.count), 1);
 
   return (
-    <div className="rounded-lg border border-[#E5E4E0] bg-white p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       {/* Header with connection status */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[var(--grey-900)]">Responses</h3>
@@ -88,7 +88,7 @@ export function ResponseTracker({
 
       {/* Department breakdown */}
       {departmentBreakdown.length > 0 && (
-        <div className="mt-5 border-t border-[#E5E4E0] pt-4">
+        <div className="mt-5 border-t border-[var(--grey-100)] pt-4">
           <p className="text-xs font-medium text-[var(--grey-700)]">By Department</p>
           <div className="mt-3 flex flex-col gap-2.5">
             {departmentBreakdown.map((dept) => (

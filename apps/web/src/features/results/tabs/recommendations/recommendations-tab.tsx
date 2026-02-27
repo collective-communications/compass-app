@@ -72,11 +72,11 @@ export function RecommendationsInsightsContent(): ReactElement {
 function LoadingSkeleton(): ReactElement {
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-10 animate-pulse rounded-lg bg-[#F5F5F5]" />
+      <div className="h-10 animate-pulse rounded-lg bg-[var(--grey-50)]" />
       {Array.from({ length: 3 }, (_, i) => (
         <div
           key={i}
-          className="h-28 animate-pulse rounded-lg border border-[#E5E4E0] bg-white"
+          className="h-28 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]"
         />
       ))}
     </div>
