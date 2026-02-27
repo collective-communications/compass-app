@@ -15,7 +15,10 @@ interface RecommendationRow {
   dimension_code: string;
   severity: string;
   title: string;
-  description: string;
+  body: string;
+  actions: string[];
+  ccc_service_link: string | null;
+  trust_ladder_link: string | null;
   priority: number;
 }
 
@@ -25,7 +28,10 @@ function transformRows(rows: RecommendationRow[]): Recommendation[] {
     dimensionCode: row.dimension_code as DimensionCode,
     severity: row.severity as RiskSeverity,
     title: row.title,
-    description: row.description,
+    body: row.body,
+    actions: Array.isArray(row.actions) ? row.actions : [],
+    cccServiceLink: row.ccc_service_link,
+    trustLadderLink: row.trust_ladder_link,
     priority: row.priority,
   }));
 }
@@ -36,7 +42,7 @@ export function useRecommendations(surveyId: string): UseQueryResult<Recommendat
     queryFn: async () => {
       const { data, error } = await supabase
         .from('recommendations')
-        .select('*')
+        .select('id, dimension_code, severity, title, body, actions, ccc_service_link, trust_ladder_link, priority')
         .eq('survey_id', surveyId)
         .order('priority', { ascending: true });
 

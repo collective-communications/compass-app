@@ -12,7 +12,7 @@
  * URL search params: segmentType, segmentValue.
  */
 
-import { useState, useMemo, useCallback, type ReactElement } from 'react';
+import { useState, useMemo, useCallback, useEffect, type ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
 import type { SegmentType } from '@compass/scoring';
 import { useOverallScores } from '../../hooks/use-overall-scores';
@@ -32,13 +32,15 @@ const DEFAULT_SEGMENT_TYPE: SegmentType = 'department';
 
 interface GroupsTabProps {
   surveyId: string;
+  initialSegmentType?: SegmentType;
+  initialSegmentValue?: string;
   /** Content rendered into the insights panel slot. Provided via render prop. */
   insightsRef?: (node: ReactElement | null) => void;
 }
 
-export function GroupsTab({ surveyId }: GroupsTabProps): ReactElement {
-  const [segmentType, setSegmentType] = useState<SegmentType>(DEFAULT_SEGMENT_TYPE);
-  const [segmentValue, setSegmentValue] = useState<string>(ALL_VALUE);
+export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }: GroupsTabProps): ReactElement {
+  const [segmentType, setSegmentType] = useState<SegmentType>(initialSegmentType ?? DEFAULT_SEGMENT_TYPE);
+  const [segmentValue, setSegmentValue] = useState<string>(initialSegmentValue ?? ALL_VALUE);
 
   const isAllSelected = segmentValue === ALL_VALUE;
 
@@ -74,6 +76,7 @@ export function GroupsTab({ surveyId }: GroupsTabProps): ReactElement {
         segmentType: 'overall',
         segmentValue: 'all',
         dimensionCode: dim,
+        isMasked: false,
         score: overallScores[dim].score,
         rawScore: overallScores[dim].rawScore,
         responseCount: overallScores[dim].responseCount,
@@ -109,10 +112,8 @@ export function GroupsTab({ surveyId }: GroupsTabProps): ReactElement {
     }
 
     /**
-     * The safe_segment_scores view returns score: null when below threshold.
-     * Since our DimensionScoreRow types score as number, the Supabase client
-     * will coerce null to 0 or the row may be omitted entirely.
-     * A segment is below threshold if it has no rows or responseCount < 1.
+     * The safe_segment_scores view sets is_masked = true when below threshold.
+     * A segment is below threshold if it has no rows or all rows are masked.
      */
     for (const value of segmentValues) {
       const rows = byValue.get(value);
@@ -120,8 +121,8 @@ export function GroupsTab({ surveyId }: GroupsTabProps): ReactElement {
         belowSet.add(value);
         continue;
       }
-      const allBelowThreshold = rows.every((r) => r.responseCount === 0);
-      if (allBelowThreshold) {
+      const allMasked = rows.every((r) => r.isMasked);
+      if (allMasked) {
         belowSet.add(value);
       }
     }
@@ -131,6 +132,19 @@ export function GroupsTab({ surveyId }: GroupsTabProps): ReactElement {
 
   /** Whether the currently selected segment is below anonymity threshold. */
   const isSelectedBelowThreshold = !isAllSelected && belowThresholdValues.has(segmentValue);
+
+  // ── URL sync ────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('segmentType', segmentType);
+    if (segmentValue === ALL_VALUE) {
+      url.searchParams.delete('segmentValue');
+    } else {
+      url.searchParams.set('segmentValue', segmentValue);
+    }
+    window.history.replaceState(null, '', url.toString());
+  }, [segmentType, segmentValue]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 

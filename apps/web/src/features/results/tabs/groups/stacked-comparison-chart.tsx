@@ -68,7 +68,7 @@ export function StackedComparisonChart({
       dimMap = new Map();
       dataMap.set(row.dimensionCode, dimMap);
     }
-    dimMap.set(row.segmentValue, row.score);
+    dimMap.set(row.segmentValue, row.score ?? 0);
   }
 
   /** Assign colours to segment values. */

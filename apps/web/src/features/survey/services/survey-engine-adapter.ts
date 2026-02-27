@@ -54,14 +54,15 @@ export function createSurveyEngineAdapter(): Pick<
 
       // Check survey status
       if (survey.status === 'closed' || survey.status === 'archived') {
-        return { status: 'closed', message: `This survey closed on ${formatDate(survey.closes_at)}.` };
+        return { status: 'closed', message: `This survey closed on ${formatDate(survey.closes_at)}.`, closesAt: survey.closes_at };
       }
 
       // Check if survey has not opened yet
       if (survey.opens_at && new Date(survey.opens_at) > new Date()) {
         return {
-          status: 'expired',
+          status: 'not_yet_open',
           message: `This survey opens on ${formatDate(survey.opens_at)}.`,
+          opensAt: survey.opens_at,
         };
       }
 
@@ -168,7 +169,7 @@ export function createSurveyEngineAdapter(): Pick<
     async getQuestions(surveyId: string): Promise<QuestionWithDimension[]> {
       const { data, error } = await supabase
         .from('questions')
-        .select('*, question_dimensions(id, question_id, dimension_id, weight)')
+        .select('*, question_dimensions(question_id, dimension_id, weight)')
         .eq('survey_id', surveyId)
         .order('order_index', { ascending: true });
 

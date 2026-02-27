@@ -18,7 +18,7 @@ import { useResumeSession } from '../features/survey/hooks/use-resume-session';
 import { useSubmitResponse } from '../features/survey/hooks/use-submit-response';
 import { useAnswerStore } from '../features/survey/stores/answer-store';
 import { SessionCookieManager } from '../features/survey/lib/session-cookie';
-import { InvalidTokenScreen, SurveyClosedScreen, SurveyNotOpenScreen, AlreadyCompletedScreen } from '../features/survey/components/edge-states';
+import { InvalidTokenScreen, SurveyClosedScreen, SurveyNotOpenScreen, AlreadyCompletedScreen, DeploymentExpiredScreen } from '../features/survey/components/edge-states';
 import { WelcomeScreen } from '../features/survey/components/welcome-screen';
 import { WelcomeBackScreen } from '../features/survey/components/welcome-back-screen';
 import { QuestionScreen } from '../features/survey/components/question-screen';
@@ -98,7 +98,15 @@ const surveyLayoutRoute = createRoute({
     if (resolution.status === 'expired') {
       return (
         <SurveyShell orgName="">
-          <SurveyNotOpenScreen />
+          <DeploymentExpiredScreen />
+        </SurveyShell>
+      );
+    }
+
+    if (resolution.status === 'not_yet_open') {
+      return (
+        <SurveyShell orgName="">
+          <SurveyNotOpenScreen opensDate={resolution.opensAt} />
         </SurveyShell>
       );
     }
@@ -106,7 +114,7 @@ const surveyLayoutRoute = createRoute({
     if (resolution.status === 'closed') {
       return (
         <SurveyShell orgName="">
-          <SurveyClosedScreen />
+          <SurveyClosedScreen closedDate={resolution.closesAt} />
         </SurveyShell>
       );
     }

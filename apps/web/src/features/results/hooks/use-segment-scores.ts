@@ -15,9 +15,10 @@ interface SafeSegmentScoreRow {
   segment_type: string;
   segment_value: string;
   dimension_code: string;
-  score: number;
-  raw_score: number;
-  response_count: number;
+  is_masked: boolean;
+  score: number | null;
+  raw_score: number | null;
+  response_count: number | null;
 }
 
 function transformRows(rows: SafeSegmentScoreRow[]): DimensionScoreRow[] {
@@ -26,6 +27,7 @@ function transformRows(rows: SafeSegmentScoreRow[]): DimensionScoreRow[] {
     segmentType: row.segment_type,
     segmentValue: row.segment_value,
     dimensionCode: row.dimension_code as DimensionCode,
+    isMasked: row.is_masked,
     score: row.score,
     rawScore: row.raw_score,
     responseCount: row.response_count,

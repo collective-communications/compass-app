@@ -50,7 +50,7 @@ export function SegmentComparisonCard({
   /** Build a lookup from segment rows. */
   const segmentScoreMap = new Map<DimensionCode, number>();
   for (const row of segmentRows) {
-    segmentScoreMap.set(row.dimensionCode, row.score);
+    segmentScoreMap.set(row.dimensionCode, row.score ?? 0);
   }
 
   return (

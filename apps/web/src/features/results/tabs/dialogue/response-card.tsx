@@ -8,6 +8,8 @@ import type { DialogueResponse } from '../../types';
 
 interface ResponseCardProps {
   response: DialogueResponse;
+  /** Reserved for future sentiment analysis integration. */
+  sentiment?: 'positive' | 'neutral' | 'negative';
 }
 
 /** Individual anonymized dialogue response card. */

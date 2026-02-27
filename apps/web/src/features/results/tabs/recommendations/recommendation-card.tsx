@@ -28,7 +28,7 @@ const DIMENSION_LABELS: Record<string, string> = {
 export function RecommendationCard({
   recommendation,
 }: RecommendationCardProps): ReactElement {
-  const { severity, title, description, priority, dimensionCode } = recommendation;
+  const { severity, title, body, actions, cccServiceLink, trustLadderLink, priority, dimensionCode } = recommendation;
   const borderColor = SEVERITY_COLORS[severity as SeverityLevel] ?? SEVERITY_COLORS.medium;
   const severityLabel = SEVERITY_LABELS[severity as SeverityLevel] ?? severity;
 
@@ -52,7 +52,40 @@ export function RecommendationCard({
       </span>
 
       <h3 className="mb-1 pr-12 text-base font-semibold text-[var(--grey-900)]">{title}</h3>
-      <p className="text-sm leading-relaxed text-[#616161]">{description}</p>
+      <p className="text-sm leading-relaxed text-[#616161]">{body}</p>
+
+      {actions.length > 0 && (
+        <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm leading-relaxed text-[var(--grey-700)]">
+          {actions.map((action, i) => (
+            <li key={i}>{action}</li>
+          ))}
+        </ol>
+      )}
+
+      {(cccServiceLink || trustLadderLink) && (
+        <div className="mt-3 flex flex-wrap gap-3 text-sm">
+          {cccServiceLink && (
+            <a
+              href={cccServiceLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--color-core)] hover:underline"
+            >
+              CC+C Service
+            </a>
+          )}
+          {trustLadderLink && (
+            <a
+              href={trustLadderLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[var(--color-core)] hover:underline"
+            >
+              Trust Ladder
+            </a>
+          )}
+        </div>
+      )}
     </article>
   );
 }

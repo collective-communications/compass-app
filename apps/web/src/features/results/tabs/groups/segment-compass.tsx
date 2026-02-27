@@ -33,7 +33,7 @@ interface SegmentCompassProps {
 function toCompassScores(rows: DimensionScoreRow[]): CompassDimensionScore[] {
   return rows.map((row) => ({
     dimension: row.dimensionCode,
-    score: row.score,
+    score: row.score ?? 0,
     color: DIMENSION_COLORS[row.dimensionCode],
     label: DIMENSION_LABELS[row.dimensionCode],
   }));
