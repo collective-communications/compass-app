@@ -47,7 +47,7 @@ export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactEl
 
             <div className="mt-3 flex flex-col gap-1 text-sm text-[var(--grey-600)]">
               {organization.industry && <span>{organization.industry}</span>}
-              {organization.employeeCount !== null && (
+              {organization.employeeCount != null && (
                 <span>{organization.employeeCount.toLocaleString()} employees</span>
               )}
             </div>
