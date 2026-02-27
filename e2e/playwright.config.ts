@@ -41,10 +41,17 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'chromium',
+      name: 'chromium-survey',
+      testDir: './tests/survey',
+      fullyParallel: false,
       use: { ...devices['Desktop Chrome'] },
       dependencies: ['auth-setup'],
-      testIgnore: /auth\.setup\.ts/,
+    },
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+      dependencies: ['auth-setup', 'chromium-survey'],
+      testIgnore: [/auth\.setup\.ts/, /survey\//],
     },
     ...(isCI
       ? [

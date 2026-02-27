@@ -19,6 +19,7 @@ test('complete full survey with open-ended response', async ({ page }) => {
   const survey = new SurveyPage(page);
 
   await survey.goto(token);
+  await survey.fillMetadata();
   await survey.startButton.click();
   await survey.answerAllLikertQuestions();
 
@@ -35,6 +36,7 @@ test('complete survey skipping open-ended', async ({ page }) => {
   const survey = new SurveyPage(page);
 
   await survey.goto(token);
+  await survey.fillMetadata();
   await survey.startButton.click();
   await survey.answerAllLikertQuestions();
 

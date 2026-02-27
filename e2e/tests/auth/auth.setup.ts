@@ -7,7 +7,7 @@ const TEST_ADMIN_PASSWORD = 'Test1234!';
 const SEED_ORG_ID = '00000000-0000-0000-0000-000000000001'; // CCC org
 
 setup('authenticate as admin', async ({ page }) => {
-  await ensureTestUser(TEST_ADMIN_EMAIL, 'admin', SEED_ORG_ID, TEST_ADMIN_PASSWORD);
+  await ensureTestUser(TEST_ADMIN_EMAIL, 'ccc_admin', SEED_ORG_ID, TEST_ADMIN_PASSWORD);
 
   const loginPage = new LoginPage(page);
   await loginPage.goto();

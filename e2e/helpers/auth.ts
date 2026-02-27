@@ -11,7 +11,7 @@ interface TestUser {
  */
 export async function ensureTestUser(
   email: string,
-  role: 'admin' | 'client_admin' | 'viewer',
+  role: 'ccc_admin' | 'ccc_member' | 'client_exec' | 'client_director' | 'client_manager' | 'client_user',
   orgId: string,
   password = 'Test1234!',
 ): Promise<TestUser> {
@@ -43,10 +43,10 @@ export async function ensureTestUser(
   const { error: memberError } = await supabase.from('org_members').upsert(
     {
       user_id: userId,
-      org_id: orgId,
+      organization_id: orgId,
       role,
     },
-    { onConflict: 'user_id,org_id' },
+    { onConflict: 'organization_id,user_id' },
   );
 
   if (memberError) {
