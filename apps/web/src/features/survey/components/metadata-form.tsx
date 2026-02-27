@@ -72,30 +72,6 @@ export function MetadataForm({ config, onSubmit, isSubmitting }: MetadataFormPro
   const [location, setLocation] = useState<FieldState>(EMPTY_FIELD);
   const [tenure, setTenure] = useState<FieldState>(EMPTY_FIELD);
 
-  const allSelected = !!(department.value && role.value && location.value && tenure.value);
-
-  const handleSubmit = useCallback(
-    (e: React.FormEvent) => {
-      e.preventDefault();
-
-      // Touch all fields to show validation
-      setDepartment((prev) => ({ ...prev, touched: true }));
-      setRole((prev) => ({ ...prev, touched: true }));
-      setLocation((prev) => ({ ...prev, touched: true }));
-      setTenure((prev) => ({ ...prev, touched: true }));
-
-      if (!allSelected) return;
-
-      onSubmit({
-        department: department.value,
-        role: role.value,
-        location: location.value,
-        tenure: tenure.value,
-      });
-    },
-    [allSelected, department.value, role.value, location.value, tenure.value, onSubmit],
-  );
-
   const fields: Array<{
     label: string;
     options: string[];
@@ -110,6 +86,29 @@ export function MetadataForm({ config, onSubmit, isSubmitting }: MetadataFormPro
 
   // Filter out fields with no options (e.g. departments may be empty)
   const visibleFields = fields.filter((f) => f.options.length > 0);
+
+  const allSelected = visibleFields.every(({ field }) => !!field.value);
+
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
+
+      // Touch all visible fields to show validation
+      for (const { setter } of visibleFields) {
+        setter((prev) => ({ ...prev, touched: true }));
+      }
+
+      if (!allSelected) return;
+
+      onSubmit({
+        department: department.value,
+        role: role.value,
+        location: location.value,
+        tenure: tenure.value,
+      });
+    },
+    [allSelected, visibleFields, department.value, role.value, location.value, tenure.value, onSubmit],
+  );
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5" noValidate>
