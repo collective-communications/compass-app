@@ -5,6 +5,7 @@
  */
 
 import type { ReactElement } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { AppShell } from '../../../components/shells/app-shell';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useDashboardData } from '../hooks/use-dashboard-data';
@@ -24,6 +25,7 @@ export function DashboardPage(): ReactElement {
     organizationId: user?.organizationId ?? null,
   });
 
+  const navigate = useNavigate();
   const firstName = getFirstName(user?.fullName ?? null);
   const hasSurveys = activeSurvey !== null || previousSurveys.length > 0;
 
@@ -36,13 +38,11 @@ export function DashboardPage(): ReactElement {
   const resultsEnabled = activeSurvey?.survey.scoresCalculated ?? false;
 
   const handleNavigate = (path: string): void => {
-    // Navigation will be wired to the router in a later slice
-    window.location.href = path;
+    void navigate({ to: path });
   };
 
   const handleSelectSurvey = (surveyId: string): void => {
-    // Navigation will be wired to the router in a later slice
-    window.location.href = `/results/${surveyId}/compass`;
+    void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
   };
 
   return (

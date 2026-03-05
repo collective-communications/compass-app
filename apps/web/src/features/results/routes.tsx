@@ -18,6 +18,8 @@ import type { ReactElement } from 'react';
 import { createRoute, Outlet, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import type { SegmentType } from '@compass/scoring';
+import { useAuthStore } from '../../stores/auth-store';
+import { supabase } from '../../lib/supabase';
 import { AppShell } from '../../components/shells/app-shell';
 import { ResultsLayout } from './components/results-layout';
 import { ResultsSkeleton } from './components/results-skeleton';
@@ -190,6 +192,23 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
   const resultsLayoutRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/results/$surveyId',
+    beforeLoad: async () => {
+      const { user } = useAuthStore.getState();
+      if (!user) {
+        throw redirect({ to: '/auth/login' });
+      }
+      if (user.tier === 'tier_1') {
+        return;
+      }
+      const { data } = await supabase
+        .from('organizations')
+        .select('client_access_enabled')
+        .eq('id', user.organizationId)
+        .single();
+      if (!data?.client_access_enabled) {
+        throw redirect({ to: '/dashboard' });
+      }
+    },
     component: ResultsLayoutRoute,
   });
 
