@@ -53,7 +53,7 @@ export function ReportCard({
   onDelete,
   canDelete,
 }: ReportCardProps): ReactElement {
-  const isReady = report.status === 'complete';
+  const isReady = report.status === 'completed';
   const isFailed = report.status === 'failed';
   const isInProgress = report.status === 'queued' || report.status === 'generating';
 

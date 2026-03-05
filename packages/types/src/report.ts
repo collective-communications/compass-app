@@ -18,7 +18,7 @@ export type ReportFormat = (typeof ReportFormat)[keyof typeof ReportFormat];
 export const ReportGenerationStatus = {
   QUEUED: 'queued',
   GENERATING: 'generating',
-  COMPLETE: 'complete',
+  COMPLETED: 'completed',
   FAILED: 'failed',
 } as const;
 
@@ -66,7 +66,7 @@ export interface ReportStatus {
   status: ReportGenerationStatus;
   /** Generation progress percentage (0-100) */
   progress: number;
-  /** Signed S3 URL with 24h expiry, available when status is 'complete' */
+  /** Signed S3 URL with 24h expiry, available when status is 'completed' */
   fileUrl: string | null;
   fileSize: number | null;
   pageCount: number | null;
