@@ -8,12 +8,10 @@
     "e2e"
   ],
   "scripts": {
-    "dev": "supabase start && bun run --filter @compass/web dev",
-    "dev:web": "bun run --filter @compass/web dev",
-    "dev:stop": "supabase stop",
-    "db:reset": "supabase db reset",
+    "dev": "bun run --filter @compass/web dev",
+    "db:push": "supabase db push",
     "db:migrate": "supabase migration new",
-    "db:gen-types": "supabase gen types typescript --local > packages/types/src/database.ts",
+    "db:gen-types": "supabase gen types typescript --project-id gscaczmrruzymzdpzohr > packages/types/src/database.ts",
     "db:seed": "bun run scripts/seed-dev.ts",
     "db:clean": "bun run scripts/seed-dev.ts --clean",
     "build": "bun run --filter @compass/web build",

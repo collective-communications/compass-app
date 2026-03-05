@@ -15,13 +15,11 @@ export const supabase: SupabaseClient = new Proxy({} as SupabaseClient, {
       const key = optionalEnv('VITE_SUPABASE_ANON_KEY', '');
 
       if (!url || !key) {
-        console.warn(
-          '[supabase] VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are not set. Auth features will not work.',
+        throw new Error(
+          'VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set. Copy .env.example to .env.local and fill in your Supabase cloud credentials.',
         );
-        _client = createClient('http://localhost:54321', 'placeholder');
-      } else {
-        _client = createClient(url, key);
       }
+      _client = createClient(url, key);
     }
     return Reflect.get(_client, prop, receiver);
   },

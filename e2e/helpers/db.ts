@@ -8,7 +8,7 @@ export function createAdminClient(): SupabaseClient {
   const url =
     process.env.E2E_SUPABASE_URL ??
     process.env.VITE_SUPABASE_URL ??
-    'http://localhost:54321';
+    '';
 
   const serviceKey = process.env.E2E_SUPABASE_SERVICE_KEY;
 
