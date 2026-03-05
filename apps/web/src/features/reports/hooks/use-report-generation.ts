@@ -5,7 +5,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { ReportConfig, ReportGenerationStatus } from '@compass/types';
-import { createReport, getReportStatus } from '../services/report-api';
+import { createReport, getReportStatus, triggerReportGeneration } from '../services/report-api';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -62,7 +62,7 @@ export function useReportGeneration(): UseReportGenerationReturn {
           setStatus(report.status);
           setProgress(report.progress);
 
-          if (report.status === 'complete') {
+          if (report.status === 'completed') {
             setFileUrl(report.fileUrl);
             stopPolling();
           } else if (report.status === 'failed') {
@@ -99,6 +99,18 @@ export function useReportGeneration(): UseReportGenerationReturn {
       try {
         const { reportId } = await createReport(config);
         reportIdRef.current = reportId;
+
+        // Invoke edge function to start generation; failure is non-fatal
+        try {
+          await triggerReportGeneration(reportId);
+        } catch (invokeError) {
+          const message =
+            invokeError instanceof Error ? invokeError.message : 'Failed to start report generation.';
+          setStatus('failed');
+          setError(message);
+          return;
+        }
+
         startPolling(reportId);
       } catch (createError) {
         const message =
