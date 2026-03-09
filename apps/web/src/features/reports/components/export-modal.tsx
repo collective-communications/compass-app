@@ -110,7 +110,7 @@ export function ExportModal({
 
   // Derive modal state from generation status
   const modalState: ModalState =
-    generation.status === 'complete'
+    generation.status === 'completed'
       ? 'complete'
       : generation.isGenerating
         ? 'generating'

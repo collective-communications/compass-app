@@ -15,8 +15,11 @@
  */
 
 import type { ReactElement } from 'react';
-import { createRoute, Outlet, redirect, useNavigate, useParams } from '@tanstack/react-router';
+import { createRoute, Outlet, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
+import type { SegmentType } from '@compass/scoring';
+import { useAuthStore } from '../../stores/auth-store';
+import { supabase } from '../../lib/supabase';
 import { AppShell } from '../../components/shells/app-shell';
 import { ResultsLayout } from './components/results-layout';
 import { ResultsSkeleton } from './components/results-skeleton';
@@ -86,8 +89,13 @@ function ResultsLayoutRoute(): ReactElement {
     switch (activeTab) {
       case 'compass':
         return <CompassInsightsContent scores={scores} riskFlags={riskFlags} activeDimension="overview" />;
-      case 'groups':
-        return <GroupsInsights surveyId={surveyId} segmentValue="" isBelowThreshold={false} />;
+      case 'groups': {
+        const groupsSearch = (typeof window !== 'undefined'
+          ? Object.fromEntries(new URLSearchParams(window.location.search))
+          : {}) as GroupsSearch;
+        const sv = groupsSearch.segmentValue ?? '';
+        return <GroupsInsights surveyId={surveyId} segmentValue={sv} isBelowThreshold={!sv} />;
+      }
       case 'dialogue':
         return <DialogueInsightsContent />;
       case 'recommendations':
@@ -143,10 +151,22 @@ function SurveyRoute(): ReactElement {
   return <SurveyDimensionsTab surveyId={surveyId} />;
 }
 
+export interface GroupsSearch {
+  segmentType?: string;
+  segmentValue?: string;
+}
+
 /** Groups tab route component. */
 function GroupsRoute(): ReactElement {
   const { surveyId } = useParams({ strict: false }) as { surveyId: string };
-  return <GroupsTab surveyId={surveyId} />;
+  const search = useSearch({ strict: false }) as GroupsSearch;
+  return (
+    <GroupsTab
+      surveyId={surveyId}
+      initialSegmentType={search.segmentType as SegmentType | undefined}
+      initialSegmentValue={search.segmentValue}
+    />
+  );
 }
 
 /** Dialogue tab route component. */
@@ -172,6 +192,23 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
   const resultsLayoutRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/results/$surveyId',
+    beforeLoad: async () => {
+      const { user } = useAuthStore.getState();
+      if (!user) {
+        throw redirect({ to: '/auth/login' });
+      }
+      if (user.tier === 'tier_1') {
+        return;
+      }
+      const { data } = await supabase
+        .from('organizations')
+        .select('client_access_enabled')
+        .eq('id', user.organizationId)
+        .single();
+      if (!data?.client_access_enabled) {
+        throw redirect({ to: '/dashboard' });
+      }
+    },
     component: ResultsLayoutRoute,
   });
 
@@ -202,6 +239,10 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
   const groupsRoute = createRoute({
     getParentRoute: () => resultsLayoutRoute,
     path: '/groups',
+    validateSearch: (search: Record<string, unknown>): GroupsSearch => ({
+      segmentType: typeof search.segmentType === 'string' ? search.segmentType : undefined,
+      segmentValue: typeof search.segmentValue === 'string' ? search.segmentValue : undefined,
+    }),
     component: GroupsRoute,
   });
 

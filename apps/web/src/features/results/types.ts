@@ -18,9 +18,10 @@ export interface DimensionScoreRow {
   segmentType: string;
   segmentValue: string;
   dimensionCode: DimensionCode;
-  score: number;
-  rawScore: number;
-  responseCount: number;
+  isMasked: boolean;
+  score: number | null;
+  rawScore: number | null;
+  responseCount: number | null;
 }
 
 /** Row shape returned by the question_scores RPC or view. */
@@ -57,7 +58,10 @@ export interface Recommendation {
   dimensionCode: DimensionCode;
   severity: RiskFlag['severity'];
   title: string;
-  description: string;
+  body: string;
+  actions: string[];
+  cccServiceLink: string | null;
+  trustLadderLink: string | null;
   priority: number;
 }
 

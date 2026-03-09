@@ -6,7 +6,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { createRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { createRoute, Outlet, redirect, useNavigate } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { AppShell } from '../../components/shells/app-shell';
 import {
@@ -27,9 +27,6 @@ import { OrgSettingsPage } from './clients/pages/org-settings-page';
 import { SystemSettingsPage } from './settings';
 import { UsersPage } from './users';
 
-// TODO: Implement role-based route guard (admin role required).
-// Should redirect non-admin users to their tier home route.
-
 /**
  * Creates the admin route subtree.
  *
@@ -40,6 +37,12 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   const adminLayoutRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/admin',
+    beforeLoad: () => {
+      const { user } = useAuthStore.getState();
+      if (!user || user.tier !== 'tier_1') {
+        throw redirect({ to: '/dashboard' });
+      }
+    },
     component: function AdminLayout(): ReactElement {
       return (
         <AppShell>

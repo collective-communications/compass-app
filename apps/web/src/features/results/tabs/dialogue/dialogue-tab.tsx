@@ -12,6 +12,7 @@ import type { DialogueResponse } from '../../types';
 import { KeywordBubbles, type Keyword } from './keyword-bubbles';
 import { DialogueSearch } from './dialogue-search';
 import { DimensionFilterPills, type DimensionFilter } from './dimension-filter-pills';
+import { TopicFilter, deriveTopics } from './topic-filter';
 import { ResponseList } from './response-list';
 
 interface DialogueTabProps {
@@ -55,6 +56,7 @@ function extractKeywords(responses: DialogueResponse[]): Keyword[] {
 
 /** Dialogue tab — open-ended response explorer. */
 export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
   const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
   const [dimensionFilter, setDimensionFilter] = useState<DimensionFilter>(null);
   const [searchText, setSearchText] = useState('');
@@ -73,11 +75,16 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
     return map;
   }, [questionScores]);
 
+  const topics = useMemo(() => deriveTopics(allResponses ?? []), [allResponses]);
   const keywords = useMemo(() => extractKeywords(allResponses ?? []), [allResponses]);
 
   const filteredResponses = useMemo(() => {
     if (!allResponses) return [];
     let filtered = allResponses;
+
+    if (activeTopicId !== null) {
+      filtered = filtered.filter((r) => r.questionId === activeTopicId);
+    }
 
     if (dimensionFilter !== null) {
       filtered = filtered.filter(
@@ -102,9 +109,10 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
     }
 
     return filtered;
-  }, [allResponses, dimensionFilter, activeKeyword, searchText, questionDimensionMap]);
+  }, [allResponses, activeTopicId, dimensionFilter, activeKeyword, searchText, questionDimensionMap]);
 
   const clearFilters = useCallback(() => {
+    setActiveTopicId(null);
     setActiveKeyword(null);
     setDimensionFilter(null);
     setSearchText('');
@@ -114,6 +122,12 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
 
   return (
     <div className="flex flex-col gap-4">
+      <TopicFilter
+        topics={topics}
+        activeTopicId={activeTopicId}
+        onTopicChange={setActiveTopicId}
+      />
+
       <KeywordBubbles
         keywords={keywords}
         activeKeyword={activeKeyword}

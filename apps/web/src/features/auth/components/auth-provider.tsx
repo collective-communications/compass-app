@@ -1,4 +1,15 @@
-import { useEffect, type ReactNode } from 'react';
+/**
+ * AuthProvider — restores and manages Supabase auth sessions.
+ *
+ * Architecture:
+ *   1. onAuthStateChange (INITIAL_SESSION) provides the session from localStorage.
+ *   2. A separate useEffect resolves the full AuthUser from org_members.
+ *   3. DB queries are NEVER called inside onAuthStateChange (causes deadlock
+ *      per gotrue-js #762).
+ */
+
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import type { Session } from '@supabase/supabase-js';
 import { UserRole, getTierFromRole } from '@compass/types';
 import type { AuthUser, SessionContext } from '@compass/types';
 import { supabase } from '../../../lib/supabase';
@@ -8,7 +19,7 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-/** Resolve full AuthUser from Supabase session + org_members lookup */
+/** Resolve full AuthUser from org_members lookup */
 async function resolveUser(userId: string, email: string): Promise<AuthUser> {
   const { data: member } = await supabase
     .from('org_members')
@@ -31,7 +42,7 @@ async function resolveUser(userId: string, email: string): Promise<AuthUser> {
 }
 
 function buildSessionContext(
-  session: { access_token: string; refresh_token: string; expires_at?: number },
+  session: Session,
   user: AuthUser,
 ): SessionContext {
   return {
@@ -44,41 +55,66 @@ function buildSessionContext(
 
 export function AuthProvider({ children }: AuthProviderProps): React.ReactElement {
   const { setSession, clearSession, setInitialized, setError, isInitialized } = useAuthStore();
+  const [supabaseSession, setSupabaseSession] = useState<Session | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
+  const resolving = useRef(false);
 
+  // Step 1: Listen to Supabase auth events.
+  // INITIAL_SESSION fires synchronously on subscribe with the stored session.
+  // No Supabase DB calls here — just capture the session object.
   useEffect(() => {
-    // Restore session on mount — this is the primary initialization path.
-    // getSession() reads the persisted session from storage.
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        try {
-          const user = await resolveUser(session.user.id, session.user.email ?? '');
-          setSession(buildSessionContext(session, user));
-        } catch {
-          setError('Failed to resolve user profile');
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === 'INITIAL_SESSION') {
+          setSupabaseSession(session);
+          setSessionReady(true);
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setSupabaseSession(session);
+          if (!sessionReady) setSessionReady(true);
+        } else if (event === 'SIGNED_OUT') {
+          setSupabaseSession(null);
+          clearSession();
         }
-      }
-      setInitialized();
-    });
-
-    // Listen for subsequent auth changes (sign-in, sign-out, token refresh).
-    // Skip INITIAL_SESSION since getSession() above handles initialization.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'INITIAL_SESSION') return;
-
-      if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
-        try {
-          const user = await resolveUser(session.user.id, session.user.email ?? '');
-          setSession(buildSessionContext(session, user));
-        } catch {
-          setError('Failed to resolve user profile');
-        }
-      } else if (event === 'SIGNED_OUT') {
-        clearSession();
-      }
-    });
+      },
+    );
 
     return () => { subscription.unsubscribe(); };
-  }, [setSession, clearSession, setInitialized, setError]);
+  }, [clearSession, sessionReady]);
+
+  // Step 2: When we have a session, resolve the user profile from org_members.
+  // This runs OUTSIDE onAuthStateChange, avoiding the gotrue-js #762 deadlock.
+  useEffect(() => {
+    if (!sessionReady) return;
+
+    if (!supabaseSession?.user) {
+      // No session — mark initialized so the app can render (login page).
+      if (!useAuthStore.getState().isInitialized) {
+        setInitialized();
+      }
+      return;
+    }
+
+    // Prevent concurrent resolves (StrictMode double-mount).
+    if (resolving.current) return;
+    resolving.current = true;
+
+    const userId = supabaseSession.user.id;
+    const email = supabaseSession.user.email ?? '';
+
+    resolveUser(userId, email)
+      .then((user) => {
+        setSession(buildSessionContext(supabaseSession, user));
+      })
+      .catch(() => {
+        setError('Failed to resolve user profile');
+      })
+      .finally(() => {
+        resolving.current = false;
+        if (!useAuthStore.getState().isInitialized) {
+          setInitialized();
+        }
+      });
+  }, [supabaseSession, sessionReady, setSession, setInitialized, setError]);
 
   if (!isInitialized) {
     return (

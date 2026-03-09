@@ -253,7 +253,8 @@ export const DEFAULT_METADATA_CONFIG: MetadataConfig = {
 export type DeploymentResolution =
   | { status: 'valid'; deployment: Deployment; survey: Survey }
   | { status: 'expired'; message: string }
-  | { status: 'closed'; message: string }
+  | { status: 'not_yet_open'; message: string; opensAt: string | null }
+  | { status: 'closed'; message: string; closesAt: string | null }
   | { status: 'not_found'; message: string }
   | { status: 'already_completed'; message: string };
 
@@ -297,6 +298,7 @@ export interface SurveyEngineService {
   saveResponse(
     response: Pick<SurveyResponse, 'surveyId' | 'deploymentId' | 'answers' | 'metadata'> & {
       responseId?: string;
+      sessionToken?: string;
     },
   ): Promise<{ responseId: string }>;
 

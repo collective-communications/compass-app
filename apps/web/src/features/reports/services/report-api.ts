@@ -9,7 +9,7 @@ import { supabase } from '../../../lib/supabase';
 // ─── Queries ─────────────────────────────────────────────────────────────────
 
 /** Fetch the current status of a report by ID */
-export async function getReportStatus(reportId: string): Promise<ReportStatus> {
+export async function getReportStatus(reportId: string): Promise<ReportRow> {
   const { data, error } = await supabase
     .from('reports')
     .select('*')
@@ -22,7 +22,7 @@ export async function getReportStatus(reportId: string): Promise<ReportStatus> {
 }
 
 /** List all reports for a survey, most recent first */
-export async function listReports(surveyId: string): Promise<ReportStatus[]> {
+export async function listReports(surveyId: string): Promise<ReportRow[]> {
   const { data, error } = await supabase
     .from('reports')
     .select('*')
@@ -59,6 +59,15 @@ export async function createReport(config: ReportConfig): Promise<{ reportId: st
   return { reportId: data.id as string };
 }
 
+/** Trigger the generate-report edge function for a queued report */
+export async function triggerReportGeneration(reportId: string): Promise<void> {
+  const { error } = await supabase.functions.invoke('generate-report', {
+    body: { reportId },
+  });
+
+  if (error) throw error;
+}
+
 /** Delete a report record by ID */
 export async function deleteReport(reportId: string): Promise<void> {
   const { error } = await supabase
@@ -69,21 +78,39 @@ export async function deleteReport(reportId: string): Promise<void> {
   if (error) throw error;
 }
 
+// ─── Download ────────────────────────────────────────────────────────────────
+
+/** Generate a time-limited signed URL for downloading a report from Supabase Storage */
+export async function getReportDownloadUrl(storagePath: string): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from('reports')
+    .createSignedUrl(storagePath, 3600);
+
+  if (error) throw error;
+  return data.signedUrl;
+}
+
 // ─── Row Mapper ──────────────────────────────────────────────────────────────
 
-function mapReportRow(raw: Record<string, unknown>): ReportStatus {
+/** Extended report row that includes the storage path for signed URL generation */
+export interface ReportRow extends ReportStatus {
+  storagePath: string | null;
+}
+
+function mapReportRow(raw: Record<string, unknown>): ReportRow {
   return {
     id: raw['id'] as string,
     surveyId: raw['survey_id'] as string,
     format: raw['format'] as ReportFormat,
     status: raw['status'] as ReportStatus['status'],
     progress: (raw['progress'] as number) ?? 0,
-    fileUrl: (raw['file_url'] as string) ?? null,
+    fileUrl: null,
     fileSize: (raw['file_size'] as number) ?? null,
     pageCount: (raw['page_count'] as number) ?? null,
     sections: (raw['sections'] as string[]) ?? [],
     createdAt: raw['created_at'] as string,
     createdBy: (raw['created_by'] as string) ?? '',
     error: (raw['error'] as string) ?? null,
+    storagePath: (raw['storage_path'] as string) ?? null,
   };
 }

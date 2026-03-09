@@ -4,22 +4,21 @@
   "workspaces": [
     "apps/*",
     "packages/*",
-    "tooling/*"
+    "tooling/*",
+    "e2e"
   ],
   "scripts": {
-    "dev": "supabase start && bun run --filter @compass/web dev",
-    "dev:web": "bun run --filter @compass/web dev",
-    "dev:stop": "supabase stop",
-    "db:reset": "supabase db reset",
+    "dev": "bun run --filter @compass/web dev",
+    "db:push": "supabase db push",
     "db:migrate": "supabase migration new",
-    "db:gen-types": "supabase gen types typescript --local > packages/types/src/database.ts",
+    "db:gen-types": "supabase gen types typescript --project-id gscaczmrruzymzdpzohr > packages/types/src/database.ts",
     "db:seed": "bun run scripts/seed-dev.ts",
     "db:clean": "bun run scripts/seed-dev.ts --clean",
     "build": "bun run --filter @compass/web build",
     "lint": "eslint .",
     "typecheck": "tsc -b",
-    "test": "bun test",
-    "test:e2e": "echo 'e2e tests not yet configured'",
+    "test": "bun test apps packages",
+    "test:e2e": "bun run --filter @compass/e2e test",
     "build-storybook": "echo 'storybook not yet configured'",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
   },

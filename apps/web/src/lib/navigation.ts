@@ -9,9 +9,8 @@ export interface TabConfig {
 }
 
 const ADMIN_TABS: TabConfig[] = [
-  { id: 'clients', label: 'Clients', icon: 'building', href: '/clients' },
-  { id: 'insights', label: 'Insights', icon: 'trending-up', href: '/insights', disabled: true },
-  { id: 'settings', label: 'Settings', icon: 'settings', href: '/settings' },
+  { id: 'clients', label: 'Clients', icon: 'building', href: '/admin/clients' },
+  { id: 'settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
 ];
 
 const CLIENT_TABS: TabConfig[] = [

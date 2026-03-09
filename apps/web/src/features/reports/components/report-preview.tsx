@@ -5,11 +5,12 @@
  */
 
 import type { ReactElement } from 'react';
-import { Download, FileText } from 'lucide-react';
-import type { ReportStatus } from '@compass/types';
+import { Download, FileText, Loader2 } from 'lucide-react';
+import type { ReportRow } from '../services/report-api';
+import { useReportDownload } from '../hooks/use-report-download';
 
 interface ReportPreviewProps {
-  report: ReportStatus | null;
+  report: ReportRow | null;
 }
 
 /** Format bytes into a readable string */
@@ -42,6 +43,8 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
+  const { isLoading: isDownloading, error: downloadError, fetchUrl } = useReportDownload();
+
   if (report === null) {
     return (
       <aside
@@ -56,7 +59,16 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
     );
   }
 
-  const isReady = report.status === 'complete';
+  const isReady = report.status === 'completed';
+
+  async function handleDownload(): Promise<void> {
+    if (report?.storagePath === null || report?.storagePath === undefined) return;
+
+    const url = await fetchUrl(report.storagePath);
+    if (url !== null) {
+      window.open(url, '_blank');
+    }
+  }
 
   return (
     <aside
@@ -73,7 +85,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
             isReady ? 'text-[#2E7D32]' : report.status === 'failed' ? 'text-[#D32F2F]' : 'text-[var(--grey-500)]'
           }`}
         >
-          {report.status === 'complete' ? 'Ready' : report.status === 'failed' ? 'Failed' : 'In progress'}
+          {report.status === 'completed' ? 'Ready' : report.status === 'failed' ? 'Failed' : 'In progress'}
         </span>
       </div>
 
@@ -120,16 +132,28 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
         </p>
       )}
 
+      {/* Download error */}
+      {downloadError !== null && (
+        <p className="rounded-md bg-[#FFF5F5] px-3 py-2 text-xs text-[#D32F2F]">
+          {downloadError}
+        </p>
+      )}
+
       {/* Download button */}
-      {isReady && report.fileUrl !== null && (
-        <a
-          href={report.fileUrl}
-          download
-          className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
+      {isReady && report.storagePath !== null && (
+        <button
+          type="button"
+          onClick={() => void handleDownload()}
+          disabled={isDownloading}
+          className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2 disabled:opacity-50"
         >
-          <Download size={16} aria-hidden="true" />
-          Download {report.format.toUpperCase()}
-        </a>
+          {isDownloading ? (
+            <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+          ) : (
+            <Download size={16} aria-hidden="true" />
+          )}
+          {isDownloading ? 'Preparing...' : `Download ${report.format.toUpperCase()}`}
+        </button>
       )}
     </aside>
   );

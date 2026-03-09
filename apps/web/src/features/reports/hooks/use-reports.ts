@@ -4,12 +4,12 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { ReportStatus } from '@compass/types';
 import { listReports, deleteReport } from '../services/report-api';
+import type { ReportRow } from '../services/report-api';
 
 export interface UseReportsReturn {
   /** Reports for the active survey, newest first */
-  reports: ReportStatus[];
+  reports: ReportRow[];
   /** Whether the initial fetch is in progress */
   isLoading: boolean;
   /** Fetch error message, if any */
@@ -19,9 +19,9 @@ export interface UseReportsReturn {
   /** Remove a report by ID (optimistic) */
   remove: (reportId: string) => Promise<void>;
   /** The currently selected report for preview, if any */
-  selectedReport: ReportStatus | null;
+  selectedReport: ReportRow | null;
   /** Select a report for the preview panel */
-  selectReport: (report: ReportStatus | null) => void;
+  selectReport: (report: ReportRow | null) => void;
 }
 
 /**
@@ -29,10 +29,10 @@ export interface UseReportsReturn {
  * Pass null surveyId to skip fetching (e.g. before a survey is selected).
  */
 export function useReports(surveyId: string | null): UseReportsReturn {
-  const [reports, setReports] = useState<ReportStatus[]>([]);
+  const [reports, setReports] = useState<ReportRow[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedReport, setSelectedReport] = useState<ReportStatus | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
 
   const refresh = useCallback(async (): Promise<void> => {
     if (surveyId === null) {

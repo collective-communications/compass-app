@@ -54,14 +54,15 @@ export function createSurveyEngineAdapter(): Pick<
 
       // Check survey status
       if (survey.status === 'closed' || survey.status === 'archived') {
-        return { status: 'closed', message: `This survey closed on ${formatDate(survey.closes_at)}.` };
+        return { status: 'closed', message: `This survey closed on ${formatDate(survey.closes_at)}.`, closesAt: survey.closes_at };
       }
 
       // Check if survey has not opened yet
       if (survey.opens_at && new Date(survey.opens_at) > new Date()) {
         return {
-          status: 'expired',
+          status: 'not_yet_open',
           message: `This survey opens on ${formatDate(survey.opens_at)}.`,
+          opensAt: survey.opens_at,
         };
       }
 
@@ -129,20 +130,22 @@ export function createSurveyEngineAdapter(): Pick<
     async saveResponse(
       params: Pick<SurveyResponse, 'surveyId' | 'deploymentId' | 'answers' | 'metadata'> & {
         responseId?: string;
+        sessionToken?: string;
       },
     ): Promise<{ responseId: string }> {
-      const row = {
-        survey_id: params.surveyId,
-        deployment_id: params.deploymentId,
-        answers: params.answers,
-        metadata: params.metadata,
-        completed_at: null,
-      };
+      const metadataColumns = params.metadata
+        ? {
+            metadata_department: params.metadata.department ?? null,
+            metadata_role: params.metadata.role ?? null,
+            metadata_location: params.metadata.location ?? null,
+            metadata_tenure: params.metadata.tenure ?? null,
+          }
+        : {};
 
       if (params.responseId) {
         const { error } = await supabase
           .from('responses')
-          .update(row)
+          .update(metadataColumns)
           .eq('id', params.responseId);
 
         if (error) {
@@ -152,23 +155,30 @@ export function createSurveyEngineAdapter(): Pick<
         return { responseId: params.responseId };
       }
 
-      const { data, error } = await supabase
-        .from('responses')
-        .insert(row)
-        .select('id')
-        .single();
+      // Use the session token as the response ID so that
+      // sessionToken === responseId throughout the survey flow.
+      const responseId = params.sessionToken || crypto.randomUUID();
 
-      if (error || !data) {
-        throw new Error(`Failed to create response: ${error?.message ?? 'No data returned'}`);
+      const row = {
+        id: responseId,
+        deployment_id: params.deploymentId,
+        session_token: responseId,
+        ...metadataColumns,
+      };
+
+      const { error } = await supabase.from('responses').insert(row);
+
+      if (error) {
+        throw new Error(`Failed to create response: ${error.message}`);
       }
 
-      return { responseId: data.id as string };
+      return { responseId };
     },
 
     async getQuestions(surveyId: string): Promise<QuestionWithDimension[]> {
       const { data, error } = await supabase
         .from('questions')
-        .select('*, question_dimensions(id, question_id, dimension_id, weight)')
+        .select('*, question_dimensions(question_id, dimension_id, weight)')
         .eq('survey_id', surveyId)
         .order('order_index', { ascending: true });
 
@@ -214,9 +224,9 @@ export function createSurveyEngineAdapter(): Pick<
     async submitResponse(responseId: string): Promise<void> {
       const { error } = await supabase
         .from('responses')
-        .update({ completed_at: new Date().toISOString() })
+        .update({ is_complete: true, submitted_at: new Date().toISOString() })
         .eq('id', responseId)
-        .is('completed_at', null);
+        .eq('is_complete', false);
 
       if (error) {
         throw new Error(`Failed to submit response: ${error.message}`);
@@ -228,34 +238,22 @@ export function createSurveyEngineAdapter(): Pick<
       questionId: string,
       value: LikertValue | string,
     ): Promise<void> {
-      const { error } = await supabase.rpc('upsert_answer', {
-        p_response_id: responseId,
-        p_question_id: questionId,
-        p_value: value,
-      });
+      const isLikert = typeof value === 'number';
+
+      const row = {
+        response_id: responseId,
+        question_id: questionId,
+        ...(isLikert
+          ? { likert_value: value, open_text_value: null }
+          : { likert_value: null, open_text_value: value }),
+      };
+
+      const { error } = await supabase
+        .from('answers')
+        .upsert(row, { onConflict: 'response_id,question_id' });
 
       if (error) {
-        // Fallback: read-modify-write if RPC not available
-        const { data: existing, error: readError } = await supabase
-          .from('responses')
-          .select('answers')
-          .eq('id', responseId)
-          .single();
-
-        if (readError) {
-          throw new Error(`Failed to read response for answer update: ${readError.message}`);
-        }
-
-        const updatedAnswers = { ...(existing?.answers as Record<string, unknown>), [questionId]: value };
-
-        const { error: writeError } = await supabase
-          .from('responses')
-          .update({ answers: updatedAnswers })
-          .eq('id', responseId);
-
-        if (writeError) {
-          throw new Error(`Failed to save answer: ${writeError.message}`);
-        }
+        throw new Error(`Failed to save answer: ${error.message}`);
       }
     },
   };

@@ -28,11 +28,12 @@ export async function assembleReportPayload(config: ReportConfig): Promise<Repor
       supabase.from('surveys').select('*').eq('id', config.surveyId).single(),
       fetchOrganizationForSurvey(config.surveyId),
       supabase
-        .from('dimension_scores')
-        .select('*')
-        .eq('survey_id', config.surveyId),
+        .from('scores')
+        .select('*, dimensions!inner(code, name)')
+        .eq('survey_id', config.surveyId)
+        .is('segment_type', null),
       supabase
-        .from('segment_scores')
+        .from('safe_segment_scores')
         .select('*')
         .eq('survey_id', config.surveyId),
       supabase
@@ -67,8 +68,9 @@ export async function assembleReportPayload(config: ReportConfig): Promise<Repor
 
   for (const row of scoresResult.data ?? []) {
     const raw = row as Record<string, unknown>;
-    const code = raw['dimension_code'] as string;
-    const score = raw['average_score'] as number;
+    const dim = raw['dimensions'] as Record<string, unknown>;
+    const code = dim['code'] as string;
+    const score = raw['raw_score'] as number;
     dimensionScores[code] = score;
     dimensionPercentages[code] = ((score / 4) * 100);
     overallScore += score;
@@ -83,16 +85,16 @@ export async function assembleReportPayload(config: ReportConfig): Promise<Repor
   const segments: Record<string, Record<string, number>> = {};
   for (const row of segmentScoresResult.data ?? []) {
     const raw = row as Record<string, unknown>;
-    const segmentKey = raw['segment_key'] as string;
+    const segmentType = raw['segment_type'] as string;
     const segmentValue = raw['segment_value'] as string;
-    const score = raw['average_score'] as number;
-    const count = raw['response_count'] as number;
+    const score = raw['raw_score'] as number;
+    const isMasked = raw['is_masked'] as boolean;
 
-    if (count < ANONYMITY_THRESHOLD) {
+    if (isMasked || score == null) {
       continue;
     }
 
-    const key = `${segmentKey}:${segmentValue}`;
+    const key = `${segmentType}:${segmentValue}`;
     if (!segments[key]) {
       segments[key] = {};
     }
