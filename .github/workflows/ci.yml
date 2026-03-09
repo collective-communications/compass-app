@@ -42,9 +42,11 @@ jobs:
         run: bun run build
 
       - name: Install Playwright browsers
+        if: ${{ secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
         run: bunx playwright install --with-deps chromium
 
       - name: E2E tests
+        if: ${{ secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
         run: bun run test:e2e
         env:
           E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -54,7 +56,7 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: failure()
+        if: ${{ failure() && secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
         with:
           name: playwright-report
           path: e2e/playwright-report/
