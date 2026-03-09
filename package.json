@@ -17,7 +17,7 @@
     "build": "bun run --filter @compass/web build",
     "lint": "eslint .",
     "typecheck": "tsc -b",
-    "test": "bun test",
+    "test": "bun test apps packages",
     "test:e2e": "bun run --filter @compass/e2e test",
     "build-storybook": "echo 'storybook not yet configured'",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
