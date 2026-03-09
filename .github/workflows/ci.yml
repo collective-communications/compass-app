@@ -14,6 +14,8 @@ jobs:
   ci:
     name: Typecheck, Test, Build
     runs-on: ubuntu-latest
+    env:
+      HAS_E2E_SECRETS: ${{ secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -42,11 +44,11 @@ jobs:
         run: bun run build
 
       - name: Install Playwright browsers
-        if: ${{ secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
+        if: env.HAS_E2E_SECRETS == 'true'
         run: bunx playwright install --with-deps chromium
 
       - name: E2E tests
-        if: ${{ secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
+        if: env.HAS_E2E_SECRETS == 'true'
         run: bun run test:e2e
         env:
           E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
@@ -56,7 +58,7 @@ jobs:
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
-        if: ${{ failure() && secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
+        if: failure() && env.HAS_E2E_SECRETS == 'true'
         with:
           name: playwright-report
           path: e2e/playwright-report/
