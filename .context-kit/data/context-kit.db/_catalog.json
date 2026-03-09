@@ -1,0 +1,714 @@
+{
+  "tables": {
+    "coverage": {
+      "name": "coverage",
+      "schema": "[{\"name\":\"functions_covered\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"branches_covered\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"branches_total\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"lines_covered\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"lines_pct\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"functions_pct\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"functions_total\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"lines_total\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"branches_pct\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"file_coverage\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.022596Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "commits": {
+      "name": "commits",
+      "schema": "[{\"name\":\"files_changed\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"duration_ms\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"context_updated\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"deferral_ids\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"message\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"scope\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"subject\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"short_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"warning_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"deletions\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"additions\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"insight_ids\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.023896Z",
+      "version": 1,
+      "defaults": {
+        "context_updated": {
+          "Int64": 0
+        },
+        "deferral_ids": {
+          "Utf8": "[]"
+        },
+        "deletions": {
+          "Int64": 0
+        },
+        "insight_ids": {
+          "Utf8": "[]"
+        },
+        "duration_ms": {
+          "Int64": 0
+        },
+        "additions": {
+          "Int64": 0
+        },
+        "warning_count": {
+          "Int64": 0
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "workflow_history": {
+      "name": "workflow_history",
+      "schema": "[{\"name\":\"workflow_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"event_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"phase_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"timestamp\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"actor\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"details\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-03-04T19:04:35.974016Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "gate_evaluations": {
+      "name": "gate_evaluations",
+      "schema": "[{\"name\":\"integration_verified\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"run_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"context_available\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"tests_pass\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"dependencies_met\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"lint_clean\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"wave_number\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"passed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"no_regressions\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"evaluated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"blockers\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.019985Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "edge_suggestions": {
+      "name": "edge_suggestions",
+      "schema": "[{\"name\":\"confidence\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"layer\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"rejection_reason\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"edge_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"processed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"reasoning\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"processed_by\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.032786Z",
+      "version": 1,
+      "defaults": {
+        "status": {
+          "Utf8": "pending"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "module_embeddings": {
+      "name": "module_embeddings",
+      "schema": "[{\"name\":\"imports\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"summary\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"embedding\",\"nullable\":true,\"type\":\"FixedSizeList(Field { name: \\\"item\\\", data_type: Float32, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, 384)\"},{\"name\":\"exports\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.021467Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "git_metrics": {
+      "name": "git_metrics",
+      "schema": "[{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"pr_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"total_commits\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"avg_pr_size\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"conventional_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"avg_time_to_merge\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"recent_commits\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"conventional_pct\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"type_breakdown\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"analyzed_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.018906Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "capabilities": {
+      "name": "capabilities",
+      "schema": "[{\"name\":\"scope_out\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"layer\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"provides_to\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"archived_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"product_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"spec_content\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"depends_on\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"scope_in\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.018084Z",
+      "version": 28,
+      "defaults": {
+        "status": {
+          "Utf8": "draft"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "vacuum_state": {
+      "name": "vacuum_state",
+      "schema": "[{\"name\":\"fragments_after\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"last_vacuum_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"fragments_before\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"table_name\",\"nullable\":false,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.033521Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "table_name"
+      ]
+    },
+    "audit_reports": {
+      "name": "audit_reports",
+      "schema": "[{\"name\":\"categories\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"total_findings\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"critical_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"completed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"high_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"error\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"low_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"scope\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"results\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"medium_count\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.029834Z",
+      "version": 1,
+      "defaults": {
+        "low_count": {
+          "Int64": 0
+        },
+        "critical_count": {
+          "Int64": 0
+        },
+        "status": {
+          "Utf8": "in_progress"
+        },
+        "total_findings": {
+          "Int64": 0
+        },
+        "medium_count": {
+          "Int64": 0
+        },
+        "high_count": {
+          "Int64": 0
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "session_embeddings": {
+      "name": "session_embeddings",
+      "schema": "[{\"name\":\"outcomes\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"text_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"title\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"files_modified\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"key_decisions\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"objectives\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"tools_used\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"embedded_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.034391Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "session_id"
+      ]
+    },
+    "cost_entries": {
+      "name": "cost_entries",
+      "schema": "[{\"name\":\"timestamp\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"feature\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"model\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"output_tokens\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"input_tokens\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"slice_id\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"estimated_cost\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.018696Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "milestones": {
+      "name": "milestones",
+      "schema": "[{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_date\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"capability_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"phase\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"feature_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"product_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.030227Z",
+      "version": 1,
+      "defaults": {
+        "status": {
+          "Utf8": "pending"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "modules": {
+      "name": "modules",
+      "schema": "[{\"name\":\"imports\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"exports\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"layer\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"file_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.021744Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "workflow_instances": {
+      "name": "workflow_instances",
+      "schema": "[{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"context\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"started_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"definition_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"branch\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"current_phase\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"completed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"definition_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"}]",
+      "created_at": "2026-03-04T19:04:35.981099Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "workflow_patterns": {
+      "name": "workflow_patterns",
+      "schema": "[{\"name\":\"signature\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"confidence\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"last_seen\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"first_seen\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"examples_json\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"occurrence_count\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.030954Z",
+      "version": 1,
+      "defaults": {
+        "occurrence_count": {
+          "Int64": 1
+        },
+        "examples_json": {
+          "Utf8": "[]"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "embedding_stats": {
+      "name": "embedding_stats",
+      "schema": "[{\"name\":\"date\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"avg_latency_ms\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"processed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"queued\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"failed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"total_tokens\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.023114Z",
+      "version": 1,
+      "defaults": {
+        "processed": {
+          "Int64": 0
+        },
+        "queued": {
+          "Int64": 0
+        },
+        "avg_latency_ms": {
+          "Int64": 0
+        },
+        "failed": {
+          "Int64": 0
+        },
+        "total_tokens": {
+          "Int64": 0
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "sessions": {
+      "name": "sessions",
+      "schema": "[{\"name\":\"id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"started_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"ended_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.020568Z",
+      "version": 2,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "slices": {
+      "name": "slices",
+      "schema": "[{\"name\":\"delivers\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"feature\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"layer\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.026198Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "events": {
+      "name": "events",
+      "schema": "[{\"name\":\"tool_input\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"metadata\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"parent_event_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"project_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"tool_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"agent_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"message\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"tool_output\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"ts\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.027069Z",
+      "version": 9505,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "specs": {
+      "name": "specs",
+      "schema": "[{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"layer\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"purpose\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"frontmatter\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"title\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"content\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"feature_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"slice_number\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.026753Z",
+      "version": 58,
+      "defaults": {
+        "status": {
+          "Utf8": "draft"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "workflow_phase_state": {
+      "name": "workflow_phase_state",
+      "schema": "[{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"artifacts\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"current_step\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"entered_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"exited_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"step_data\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"workflow_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"phase_id\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-03-04T19:04:35.970244Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "findings": {
+      "name": "findings",
+      "schema": "[{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"title\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"raw_output\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"file_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"code_snippet\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"severity\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"subtype\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"resolved_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"tags\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"resolution\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line_end\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"agent_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"skill_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"resolved_by\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line_start\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.022845Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "files": {
+      "name": "files",
+      "schema": "[{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"content_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"extension\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"absolute_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"last_modified\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"language\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"size_bytes\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"line_count\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.020843Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "context_sections": {
+      "name": "context_sections",
+      "schema": "[{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"line_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"change_summary\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"changed_from_previous\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"token_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"content_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"generation_id\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.018449Z",
+      "version": 1,
+      "defaults": {
+        "changed_from_previous": {
+          "Int64": 0
+        },
+        "token_count": {
+          "Int64": 0
+        },
+        "line_count": {
+          "Int64": 0
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "patterns": {
+      "name": "patterns",
+      "schema": "[{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"occurrences\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"steps\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"success_rate\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"category\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.032403Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "products": {
+      "name": "products",
+      "schema": "[{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"problem_statement\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"archived_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"success_criteria\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_state\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"architecture_decisions\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.025928Z",
+      "version": 2,
+      "defaults": {
+        "status": {
+          "Utf8": "draft"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "vector_index_meta": {
+      "name": "vector_index_meta",
+      "schema": "[{\"name\":\"index_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"row_count_at_build\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"table_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"built_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"column_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"build_duration\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"config\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.021129Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "active_tasks": {
+      "name": "active_tasks",
+      "schema": "[{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"priority\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"ended_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"notes\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"tags\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"started_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"files\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.024706Z",
+      "version": 1,
+      "defaults": {
+        "priority": {
+          "Utf8": "medium"
+        },
+        "status": {
+          "Utf8": "active"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "embedding_queue": {
+      "name": "embedding_queue",
+      "schema": "[{\"name\":\"text_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"attempts\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"last_error\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_table\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_column\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"text\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"processed_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.019710Z",
+      "version": 1,
+      "defaults": {
+        "status": {
+          "Utf8": "pending"
+        },
+        "target_column": {
+          "Utf8": "embedding"
+        },
+        "attempts": {
+          "Int64": 0
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "graph_edges": {
+      "name": "graph_edges",
+      "schema": "[{\"name\":\"confidence\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"created_by\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"metadata\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source_method\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"edge_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source_type\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.025652Z",
+      "version": 2,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "task_handoffs": {
+      "name": "task_handoffs",
+      "schema": "[{\"name\":\"task_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"claimed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"completed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"priority\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"to_session\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"from_session\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"context\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.020266Z",
+      "version": 1,
+      "defaults": {
+        "status": {
+          "Utf8": "pending"
+        },
+        "priority": {
+          "Utf8": "medium"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "terminal_sessions": {
+      "name": "terminal_sessions",
+      "schema": "[{\"name\":\"metadata\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"pty_session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"exit_code\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"state\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"terminated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"cwd\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"claude_session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"started_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"last_activity_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.022040Z",
+      "version": 1,
+      "defaults": {
+        "state": {
+          "Utf8": "initializing"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "session_files": {
+      "name": "session_files",
+      "schema": "[{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"tool_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"lines_changed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"timestamp\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"file_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"event_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"operation\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.025355Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "symbol_embeddings": {
+      "name": "symbol_embeddings",
+      "schema": "[{\"name\":\"file_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"signature\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"embedding\",\"nullable\":true,\"type\":\"FixedSizeList(Field { name: \\\"item\\\", data_type: Float32, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, 384)\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"text_hash\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.028155Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "orchestration_runs": {
+      "name": "orchestration_runs",
+      "schema": "[{\"name\":\"wave_plan\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"waves_total\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"agents_completed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"error\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"team_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"plan_file\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"capability_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"agents_failed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"agents_total\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"current_wave\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"started_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"completed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"plan_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"feature\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"waves_completed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"feature_id\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.034799Z",
+      "version": 1,
+      "defaults": {
+        "agents_total": {
+          "Int64": 0
+        },
+        "waves_completed": {
+          "Int64": 0
+        },
+        "agents_completed": {
+          "Int64": 0
+        },
+        "current_wave": {
+          "Int64": 0
+        },
+        "status": {
+          "Utf8": "pending"
+        },
+        "waves_total": {
+          "Int64": 0
+        },
+        "agents_failed": {
+          "Int64": 0
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "symbols": {
+      "name": "symbols",
+      "schema": "[{\"name\":\"signature\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"module_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line_start\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"visibility\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"kind\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"file_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"parent_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line_end\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"doc_comment\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.033894Z",
+      "version": 1,
+      "defaults": {
+        "visibility": {
+          "Utf8": "private"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "insights": {
+      "name": "insights",
+      "schema": "[{\"name\":\"text_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"scope\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"decision_data\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line_start\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"code_snippet\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"files_involved\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"confidence\",\"nullable\":true,\"type\":\"Float64\"},{\"name\":\"problem_context\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"reinforcement_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"resolution\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"resolved_by\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"superseded_by\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"generalized_principle\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"tags\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"title\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"line_end\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"commit_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"investigation\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"severity\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.031995Z",
+      "version": 11,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "embedding_cache": {
+      "name": "embedding_cache",
+      "schema": "[{\"name\":\"access_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"accessed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"embedding\",\"nullable\":true,\"type\":\"FixedSizeList(Field { name: \\\"item\\\", data_type: Float32, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, 384)\"},{\"name\":\"model\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"text_hash\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.029414Z",
+      "version": 3,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "artifact_versions": {
+      "name": "artifact_versions",
+      "schema": "[{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"artifact_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"content\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"artifact_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"version\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"diff_from_previous\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.026476Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "expert_reports": {
+      "name": "expert_reports",
+      "schema": "[{\"name\":\"git_commit\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"medium_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"git_branch\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"markdown_content\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"summary\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"duration_ms\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"findings_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"score\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"skill_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"critical_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"info_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"audit_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"title\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"low_count\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"score_delta\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"high_count\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.027731Z",
+      "version": 1,
+      "defaults": {
+        "info_count": {
+          "Int64": 0
+        },
+        "low_count": {
+          "Int64": 0
+        },
+        "high_count": {
+          "Int64": 0
+        },
+        "medium_count": {
+          "Int64": 0
+        },
+        "critical_count": {
+          "Int64": 0
+        },
+        "findings_count": {
+          "Int64": 0
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "commit_session_links": {
+      "name": "commit_session_links",
+      "schema": "[{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"confidence\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"evidence_json\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"match_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"commit_sha\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.019482Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "session_artifact_links": {
+      "name": "session_artifact_links",
+      "schema": "[{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"evidence_json\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"score\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"artifact_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"artifact_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"feature_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"link_type\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.033150Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "work_items": {
+      "name": "work_items",
+      "schema": "[{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"severity\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"assigned_to\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"labels_json\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"run_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"team_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"archived_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"kind\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"description\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"parent_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"title\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"depends_on_json\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"number\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"size\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"started_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"github_issue_number\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"wave_number\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"completed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"delivers_json\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"capability_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"files_json\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"layer\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.027398Z",
+      "version": 115,
+      "defaults": {
+        "labels_json": {
+          "Utf8": "[]"
+        },
+        "status": {
+          "Utf8": "triage"
+        },
+        "severity": {
+          "Utf8": "medium"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "inventories": {
+      "name": "inventories",
+      "schema": "[{\"name\":\"scope\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"success_criteria\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"problem_statement\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"dependencies\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_state\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"feature_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"out_of_scope\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.022356Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "embeddings": {
+      "name": "embeddings",
+      "schema": "[{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"embedding\",\"nullable\":true,\"type\":\"FixedSizeList(Field { name: \\\"item\\\", data_type: Float32, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, 384)\"},{\"name\":\"dimension\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"entity_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"entity_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"graph_analyzed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source_text\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"model\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"text_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.030586Z",
+      "version": 1,
+      "defaults": {
+        "model": {
+          "Utf8": "all-MiniLM-L6-v2"
+        },
+        "dimension": {
+          "Int64": 384
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "audit_findings": {
+      "name": "audit_findings",
+      "schema": "[{\"name\":\"audit_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"finding_id\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.024322Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "agent_executions": {
+      "name": "agent_executions",
+      "schema": "[{\"name\":\"wave_number\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"task_ids\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"agent_name\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"run_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"territory\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"report\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"files_valid\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"error\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"deliverables\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"duration_ms\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"completed_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"started_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"tests_passed\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"slice_ids\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.025003Z",
+      "version": 1,
+      "defaults": {
+        "status": {
+          "Utf8": "pending"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "context_generations": {
+      "name": "context_generations",
+      "schema": "[{\"name\":\"status\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"sections_generated\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"error\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"duration_ms\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"output_hash\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"output_path\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"session_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"total_tokens\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.028632Z",
+      "version": 1,
+      "defaults": {
+        "sections_generated": {
+          "Int64": 0
+        },
+        "total_tokens": {
+          "Int64": 0
+        },
+        "status": {
+          "Utf8": "completed"
+        }
+      },
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "sync_state": {
+      "name": "sync_state",
+      "schema": "[{\"name\":\"id\",\"nullable\":true,\"type\":\"Int64\"},{\"name\":\"last_synced_file\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"updated_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"last_synced_line\",\"nullable\":true,\"type\":\"Int64\"}]",
+      "created_at": "2026-02-25T21:10:53.031301Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "workflow_decisions": {
+      "name": "workflow_decisions",
+      "schema": "[{\"name\":\"question\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"touchpoint_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"response\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":false,\"type\":\"Utf8\"},{\"name\":\"decided_by\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"workflow_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"phase_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"decided_at\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.023393Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": [
+        "id"
+      ]
+    },
+    "analysis_embeddings": {
+      "name": "analysis_embeddings",
+      "schema": "[{\"name\":\"id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"embedding\",\"nullable\":true,\"type\":\"FixedSizeList(Field { name: \\\"item\\\", data_type: Float32, nullable: false, dict_id: 0, dict_is_ordered: false, metadata: {} }, 384)\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"finding_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"text_hash\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.023641Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": []
+    },
+    "edges": {
+      "name": "edges",
+      "schema": "[{\"name\":\"source_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"edge_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"properties\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_id\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"target_type\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"created_at\",\"nullable\":true,\"type\":\"Utf8\"},{\"name\":\"source_id\",\"nullable\":true,\"type\":\"Utf8\"}]",
+      "created_at": "2026-02-25T21:10:53.031637Z",
+      "version": 1,
+      "defaults": {},
+      "primary_keys": []
+    }
+  },
+  "indexes": {},
+  "version": 1
+}
