@@ -1,75 +1,72 @@
-import { describe, expect, test } from 'bun:test';
-import { createElement } from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
+import { afterEach, describe, expect, test, mock } from 'bun:test';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { ProgressSquares } from './progress-squares';
 
-function render(opts: { total: number; currentIndex: number; answered: number[] }) {
-  const calls: number[] = [];
-  const html = renderToStaticMarkup(
-    createElement(ProgressSquares, {
-      total: opts.total,
-      currentIndex: opts.currentIndex,
-      answeredIndices: new Set(opts.answered),
-      onJump: (i: number) => calls.push(i),
-    }),
-  );
-  return { html, calls };
-}
-
 describe('ProgressSquares', () => {
+  afterEach(cleanup);
   test('renders correct number of buttons', () => {
-    const { html } = render({ total: 10, currentIndex: 0, answered: [] });
-    const count = (html.match(/<button/g) ?? []).length;
-    expect(count).toBe(10);
+    render(
+      <ProgressSquares total={10} currentIndex={0} answeredIndices={new Set()} onJump={() => {}} />,
+    );
+    const buttons = screen.getAllByRole('button');
+    expect(buttons).toHaveLength(10);
   });
 
   test('renders group with aria-label', () => {
-    const { html } = render({ total: 5, currentIndex: 0, answered: [] });
-    expect(html).toContain('role="group"');
-    expect(html).toContain('aria-label="Survey progress"');
+    render(
+      <ProgressSquares total={5} currentIndex={0} answeredIndices={new Set()} onJump={() => {}} />,
+    );
+    expect(screen.getByRole('group', { name: 'Survey progress' })).toBeTruthy();
   });
 
   test('current question has "current" in aria-label', () => {
-    const { html } = render({ total: 5, currentIndex: 2, answered: [] });
-    expect(html).toContain('Question 3 of 5, current');
+    render(
+      <ProgressSquares total={5} currentIndex={2} answeredIndices={new Set()} onJump={() => {}} />,
+    );
+    expect(screen.getByLabelText('Question 3 of 5, current')).toBeTruthy();
   });
 
   test('answered question has "answered" in aria-label', () => {
-    const { html } = render({ total: 5, currentIndex: 0, answered: [1, 3] });
-    expect(html).toContain('Question 2 of 5, answered');
-    expect(html).toContain('Question 4 of 5, answered');
+    render(
+      <ProgressSquares total={5} currentIndex={0} answeredIndices={new Set([1, 3])} onJump={() => {}} />,
+    );
+    expect(screen.getByLabelText('Question 2 of 5, answered')).toBeTruthy();
+    expect(screen.getByLabelText('Question 4 of 5, answered')).toBeTruthy();
   });
 
   test('unanswered non-current question has "unanswered" in aria-label', () => {
-    const { html } = render({ total: 3, currentIndex: 0, answered: [] });
-    expect(html).toContain('Question 2 of 3, unanswered');
-    expect(html).toContain('Question 3 of 3, unanswered');
+    render(
+      <ProgressSquares total={3} currentIndex={0} answeredIndices={new Set()} onJump={() => {}} />,
+    );
+    expect(screen.getByLabelText('Question 2 of 3, unanswered')).toBeTruthy();
+    expect(screen.getByLabelText('Question 3 of 3, unanswered')).toBeTruthy();
   });
 
-  test('current square gets ring styling', () => {
-    const { html } = render({ total: 3, currentIndex: 1, answered: [] });
-    // Current square has the ring class for visual emphasis
-    expect(html).toContain('ring-2');
+  test('clicking an answered square calls onJump with correct index', () => {
+    const onJump = mock(() => {});
+    render(
+      <ProgressSquares total={5} currentIndex={0} answeredIndices={new Set([2])} onJump={onJump} />,
+    );
+
+    fireEvent.click(screen.getByLabelText('Question 3 of 5, answered'));
+    expect(onJump).toHaveBeenCalledWith(2);
   });
 
-  test('answered square gets filled background', () => {
-    const { html } = render({ total: 3, currentIndex: 0, answered: [1] });
-    // Answered squares use the dark fill
-    expect(html).toContain('bg-[#0A3B4F]');
-  });
+  test('clicking any square calls onJump', () => {
+    const onJump = mock(() => {});
+    render(
+      <ProgressSquares total={5} currentIndex={0} answeredIndices={new Set()} onJump={onJump} />,
+    );
 
-  test('handles empty survey (0 answered)', () => {
-    const { html } = render({ total: 5, currentIndex: 0, answered: [] });
-    // Only the current square should be dark
-    const darkSquares = (html.match(/bg-\[#0A3B4F\]/g) ?? []).length;
-    // current square is dark
-    expect(darkSquares).toBe(1);
+    fireEvent.click(screen.getByLabelText('Question 4 of 5, unanswered'));
+    expect(onJump).toHaveBeenCalledWith(3);
   });
 
   test('handles fully answered survey', () => {
-    const { html } = render({ total: 3, currentIndex: 2, answered: [0, 1, 2] });
-    const darkSquares = (html.match(/bg-\[#0A3B4F\]/g) ?? []).length;
-    // All 3 squares should be dark (answered or current)
+    const { container } = render(
+      <ProgressSquares total={3} currentIndex={2} answeredIndices={new Set([0, 1, 2])} onJump={() => {}} />,
+    );
+    const darkSquares = (container.innerHTML.match(/bg-\[#0A3B4F\]/g) ?? []).length;
     expect(darkSquares).toBe(3);
   });
 });

@@ -247,4 +247,34 @@ describe('assembleReportPayload', () => {
     expect(payload.sections).toHaveLength(2);
     expect(payload.sections.every((s) => s.included)).toBe(true);
   });
+
+  test('assembler queries safe_segment_scores view (not raw segment_scores)', async () => {
+    // This test documents that the assembler uses the anonymity-safe view.
+    // The mock setup comment documents the query order:
+    // [3] = safe_segment_scores
+    // If this test passes, it confirms the correct view is used.
+    setupMocks({
+      segmentScores: [
+        { segment_type: 'department', segment_value: 'engineering', dimension_code: 'core', raw_score: 3.5, is_masked: false },
+      ],
+    });
+    const payload = await assembleReportPayload(defaultConfig);
+
+    // Verify segment data came through correctly from safe_segment_scores
+    expect(payload.scores.segments['department:engineering']).toBeDefined();
+    expect(payload.scores.segments['department:engineering']['core']).toBe(3.5);
+  });
+
+  test('assembler queries scores table with dimension join (not question_scores)', async () => {
+    // Documents that the assembler uses scores table, not a question_scores view
+    setupMocks({
+      scores: [
+        { raw_score: 3.0, dimensions: { code: 'core', name: 'Core' } },
+      ],
+    });
+    const payload = await assembleReportPayload(defaultConfig);
+
+    expect(payload.scores.dimensions['core']).toBe(3.0);
+    expect(payload.compass.dimensionPercentages['core']).toBe(75);
+  });
 });

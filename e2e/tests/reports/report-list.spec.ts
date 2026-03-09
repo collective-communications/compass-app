@@ -65,27 +65,50 @@ test.describe('Report list page — client_exec', () => {
   });
 });
 
-test.describe('Report list page — director', () => {
-  // Uses admin auth as proxy — in production the director role
-  // would be a separate test user. This verifies the role-based UI difference.
-  // Requires: a test user with director role. Using admin for now since
-  // admin maps to client_exec; a dedicated director user would be needed
-  // for a true negative test.
-  test.use({ storageState: 'e2e/.auth/admin.json' });
+test.describe('Report list page — director role', () => {
+  test.use({ storageState: 'e2e/.auth/director.json' });
 
-  test('director does not see Generate button on reports page', async ({ page }) => {
-    // NOTE: This test is a placeholder. The admin user is tier_1 (ccc_admin),
-    // not a director. A proper test requires a seeded director user.
-    // For now, we verify the page loads and the button visibility matches the role.
+  test('director does NOT see Generate Report button', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
-
-    // Admin/tier_1 users are always allowed. The Generate button visibility
-    // depends on the userRole prop mapped in the route. ccc_admin maps to
-    // client_exec, so the button WILL be visible for admin.
-    // A true director test needs a dedicated director test user in auth.setup.ts.
     await page.waitForLoadState('networkidle');
 
-    // Verify the page loaded (no redirect/error)
-    expect(page.url()).toContain('/reports/');
+    // Director should NOT see the generate/export button
+    const generateButton = page.getByRole('button', { name: /generate report|new export/i });
+    await expect(generateButton).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('director can view report list', async ({ page }) => {
+    await page.goto(`/reports/${SEED_SURVEY_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    // Should see either reports list or empty state
+    const emptyMessage = page.getByText(/no reports yet/i);
+    const reportList = page.getByRole('list', { name: /generated reports/i });
+    const hasContent = await emptyMessage.isVisible().catch(() => false)
+      || await reportList.isVisible().catch(() => false);
+    expect(hasContent).toBe(true);
+  });
+});
+
+test.describe('Report list page — manager role', () => {
+  test.use({ storageState: 'e2e/.auth/manager.json' });
+
+  test('manager does NOT see Generate Report button', async ({ page }) => {
+    await page.goto(`/reports/${SEED_SURVEY_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    const generateButton = page.getByRole('button', { name: /generate report|new export/i });
+    await expect(generateButton).not.toBeVisible({ timeout: 5000 });
+  });
+
+  test('manager can view report list', async ({ page }) => {
+    await page.goto(`/reports/${SEED_SURVEY_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    const emptyMessage = page.getByText(/no reports yet/i);
+    const reportList = page.getByRole('list', { name: /generated reports/i });
+    const hasContent = await emptyMessage.isVisible().catch(() => false)
+      || await reportList.isVisible().catch(() => false);
+    expect(hasContent).toBe(true);
   });
 });

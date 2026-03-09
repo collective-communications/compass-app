@@ -107,6 +107,11 @@ describe('computeSegmentedScores', () => {
     expect(() => computeSegmentedScores('survey-1', [])).toThrow(ScoringError);
   });
 
+  // Anonymity threshold (default: 5 responses minimum per segment) is enforced
+  // at the database level via the safe_segment_scores view, not in the scoring
+  // package. See Story: "Analyzes segments" acceptance criterion:
+  // "Anonymity at DB level — safe_segment_scores view enforces minimum response count"
+
   test('multiple responses with different segments produce more segment results', () => {
     const r1 = makeResponse({ responseId: 'r1' });
     const r2 = makeResponse({

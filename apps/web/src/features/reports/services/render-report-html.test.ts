@@ -90,4 +90,28 @@ describe('renderReportToHtml', () => {
     expect(html).toContain('<html');
     expect(html).toContain('</html>');
   });
+
+  test('renders all 6 section types when all included', () => {
+    const payload = makePayload();
+    const html = renderReportToHtml(payload);
+    // All 6 sections should produce content
+    // Verify the HTML contains section-specific content markers
+    expect(html).toContain('Acme Corp'); // Cover page uses org name
+    expect(html).toContain('The Connector'); // Compass overview uses archetype
+    expect(html).toContain('Improve Clarity'); // Recommendations section
+  });
+
+  test('section count matches ReportSectionId enum (6 sections)', () => {
+    // Verify the fixture uses all 6 section IDs
+    const payload = makePayload();
+    expect(payload.sections).toHaveLength(6);
+
+    const ids = payload.sections.map(s => s.id);
+    expect(ids).toContain(ReportSectionId.COVER);
+    expect(ids).toContain(ReportSectionId.EXECUTIVE_SUMMARY);
+    expect(ids).toContain(ReportSectionId.COMPASS_OVERVIEW);
+    expect(ids).toContain(ReportSectionId.DIMENSION_DEEP_DIVES);
+    expect(ids).toContain(ReportSectionId.SEGMENT_ANALYSIS);
+    expect(ids).toContain(ReportSectionId.RECOMMENDATIONS);
+  });
 });
