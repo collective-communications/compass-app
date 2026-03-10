@@ -66,7 +66,7 @@ describe('SurveyCard', () => {
   test('calls onClick with survey id when clicked', () => {
     const onClick = mock(() => {});
     render(<SurveyCard survey={makeSurvey({ id: 'survey-99' })} onClick={onClick} />);
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByText('Q1 Culture Assessment'));
     expect(onClick).toHaveBeenCalledWith('survey-99');
   });
 
