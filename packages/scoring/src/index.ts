@@ -24,6 +24,10 @@ export type { RiskSeverity, RiskFlag, RiskThresholds } from './risk-types.js';
 
 export { SEGMENT_TYPES, OVERALL_SEGMENT, segmentKey, groupResponsesBySegment, computeSegmentedScores } from './segments.js';
 
+export { calculateTrustLadderPosition } from './trust-ladder.js';
+
+export type { TrustRungStatus, TrustRungScore, TrustLadderResult } from './trust-ladder-types.js';
+
 export type {
   SegmentType,
   SegmentTypeWithOverall,

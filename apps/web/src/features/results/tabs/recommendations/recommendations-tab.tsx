@@ -51,11 +51,15 @@ export function RecommendationsTab({ surveyId }: RecommendationsTabProps): React
   );
 }
 
+interface RecommendationsInsightsContentProps {
+  surveyId: string;
+}
+
 /** Insights panel content for the Recommendations tab. */
-export function RecommendationsInsightsContent(): ReactElement {
+export function RecommendationsInsightsContent({ surveyId }: RecommendationsInsightsContentProps): ReactElement {
   return (
     <div className="flex flex-col gap-4">
-      <TrustLadderCard />
+      <TrustLadderCard surveyId={surveyId} />
       <ServiceLinksCard />
     </div>
   );

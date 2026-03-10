@@ -132,7 +132,7 @@ function ResultsLayoutRoute(): ReactElement {
       case 'dialogue':
         return <DialogueInsightsContent />;
       case 'recommendations':
-        return <RecommendationsInsightsContent />;
+        return <RecommendationsInsightsContent surveyId={surveyId} />;
       default:
         return undefined;
     }
