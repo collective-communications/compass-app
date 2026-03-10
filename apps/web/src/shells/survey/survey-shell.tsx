@@ -7,6 +7,8 @@ interface SurveyShellProps {
   orgName: string;
   /** Optional logo URL passed through to the header. */
   logoUrl?: string;
+  /** Optional callback to navigate to the save-progress screen. */
+  onSave?: () => void;
   /** Page content rendered inside the constrained content area. */
   children: React.ReactNode;
 }
@@ -17,7 +19,7 @@ interface SurveyShellProps {
  * Enforces structural anonymity: no user info, no navigation.
  * Content is constrained to 600px max-width and centered on all viewports.
  */
-export function SurveyShell({ orgName, logoUrl, children }: SurveyShellProps): React.ReactElement {
+export function SurveyShell({ orgName, logoUrl, onSave, children }: SurveyShellProps): React.ReactElement {
   const [_helpOpen, setHelpOpen] = useState(false);
 
   const handleHelpClick = useCallback((): void => {
@@ -26,7 +28,7 @@ export function SurveyShell({ orgName, logoUrl, children }: SurveyShellProps): R
 
   return (
     <div className="flex min-h-screen flex-col bg-[var(--grey-50)]">
-      <SurveyHeader orgName={orgName} logoUrl={logoUrl} />
+      <SurveyHeader orgName={orgName} logoUrl={logoUrl} onSave={onSave} />
 
       <main className="mx-auto w-full max-w-[600px] flex-1 px-4 py-6">
         {children}

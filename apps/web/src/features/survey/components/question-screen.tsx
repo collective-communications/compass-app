@@ -127,6 +127,14 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
 
   return (
     <div className="mx-auto flex max-w-[600px] flex-col gap-8 px-4 py-8">
+      {/* Progress squares — above question for orientation */}
+      <ProgressSquares
+        total={likertQuestions.length}
+        currentIndex={currentIndex}
+        answeredIndices={answeredIndices}
+        onJump={handleJump}
+      />
+
       {/* Question counter */}
       <div className="text-sm font-medium text-[var(--grey-500)]">
         Question {currentIndex + 1} of {likertQuestions.length}
@@ -158,14 +166,6 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
         isLastQuestion={isLast}
         onPrevious={goPrevious}
         onNext={goNext}
-      />
-
-      {/* Progress squares */}
-      <ProgressSquares
-        total={likertQuestions.length}
-        currentIndex={currentIndex}
-        answeredIndices={answeredIndices}
-        onJump={handleJump}
       />
     </div>
   );

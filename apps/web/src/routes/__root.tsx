@@ -62,6 +62,11 @@ const surveyLayoutRoute = createRoute({
   component: function SurveyLayout(): React.ReactElement {
     const { token } = surveyLayoutRoute.useParams();
     const { data: resolution, isLoading, error } = useDeployment(token);
+    const navigate = useNavigate();
+
+    const handleSave = useCallback(() => {
+      navigate({ to: '/s/$token/saved', params: { token } });
+    }, [navigate, token]);
 
     // While resolving the deployment token, show a loading spinner
     if (isLoading || !resolution) {
@@ -133,7 +138,7 @@ const surveyLayoutRoute = createRoute({
     const sessionToken = SessionCookieManager.getOrCreateSession(deployment.id);
 
     return (
-      <SurveyShell orgName={survey.title}>
+      <SurveyShell orgName={survey.title} onSave={handleSave}>
         <SurveyProvider value={{ deployment, survey, sessionToken }}>
           <SurveyLayoutInner />
         </SurveyProvider>

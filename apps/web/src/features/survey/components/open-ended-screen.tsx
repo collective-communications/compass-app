@@ -4,7 +4,7 @@
  */
 import { useState, type ReactNode } from 'react';
 
-const MAX_CHARS = 2000;
+const MAX_CHARS = 500;
 
 export interface OpenEndedScreenProps {
   /** Prompt text displayed above the textarea */
