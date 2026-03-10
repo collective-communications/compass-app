@@ -1,4 +1,5 @@
 import { useState, useRef, useId, type FormEvent } from 'react';
+import { Eye, EyeOff } from 'lucide-react';
 
 interface LoginFormProps {
   onSubmit: (email: string, password: string) => Promise<void>;
@@ -13,6 +14,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailTouched, setEmailTouched] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const passwordRef = useRef<HTMLInputElement>(null);
   const errorId = useId();
 
@@ -81,18 +83,29 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
         >
           Password
         </label>
-        <input
-          id="login-password"
-          ref={passwordRef}
-          type="password"
-          required
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          disabled={isLoading}
-          className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
-          placeholder="Enter your password"
-        />
+        <div className="relative">
+          <input
+            id="login-password"
+            ref={passwordRef}
+            type={showPassword ? 'text' : 'password'}
+            required
+            autoComplete="current-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={isLoading}
+            className="w-full rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 pr-10 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+            placeholder="Enter your password"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--grey-400)] hover:text-[var(--grey-600)] focus:outline-none"
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
       </div>
 
       <button

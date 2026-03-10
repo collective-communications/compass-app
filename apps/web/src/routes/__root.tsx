@@ -6,7 +6,7 @@ import { AppShell } from '../components/shells/app-shell';
 import { PublicShell } from '../components/shells/public-shell';
 import { BrandPanel, LoginForm, ForgotPasswordForm, SocialSignOnButtons } from '../features/auth/components';
 import { useAuth, usePasswordReset } from '../features/auth/hooks';
-import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Lock, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { createResultsRoutes } from '../features/results/routes';
 import { createAdminRoutes } from '../features/admin/routes';
@@ -384,8 +384,8 @@ const loginRoute = createRoute({
                 Sign in
               </h1>
 
-              <SocialSignOnButtons onSignIn={signInWithOAuth} isLoading={isLoading} />
               <LoginForm onSubmit={signInWithEmail} isLoading={isLoading} error={error} />
+              <SocialSignOnButtons onSignIn={signInWithOAuth} isLoading={isLoading} />
 
               <p className="mt-4 text-center">
                 <Link
@@ -491,7 +491,7 @@ const forgotPasswordRoute = createRoute({
               </div>
 
               <div className="mb-2 flex justify-center">
-                <Mail size={32} className="text-[var(--color-core)]" />
+                <Lock size={32} className="text-[var(--color-core)]" />
               </div>
 
               <h1
@@ -505,6 +505,27 @@ const forgotPasswordRoute = createRoute({
               </p>
 
               <ForgotPasswordForm onSubmit={requestReset} isLoading={isLoading} error={error} />
+
+              <div className="mt-6 rounded-lg border border-[var(--grey-200)] bg-[var(--grey-50)] p-4">
+                <p className="mb-2 text-sm font-medium text-[var(--grey-700)]">
+                  Didn&apos;t receive the email?
+                </p>
+                <ul className="list-disc pl-4 text-xs text-[var(--grey-500)] space-y-1">
+                  <li>Check your spam or junk folder</li>
+                  <li>Make sure you entered the correct email address</li>
+                  <li>Wait a few minutes and try again</li>
+                </ul>
+              </div>
+
+              <p className="mt-4 text-center text-sm text-[var(--grey-500)]">
+                Remember your password?{' '}
+                <Link
+                  to="/auth/login"
+                  className="text-[var(--color-core)] hover:underline"
+                >
+                  Sign in
+                </Link>
+              </p>
             </div>
           </div>
         </div>
