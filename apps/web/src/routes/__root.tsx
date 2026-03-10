@@ -3,6 +3,7 @@ import { createRootRoute, createRoute, Link, Outlet, useNavigate } from '@tansta
 import { type UserRole, QuestionType, getTierFromRole, getTierHomeRoute } from '@compass/types';
 import { SurveyShell } from '../shells/survey';
 import { AppShell } from '../components/shells/app-shell';
+import { PublicShell } from '../components/shells/public-shell';
 import { BrandPanel, LoginForm, ForgotPasswordForm, SocialSignOnButtons } from '../features/auth/components';
 import { useAuth, usePasswordReset } from '../features/auth/hooks';
 import { ArrowLeft, Mail, CheckCircle } from 'lucide-react';
@@ -370,32 +371,34 @@ const loginRoute = createRoute({
     const { isLoading, error, signInWithEmail, signInWithOAuth } = useAuth();
 
     return (
-      <div className="flex min-h-screen">
-        <BrandPanel />
+      <PublicShell>
+        <div className="flex flex-1">
+          <BrandPanel />
 
-        <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
-          <div className="w-full max-w-sm">
-            <h1
-              className="mb-8 text-center text-2xl font-bold text-[var(--grey-900)]"
-              style={{ fontFamily: 'var(--font-headings)' }}
-            >
-              Sign in
-            </h1>
-
-            <SocialSignOnButtons onSignIn={signInWithOAuth} isLoading={isLoading} />
-            <LoginForm onSubmit={signInWithEmail} isLoading={isLoading} error={error} />
-
-            <p className="mt-4 text-center">
-              <Link
-                to="/auth/forgot-password"
-                className="text-sm text-[var(--color-core)] hover:underline"
+          <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
+            <div className="w-full max-w-sm">
+              <h1
+                className="mb-8 text-center text-2xl font-bold text-[var(--grey-900)]"
+                style={{ fontFamily: 'var(--font-headings)' }}
               >
-                Forgot your password?
-              </Link>
-            </p>
+                Sign in
+              </h1>
+
+              <SocialSignOnButtons onSignIn={signInWithOAuth} isLoading={isLoading} />
+              <LoginForm onSubmit={signInWithEmail} isLoading={isLoading} error={error} />
+
+              <p className="mt-4 text-center">
+                <Link
+                  to="/auth/forgot-password"
+                  className="text-sm text-[var(--color-core)] hover:underline"
+                >
+                  Forgot your password?
+                </Link>
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </PublicShell>
     );
   },
 });
@@ -471,39 +474,41 @@ const forgotPasswordRoute = createRoute({
     const { requestReset, isLoading, error } = usePasswordReset();
 
     return (
-      <div className="flex min-h-screen">
-        <BrandPanel />
+      <PublicShell>
+        <div className="flex flex-1">
+          <BrandPanel />
 
-        <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
-          <div className="w-full max-w-sm">
-            <div className="mb-6">
-              <Link
-                to="/auth/login"
-                className="inline-flex items-center gap-1 text-sm text-[var(--color-core)] hover:underline"
+          <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
+            <div className="w-full max-w-sm">
+              <div className="mb-6">
+                <Link
+                  to="/auth/login"
+                  className="inline-flex items-center gap-1 text-sm text-[var(--color-core)] hover:underline"
+                >
+                  <ArrowLeft size={16} />
+                  Back to sign in
+                </Link>
+              </div>
+
+              <div className="mb-2 flex justify-center">
+                <Mail size={32} className="text-[var(--color-core)]" />
+              </div>
+
+              <h1
+                className="mb-2 text-center text-2xl font-bold text-[var(--grey-900)]"
+                style={{ fontFamily: 'var(--font-headings)' }}
               >
-                <ArrowLeft size={16} />
-                Back to sign in
-              </Link>
+                Reset your password
+              </h1>
+              <p className="mb-8 text-center text-sm text-[var(--grey-500)]">
+                Enter your email and we'll send you a link to reset your password.
+              </p>
+
+              <ForgotPasswordForm onSubmit={requestReset} isLoading={isLoading} error={error} />
             </div>
-
-            <div className="mb-2 flex justify-center">
-              <Mail size={32} className="text-[var(--color-core)]" />
-            </div>
-
-            <h1
-              className="mb-2 text-center text-2xl font-bold text-[var(--grey-900)]"
-              style={{ fontFamily: 'var(--font-headings)' }}
-            >
-              Reset your password
-            </h1>
-            <p className="mb-8 text-center text-sm text-[var(--grey-500)]">
-              Enter your email and we'll send you a link to reset your password.
-            </p>
-
-            <ForgotPasswordForm onSubmit={requestReset} isLoading={isLoading} error={error} />
           </div>
         </div>
-      </div>
+      </PublicShell>
     );
   },
 });
@@ -522,52 +527,54 @@ const forgotPasswordSentRoute = createRoute({
     const { email } = forgotPasswordSentRoute.useSearch();
 
     return (
-      <div className="flex min-h-screen">
-        <BrandPanel />
+      <PublicShell>
+        <div className="flex flex-1">
+          <BrandPanel />
 
-        <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
-          <div className="w-full max-w-sm text-center">
-            <div className="mb-4 flex justify-center">
-              <CheckCircle size={40} className="text-[var(--color-connection)]" />
+          <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
+            <div className="w-full max-w-sm text-center">
+              <div className="mb-4 flex justify-center">
+                <CheckCircle size={40} className="text-[var(--color-connection)]" />
+              </div>
+
+              <h1
+                className="mb-2 text-2xl font-bold text-[var(--grey-900)]"
+                style={{ fontFamily: 'var(--font-headings)' }}
+              >
+                Check your email
+              </h1>
+
+              {email && (
+                <p className="mb-6 text-sm text-[var(--grey-500)]">
+                  We sent a reset link to <span className="font-medium text-[var(--grey-700)]">{email}</span>
+                </p>
+              )}
+
+              <ol className="mb-8 space-y-3 text-left text-sm text-[var(--grey-600)]">
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">1</span>
+                  Open the email from Culture Compass
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">2</span>
+                  Click the reset link
+                </li>
+                <li className="flex gap-3">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">3</span>
+                  Choose a new password
+                </li>
+              </ol>
+
+              <Link
+                to="/auth/login"
+                className="inline-block text-sm text-[var(--color-core)] hover:underline"
+              >
+                Back to sign in
+              </Link>
             </div>
-
-            <h1
-              className="mb-2 text-2xl font-bold text-[var(--grey-900)]"
-              style={{ fontFamily: 'var(--font-headings)' }}
-            >
-              Check your email
-            </h1>
-
-            {email && (
-              <p className="mb-6 text-sm text-[var(--grey-500)]">
-                We sent a reset link to <span className="font-medium text-[var(--grey-700)]">{email}</span>
-              </p>
-            )}
-
-            <ol className="mb-8 space-y-3 text-left text-sm text-[var(--grey-600)]">
-              <li className="flex gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">1</span>
-                Open the email from Culture Compass
-              </li>
-              <li className="flex gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">2</span>
-                Click the reset link
-              </li>
-              <li className="flex gap-3">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">3</span>
-                Choose a new password
-              </li>
-            </ol>
-
-            <Link
-              to="/auth/login"
-              className="inline-block text-sm text-[var(--color-core)] hover:underline"
-            >
-              Back to sign in
-            </Link>
           </div>
         </div>
-      </div>
+      </PublicShell>
     );
   },
 });
