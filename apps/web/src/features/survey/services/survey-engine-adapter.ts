@@ -325,11 +325,11 @@ function mapResponse(row: any): SurveyResponse {
 function mapResponseWithAnswers(row: any): SurveyResponse {
   // Build answers map from the joined answers rows
   const answersArray = Array.isArray(row.answers) ? row.answers : [];
-  const answers: Record<string, number | string> = {};
+  const answers: Record<string, LikertValue | string> = {};
 
   for (const a of answersArray) {
     if (a.likert_value != null) {
-      answers[a.question_id] = a.likert_value;
+      answers[a.question_id] = a.likert_value as LikertValue;
     } else if (a.open_text_value != null) {
       answers[a.question_id] = a.open_text_value;
     }
