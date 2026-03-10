@@ -54,7 +54,7 @@ export async function authorize(
 
   // Look up the user's role from the users table
   const { data: profile, error: profileError } = await client
-    .from('users')
+    .from('user_profiles')
     .select('role')
     .eq('id', user.id)
     .single();

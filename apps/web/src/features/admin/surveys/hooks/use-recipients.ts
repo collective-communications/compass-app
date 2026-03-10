@@ -33,6 +33,7 @@ export function useRecipients(surveyId: string): UseQueryResult<SurveyRecipient[
     queryKey: recipientKeys.list(surveyId),
     queryFn: () => listRecipients(surveyId),
     enabled: !!surveyId,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -42,6 +43,7 @@ export function useRecipientStats(surveyId: string): UseQueryResult<RecipientSta
     queryKey: recipientKeys.stats(surveyId),
     queryFn: () => getRecipientStats(surveyId),
     enabled: !!surveyId,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

@@ -20,6 +20,12 @@ function errorResponse(error: string, message: string, status: number): Response
   return jsonResponse({ error, message }, status);
 }
 
+// ─── HTML Escaping ──────────────────────────────────────────────────────────
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ─── Template Rendering ──────────────────────────────────────────────────────
 
 function renderTemplate(
@@ -83,7 +89,9 @@ Deno.serve(async (req: Request) => {
     }
 
     const now = new Date();
+    const TWENTY_THREE_HOURS_MS = 23 * 60 * 60 * 1000;
     let totalRemindersSent = 0;
+    let totalFailed = 0;
     const BATCH_SIZE = 14;
     let batchCounter = 0;
 
@@ -141,9 +149,16 @@ Deno.serve(async (req: Request) => {
         : 'TBD';
 
       const surveyLink = `${appUrl}/s/${deployment.token}`;
+      const successIds: string[] = [];
 
       for (const recipient of recipients) {
         if (!recipient.invitation_sent_at) continue;
+
+        // Dedup guard: skip if reminder sent within last 23 hours
+        if (recipient.reminder_sent_at) {
+          const lastReminder = new Date(recipient.reminder_sent_at).getTime();
+          if (now.getTime() - lastReminder < TWENTY_THREE_HOURS_MS) continue;
+        }
 
         const daysSinceInvite = daysBetween(recipient.invitation_sent_at, now);
 
@@ -151,20 +166,21 @@ Deno.serve(async (req: Request) => {
         if (!schedule.includes(daysSinceInvite)) continue;
 
         // Render and send
-        const recipientName = recipient.name ?? '';
+        const recipientName = escapeHtml(recipient.name ?? '');
+        const escapedOrgName = escapeHtml(org.name);
         const renderedSubject = renderTemplate(template.subject, {
-          organization_name: org.name,
+          organization_name: escapedOrgName,
           recipient_name: recipientName,
         });
         const renderedBody = renderTemplate(template.html_body, {
-          organization_name: org.name,
+          organization_name: escapedOrgName,
           survey_link: surveyLink,
           recipient_name: recipientName,
           close_date: closesAt,
         });
 
         try {
-          await client.functions.invoke('send-email', {
+          const { error: sendError } = await client.functions.invoke('send-email', {
             body: {
               to: recipient.email,
               subject: renderedSubject,
@@ -173,14 +189,11 @@ Deno.serve(async (req: Request) => {
             },
           });
 
-          // Update recipient reminder tracking
-          await client
-            .from('survey_recipients')
-            .update({
-              reminder_sent_at: now.toISOString(),
-            })
-            .eq('id', recipient.id);
+          if (sendError) {
+            throw new Error(sendError.message);
+          }
 
+          successIds.push(recipient.id);
           totalRemindersSent++;
           batchCounter++;
 
@@ -188,15 +201,46 @@ Deno.serve(async (req: Request) => {
           if (batchCounter % BATCH_SIZE === 0) {
             await delay(1000);
           }
-        } catch {
-          // Log but continue — individual failures should not stop the batch
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : 'Unknown error';
+          totalFailed++;
+
+          // Log failed send to email_log
+          await client.from('email_log').insert({
+            recipient_email: recipient.email,
+            template_type: 'reminder',
+            status: 'failed',
+            error_message: msg,
+            survey_id: survey.id,
+          });
         }
+      }
+
+      // Batch update reminder_sent_at for all successful recipients of this survey
+      if (successIds.length > 0) {
+        await client
+          .from('survey_recipients')
+          .update({ reminder_sent_at: now.toISOString() })
+          .in('id', successIds);
+
+        // Batch log successful sends
+        const logEntries = successIds.map((id) => {
+          const recipient = recipients.find((r) => r.id === id)!;
+          return {
+            recipient_email: recipient.email,
+            template_type: 'reminder',
+            status: 'sent',
+            survey_id: survey.id,
+          };
+        });
+        await client.from('email_log').insert(logEntries);
       }
     }
 
     return jsonResponse({
       surveysChecked: surveys.length,
       remindersSent: totalRemindersSent,
+      failed: totalFailed,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown error';

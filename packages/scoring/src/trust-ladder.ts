@@ -4,9 +4,28 @@
  */
 
 import type { DimensionCode, DimensionScoreMap } from './types.js';
-import type { TrustRungStatus, TrustRungScore, TrustLadderResult } from './trust-ladder-types.js';
 
-export type { TrustRungStatus, TrustRungScore, TrustLadderResult } from './trust-ladder-types.js';
+/** Status of a single trust ladder rung based on its dimension score. */
+export type TrustRungStatus = 'achieved' | 'in_progress' | 'not_started';
+
+/** Scored result for a single rung on the Trust Ladder. */
+export interface TrustRungScore {
+  rung: number;
+  name: string;
+  dimensionCode: DimensionCode;
+  score: number;
+  maxScore: 4;
+  status: TrustRungStatus;
+}
+
+/** Full Trust Ladder computation result. */
+export interface TrustLadderResult {
+  rungs: TrustRungScore[];
+  /** Highest rung number with 'achieved' status, 0 if none. */
+  currentLevel: number;
+  /** Labels of the first 1-2 actionable rungs above currentLevel. */
+  nextActions: string[];
+}
 
 /** Static rung definitions ordered from foundation (1) to top (9). */
 const RUNG_DEFINITIONS: readonly { rung: number; name: string; dimensionCode: DimensionCode }[] = [

@@ -20,6 +20,12 @@ function errorResponse(error: string, message: string, status: number): Response
   return jsonResponse({ error, message }, status);
 }
 
+// ─── HTML Escaping ──────────────────────────────────────────────────────────
+
+function escapeHtml(str: string): string {
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 // ─── Template Rendering ──────────────────────────────────────────────────────
 
 function renderTemplate(
@@ -156,68 +162,93 @@ Deno.serve(async (req: Request) => {
     let failed = 0;
     const errors: string[] = [];
 
-    // Send to each recipient in batches (14/sec SES limit)
+    const surveyLink = baseSurveyLink;
+
+    // Process recipients in batches with Promise.allSettled
     const BATCH_SIZE = 14;
-    for (let i = 0; i < recipients.length; i++) {
-      const recipient = recipients[i];
+    for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
+      const batch = recipients.slice(i, i + BATCH_SIZE);
 
-      // Per-recipient tracked link using email hash
-      const emailHash = await crypto.subtle
-        .digest('SHA-256', new TextEncoder().encode(recipient.email))
-        .then((buf) =>
-          Array.from(new Uint8Array(buf))
-            .map((b) => b.toString(16).padStart(2, '0'))
-            .join('')
-            .slice(0, 12),
-        );
+      const results = await Promise.allSettled(
+        batch.map(async (recipient) => {
+          const recipientName = escapeHtml(recipient.name ?? '');
+          const escapedOrgName = escapeHtml(org.name);
 
-      const surveyLink = `${baseSurveyLink}?ref=${emailHash}`;
+          const renderedSubject = renderTemplate(template.subject, {
+            organization_name: escapedOrgName,
+            recipient_name: recipientName,
+          });
+          const renderedBody = renderTemplate(template.html_body, {
+            organization_name: escapedOrgName,
+            survey_link: surveyLink,
+            recipient_name: recipientName,
+            close_date: closesAt,
+          });
 
-      const recipientName = recipient.name ?? '';
-      const renderedSubject = renderTemplate(template.subject, {
-        organization_name: org.name,
-        recipient_name: recipientName,
-      });
-      const renderedBody = renderTemplate(template.html_body, {
-        organization_name: org.name,
-        survey_link: surveyLink,
-        recipient_name: recipientName,
-        close_date: closesAt,
-      });
+          const { error: sendError } = await client.functions.invoke('send-email', {
+            body: {
+              to: recipient.email,
+              subject: renderedSubject,
+              html: renderedBody,
+              templateType: 'survey_invitation',
+            },
+          });
 
-      try {
-        // Invoke send-email function
-        const { error: sendError } = await client.functions.invoke('send-email', {
-          body: {
-            to: recipient.email,
-            subject: renderedSubject,
-            html: renderedBody,
-            templateType: 'survey_invitation',
-          },
-        });
+          if (sendError) {
+            throw new Error(sendError.message);
+          }
 
-        if (sendError) {
-          throw new Error(sendError.message);
+          return recipient.id;
+        }),
+      );
+
+      const successIds: string[] = [];
+      for (let j = 0; j < results.length; j++) {
+        const result = results[j];
+        if (result.status === 'fulfilled') {
+          successIds.push(result.value);
+          sent++;
+        } else {
+          const msg = result.reason instanceof Error ? result.reason.message : 'Unknown error';
+          errors.push(`${batch[j].email}: ${msg}`);
+          failed++;
+
+          // Log failed send to email_log
+          await client.from('email_log').insert({
+            recipient_email: batch[j].email,
+            template_type: 'survey_invitation',
+            status: 'failed',
+            error_message: msg,
+            survey_id: body.surveyId,
+          });
         }
+      }
 
-        // Update recipient status
+      // Batch update successful recipients
+      if (successIds.length > 0) {
         await client
           .from('survey_recipients')
           .update({
             status: 'invited',
             invitation_sent_at: new Date().toISOString(),
           })
-          .eq('id', recipient.id);
+          .in('id', successIds);
 
-        sent++;
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Unknown error';
-        errors.push(`${recipient.email}: ${msg}`);
-        failed++;
+        // Batch log successful sends
+        const logEntries = successIds.map((id) => {
+          const recipient = batch.find((r) => r.id === id)!;
+          return {
+            recipient_email: recipient.email,
+            template_type: 'survey_invitation',
+            status: 'sent',
+            survey_id: body.surveyId,
+          };
+        });
+        await client.from('email_log').insert(logEntries);
       }
 
-      // Rate limiting: pause after each batch
-      if ((i + 1) % BATCH_SIZE === 0 && i + 1 < recipients.length) {
+      // Rate limiting: pause between batches
+      if (i + BATCH_SIZE < recipients.length) {
         await delay(1000);
       }
     }

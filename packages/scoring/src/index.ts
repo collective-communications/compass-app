@@ -26,7 +26,7 @@ export { SEGMENT_TYPES, OVERALL_SEGMENT, segmentKey, groupResponsesBySegment, co
 
 export { calculateTrustLadderPosition } from './trust-ladder.js';
 
-export type { TrustRungStatus, TrustRungScore, TrustLadderResult } from './trust-ladder-types.js';
+export type { TrustRungStatus, TrustRungScore, TrustLadderResult } from './trust-ladder.js';
 
 export type {
   SegmentType,

@@ -5,8 +5,6 @@
  */
 
 import { useRef, useEffect, useState, useCallback, type ReactElement, type ChangeEvent } from 'react';
-import type { SurveyRecipient } from '@compass/types';
-
 export interface BulkImportModalProps {
   open: boolean;
   onClose: () => void;
@@ -34,6 +32,38 @@ interface ParsedRow {
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+/** RFC 4180-compliant CSV field parser: splits on commas, respecting double-quoted fields. */
+function parseCsvFields(line: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i++; // skip escaped quote
+        } else {
+          inQuotes = false;
+        }
+      } else {
+        current += ch;
+      }
+    } else if (ch === '"') {
+      inQuotes = true;
+    } else if (ch === ',') {
+      fields.push(current);
+      current = '';
+    } else {
+      current += ch;
+    }
+  }
+  fields.push(current);
+  return fields;
+}
+
 function parseCsvContent(content: string, existingEmails: string[]): ParsedRow[] {
   const lines = content.trim().split('\n');
   if (lines.length === 0) return [];
@@ -49,7 +79,7 @@ function parseCsvContent(content: string, existingEmails: string[]): ParsedRow[]
   return dataLines
     .filter((line) => line.trim().length > 0)
     .map((line) => {
-      const parts = line.split(',').map((p) => p.trim().replace(/^"|"$/g, ''));
+      const parts = parseCsvFields(line).map((p) => p.trim());
       const email = (parts[0] ?? '').toLowerCase().trim();
       const name = parts[1] ?? '';
       const department = parts[2] ?? '';
