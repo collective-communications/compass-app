@@ -20,6 +20,7 @@ import { useResponseTracking } from './surveys/hooks/use-response-tracking';
 import { useRealtimeResponses } from './surveys/hooks/use-realtime-responses';
 import { useSurveyBuilder } from './surveys/hooks/use-survey-builder';
 import { useAuthStore } from '../../stores/auth-store';
+import { UserRole } from '@compass/types';
 import { ClientListPage } from './clients';
 import { ClientDetailPage } from './clients/pages/client-detail-page';
 import { ClientUsersTab } from './clients/components/client-users-tab';
@@ -185,6 +186,12 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   const adminSettingsRoute = createRoute({
     getParentRoute: () => adminLayoutRoute,
     path: '/settings',
+    beforeLoad: () => {
+      const { user } = useAuthStore.getState();
+      if (user?.role !== UserRole.CCC_ADMIN) {
+        throw redirect({ to: '/admin/surveys' });
+      }
+    },
     component: function AdminSettingsPage(): ReactElement {
       return <SystemSettingsPage />;
     },
@@ -193,6 +200,12 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   const adminUsersRoute = createRoute({
     getParentRoute: () => adminLayoutRoute,
     path: '/settings/users',
+    beforeLoad: () => {
+      const { user } = useAuthStore.getState();
+      if (user?.role !== UserRole.CCC_ADMIN) {
+        throw redirect({ to: '/admin/surveys' });
+      }
+    },
     component: function AdminUsersPage(): ReactElement {
       return <UsersPage />;
     },

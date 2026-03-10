@@ -9,6 +9,7 @@ import { useNavigate } from '@tanstack/react-router';
 import { AppShell } from '../../../components/shells/app-shell';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useDashboardData } from '../hooks/use-dashboard-data';
+import { useClientAccess } from '../hooks/use-client-access';
 import { ActiveSurveyCard } from '../components/active-survey-card';
 import { QuickActions } from '../components/quick-actions';
 import { PreviousSurveys } from '../components/previous-surveys';
@@ -34,8 +35,9 @@ export function DashboardPage(): ReactElement {
     ? `${window.location.origin}/s/${activeSurvey.deployment.token}`
     : null;
 
-  // TODO: Wire to organization settings when available
-  const resultsEnabled = activeSurvey?.survey.scoresCalculated ?? false;
+  const clientAccessEnabled = useClientAccess({ organizationId: user?.organizationId ?? null });
+  const resultsEnabled =
+    (activeSurvey?.survey.scoresCalculated ?? false) && clientAccessEnabled;
 
   const handleNavigate = (path: string): void => {
     void navigate({ to: path });
