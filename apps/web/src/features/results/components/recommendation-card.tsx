@@ -3,6 +3,8 @@
  * Colored left border indicates severity.
  */
 
+import { Card } from '@/components/ui/card';
+
 interface RecommendationCardProps {
   title: string;
   description: string;
@@ -10,13 +12,6 @@ interface RecommendationCardProps {
   dimension: string;
   actions: string[];
 }
-
-const SEVERITY_BORDERS: Record<string, string> = {
-  critical: 'border-l-[#B71C1C]',
-  high: 'border-l-[#E65100]',
-  medium: 'border-l-[#F9A825]',
-  healthy: 'border-l-[#2E7D32]',
-};
 
 export function RecommendationCard({
   title,
@@ -26,9 +21,9 @@ export function RecommendationCard({
   actions,
 }: RecommendationCardProps): React.ReactNode {
   return (
-    <div
+    <Card
+      severity={severity}
       data-testid="recommendation-card"
-      className={`rounded-lg border border-[#E5E4E0] border-l-4 bg-white p-6 ${SEVERITY_BORDERS[severity]}`}
       role="article"
       aria-label={`${dimension} recommendation: ${title}`}
     >
@@ -43,6 +38,6 @@ export function RecommendationCard({
           </ol>
         </div>
       )}
-    </div>
+    </Card>
   );
 }

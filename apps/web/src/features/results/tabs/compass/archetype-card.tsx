@@ -5,6 +5,7 @@
 
 import { useState, type ReactElement } from 'react';
 import type { ArchetypeMatch } from '@compass/scoring';
+import { Card } from '@/components/ui/card';
 
 interface ArchetypeCardProps {
   match: ArchetypeMatch;
@@ -20,7 +21,7 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <Card className="rounded-xl">
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--grey-400)]">
         Culture Archetype
       </p>
@@ -46,6 +47,6 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
           {match.archetype.description}
         </p>
       )}
-    </div>
+    </Card>
   );
 }

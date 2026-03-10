@@ -5,6 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { OrganizationSummary } from '@compass/types';
+import { Card } from '@/components/ui/card';
 
 export interface OrgInfoCardProps {
   organization: OrganizationSummary;
@@ -22,7 +23,7 @@ function getInitials(name: string): string {
 
 export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactElement {
   return (
-    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <Card className="rounded-xl">
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-4">
           {/* Logo or initials fallback */}
@@ -79,6 +80,6 @@ export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactEl
           Edit
         </button>
       </div>
-    </div>
+    </Card>
   );
 }

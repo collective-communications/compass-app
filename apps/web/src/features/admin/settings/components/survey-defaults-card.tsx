@@ -7,6 +7,7 @@
 import { useState, useCallback, type ReactElement, type ChangeEvent } from 'react';
 import type { SystemSettings, SaveStatus } from '../hooks/use-system-settings';
 import { AutoSaveIndicator, type AutoSaveStatus } from '../../surveys/components/auto-save-indicator';
+import { Card } from '@/components/ui/card';
 
 interface SurveyDefaultsCardProps {
   settings: SystemSettings;
@@ -59,7 +60,7 @@ export function SurveyDefaultsCard({
   );
 
   return (
-    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <Card className="rounded-xl">
       <fieldset>
         <legend className="mb-4 flex w-full items-center justify-between">
           <span className="text-lg font-semibold text-[var(--grey-900)]">Survey Defaults</span>
@@ -166,6 +167,6 @@ export function SurveyDefaultsCard({
           )}
         </div>
       </fieldset>
-    </div>
+    </Card>
   );
 }

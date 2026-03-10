@@ -5,6 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { SystemSettings } from '../hooks/use-system-settings';
+import { Card } from '@/components/ui/card';
 
 interface BrandingCardProps {
   settings: SystemSettings;
@@ -19,7 +20,7 @@ const COLOR_LABELS: { key: keyof SystemSettings['brand_colors']; label: string }
 
 export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
   return (
-    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <Card className="rounded-xl">
       <fieldset>
         <legend className="mb-4 text-lg font-semibold text-[var(--grey-900)]">
           Branding
@@ -77,6 +78,6 @@ export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
           Per-client branding set in client settings.
         </p>
       </fieldset>
-    </div>
+    </Card>
   );
 }

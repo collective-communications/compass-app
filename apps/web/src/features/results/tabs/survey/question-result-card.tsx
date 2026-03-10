@@ -7,6 +7,7 @@
 import type { ReactElement } from 'react';
 import type { QuestionScoreRow } from '../../types';
 import { LikertBarChart } from '../../components/likert-bar-chart';
+import { Card } from '@/components/ui/card';
 
 interface QuestionResultCardProps {
   question: QuestionScoreRow;
@@ -21,7 +22,7 @@ export function QuestionResultCard({
   const scorePercent = Math.round(question.meanScore * 100);
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <Card>
       <div className="mb-3 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <p className="text-sm font-medium text-[var(--grey-700)]">
@@ -45,6 +46,6 @@ export function QuestionResultCard({
         agreeColor={dimensionColor}
         height={20}
       />
-    </div>
+    </Card>
   );
 }

@@ -3,19 +3,14 @@
  * Severity levels: critical (red), high (orange), medium (yellow), healthy (green).
  */
 
+import { Card } from '@/components/ui/card';
+
 interface RiskFlagCardProps {
   title: string;
   description: string;
   severity: 'critical' | 'high' | 'medium' | 'healthy';
   dimension: string;
 }
-
-const SEVERITY_BORDERS: Record<string, string> = {
-  critical: 'border-l-[#B71C1C]',
-  high: 'border-l-[#E65100]',
-  medium: 'border-l-[#F9A825]',
-  healthy: 'border-l-[#2E7D32]',
-};
 
 const SEVERITY_LABELS: Record<string, string> = {
   critical: 'Critical',
@@ -26,9 +21,9 @@ const SEVERITY_LABELS: Record<string, string> = {
 
 export function RiskFlagCard({ title, description, severity, dimension }: RiskFlagCardProps): React.ReactNode {
   return (
-    <div
+    <Card
+      severity={severity}
       data-testid="risk-flag-card"
-      className={`rounded-lg border border-[#E5E4E0] border-l-4 bg-white p-6 ${SEVERITY_BORDERS[severity]}`}
       role="article"
       aria-label={`${severity} risk: ${title}`}
     >
@@ -38,6 +33,6 @@ export function RiskFlagCard({ title, description, severity, dimension }: RiskFl
       </div>
       <h3 className="mb-2 text-base font-semibold text-[#212121]">{title}</h3>
       <p className="text-sm text-[#616161]">{description}</p>
-    </div>
+    </Card>
   );
 }

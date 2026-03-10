@@ -6,6 +6,7 @@
 
 import type { ReactElement } from 'react';
 import type { ActiveSurvey } from '../hooks/use-dashboard-data';
+import { Card } from '@/components/ui/card';
 
 interface ActiveSurveyCardProps {
   data: ActiveSurvey;
@@ -25,7 +26,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
   const { survey, responseCount, expectedCount, completionPercent, daysRemaining } = data;
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <Card>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-semibold text-[var(--grey-900)]">{survey.title}</h2>
@@ -82,6 +83,6 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
           />
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
