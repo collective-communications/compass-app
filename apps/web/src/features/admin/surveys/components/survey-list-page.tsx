@@ -78,7 +78,7 @@ export function SurveyListPage({
           disabled={createSurvey.isPending}
           className="rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {createSurvey.isPending ? 'Creating\u2026' : 'New Survey'}
+          {createSurvey.isPending ? 'Creating\u2026' : '+ New Survey'}
         </button>
       </div>
 

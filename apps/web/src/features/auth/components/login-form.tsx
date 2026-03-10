@@ -69,7 +69,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
           disabled={isLoading}
           aria-invalid={emailTouched && !emailValid ? true : undefined}
           className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/20 disabled:cursor-not-allowed disabled:opacity-50"
-          placeholder="you@example.com"
+          placeholder="Enter your email"
         />
         {emailTouched && !emailValid && (
           <p className="text-xs text-red-600">Enter a valid email address.</p>

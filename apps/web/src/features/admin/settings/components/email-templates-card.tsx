@@ -42,7 +42,7 @@ export function EmailTemplatesCard(): ReactElement {
   }, []);
 
   return (
-    <Card className="rounded-xl">
+    <Card className="rounded-lg">
       <fieldset>
         <legend className="mb-4 text-lg font-semibold text-[var(--grey-900)]">
           Email Templates

@@ -94,10 +94,10 @@ export function MetadataForm({ config, onSubmit, isSubmitting }: MetadataFormPro
     field: FieldState;
     setter: React.Dispatch<React.SetStateAction<FieldState>>;
   }> = [
-    { label: 'Tenure', options: config.tenures, field: tenure, setter: setTenure },
-    { label: 'Location', options: config.locations, field: location, setter: setLocation },
-    { label: 'Role', options: config.roles, field: role, setter: setRole },
     { label: 'Department', options: config.departments, field: department, setter: setDepartment },
+    { label: 'Role', options: config.roles, field: role, setter: setRole },
+    { label: 'Location', options: config.locations, field: location, setter: setLocation },
+    { label: 'Tenure', options: config.tenures, field: tenure, setter: setTenure },
   ];
 
   // Filter out fields with no options (e.g. departments may be empty)

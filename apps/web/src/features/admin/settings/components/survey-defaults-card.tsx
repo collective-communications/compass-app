@@ -60,7 +60,7 @@ export function SurveyDefaultsCard({
   );
 
   return (
-    <Card className="rounded-xl">
+    <Card className="rounded-lg">
       <fieldset>
         <legend className="mb-4 flex w-full items-center justify-between">
           <span className="text-lg font-semibold text-[var(--grey-900)]">Survey Defaults</span>

@@ -21,7 +21,7 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <Card className="rounded-xl">
+    <Card className="rounded-lg">
       <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--grey-400)]">
         Culture Archetype
       </p>

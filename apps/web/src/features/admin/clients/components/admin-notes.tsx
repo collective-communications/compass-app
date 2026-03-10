@@ -66,7 +66,7 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
   );
 
   return (
-    <div className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
         Notes
       </h3>

@@ -289,7 +289,7 @@ const surveyOpenEndedRoute = createRoute({
     }, [submit, responseId, deployment.id, deployment.token, navigate]);
 
     const prompt =
-      'Is there anything else you would like to share about your experience?';
+      "Is there anything else you'd like to share about your experience?";
 
     return (
       <OpenEndedScreen
@@ -397,7 +397,7 @@ const loginRoute = createRoute({
                   to="/auth/forgot-password"
                   className="text-sm text-[var(--color-core)] hover:underline"
                 >
-                  Forgot your password?
+                  Forgot password?
                 </Link>
               </p>
             </div>
@@ -579,11 +579,11 @@ const forgotPasswordSentRoute = createRoute({
               <ol className="mb-8 space-y-3 text-left text-sm text-[var(--grey-600)]">
                 <li className="flex gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">1</span>
-                  Open the email from Culture Compass
+                  Check your inbox (and spam folder)
                 </li>
                 <li className="flex gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">2</span>
-                  Click the reset link
+                  Click the reset link in the email
                 </li>
                 <li className="flex gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">3</span>
@@ -595,7 +595,7 @@ const forgotPasswordSentRoute = createRoute({
                 to="/auth/login"
                 className="inline-block text-sm text-[var(--color-core)] hover:underline"
               >
-                Back to sign in
+                Return to sign in
               </Link>
             </div>
           </div>

@@ -28,9 +28,8 @@ export function OpenEndedScreen({
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
-        <h2 className="mb-2 text-xl font-semibold text-[var(--grey-900)]">One more thing...</h2>
-        <p className="mb-4 text-[#616161]">{prompt}</p>
+      <div className="w-full max-w-[600px] rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
+        <h2 className="mb-4 text-xl font-semibold text-[var(--grey-900)]">{prompt}</h2>
 
         <div className="mb-2">
           <textarea

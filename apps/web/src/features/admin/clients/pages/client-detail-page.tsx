@@ -181,7 +181,7 @@ export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPagePro
             <ConsultantCard orgId={orgId} />
 
             {/* Quick Actions */}
-            <nav aria-label="Quick actions" className="rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+            <nav aria-label="Quick actions" className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
                 Quick Actions
               </h3>

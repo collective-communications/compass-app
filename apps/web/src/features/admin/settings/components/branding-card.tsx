@@ -20,7 +20,7 @@ const COLOR_LABELS: { key: keyof SystemSettings['brand_colors']; label: string }
 
 export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
   return (
-    <Card className="rounded-xl">
+    <Card className="rounded-lg">
       <fieldset>
         <legend className="mb-4 text-lg font-semibold text-[var(--grey-900)]">
           Branding

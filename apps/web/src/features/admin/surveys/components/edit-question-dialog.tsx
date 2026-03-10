@@ -121,7 +121,7 @@ export function EditQuestionDialog({
       ref={dialogRef}
       aria-labelledby={titleId}
       onClose={onClose}
-      className="w-full max-w-lg rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
+      className="w-full max-w-lg rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
     >
       <div className="p-6">
         <h2 id={titleId} className="text-lg font-semibold text-[var(--grey-900)]">

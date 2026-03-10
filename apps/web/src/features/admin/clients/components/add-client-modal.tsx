@@ -125,7 +125,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
         if (e.key === 'Escape') onClose();
       }}
     >
-      <div className="mx-4 w-full max-w-md rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-8 shadow-lg">
+      <div className="mx-4 w-full max-w-md rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-8 shadow-lg">
         <h2 id="add-client-title" className="mb-6 text-xl font-bold text-[var(--grey-900)]">
           Add Client
         </h2>

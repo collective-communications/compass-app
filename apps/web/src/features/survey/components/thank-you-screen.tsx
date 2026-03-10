@@ -25,7 +25,7 @@ export function ThankYouScreen({
 }: ThankYouScreenProps): ReactNode {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
+      <div className="w-full max-w-[600px] rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
         {/* Checkmark */}
         <div className="mb-4 flex justify-center">
           <svg
@@ -58,7 +58,7 @@ export function ThankYouScreen({
           <div className="mt-8 flex justify-center">
             <a
               href={organizationUrl}
-              className="inline-flex items-center justify-center rounded-lg bg-[#0A3B4F] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90"
+              className="inline-flex items-center justify-center rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-6 py-2.5 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
               rel="noopener noreferrer"
             >
               Return to {organizationName ?? 'organization'}

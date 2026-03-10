@@ -55,6 +55,12 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
     return indices;
   }, [likertQuestions, answers]);
 
+  // Question texts for progress square tooltips (answered squares only)
+  const questionTexts = useMemo(
+    () => likertQuestions.map((q) => q.text),
+    [likertQuestions],
+  );
+
   // Autosave
   useAnswerAutosave(sessionToken);
 
@@ -133,6 +139,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
         currentIndex={currentIndex}
         answeredIndices={answeredIndices}
         onJump={handleJump}
+        questionTexts={questionTexts}
       />
 
       {/* Question counter */}

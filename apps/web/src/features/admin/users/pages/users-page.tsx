@@ -118,7 +118,7 @@ export function UsersPage(): ReactElement {
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6">
-      <h1 className="mb-6 text-2xl font-bold text-[var(--grey-900)]">Team</h1>
+      <h1 className="mb-6 text-2xl font-bold text-[var(--grey-900)]">Team Members</h1>
 
       {/* Invite toggle + form */}
       <div className="mb-6">

@@ -35,7 +35,7 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
   const hasScore = organization.lastScore !== null;
 
   return (
-    <Card className="rounded-xl">
+    <Card className="rounded-lg">
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
         Key Metrics
       </h3>

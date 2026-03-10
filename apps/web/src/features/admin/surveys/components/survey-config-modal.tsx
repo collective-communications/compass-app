@@ -118,7 +118,7 @@ export function SurveyConfigModal({
     <dialog
       ref={dialogRef}
       onClose={onClose}
-      className="w-full max-w-lg rounded-xl border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
+      className="w-full max-w-lg rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
     >
       <form onSubmit={handleSave} className="flex flex-col gap-6 p-6">
         <div className="flex items-center justify-between">
