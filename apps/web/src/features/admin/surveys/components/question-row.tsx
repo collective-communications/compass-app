@@ -1,15 +1,20 @@
 /**
  * Single question row in the survey builder.
- * Shows display order, question text, type badge, and reverse-scored indicator.
+ * Shows drag handle, question code, question text, type badge, and reverse-scored indicator.
+ * Uses @dnd-kit/sortable for drag-and-drop reordering.
  */
 
-import type { ReactElement } from 'react';
+import { type ReactElement } from 'react';
+import { useSortable } from '@dnd-kit/sortable';
+import { GripVertical } from 'lucide-react';
 import type { QuestionWithDimension, QuestionType } from '@compass/types';
 
 interface QuestionRowProps {
   question: QuestionWithDimension;
   isLocked: boolean;
   onEdit: (questionId: string) => void;
+  /** Question code label (e.g., "C1", "L2") based on dimension abbreviation + order within dimension */
+  questionCode: string;
 }
 
 const TYPE_LABEL: Record<QuestionType, string> = {
@@ -17,28 +22,66 @@ const TYPE_LABEL: Record<QuestionType, string> = {
   open_text: 'Open Text',
 };
 
-export function QuestionRow({ question, isLocked, onEdit }: QuestionRowProps): ReactElement {
+export function QuestionRow({ question, isLocked, onEdit, questionCode }: QuestionRowProps): ReactElement {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: question.id,
+    disabled: isLocked,
+  });
+
+  const style = {
+    transform: transform
+      ? `translate3d(${transform.x}px, ${transform.y}px, 0)`
+      : undefined,
+    transition,
+  };
+
   return (
-    <button
-      type="button"
-      onClick={() => !isLocked && onEdit(question.id)}
-      disabled={isLocked}
+    <div
+      ref={setNodeRef}
+      style={style}
       className={`flex w-full items-start gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-left transition-shadow ${
-        isLocked ? 'cursor-default opacity-70' : 'cursor-pointer hover:shadow-sm'
-      }`}
+        isDragging ? 'z-50 shadow-lg opacity-90' : ''
+      } ${isLocked ? 'opacity-70' : ''}`}
     >
-      <span className="mt-0.5 shrink-0 text-xs font-mono text-[var(--grey-400)]">
-        {question.displayOrder}
+      {/* Drag handle */}
+      {!isLocked && (
+        <button
+          type="button"
+          className="mt-0.5 shrink-0 cursor-grab touch-none text-[var(--grey-400)] hover:text-[var(--grey-600)] active:cursor-grabbing"
+          aria-label="Drag to reorder"
+          {...attributes}
+          {...listeners}
+        >
+          <GripVertical size={16} />
+        </button>
+      )}
+
+      {/* Question code */}
+      <span className="mt-0.5 shrink-0 rounded bg-[var(--grey-100)] px-1.5 py-0.5 text-xs font-mono font-medium text-[var(--grey-600)]">
+        {questionCode}
       </span>
 
-      <div className="min-w-0 flex-1">
+      {/* Question text (clickable for edit) */}
+      <button
+        type="button"
+        onClick={() => !isLocked && onEdit(question.id)}
+        disabled={isLocked}
+        className={`min-w-0 flex-1 text-left ${isLocked ? 'cursor-default' : 'cursor-pointer'}`}
+      >
         <p className="text-sm text-[var(--grey-900)]">{question.text}</p>
         {question.diagnosticFocus && (
           <p className="mt-0.5 text-xs text-[var(--grey-500)]">
             Focus: {question.diagnosticFocus}
           </p>
         )}
-      </div>
+      </button>
 
       <div className="flex shrink-0 items-center gap-2">
         <span className="rounded bg-[var(--grey-100)] px-2 py-0.5 text-xs text-[var(--grey-600)]">
@@ -53,6 +96,6 @@ export function QuestionRow({ question, isLocked, onEdit }: QuestionRowProps): R
           </span>
         )}
       </div>
-    </button>
+    </div>
   );
 }

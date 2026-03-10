@@ -16,6 +16,7 @@ export interface InviteFormProps {
   isPending: boolean;
   error: string | null;
   lastCreated: Invitation | null;
+  onClose?: () => void;
 }
 
 /** Validates basic email format */
@@ -32,6 +33,7 @@ export function InviteForm({
   isPending,
   error,
   lastCreated,
+  onClose,
 }: InviteFormProps): ReactElement {
   const [email, setEmail] = useState('');
   const [role, setRole] = useState<CccRole | ClientRole>(defaultRole);
@@ -74,9 +76,21 @@ export function InviteForm({
 
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
-        Invite Team Member
-      </h3>
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+          Invite Team Member
+        </h3>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm text-[var(--grey-500)] hover:text-[var(--grey-700)]"
+            aria-label="Close invite form"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         {/* Email input */}

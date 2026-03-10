@@ -5,14 +5,14 @@
  *
  * Three states:
  * 1. Configuration — format + section selection
- * 2. Generating — progress bar with step indicators, 2s polling
- * 3. Complete — download link
+ * 2. Generating — progress bar with step indicators and spinner
+ * 3. Complete — file card with metadata, download, copy link, new export
  *
  * Focus trap is active while the modal is open. Escape closes.
  */
 
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import { X, Download, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
+import { X, Download, CheckCircle2, AlertCircle, FileText, Copy, Plus } from 'lucide-react';
 import {
   ReportFormat,
   getDefaultReportSections,
@@ -20,7 +20,6 @@ import {
   type ReportConfig,
 } from '@compass/types';
 import { useReportGeneration } from '../hooks/use-report-generation';
-import { fetchAndPrint } from '../../../lib/print-to-pdf';
 
 // ─── Focus Trap ─────────────────────────────────────────────────────────────
 
@@ -70,6 +69,8 @@ interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   surveyId: string;
+  /** Survey name shown in the modal header for context */
+  surveyName?: string;
   /** Called after a successful generation to refresh the reports list */
   onGenerated?: () => void;
 }
@@ -95,17 +96,59 @@ function getCurrentStep(progress: number): number {
   return step;
 }
 
+// ─── Format Descriptions ────────────────────────────────────────────────────
+
+const FORMAT_DESCRIPTIONS: Record<string, string> = {
+  [ReportFormat.PDF]: 'Best for printing and sharing',
+  [ReportFormat.PPTX]: 'Best for presentations',
+};
+
+// ─── Section Page Estimates ─────────────────────────────────────────────────
+
+/** Approximate page counts per section for the estimated page count display */
+const SECTION_PAGE_ESTIMATES: Record<string, number> = {
+  cover: 1,
+  executive_summary: 2,
+  compass_overview: 2,
+  dimension_deep_dives: 6,
+  segment_analysis: 4,
+  recommendations: 3,
+};
+
+function estimatePageCount(sections: ReportSection[]): number {
+  return sections
+    .filter((s) => s.included)
+    .reduce((total, s) => total + (SECTION_PAGE_ESTIMATES[s.id] ?? 1), 0);
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+/** Format bytes into a readable file size string */
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+/** Build a filename from format and survey name */
+function buildFilename(format: ReportFormat, surveyName?: string): string {
+  const base = surveyName ? surveyName.replace(/\s+/g, '-').toLowerCase() : 'report';
+  return `${base}-report.${format}`;
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export function ExportModal({
   isOpen,
   onClose,
   surveyId,
+  surveyName,
   onGenerated,
 }: ExportModalProps): ReactElement {
   const modalRef = useRef<HTMLDivElement>(null);
   const [format, setFormat] = useState<ReportFormat>(ReportFormat.PDF);
   const [sections, setSections] = useState<ReportSection[]>(getDefaultReportSections);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   const generation = useReportGeneration();
 
@@ -145,6 +188,7 @@ export function ExportModal({
     generation.reset();
     setFormat(ReportFormat.PDF);
     setSections(getDefaultReportSections());
+    setLinkCopied(false);
     onClose();
   }, [modalState, generation, onClose]);
 
@@ -153,6 +197,26 @@ export function ExportModal({
     onGenerated?.();
     handleClose();
   }, [onGenerated, handleClose]);
+
+  /** Reset to configure state for a new export */
+  const handleNewExport = useCallback((): void => {
+    generation.reset();
+    setFormat(ReportFormat.PDF);
+    setSections(getDefaultReportSections());
+    setLinkCopied(false);
+  }, [generation]);
+
+  /** Copy the file URL to clipboard */
+  const handleCopyLink = useCallback(async (): Promise<void> => {
+    if (generation.fileUrl === null) return;
+    try {
+      await navigator.clipboard.writeText(generation.fileUrl);
+      setLinkCopied(true);
+      setTimeout(() => setLinkCopied(false), 2000);
+    } catch {
+      // Clipboard API may fail in insecure contexts — no-op
+    }
+  }, [generation.fileUrl]);
 
   /** Toggle a section's included state */
   const toggleSection = useCallback((sectionId: string): void => {
@@ -174,6 +238,8 @@ export function ExportModal({
   }, [surveyId, format, sections, generation]);
 
   const currentStep = getCurrentStep(generation.progress);
+  const estimatedPages = estimatePageCount(sections);
+  const filename = buildFilename(format, surveyName);
 
   return (
     <>
@@ -212,7 +278,12 @@ export function ExportModal({
 
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--grey-100)] px-6 py-4">
-          <h2 className="text-lg font-semibold text-[var(--grey-900)]">Export Report</h2>
+          <div className="flex flex-col">
+            <h2 className="text-lg font-semibold text-[var(--grey-900)]">Export Report</h2>
+            {surveyName && (
+              <p className="mt-0.5 text-sm text-[var(--grey-500)]">{surveyName}</p>
+            )}
+          </div>
           {modalState !== 'generating' && (
             <button
               type="button"
@@ -232,9 +303,12 @@ export function ExportModal({
             <div className="flex flex-col gap-6">
               {/* Format selection */}
               <fieldset>
-                <legend className="mb-3 text-sm font-medium text-[var(--grey-700)]">
+                <legend className="mb-1 text-sm font-medium text-[var(--grey-700)]">
                   Output Format
                 </legend>
+                <p className="mb-3 text-xs text-[var(--grey-400)]">
+                  Choose how your report will be delivered
+                </p>
                 <div className="flex flex-col gap-2">
                   <label className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors hover:bg-[#FAFAFA]">
                     <input
@@ -245,7 +319,12 @@ export function ExportModal({
                       onChange={() => setFormat(ReportFormat.PDF)}
                       className="h-4 w-4 text-[#0A3B4F] focus:ring-[#0A3B4F]"
                     />
-                    <span className="text-sm text-[var(--grey-700)]">PDF</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-[var(--grey-700)]">PDF</span>
+                      <span className="text-xs text-[var(--grey-400)]">
+                        {FORMAT_DESCRIPTIONS[ReportFormat.PDF]}
+                      </span>
+                    </div>
                   </label>
                   <label className="flex cursor-not-allowed items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 opacity-50">
                     <input
@@ -255,21 +334,29 @@ export function ExportModal({
                       disabled
                       className="h-4 w-4"
                     />
-                    <span className="text-sm text-[var(--grey-400)]">
-                      PPTX
-                      <span className="ml-2 rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-xs text-[var(--grey-400)]">
-                        Coming soon
+                    <div className="flex flex-col">
+                      <span className="text-sm text-[var(--grey-400)]">
+                        PPTX
+                        <span className="ml-2 rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-xs text-[var(--grey-400)]">
+                          Coming soon
+                        </span>
                       </span>
-                    </span>
+                      <span className="text-xs text-[var(--grey-300)]">
+                        {FORMAT_DESCRIPTIONS[ReportFormat.PPTX]}
+                      </span>
+                    </div>
                   </label>
                 </div>
               </fieldset>
 
               {/* Section selection */}
               <fieldset>
-                <legend className="mb-3 text-sm font-medium text-[var(--grey-700)]">
+                <legend className="mb-1 text-sm font-medium text-[var(--grey-700)]">
                   Report Sections
                 </legend>
+                <p className="mb-3 text-xs text-[var(--grey-400)]">
+                  Select which sections to include in your report
+                </p>
                 <div className="flex flex-col gap-2">
                   {sections.map((section) => (
                     <label
@@ -299,6 +386,11 @@ export function ExportModal({
                     </label>
                   ))}
                 </div>
+
+                {/* Estimated page count */}
+                <p className="mt-3 text-xs text-[var(--grey-400)]">
+                  Estimated length: ~{estimatedPages} pages
+                </p>
               </fieldset>
 
               {/* Generation error from previous attempt */}
@@ -317,23 +409,41 @@ export function ExportModal({
           {/* ── Generating State ── */}
           {modalState === 'generating' && (
             <div className="flex flex-col gap-6">
-              {/* Progress bar */}
-              <div>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="text-[var(--grey-700)]">Generating report</span>
-                  <span className="text-[var(--grey-500)]">{generation.progress}%</span>
+              {/* Circular spinner */}
+              <div className="flex flex-col items-center gap-4 py-4">
+                <div className="relative h-20 w-20">
+                  {/* Background circle */}
+                  <svg className="h-20 w-20" viewBox="0 0 80 80">
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="var(--grey-100)"
+                      strokeWidth="6"
+                    />
+                    {/* Progress arc */}
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="34"
+                      fill="none"
+                      stroke="#0A3B4F"
+                      strokeWidth="6"
+                      strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 34}`}
+                      strokeDashoffset={`${2 * Math.PI * 34 * (1 - generation.progress / 100)}`}
+                      className="transition-[stroke-dashoffset] duration-500 ease-out"
+                      transform="rotate(-90 40 40)"
+                    />
+                  </svg>
+                  <span className="absolute inset-0 flex items-center justify-center text-sm font-semibold text-[var(--grey-700)]">
+                    {generation.progress}%
+                  </span>
                 </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--grey-50)]">
-                  <div
-                    className="h-full rounded-full bg-[#0A3B4F] transition-[width] duration-500 ease-out"
-                    style={{ width: `${generation.progress}%` }}
-                    role="progressbar"
-                    aria-valuenow={generation.progress}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-label="Report generation progress"
-                  />
-                </div>
+                <span className="text-sm font-medium text-[var(--grey-700)]">
+                  Generating report
+                </span>
               </div>
 
               {/* Step indicators */}
@@ -357,7 +467,7 @@ export function ExportModal({
                         {isDone ? (
                           <CheckCircle2 size={14} aria-hidden="true" />
                         ) : isActive ? (
-                          <Loader2 size={14} className="animate-spin" aria-hidden="true" />
+                          <span className="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                         ) : (
                           <span>{index + 1}</span>
                         )}
@@ -382,24 +492,63 @@ export function ExportModal({
 
           {/* ── Complete State ── */}
           {modalState === 'complete' && (
-            <div className="flex flex-col items-center gap-4 py-6 text-center">
+            <div className="flex flex-col items-center gap-5 py-6">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#E8F5E9]">
                 <CheckCircle2 size={32} className="text-[#2E7D32]" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-[var(--grey-900)]">Report Ready</h3>
-              <p className="text-sm text-[var(--grey-500)]">
-                Your report has been generated and is ready for download.
-              </p>
-              {generation.fileUrl !== null && (
+
+              {/* File card */}
+              <div className="w-full rounded-lg border border-[var(--grey-100)] bg-white px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#F5F5F5]">
+                    <FileText size={20} className="text-[var(--grey-500)]" aria-hidden="true" />
+                  </div>
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate text-sm font-medium text-[var(--grey-700)]">
+                      {filename}
+                    </span>
+                    <span className="text-xs text-[var(--grey-400)]">
+                      {generation.fileSize !== null && formatFileSize(generation.fileSize)}
+                      {generation.fileSize !== null && generation.pageCount !== null && ' · '}
+                      {generation.pageCount !== null &&
+                        `${generation.pageCount} page${generation.pageCount !== 1 ? 's' : ''}`}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex w-full flex-col gap-2">
+                {generation.fileUrl !== null && (
+                  <a
+                    href={generation.fileUrl}
+                    download={filename}
+                    className="flex items-center justify-center gap-2 rounded-md bg-[#0A3B4F] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
+                  >
+                    <Download size={16} aria-hidden="true" />
+                    Download {format.toUpperCase()}
+                  </a>
+                )}
+                {generation.fileUrl !== null && (
+                  <button
+                    type="button"
+                    onClick={() => void handleCopyLink()}
+                    className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
+                  >
+                    <Copy size={16} aria-hidden="true" />
+                    {linkCopied ? 'Link Copied' : 'Copy Share Link'}
+                  </button>
+                )}
                 <button
                   type="button"
-                  onClick={() => void fetchAndPrint(generation.fileUrl!)}
-                  className="flex items-center gap-2 rounded-md bg-[#0A3B4F] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
+                  onClick={handleNewExport}
+                  className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
                 >
-                  <Download size={16} aria-hidden="true" />
-                  Download {format.toUpperCase()}
+                  <Plus size={16} aria-hidden="true" />
+                  New Export
                 </button>
-              )}
+              </div>
             </div>
           )}
 

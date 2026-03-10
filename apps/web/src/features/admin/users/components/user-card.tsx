@@ -19,6 +19,12 @@ export interface UserCardProps {
   isUpdating: boolean;
 }
 
+/** Role-coded avatar background colors */
+const ROLE_AVATAR_COLORS: Record<string, { bg: string; text: string }> = {
+  ccc_admin: { bg: '#0A3B4F', text: '#FFFFFF' },
+  ccc_member: { bg: '#9FD7C3', text: '#0A3B4F' },
+};
+
 /** Role display labels */
 const ROLE_LABELS: Record<string, string> = {
   ccc_admin: 'Admin',
@@ -103,7 +109,11 @@ export function UserCard({
           />
         ) : (
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--grey-200)] text-sm font-semibold text-[var(--grey-700)]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+            style={{
+              backgroundColor: ROLE_AVATAR_COLORS[member.role]?.bg ?? 'var(--grey-200)',
+              color: ROLE_AVATAR_COLORS[member.role]?.text ?? 'var(--grey-700)',
+            }}
             aria-hidden="true"
           >
             {getInitials(member.fullName)}

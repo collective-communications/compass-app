@@ -1,10 +1,11 @@
 /**
  * Reports page — Tier 2 bottom tab at /reports/:surveyId.
- * Lists generated reports for a survey with a 65/35 desktop split (list + preview).
+ * Lists generated reports grouped by "Available Reports" (active survey)
+ * and "Previous Surveys" (completed/closed surveys).
  * Role-based: client_exec can generate, director/manager can download only.
  */
 
-import { useCallback, useState, type ReactElement } from 'react';
+import { useCallback, useMemo, useState, type ReactElement } from 'react';
 import { FileText, Plus } from 'lucide-react';
 import { useReports } from '../hooks/use-reports';
 import { SurveyPicker, type ReportSurveyOption } from '../components/survey-picker';
@@ -28,6 +29,28 @@ interface ReportsPageProps {
   initialSurveyId: string | null;
 }
 
+// ─── Helpers ────────────────────────────────────────────────────────────────
+
+/** Split surveys into active (current) and previous (completed/closed) */
+function groupSurveys(surveys: ReportSurveyOption[]): {
+  active: ReportSurveyOption[];
+  previous: ReportSurveyOption[];
+} {
+  const active: ReportSurveyOption[] = [];
+  const previous: ReportSurveyOption[] = [];
+
+  for (const survey of surveys) {
+    if (survey.status === 'completed' || survey.status === 'closed') {
+      previous.push(survey);
+    } else {
+      // 'active' or undefined (backwards-compatible default)
+      active.push(survey);
+    }
+  }
+
+  return { active, previous };
+}
+
 // ─── Component ──────────────────────────────────────────────────────────────
 
 export function ReportsPage({
@@ -46,13 +69,13 @@ export function ReportsPage({
     isLoading,
     error,
     refresh,
-    remove,
     selectedReport,
     selectReport,
   } = useReports(activeSurveyId);
 
   const canGenerate = userRole === 'client_exec';
-  const canDelete = userRole === 'client_exec';
+
+  const { active, previous } = useMemo(() => groupSurveys(surveys), [surveys]);
 
   const handleSurveyChange = useCallback((surveyId: string): void => {
     setActiveSurveyId(surveyId);
@@ -61,6 +84,9 @@ export function ReportsPage({
   const handleGenerated = useCallback((): void => {
     void refresh();
   }, [refresh]);
+
+  // Determine if the currently selected survey is active
+  const isActiveSurvey = active.some((s) => s.id === activeSurveyId);
 
   return (
     <div className="flex flex-col gap-6">
@@ -131,22 +157,46 @@ export function ReportsPage({
       {!isLoading && reports.length > 0 && (
         <div className="flex flex-col gap-6 lg:flex-row">
           {/* Report list — 65% */}
-          <div
-            className="flex min-w-0 flex-col gap-3 lg:w-[65%]"
-            role="list"
-            aria-label="Generated reports"
-          >
-            {reports.map((report) => (
-              <div key={report.id} role="listitem">
-                <ReportCard
-                  report={report}
-                  isSelected={selectedReport?.id === report.id}
-                  onSelect={() => selectReport(report)}
-                  onDelete={() => void remove(report.id)}
-                  canDelete={canDelete}
-                />
+          <div className="flex min-w-0 flex-col gap-6 lg:w-[65%]">
+            {/* Active survey reports */}
+            {isActiveSurvey && (
+              <div className="flex flex-col gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--grey-400)]">
+                  Available Reports
+                </h2>
+                <div role="list" aria-label="Available reports">
+                  {reports.map((report) => (
+                    <div key={report.id} role="listitem" className="mb-3 last:mb-0">
+                      <ReportCard
+                        report={report}
+                        isSelected={selectedReport?.id === report.id}
+                        onSelect={() => selectReport(report)}
+                      />
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
+
+            {/* Previous survey reports */}
+            {!isActiveSurvey && (
+              <div className="flex flex-col gap-3">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--grey-400)]">
+                  Previous Surveys
+                </h2>
+                <div role="list" aria-label="Previous survey reports">
+                  {reports.map((report) => (
+                    <div key={report.id} role="listitem" className="mb-3 last:mb-0">
+                      <ReportCard
+                        report={report}
+                        isSelected={selectedReport?.id === report.id}
+                        onSelect={() => selectReport(report)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Preview panel — 35%, desktop only (stacks below on mobile) */}
@@ -162,6 +212,7 @@ export function ReportsPage({
           isOpen={isExportOpen}
           onClose={() => setIsExportOpen(false)}
           surveyId={activeSurveyId}
+          surveyName={surveys.find((s) => s.id === activeSurveyId)?.title}
           onGenerated={handleGenerated}
         />
       )}

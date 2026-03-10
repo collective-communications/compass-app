@@ -22,6 +22,8 @@ export interface UseReportGenerationReturn {
   status: ReportGenerationStatus | null;
   progress: number;
   fileUrl: string | null;
+  fileSize: number | null;
+  pageCount: number | null;
   isGenerating: boolean;
   error: string | null;
   reset: () => void;
@@ -35,6 +37,8 @@ export function useReportGeneration(): UseReportGenerationReturn {
   const [status, setStatus] = useState<ReportGenerationStatus | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [fileSize, setFileSize] = useState<number | null>(null);
+  const [pageCount, setPageCount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -64,6 +68,8 @@ export function useReportGeneration(): UseReportGenerationReturn {
 
           if (report.status === 'completed') {
             setFileUrl(report.fileUrl);
+            setFileSize(report.fileSize);
+            setPageCount(report.pageCount);
             stopPolling();
           } else if (report.status === 'failed') {
             setError(report.error ?? 'Report generation failed.');
@@ -94,6 +100,8 @@ export function useReportGeneration(): UseReportGenerationReturn {
       setStatus('queued');
       setProgress(0);
       setFileUrl(null);
+      setFileSize(null);
+      setPageCount(null);
       setError(null);
 
       try {
@@ -129,6 +137,8 @@ export function useReportGeneration(): UseReportGenerationReturn {
     setStatus(null);
     setProgress(0);
     setFileUrl(null);
+    setFileSize(null);
+    setPageCount(null);
     setError(null);
   }, [stopPolling]);
 
@@ -146,6 +156,8 @@ export function useReportGeneration(): UseReportGenerationReturn {
     status,
     progress,
     fileUrl,
+    fileSize,
+    pageCount,
     isGenerating,
     error,
     reset,

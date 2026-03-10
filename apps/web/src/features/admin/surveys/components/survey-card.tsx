@@ -5,6 +5,7 @@
  */
 
 import type { ReactElement } from 'react';
+import { Settings, Edit, Link, BarChart3 } from 'lucide-react';
 import type { SurveyStatus } from '@compass/types';
 import type { SurveyListItem } from '../services/admin-survey-service';
 
@@ -82,6 +83,46 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
           <span>{survey.completionPercent}% complete</span>
         )}
         {daysRemaining && <span>{daysRemaining}</span>}
+      </div>
+
+      {/* Action buttons */}
+      <div className="mt-4 flex items-center gap-2 border-t border-[var(--grey-100)] pt-4">
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); }}
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          aria-label="Configure survey"
+        >
+          <Settings size={14} />
+          Configure
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); }}
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          aria-label="Edit questions"
+        >
+          <Edit size={14} />
+          Edit Questions
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); }}
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          aria-label="Copy survey link"
+        >
+          <Link size={14} />
+          Copy Link
+        </button>
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); }}
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          aria-label="View results"
+        >
+          <BarChart3 size={14} />
+          View Results
+        </button>
       </div>
     </button>
   );

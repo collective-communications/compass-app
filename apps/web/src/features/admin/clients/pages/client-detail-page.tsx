@@ -12,6 +12,10 @@ import { KeyMetricsCard } from '../components/key-metrics-card';
 import { AdminNotes } from '../components/admin-notes';
 import { ConsultantCard } from '../components/consultant-card';
 import { EditOrgModal } from '../components/edit-org-modal';
+import { ClientUsersTab } from '../components/client-users-tab';
+import { DrilldownHeader } from '../../../../components/navigation/drilldown-header';
+import { SurveyListPage } from '../../surveys';
+import { useAuthStore } from '../../../../stores/auth-store';
 
 export interface ClientDetailPageProps {
   orgId: string;
@@ -27,9 +31,10 @@ const TABS: Array<{ id: DetailTab; label: string }> = [
   { id: 'users', label: 'Users' },
 ];
 
-export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): ReactElement {
+export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPageProps): ReactElement {
   const { data: organization, isLoading, error } = useOrganization(orgId);
   const archiveOrg = useArchiveOrganization(orgId);
+  const user = useAuthStore((s) => s.user);
 
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -59,13 +64,7 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
   if (error || !organization) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-6">
-        <button
-          type="button"
-          onClick={onBack}
-          className="mb-4 text-sm font-medium text-[var(--color-core)] hover:underline"
-        >
-          &larr; Back
-        </button>
+        <DrilldownHeader backTo="/admin/clients" backLabel="Back to clients" title="Client not found" />
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
           Failed to load client. Please try again.
         </div>
@@ -90,18 +89,7 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
       )}
 
       {/* Drilldown header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={onBack}
-            className="text-sm font-medium text-[var(--color-core)] hover:underline"
-          >
-            &larr; Back
-          </button>
-          <h1 className="text-2xl font-bold text-[var(--grey-900)]">{organization.name}</h1>
-        </div>
-
+      <DrilldownHeader backTo="/admin/clients" backLabel="Back to clients" title={organization.name}>
         {/* Action menu */}
         <div className="relative">
           <button
@@ -151,7 +139,7 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
             </div>
           )}
         </div>
-      </div>
+      </DrilldownHeader>
 
       {/* Underline tab bar */}
       <div className="mb-6 border-b border-[var(--grey-100)]" role="tablist" aria-label="Client detail tabs">
@@ -233,13 +221,19 @@ export function ClientDetailPage({ orgId, onBack }: ClientDetailPageProps): Reac
 
       {activeTab === 'surveys' && (
         <div role="tabpanel" aria-label="Surveys">
-          <p className="py-12 text-center text-sm text-[var(--grey-500)]">Surveys tab content will be added in a future wave.</p>
+          <SurveyListPage
+            organizationId={orgId}
+            userId={user?.id ?? ''}
+            onSelectSurvey={() => {
+              // Survey detail navigation handled at route level
+            }}
+          />
         </div>
       )}
 
       {activeTab === 'users' && (
         <div role="tabpanel" aria-label="Users">
-          <p className="py-12 text-center text-sm text-[var(--grey-500)]">Users tab content will be added in a future wave.</p>
+          <ClientUsersTab organizationId={orgId} />
         </div>
       )}
 

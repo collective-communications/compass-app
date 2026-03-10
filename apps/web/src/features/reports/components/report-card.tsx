@@ -1,6 +1,7 @@
 /**
  * Report list item card. Displays format, date, size, page count, and download.
  * Ready reports have a green left border (#2E7D32). Failed reports show inline error.
+ * Download button is always visible on ready reports (critical for mobile access).
  */
 
 import type { ReactElement } from 'react';
@@ -12,9 +13,6 @@ interface ReportCardProps {
   /** Whether this card is selected in the preview panel */
   isSelected: boolean;
   onSelect: () => void;
-  onDelete: () => void;
-  /** Whether the current user can only download (not delete) */
-  canDelete: boolean;
 }
 
 /** Format bytes into a readable string */
@@ -50,8 +48,6 @@ export function ReportCard({
   report,
   isSelected,
   onSelect,
-  onDelete,
-  canDelete,
 }: ReportCardProps): ReactElement {
   const isReady = report.status === 'completed';
   const isFailed = report.status === 'failed';
@@ -75,30 +71,24 @@ export function ReportCard({
         isSelected ? 'ring-2 ring-[#0A3B4F]' : 'hover:bg-[#FAFAFA]',
       ].join(' ')}
     >
-      {/* Top row: format badge + date */}
+      {/* Top row: format badge + date + download */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FormatBadge format={report.format} />
           <span className="text-sm text-[var(--grey-500)]">{formatDate(report.createdAt)}</span>
         </div>
 
-        <div className="flex items-center gap-2">
-          {canDelete && (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              aria-label="Delete report"
-              className="rounded-md p-1 text-[var(--grey-400)] hover:bg-[var(--grey-50)] hover:text-[#D32F2F]"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                <path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14" />
-              </svg>
-            </button>
-          )}
-        </div>
+        {isReady && report.fileUrl !== null && (
+          <a
+            href={report.fileUrl}
+            download
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`Download ${report.format.toUpperCase()} report`}
+            className="rounded-md p-1.5 text-[var(--grey-400)] transition-colors hover:bg-[var(--grey-100)] hover:text-[#0A3B4F]"
+          >
+            <Download size={16} aria-hidden="true" />
+          </a>
+        )}
       </div>
 
       {/* Bottom row: metadata */}

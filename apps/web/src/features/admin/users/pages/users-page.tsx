@@ -37,6 +37,7 @@ export function UsersPage(): ReactElement {
   const updateRole = useUpdateRole();
   const removeUser = useRemoveUser();
 
+  const [showInviteForm, setShowInviteForm] = useState(false);
   const [roleErrors, setRoleErrors] = useState<Record<string, string>>({});
   const [removeErrors, setRemoveErrors] = useState<Record<string, string>>({});
 
@@ -119,18 +120,29 @@ export function UsersPage(): ReactElement {
     <div className="mx-auto max-w-5xl px-4 py-6">
       <h1 className="mb-6 text-2xl font-bold text-[var(--grey-900)]">Team</h1>
 
-      {/* Invite form */}
+      {/* Invite toggle + form */}
       <div className="mb-6">
-        <InviteForm
-          availableRoles={CCC_ROLES}
-          defaultRole="ccc_member"
-          existingEmails={existingEmails}
-          pendingEmails={pendingEmails}
-          onInvite={handleInvite}
-          isPending={createInvite.isPending}
-          error={createInvite.error?.message ?? null}
-          lastCreated={createInvite.data ?? null}
-        />
+        {showInviteForm ? (
+          <InviteForm
+            availableRoles={CCC_ROLES}
+            defaultRole="ccc_member"
+            existingEmails={existingEmails}
+            pendingEmails={pendingEmails}
+            onInvite={handleInvite}
+            isPending={createInvite.isPending}
+            error={createInvite.error?.message ?? null}
+            lastCreated={createInvite.data ?? null}
+            onClose={() => setShowInviteForm(false)}
+          />
+        ) : (
+          <button
+            type="button"
+            onClick={() => setShowInviteForm(true)}
+            className="rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90"
+          >
+            + Invite
+          </button>
+        )}
       </div>
 
       {/* Two-column layout: members left (560px), invitations right */}

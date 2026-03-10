@@ -8,6 +8,8 @@ import type { ReactElement } from 'react';
 export interface ReportSurveyOption {
   id: string;
   title: string;
+  /** Survey lifecycle status — used to group reports into active vs previous */
+  status?: 'active' | 'completed' | 'closed';
 }
 
 interface SurveyPickerProps {

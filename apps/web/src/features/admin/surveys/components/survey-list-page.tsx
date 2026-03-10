@@ -6,6 +6,7 @@
 import { useState, useCallback, type ReactElement } from 'react';
 import { SurveyStatus } from '@compass/types';
 import { PillTabNav, type PillTab } from '../../../../components/navigation/pill-tab-nav';
+import { DrilldownHeader } from '../../../../components/navigation/drilldown-header';
 import { useSurveys } from '../hooks/use-surveys';
 import { useCreateSurvey } from '../hooks/use-create-survey';
 import { SurveyCard } from './survey-card';
@@ -14,6 +15,10 @@ interface SurveyListPageProps {
   organizationId: string;
   userId: string;
   onSelectSurvey: (surveyId: string) => void;
+  /** When provided, renders a DrilldownHeader with back navigation to the client. */
+  clientName?: string;
+  /** Route to navigate back to. Defaults to /admin/clients. */
+  backTo?: string;
 }
 
 const STATUS_PILLS: PillTab[] = [
@@ -28,6 +33,8 @@ export function SurveyListPage({
   organizationId,
   userId,
   onSelectSurvey,
+  clientName,
+  backTo,
 }: SurveyListPageProps): ReactElement {
   const [activeFilter, setActiveFilter] = useState('all');
   const statusFilter = activeFilter === 'all' ? undefined : (activeFilter as SurveyStatus);
@@ -56,8 +63,15 @@ export function SurveyListPage({
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
+      {clientName && (
+        <DrilldownHeader
+          backTo={backTo ?? '/admin/clients'}
+          backLabel="Back to client"
+          title={`${clientName} — Surveys`}
+        />
+      )}
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[var(--grey-900)]">Surveys</h1>
+        {!clientName && <h1 className="text-2xl font-bold text-[var(--grey-900)]">Surveys</h1>}
         <button
           type="button"
           onClick={handleCreateSurvey}
