@@ -22,7 +22,9 @@ export class AdminPage {
     this.surveysTab = page.getByRole('tab', { name: /surveys/i });
     this.clientsTab = page.getByRole('tab', { name: /clients/i });
     this.newSurveyButton = page.getByRole('button', { name: /new survey/i });
-    this.surveyCards = page.getByTestId('survey-card');
+    this.surveyCards = page.getByTestId('survey-card').or(
+      page.locator('button').filter({ hasText: /responses|remaining|active|draft|closed|archived/i }),
+    );
     this.dimensionNavigator = page.getByTestId('dimension-navigator');
     this.questionRows = page.getByTestId('question-row');
     this.deployButton = page.getByRole('button', { name: /deploy/i });

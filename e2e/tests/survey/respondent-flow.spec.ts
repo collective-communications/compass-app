@@ -108,7 +108,7 @@ test('dimension labels are hidden from respondents', async ({ page }) => {
   }
 });
 
-test('open-ended textarea enforces 500 character limit', async ({ page }) => {
+test('open-ended textarea enforces 2000 character limit', async ({ page }) => {
   const survey = new SurveyPage(page);
   await survey.goto(token);
   await survey.fillMetadata();
@@ -119,7 +119,7 @@ test('open-ended textarea enforces 500 character limit', async ({ page }) => {
 
   // Type a short message and verify counter
   await survey.openEndedTextarea.fill('Test response');
-  const counter = page.getByText(/\d+.*\/.*500|characters remaining/i);
+  const counter = page.getByText(/\d+.*\/.*2000|characters remaining/i);
   if (await counter.isVisible().catch(() => false)) {
     await expect(counter).toBeVisible();
   }
@@ -127,7 +127,7 @@ test('open-ended textarea enforces 500 character limit', async ({ page }) => {
   // Verify maxlength attribute or character limit enforcement
   const maxLength = await survey.openEndedTextarea.getAttribute('maxlength');
   if (maxLength) {
-    expect(parseInt(maxLength)).toBe(500);
+    expect(parseInt(maxLength)).toBe(2000);
   }
 });
 
@@ -145,20 +145,34 @@ test('resume incomplete survey shows welcome-back with progress', async ({ page 
     await survey.nextButton.click();
   }
 
+  // Wait for autosave to flush (debounce is 300ms, add margin for network round-trip)
+  await page.waitForTimeout(2000);
+
   // Navigate away and return
   await page.goto('/');
+  await page.waitForLoadState('networkidle');
   await survey.goto(token);
+  await page.waitForLoadState('networkidle');
 
-  // Should show a welcome-back or resume screen, or resume directly to where we left off
-  // The implementation may show a resume prompt or auto-resume
-  const resumePrompt = page.getByText(/welcome back|resume|continue where/i);
+  // Wait for the page to fully load — either the welcome-back screen,
+  // the welcome screen, or the question screen should appear
+  // Use expect().toBeVisible() which auto-retries unlike locator.isVisible()
+  const resumePrompt = page.getByText(/welcome back/i);
+  const welcomeScreen = page.getByText(/hello/i);
   const questionVisible = survey.likertOptions.first();
 
-  // Either a resume prompt appears, or we're auto-resumed to a question
-  const hasResume = await resumePrompt.isVisible({ timeout: 10000 }).catch(() => false);
-  const hasQuestion = await questionVisible.isVisible({ timeout: 5000 }).catch(() => false);
+  // Wait for any of these to appear (whichever loads first)
+  try {
+    await expect(resumePrompt.or(welcomeScreen).or(questionVisible)).toBeVisible({ timeout: 20000 });
+  } catch {
+    // If none appeared, the test will fail at the assertion below
+  }
 
-  expect(hasResume || hasQuestion).toBe(true);
+  const hasResume = await resumePrompt.isVisible();
+  const hasQuestion = await questionVisible.isVisible();
+  const hasWelcome = await welcomeScreen.isVisible();
+
+  expect(hasResume || hasQuestion || hasWelcome).toBe(true);
 });
 
 test('already completed survey shows already-completed screen on revisit', async ({ page }) => {

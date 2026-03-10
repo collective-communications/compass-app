@@ -16,6 +16,9 @@ const TEST_DIRECTOR_PASSWORD = 'Test1234!';
 const TEST_MANAGER_EMAIL = 'e2e-manager@test.compassapp.dev';
 const TEST_MANAGER_PASSWORD = 'Test1234!';
 
+const TEST_CCC_MEMBER_EMAIL = 'e2e-ccc-member@test.compassapp.dev';
+const TEST_CCC_MEMBER_PASSWORD = 'Test1234!';
+
 setup('authenticate as admin', async ({ page }) => {
   await ensureTestUser(TEST_ADMIN_EMAIL, 'ccc_admin', SEED_ORG_ID, TEST_ADMIN_PASSWORD);
 
@@ -64,4 +67,15 @@ setup('authenticate as manager', async ({ page }) => {
 
   await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
   await page.context().storageState({ path: 'e2e/.auth/manager.json' });
+});
+
+setup('authenticate as ccc_member', async ({ page }) => {
+  await ensureTestUser(TEST_CCC_MEMBER_EMAIL, 'ccc_member', SEED_ORG_ID, TEST_CCC_MEMBER_PASSWORD);
+
+  const loginPage = new LoginPage(page);
+  await loginPage.goto();
+  await loginPage.login(TEST_CCC_MEMBER_EMAIL, TEST_CCC_MEMBER_PASSWORD);
+
+  await page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 15000 });
+  await page.context().storageState({ path: 'e2e/.auth/ccc-member.json' });
 });
