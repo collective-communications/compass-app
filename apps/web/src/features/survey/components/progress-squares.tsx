@@ -59,7 +59,7 @@ export function ProgressSquares({
       let closest = -1;
       let closestDist = Infinity;
       for (let i = 0; i < buttons.length; i++) {
-        const rect = buttons[i].getBoundingClientRect();
+        const rect = buttons[i]!.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
         const dist = Math.hypot(e.clientX - cx, e.clientY - cy);

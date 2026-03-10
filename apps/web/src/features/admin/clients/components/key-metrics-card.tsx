@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { OrganizationSummary } from '@compass/types';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../../components/ui/card';
 
 export interface KeyMetricsCardProps {
   organization: OrganizationSummary;

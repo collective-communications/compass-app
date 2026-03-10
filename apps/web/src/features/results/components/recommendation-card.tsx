@@ -3,7 +3,7 @@
  * Colored left border indicates severity.
  */
 
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../components/ui/card';
 
 interface RecommendationCardProps {
   title: string;

@@ -6,7 +6,7 @@
 
 import type { ReactElement } from 'react';
 import type { ActiveSurvey } from '../hooks/use-dashboard-data';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../components/ui/card';
 
 interface ActiveSurveyCardProps {
   data: ActiveSurvey;

@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { DialogueResponse } from '../../types';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../../components/ui/card';
 
 interface ResponseCardProps {
   response: DialogueResponse;

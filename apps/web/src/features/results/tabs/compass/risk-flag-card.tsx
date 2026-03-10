@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { RiskFlag } from '@compass/scoring';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../../components/ui/card';
 
 interface RiskFlagCardProps {
   flag: RiskFlag;

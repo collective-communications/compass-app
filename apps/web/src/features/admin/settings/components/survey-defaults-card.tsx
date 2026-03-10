@@ -7,7 +7,7 @@
 import { useState, useCallback, type ReactElement, type ChangeEvent } from 'react';
 import type { SystemSettings, SaveStatus } from '../hooks/use-system-settings';
 import { AutoSaveIndicator, type AutoSaveStatus } from '../../surveys/components/auto-save-indicator';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../../components/ui/card';
 
 interface SurveyDefaultsCardProps {
   settings: SystemSettings;

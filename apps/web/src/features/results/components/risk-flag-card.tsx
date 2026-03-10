@@ -3,7 +3,7 @@
  * Severity levels: critical (red), high (orange), medium (yellow), healthy (green).
  */
 
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../components/ui/card';
 
 interface RiskFlagCardProps {
   title: string;

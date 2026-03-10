@@ -37,7 +37,7 @@ export function RecommendationsTab({ surveyId }: RecommendationsTabProps): React
   }
 
   const clampedIndex = Math.min(activeIndex, sorted.length - 1);
-  const activeRec = sorted[clampedIndex];
+  const activeRec = sorted[clampedIndex]!;
 
   return (
     <div className="flex flex-col gap-4">

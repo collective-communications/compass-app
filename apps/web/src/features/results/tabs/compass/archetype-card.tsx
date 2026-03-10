@@ -5,7 +5,7 @@
 
 import { useState, type ReactElement } from 'react';
 import type { ArchetypeMatch } from '@compass/scoring';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../../components/ui/card';
 
 interface ArchetypeCardProps {
   match: ArchetypeMatch;

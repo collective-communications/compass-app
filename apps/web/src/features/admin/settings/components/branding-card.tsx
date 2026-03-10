@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { SystemSettings } from '../hooks/use-system-settings';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../../components/ui/card';
 
 interface BrandingCardProps {
   settings: SystemSettings;

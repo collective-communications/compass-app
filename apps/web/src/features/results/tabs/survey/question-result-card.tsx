@@ -7,7 +7,7 @@
 import type { ReactElement } from 'react';
 import type { QuestionScoreRow } from '../../types';
 import { LikertBarChart } from '../../components/likert-bar-chart';
-import { Card } from '@/components/ui/card';
+import { Card } from '../../../../components/ui/card';
 
 interface QuestionResultCardProps {
   question: QuestionScoreRow;
