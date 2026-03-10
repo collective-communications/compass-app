@@ -43,7 +43,7 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
-  const { isLoading: isDownloading, error: downloadError, fetchUrl } = useReportDownload();
+  const { isLoading: isDownloading, error: downloadError, printPdf } = useReportDownload();
 
   if (report === null) {
     return (
@@ -63,11 +63,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
 
   async function handleDownload(): Promise<void> {
     if (report?.storagePath === null || report?.storagePath === undefined) return;
-
-    const url = await fetchUrl(report.storagePath);
-    if (url !== null) {
-      window.open(url, '_blank');
-    }
+    await printPdf(report.storagePath);
   }
 
   return (

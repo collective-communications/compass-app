@@ -20,6 +20,7 @@ import {
   type ReportConfig,
 } from '@compass/types';
 import { useReportGeneration } from '../hooks/use-report-generation';
+import { fetchAndPrint } from '../../../lib/print-to-pdf';
 
 // ─── Focus Trap ─────────────────────────────────────────────────────────────
 
@@ -390,14 +391,14 @@ export function ExportModal({
                 Your report has been generated and is ready for download.
               </p>
               {generation.fileUrl !== null && (
-                <a
-                  href={generation.fileUrl}
-                  download
+                <button
+                  type="button"
+                  onClick={() => void fetchAndPrint(generation.fileUrl!)}
                   className="flex items-center gap-2 rounded-md bg-[#0A3B4F] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
                 >
                   <Download size={16} aria-hidden="true" />
                   Download {format.toUpperCase()}
-                </a>
+                </button>
               )}
             </div>
           )}

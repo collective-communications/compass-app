@@ -5,6 +5,7 @@
 
 import { useCallback, useState } from 'react';
 import { getReportDownloadUrl } from '../services/report-api';
+import { fetchAndPrint } from '../../../lib/print-to-pdf';
 
 export interface UseReportDownloadReturn {
   /** Signed download URL, null until fetched */
@@ -15,9 +16,11 @@ export interface UseReportDownloadReturn {
   error: string | null;
   /** Fetch (or refresh) the signed URL for the given storage path */
   fetchUrl: (storagePath: string) => Promise<string | null>;
+  /** Fetch the report HTML and open the browser print/save-as-PDF dialog */
+  printPdf: (storagePath: string) => Promise<void>;
 }
 
-/** Provides on-demand signed URL generation for report downloads */
+/** Provides on-demand signed URL generation and print-to-PDF for report downloads */
 export function useReportDownload(): UseReportDownloadReturn {
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -42,5 +45,21 @@ export function useReportDownload(): UseReportDownloadReturn {
     }
   }, []);
 
-  return { downloadUrl, isLoading, error, fetchUrl };
+  const printPdf = useCallback(async (storagePath: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const url = await getReportDownloadUrl(storagePath);
+      await fetchAndPrint(url);
+    } catch (printError) {
+      const message =
+        printError instanceof Error ? printError.message : 'Failed to prepare report for printing.';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return { downloadUrl, isLoading, error, fetchUrl, printPdf };
 }
