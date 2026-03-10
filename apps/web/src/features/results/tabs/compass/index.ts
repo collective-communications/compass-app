@@ -8,6 +8,7 @@ export { CoreHealthIndicator } from './core-health-indicator';
 export { DimensionDetailPanel } from './dimension-detail-panel';
 export { DimensionNav } from './dimension-nav';
 export { DimensionNavItem } from './dimension-nav-item';
+export { KeyFindingsPanel } from './key-findings-panel';
 export { ScoreRing } from './score-ring';
 
 export type { DimensionNavId } from './dimension-nav-item';

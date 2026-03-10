@@ -16,12 +16,11 @@ export const SEVERITY_COLORS: Record<SeverityLevel, string> = {
   healthy: '#2E7D32',
 } as const;
 
-/** Sort order for severity (most severe first). */
+/** Sort order for severity (most severe first). Excludes "healthy" — filter shows only actionable severities. */
 export const SEVERITY_ORDER: SeverityLevel[] = [
   'critical',
   'high',
   'medium',
-  'healthy',
 ] as const;
 
 /** Display labels for severity pills. */

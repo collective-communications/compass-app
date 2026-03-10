@@ -6,6 +6,7 @@
 
 import { useState, useMemo, type ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
+import type { DimensionScoreMap } from '@compass/scoring';
 import { useQuestionScores } from '../../hooks/use-question-scores';
 import { useOverallScores } from '../../hooks/use-overall-scores';
 import { DimensionHeaderCard } from './dimension-header-card';
@@ -90,6 +91,63 @@ export function SurveyDimensionsTab({
           />
         </>
       )}
+    </div>
+  );
+}
+
+/** Severity label styling for dimension score ranges. */
+const SCORE_LABELS: Array<{ min: number; label: string; className: string }> = [
+  { min: 3.5, label: 'Healthy', className: 'bg-green-50 text-green-700' },
+  { min: 2.5, label: 'Moderate', className: 'bg-yellow-50 text-yellow-700' },
+  { min: 1.5, label: 'Needs attention', className: 'bg-orange-50 text-orange-700' },
+  { min: 0, label: 'Critical', className: 'bg-red-50 text-red-700' },
+];
+
+function getScoreLabel(score: number): { label: string; className: string } {
+  return SCORE_LABELS.find((s) => score >= s.min) ?? SCORE_LABELS[SCORE_LABELS.length - 1]!;
+}
+
+/** Insights panel content for the Survey Dimensions tab — dimension score summary list. */
+export function SurveyInsightsContent({
+  scores,
+}: {
+  scores: DimensionScoreMap;
+}): ReactElement {
+  return (
+    <div className="flex flex-col gap-4 py-4">
+      <h3 className="text-sm font-semibold text-[var(--grey-900)]">Dimension Scores</h3>
+      <ul className="flex flex-col gap-3">
+        {DIMENSIONS.map((dim) => {
+          const dimScore = scores[dim.code]?.score ?? 0;
+          const { label, className } = getScoreLabel(dimScore);
+          return (
+            <li
+              key={dim.code}
+              className="flex items-center justify-between rounded-lg border border-[var(--grey-100)] px-3 py-2"
+            >
+              <div className="flex items-center gap-2">
+                <span
+                  className="inline-block h-3 w-3 rounded-full"
+                  style={{ backgroundColor: dim.color }}
+                  aria-hidden="true"
+                />
+                <span className="text-sm font-medium text-[var(--grey-900)]">{dim.label}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm tabular-nums text-[var(--grey-700)]">
+                  {dimScore.toFixed(1)}
+                </span>
+                <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${className}`}>
+                  {label}
+                </span>
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+      <p className="text-xs leading-relaxed text-[#616161]">
+        Select a dimension above to explore individual question scores and response distributions.
+      </p>
     </div>
   );
 }

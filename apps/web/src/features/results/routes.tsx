@@ -14,7 +14,7 @@
  *   /results/$surveyId/recommendations — RecommendationsTab
  */
 
-import type { ReactElement } from 'react';
+import { createContext, useContext, useState, useCallback, type ReactElement } from 'react';
 import { createRoute, Outlet, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import type { SegmentType } from '@compass/scoring';
@@ -24,7 +24,8 @@ import { AppShell } from '../../components/shells/app-shell';
 import { ResultsLayout } from './components/results-layout';
 import { ResultsSkeleton } from './components/results-skeleton';
 import { CompassTab, CompassInsightsContent } from './tabs/compass';
-import { SurveyDimensionsTab } from './tabs/survey';
+import type { DimensionNavId } from './tabs/compass';
+import { SurveyDimensionsTab, SurveyInsightsContent } from './tabs/survey';
 import { GroupsTab, GroupsInsights } from './tabs/groups';
 import { DialogueTab, DialogueInsightsContent } from './tabs/dialogue';
 import { RecommendationsTab, RecommendationsInsightsContent } from './tabs/recommendations';
@@ -33,6 +34,22 @@ import { useArchetype } from './hooks/use-archetype';
 import { useRiskFlags } from './hooks/use-risk-flags';
 import { useScoredSurveys } from './hooks/use-scored-surveys';
 import type { ResultsTabId } from './types';
+
+/** Context for sharing activeDimension state between layout and compass tab route. */
+interface DimensionContextValue {
+  activeDimension: DimensionNavId;
+  setActiveDimension: (dimension: DimensionNavId) => void;
+}
+
+const DimensionContext = createContext<DimensionContextValue>({
+  activeDimension: 'overview',
+  setActiveDimension: () => {},
+});
+
+/** Hook for compass tab route to consume the lifted dimension state. */
+export function useActiveDimension(): DimensionContextValue {
+  return useContext(DimensionContext);
+}
 
 /** Map route path segments to tab IDs. */
 const PATH_TO_TAB: Record<string, ResultsTabId> = {
@@ -63,6 +80,12 @@ function ResultsLayoutRoute(): ReactElement {
   const { surveyId } = useParams({ strict: false }) as { surveyId: string };
   const navigate = useNavigate();
   const activeTab = useActiveTab();
+  const [activeDimension, setActiveDimension] = useState<DimensionNavId>('overview');
+
+  /** Reset dimension selection when switching tabs. */
+  const handleDimensionChange = useCallback((dimension: DimensionNavId) => {
+    setActiveDimension(dimension);
+  }, []);
 
   // Fetch scored surveys for the picker (organization ID derived server-side via RLS)
   const { data: surveys = [], isLoading: isSurveysLoading } = useScoredSurveys('');
@@ -75,6 +98,7 @@ function ResultsLayoutRoute(): ReactElement {
   const isContentLoading = scoresLoading || archetypeLoading || riskFlagsLoading;
 
   function handleTabChange(tabId: ResultsTabId): void {
+    setActiveDimension('overview');
     void navigate({ to: `/results/${surveyId}/${tabId}` });
   }
 
@@ -88,7 +112,16 @@ function ResultsLayoutRoute(): ReactElement {
 
     switch (activeTab) {
       case 'compass':
-        return <CompassInsightsContent scores={scores} riskFlags={riskFlags} activeDimension="overview" />;
+        return (
+          <CompassInsightsContent
+            scores={scores}
+            riskFlags={riskFlags}
+            activeDimension={activeDimension}
+            onViewRecommendations={() => void navigate({ to: `/results/${surveyId}/recommendations` })}
+          />
+        );
+      case 'survey':
+        return <SurveyInsightsContent scores={scores} />;
       case 'groups': {
         const groupsSearch = (typeof window !== 'undefined'
           ? Object.fromEntries(new URLSearchParams(window.location.search))
@@ -125,7 +158,9 @@ function ResultsLayoutRoute(): ReactElement {
         isContentLoading={isContentLoading}
         insightsContent={renderInsightsContent()}
       >
-        <Outlet />
+        <DimensionContext.Provider value={{ activeDimension, setActiveDimension: handleDimensionChange }}>
+          <Outlet />
+        </DimensionContext.Provider>
       </ResultsLayout>
     </AppShell>
   );
@@ -142,7 +177,16 @@ function CompassRoute(): ReactElement {
     return <ResultsSkeleton />;
   }
 
-  return <CompassTab scores={scores} archetype={archetype} riskFlags={riskFlags} />;
+  const { activeDimension, setActiveDimension } = useActiveDimension();
+  return (
+    <CompassTab
+      scores={scores}
+      archetype={archetype}
+      riskFlags={riskFlags}
+      activeDimension={activeDimension}
+      onDimensionChange={setActiveDimension}
+    />
+  );
 }
 
 /** Survey dimensions tab route component. */

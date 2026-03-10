@@ -17,12 +17,15 @@ import { ArchetypeCard } from './archetype-card';
 import { RiskFlagList } from './risk-flag-list';
 import { CoreHealthIndicator } from './core-health-indicator';
 import { DimensionDetailPanel } from './dimension-detail-panel';
+import { KeyFindingsPanel } from './key-findings-panel';
 import type { DimensionNavId } from './dimension-nav-item';
 
 interface CompassTabProps {
   scores: DimensionScoreMap;
   archetype: ArchetypeMatch;
   riskFlags: RiskFlag[];
+  activeDimension?: DimensionNavId;
+  onDimensionChange?: (dimension: DimensionNavId) => void;
 }
 
 /** Brand colors per compass dimension, matching the Compass component contract. */
@@ -52,19 +55,21 @@ function toCompassScores(
   }));
 }
 
-export function CompassTab({ scores, archetype, riskFlags }: CompassTabProps): ReactElement {
-  const [activeDimension, setActiveDimension] = useState<DimensionNavId>('overview');
+export function CompassTab({ scores, archetype, riskFlags, activeDimension: controlledDimension, onDimensionChange }: CompassTabProps): ReactElement {
+  const [localDimension, setLocalDimension] = useState<DimensionNavId>('overview');
+  const activeDimension = controlledDimension ?? localDimension;
+  const setActiveDimension = onDimensionChange ?? setLocalDimension;
 
   const selectedSegment: DimensionCode | null =
     activeDimension === 'overview' ? null : activeDimension;
 
   const handleSegmentClick = useCallback((dimension: DimensionCode) => {
-    setActiveDimension((prev) => (prev === dimension ? 'overview' : dimension));
-  }, []);
+    setActiveDimension(activeDimension === dimension ? 'overview' : dimension);
+  }, [activeDimension, setActiveDimension]);
 
   const handleDimensionSelect = useCallback((id: DimensionNavId) => {
     setActiveDimension(id);
-  }, []);
+  }, [setActiveDimension]);
 
   const compassScores = toCompassScores(scores);
   const coreScore = scores.core?.score ?? 0;
@@ -135,11 +140,23 @@ export function CompassInsightsContent({
   scores,
   riskFlags,
   activeDimension,
+  onViewRecommendations,
 }: {
   scores: DimensionScoreMap;
   riskFlags: RiskFlag[];
   activeDimension: DimensionNavId;
+  onViewRecommendations?: () => void;
 }): ReactElement {
+  if (activeDimension === 'overview') {
+    return (
+      <KeyFindingsPanel
+        scores={scores}
+        riskFlags={riskFlags}
+        onViewRecommendations={onViewRecommendations}
+      />
+    );
+  }
+
   return (
     <DimensionDetailPanel
       dimension={activeDimension}

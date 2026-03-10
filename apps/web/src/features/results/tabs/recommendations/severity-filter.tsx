@@ -1,74 +1,52 @@
 /**
- * SeverityFilter — horizontal pill bar for filtering
- * recommendations by severity level.
+ * RecommendationNav — horizontal pill bar for navigating between
+ * individual recommendations. Replaces the previous severity filter.
  */
 
 import type { ReactElement } from 'react';
-import type { RiskSeverity } from '@compass/scoring';
+import type { Recommendation } from '../../types';
 import {
   SEVERITY_COLORS,
-  SEVERITY_LABELS,
-  SEVERITY_ORDER,
+  type SeverityLevel,
 } from '../../lib/severity-mapping';
 
-type FilterValue = RiskSeverity | 'all';
-
-interface SeverityFilterProps {
-  activeFilter: FilterValue;
-  counts: Record<RiskSeverity, number>;
-  totalCount: number;
-  onFilterChange: (filter: FilterValue) => void;
+interface RecommendationNavProps {
+  recommendations: Recommendation[];
+  activeIndex: number;
+  onSelect: (index: number) => void;
 }
 
-/** Horizontal severity pill filter with colored dots and count badges. */
-export function SeverityFilter({
-  activeFilter,
-  counts,
-  totalCount,
-  onFilterChange,
-}: SeverityFilterProps): ReactElement {
+/** Horizontal pill navigation — one pill per recommendation. */
+export function RecommendationNav({
+  recommendations,
+  activeIndex,
+  onSelect,
+}: RecommendationNavProps): ReactElement {
   return (
-    <nav className="overflow-x-auto scrollbar-hide" aria-label="Filter by severity">
+    <nav className="overflow-x-auto scrollbar-hide" aria-label="Recommendation navigation">
       <ul className="flex items-center gap-1">
-        {/* All pill */}
-        <li>
-          <button
-            type="button"
-            onClick={() => onFilterChange('all')}
-            className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
-              activeFilter === 'all'
-                ? 'bg-[var(--grey-700)] text-white'
-                : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
-            }`}
-            aria-current={activeFilter === 'all' ? 'true' : undefined}
-            aria-label={`All recommendations (${totalCount})`}
-          >
-            All ({totalCount})
-          </button>
-        </li>
-
-        {SEVERITY_ORDER.map((level) => {
-          const count = counts[level] ?? 0;
-          const isActive = activeFilter === level;
+        {recommendations.map((rec, i) => {
+          const isActive = activeIndex === i;
+          const dotColor = SEVERITY_COLORS[rec.severity as SeverityLevel] ?? SEVERITY_COLORS.medium;
           return (
-            <li key={level}>
+            <li key={rec.id}>
               <button
                 type="button"
-                onClick={() => onFilterChange(level)}
+                onClick={() => onSelect(i)}
                 className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
                   isActive
                     ? 'bg-[var(--grey-700)] text-white'
                     : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
                 }`}
                 aria-current={isActive ? 'true' : undefined}
-                aria-label={`${SEVERITY_LABELS[level]} (${count})`}
+                aria-label={`Recommendation ${i + 1}: ${rec.title}`}
               >
                 <span
-                  className="inline-block h-2 w-2 rounded-full"
-                  style={{ backgroundColor: SEVERITY_COLORS[level] }}
+                  className="inline-block h-2 w-2 shrink-0 rounded-full"
+                  style={{ backgroundColor: dotColor }}
                   aria-hidden="true"
                 />
-                {SEVERITY_LABELS[level]} ({count})
+                {rec.title.length > 28 ? `${rec.title.slice(0, 26)}…` : rec.title}
               </button>
             </li>
           );
@@ -77,5 +55,3 @@ export function SeverityFilter({
     </nav>
   );
 }
-
-export type { FilterValue };

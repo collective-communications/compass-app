@@ -5,7 +5,9 @@
 
 import type { ReactElement } from 'react';
 import type { Recommendation } from '../../types';
-import type { FilterValue } from './severity-filter';
+import type { RiskSeverity } from '@compass/scoring';
+
+type FilterValue = RiskSeverity | 'all';
 import { severitySortKey } from '../../lib/severity-mapping';
 import { RecommendationCard } from './recommendation-card';
 
