@@ -36,6 +36,12 @@ export type {
 } from './report';
 
 export type {
+  TrustRungStatus,
+  TrustRungScore,
+  TrustLadderResult,
+} from './trust-ladder';
+
+export type {
   LikertValue,
   Dimension,
   SurveySettings,
@@ -51,6 +57,7 @@ export type {
   SurveyTemplate,
   MetadataConfig,
   DeploymentResolution,
+  SurveyRecipient,
   SurveyEngineConfig,
   SurveyEngineService,
 } from './survey';

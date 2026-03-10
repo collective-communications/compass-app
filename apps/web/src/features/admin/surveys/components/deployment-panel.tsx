@@ -5,6 +5,7 @@
 
 import { useState, useCallback, type ReactElement } from 'react';
 import type { Deployment, Survey } from '@compass/types';
+import { useRecipientStats, useSendInvitations } from '../hooks/use-recipients';
 
 export interface DeploymentPanelProps {
   deployment: Deployment;
@@ -105,6 +106,11 @@ export function DeploymentPanel({
         </p>
       </div>
 
+      {/* Send Invitations (email_invite deployments) */}
+      {deployment.type === 'email_invite' && (
+        <EmailInviteSection surveyId={survey.id} deploymentId={deployment.id} />
+      )}
+
       {/* Deactivate */}
       <div className="mt-6 border-t border-[var(--grey-100)] pt-4">
         <button
@@ -116,6 +122,51 @@ export function DeploymentPanel({
           {isPending ? 'Closing...' : 'Close Early'}
         </button>
       </div>
+    </div>
+  );
+}
+
+// ─── Email Invite Section ────────────────────────────────────────────────────
+
+function EmailInviteSection({
+  surveyId,
+  deploymentId,
+}: {
+  surveyId: string;
+  deploymentId: string;
+}): ReactElement {
+  const { data: stats } = useRecipientStats(surveyId);
+  const sendMutation = useSendInvitations();
+  const [result, setResult] = useState<{ sent: number; failed: number } | null>(null);
+
+  const handleSend = useCallback(async () => {
+    const data = await sendMutation.mutateAsync({ surveyId, deploymentId });
+    setResult({ sent: data.sent, failed: data.failed });
+  }, [surveyId, deploymentId, sendMutation]);
+
+  if (!stats || stats.pending === 0) return <></>;
+
+  return (
+    <div className="mt-4 border-t border-[var(--grey-100)] pt-4">
+      <p className="text-sm font-medium text-[var(--grey-700)]">Email Invitations</p>
+      <p className="mt-1 text-xs text-[var(--grey-500)]">
+        {stats.pending} pending recipient{stats.pending !== 1 ? 's' : ''} ready to receive invitations
+      </p>
+
+      {result && (
+        <p className="mt-2 text-xs text-[var(--grey-600)]">
+          Sent: {result.sent}{result.failed > 0 ? `, Failed: ${result.failed}` : ''}
+        </p>
+      )}
+
+      <button
+        type="button"
+        onClick={handleSend}
+        disabled={sendMutation.isPending}
+        className="mt-3 rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+      >
+        {sendMutation.isPending ? 'Sending...' : `Send Invitations (${stats.pending})`}
+      </button>
     </div>
   );
 }

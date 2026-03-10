@@ -7,6 +7,7 @@
 import { useRef, useEffect, useState, type ReactElement, type FormEvent } from 'react';
 import type { Survey, SurveySettings } from '@compass/types';
 import { DEFAULT_SURVEY_ENGINE_CONFIG } from '@compass/types';
+import { ReminderConfig } from './reminder-config';
 
 export interface SurveyConfigModalProps {
   /** Whether the modal is open */
@@ -31,6 +32,7 @@ export interface SurveyConfigFormData {
   opensAt: string;
   closesAt: string;
   settings: Partial<SurveySettings>;
+  reminderSchedule: number[];
 }
 
 function toDateInputValue(isoString: string | null): string {
@@ -58,6 +60,7 @@ export function SurveyConfigModal({
       ? DEFAULT_SURVEY_ENGINE_CONFIG.anonymityThreshold
       : DEFAULT_SURVEY_ENGINE_CONFIG.anonymityThreshold,
   );
+  const [reminderSchedule, setReminderSchedule] = useState<number[]>([]);
 
   // Validation
   const dateError =
@@ -100,6 +103,7 @@ export function SurveyConfigModal({
         welcomeMessage: null,
         completionMessage: null,
       },
+      reminderSchedule,
     };
   }
 
@@ -223,6 +227,9 @@ export function SurveyConfigModal({
             className="w-24 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
           />
         </div>
+
+        {/* Reminder Schedule */}
+        <ReminderConfig value={reminderSchedule} onChange={setReminderSchedule} />
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 border-t border-[var(--grey-100)] pt-4">

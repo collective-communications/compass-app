@@ -214,6 +214,19 @@ export interface SurveyTemplate {
   isActive: boolean;
 }
 
+/** Survey email recipient for tracked/email deployments */
+export interface SurveyRecipient {
+  id: string;
+  surveyId: string;
+  email: string;
+  name: string | null;
+  segmentMetadata: Record<string, string>;
+  status: 'pending' | 'invited' | 'completed' | 'bounced';
+  invitationSentAt: string | null;
+  reminderSentAt: string | null;
+  createdAt: string;
+}
+
 /** Per-organization metadata field configuration */
 export interface MetadataConfig {
   departments: string[];
