@@ -80,7 +80,7 @@ export function createSurveyEngineAdapter(): Pick<
     ): Promise<SurveyResponse | null> {
       const { data, error } = await supabase
         .from('responses')
-        .select('*')
+        .select('*, answers(question_id, likert_value, open_text_value)')
         .eq('deployment_id', deploymentId)
         .eq('id', sessionToken)
         .maybeSingle();
@@ -89,7 +89,7 @@ export function createSurveyEngineAdapter(): Pick<
         return null;
       }
 
-      return mapResponse(data);
+      return mapResponseWithAnswers(data);
     },
 
     async getMetadataConfig(organizationId: string): Promise<MetadataConfig> {
@@ -312,6 +312,34 @@ function mapResponse(row: any): SurveyResponse {
     surveyId: row.survey_id,
     deploymentId: row.deployment_id,
     answers: row.answers,
+    metadata: row.metadata,
+    completedAt: row.completed_at,
+    ipHash: row.ip_hash,
+    userAgent: row.user_agent,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+/** Map response row with joined answers from the answers table */
+function mapResponseWithAnswers(row: any): SurveyResponse {
+  // Build answers map from the joined answers rows
+  const answersArray = Array.isArray(row.answers) ? row.answers : [];
+  const answers: Record<string, number | string> = {};
+
+  for (const a of answersArray) {
+    if (a.likert_value != null) {
+      answers[a.question_id] = a.likert_value;
+    } else if (a.open_text_value != null) {
+      answers[a.question_id] = a.open_text_value;
+    }
+  }
+
+  return {
+    id: row.id,
+    surveyId: row.survey_id,
+    deploymentId: row.deployment_id,
+    answers,
     metadata: row.metadata,
     completedAt: row.completed_at,
     ipHash: row.ip_hash,
