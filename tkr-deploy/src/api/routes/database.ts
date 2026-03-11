@@ -8,12 +8,27 @@ export function registerDatabaseRoutes(
 ): void {
   router.get('/api/database/health', async () => {
     const health = await supabase.healthCheck();
-    return jsonSuccess(health);
+    const details = health.details as Record<string, string> | undefined;
+    return jsonSuccess({
+      status: health.status === 'healthy' ? 'connected' : 'disconnected',
+      projectRef: details?.projectRef ?? '',
+      region: details?.region ?? 'unknown',
+      version: details?.version ?? 'unknown',
+    });
   });
 
   router.get('/api/database/migrations', async () => {
     const migrations = await supabase.getMigrations();
-    return jsonSuccess(migrations);
+    // Normalize MigrationEntry[] → UI MigrationsData shape
+    const applied = migrations.filter((m) => m.status === 'applied').length;
+    return jsonSuccess({
+      applied,
+      total: migrations.length,
+      migrations: migrations.map((m) => ({
+        name: m.filename,
+        applied: m.status === 'applied',
+      })),
+    });
   });
 
   router.post('/api/database/migrations/push', async () => {
@@ -23,7 +38,17 @@ export function registerDatabaseRoutes(
 
   router.get('/api/database/functions', async () => {
     const functions = await supabase.getEdgeFunctions();
-    return jsonSuccess(functions);
+    // Normalize EdgeFunction[] → UI FunctionsData shape
+    const deployed = functions.filter((f) => f.deployed).length;
+    return jsonSuccess({
+      deployed,
+      total: functions.length,
+      functions: functions.map((f) => ({
+        name: f.name,
+        deployed: f.deployed,
+        missingSecrets: f.requiredSecrets ?? [],
+      })),
+    });
   });
 
   router.post('/api/database/functions/deploy', async (req) => {
@@ -44,13 +69,28 @@ export function registerDatabaseRoutes(
     return jsonSuccess(result);
   });
 
+  router.post('/api/database/functions/:name/deploy', async (_req, params) => {
+    await supabase.deployFunction(params.name);
+    return jsonSuccess({ deployed: params.name });
+  });
+
+  router.post('/api/database/functions/deploy-all', async () => {
+    const result = await supabase.deployAllFunctions();
+    return jsonSuccess(result);
+  });
+
   router.get('/api/database/extensions', async () => {
     const status = await supabase.getExtensionStatus('vector');
-    return jsonSuccess(status);
+    // Normalize { installed, version } → UI ExtensionData shape
+    return jsonSuccess({
+      pgvector: status.installed ? 'enabled' : 'available',
+    });
   });
 
   router.post('/api/database/extensions/:name/enable', async (_req, params) => {
-    await supabase.enableExtension(params.name);
+    // UI uses "pgvector" but the Postgres extension name is "vector"
+    const extName = params.name === 'pgvector' ? 'vector' : params.name;
+    await supabase.enableExtension(extName);
     return jsonSuccess({ enabled: params.name });
   });
 }

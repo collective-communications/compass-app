@@ -11,6 +11,6 @@ export function registerActivityRoutes(
     const limitParam = url.searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : 50;
     const entries = await orchestrator.getActivityLog(limit);
-    return jsonSuccess(entries);
+    return jsonSuccess({ entries });
   });
 }

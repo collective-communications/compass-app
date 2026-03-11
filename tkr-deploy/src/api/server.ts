@@ -53,7 +53,7 @@ export function createServer(config: ServerConfig): ReturnType<typeof Bun.serve>
 
   // Register all API routes
   registerHealthRoutes(router, config.healthAggregator);
-  registerSecretsRoutes(router, config.syncEngine);
+  registerSecretsRoutes(router, config.syncEngine, config.vaultClient);
   registerDatabaseRoutes(router, config.adapters.supabase);
   registerFrontendRoutes(router, config.adapters.vercel, config.syncEngine);
   registerEmailRoutes(router, config.adapters.resend);

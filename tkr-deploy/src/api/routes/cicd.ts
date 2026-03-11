@@ -12,22 +12,95 @@ export function registerCicdRoutes(
 ): void {
   router.get('/api/cicd/health', async () => {
     const health = await github.healthCheck();
-    return jsonSuccess(health);
+    return jsonSuccess({
+      githubConnected: health.status === 'healthy',
+    });
+  });
+
+  router.get('/api/cicd/repo', async () => {
+    const health = await github.healthCheck();
+    const details = health.details as Record<string, unknown> | undefined;
+    const repoName = (details?.repo as string) ?? '';
+    return jsonSuccess({
+      name: repoName || health.label || 'unknown',
+      branch: 'main',
+      url: repoName ? `https://github.com/${repoName}` : '',
+    });
   });
 
   router.get('/api/cicd/workflows', async () => {
     const workflows = await github.getWorkflows();
-    return jsonSuccess(workflows);
+    // Normalize WorkflowStatus[] → UI WorkflowData[] shape
+    return jsonSuccess(workflows.map((wf) => ({
+      filename: wf.filename,
+      status: wf.state === 'not_created' ? 'not_created' as const
+        : wf.lastRun?.conclusion === 'success' ? 'healthy' as const
+        : wf.lastRun?.conclusion === 'failure' ? 'warning' as const
+        : 'not_created' as const,
+      trigger: wf.lastRun?.event ?? 'push',
+      branch: wf.lastRun?.branch ?? 'main',
+      duration: wf.lastRun?.durationMs
+        ? `${Math.round(wf.lastRun.durationMs / 1000)}s`
+        : '—',
+      lastRun: wf.lastRun?.createdAt ?? '—',
+      running: wf.lastRun?.status === 'in_progress',
+    })));
   });
 
   router.get('/api/cicd/runs', async () => {
     const runs = await github.getRecentRuns();
-    return jsonSuccess(runs);
+    // Normalize WorkflowRun[] → UI RunData[] shape
+    return jsonSuccess(runs.map((run) => ({
+      status: run.conclusion === 'success' ? 'healthy' as const
+        : run.conclusion === 'failure' ? 'warning' as const
+        : 'unknown' as const,
+      workflow: `Run #${run.id}`,
+      event: run.event,
+      branch: run.branch,
+      duration: run.durationMs
+        ? `${Math.round(run.durationMs / 1000)}s`
+        : '—',
+      timestamp: run.createdAt,
+    })));
   });
 
   router.get('/api/cicd/secrets', async () => {
-    const secrets = await github.listSecrets();
-    return jsonSuccess(secrets);
+    let secretNames: string[] = [];
+    let githubError = false;
+    try {
+      secretNames = await github.listSecrets();
+    } catch {
+      githubError = true;
+    }
+
+    let vaultLocked = false;
+    try {
+      const status = await vaultClient.getStatus();
+      vaultLocked = status.locked;
+    } catch {
+      vaultLocked = true;
+    }
+
+    // Expected secrets for CI/CD
+    const expectedSecrets = [
+      'VITE_SUPABASE_URL', 'VITE_SUPABASE_ANON_KEY',
+      'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_ACCESS_TOKEN',
+      'VERCEL_TOKEN', 'VERCEL_ORG_ID', 'VERCEL_PROJECT_ID',
+      'RESEND_CCC_SEND', 'E2E_SUPABASE_URL', 'E2E_SUPABASE_SERVICE_KEY',
+    ];
+
+    const secretSet = new Set(secretNames);
+    const secrets = expectedSecrets.map((name) => ({
+      name,
+      configured: githubError ? false : secretSet.has(name),
+    }));
+
+    return jsonSuccess({
+      configured: secrets.filter((s) => s.configured).length,
+      total: secrets.length,
+      secrets,
+      vaultLocked,
+    });
   });
 
   router.post('/api/cicd/secrets/sync', async () => {
