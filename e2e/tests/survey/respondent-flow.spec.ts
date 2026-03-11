@@ -108,7 +108,7 @@ test('dimension labels are hidden from respondents', async ({ page }) => {
   }
 });
 
-test('open-ended textarea enforces 2000 character limit', async ({ page }) => {
+test('open-ended textarea enforces 500 character limit', async ({ page }) => {
   const survey = new SurveyPage(page);
   await survey.goto(token);
   await survey.fillMetadata();
@@ -119,15 +119,15 @@ test('open-ended textarea enforces 2000 character limit', async ({ page }) => {
 
   // Type a short message and verify counter
   await survey.openEndedTextarea.fill('Test response');
-  const counter = page.getByText(/\d+.*\/.*2000|characters remaining/i);
+  const counter = page.getByText(/\d+.*\/.*500|characters remaining/i);
   if (await counter.isVisible().catch(() => false)) {
     await expect(counter).toBeVisible();
   }
 
-  // Verify maxlength attribute or character limit enforcement
+  // Verify maxlength attribute
   const maxLength = await survey.openEndedTextarea.getAttribute('maxlength');
   if (maxLength) {
-    expect(parseInt(maxLength)).toBe(2000);
+    expect(parseInt(maxLength)).toBe(500);
   }
 });
 

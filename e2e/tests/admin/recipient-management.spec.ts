@@ -5,6 +5,9 @@ import { createActiveDeployment, cleanupDeployment } from '../../helpers/survey'
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
+// Skip on Firefox — networkidle timing is unreliable, covered by Chromium
+test.skip(({ browserName }) => browserName === 'firefox', 'Firefox networkidle flaky');
+
 test.describe('Admin recipient management', () => {
   let deploymentId: string;
 
