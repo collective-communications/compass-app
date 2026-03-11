@@ -19,6 +19,8 @@ interface DeploymentData {
   duration: string;
   deployedAt: string;
   previewUrl?: string;
+  errorMessage?: string;
+  inspectorUrl?: string;
 }
 
 interface DeploymentsResponse {
@@ -223,13 +225,34 @@ function buildCurrentDeploymentCard(deployment: DeploymentData): HTMLElement {
   msg.style.color = 'var(--color-text-secondary)';
   commitEl.appendChild(msg);
 
-  const dl = createDl([
+  const entries: Array<{ label: string; value: string | HTMLElement }> = [
     { label: 'Status', value: statusBadge },
     { label: 'Commit', value: commitEl },
     { label: 'Branch', value: deployment.branch },
     { label: 'Duration', value: deployment.duration },
     { label: 'Deployed', value: deployment.deployedAt },
-  ]);
+  ];
+
+  if (deployment.status === 'Error' && deployment.errorMessage) {
+    const errEl = document.createElement('span');
+    errEl.textContent = deployment.errorMessage;
+    errEl.style.color = '#C62828';
+    errEl.style.fontSize = 'var(--font-size-sm)';
+    entries.push({ label: 'Error', value: errEl });
+  }
+
+  if (deployment.inspectorUrl) {
+    const link = document.createElement('a');
+    link.href = deployment.inspectorUrl;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'View build logs';
+    link.style.fontSize = 'var(--font-size-sm)';
+    link.style.color = 'var(--color-active)';
+    entries.push({ label: 'Logs', value: link });
+  }
+
+  const dl = createDl(entries);
   card.appendChild(dl);
   return card;
 }

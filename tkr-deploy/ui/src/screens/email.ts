@@ -24,9 +24,9 @@ interface DnsRecord {
 interface SendingStats {
   sent: number;
   limit: number;
-  today: number;
-  rateLimit: string;
-  bounceRate: string;
+  remaining: number;
+  rateLimit?: string;
+  bounceRate?: string;
 }
 
 interface ApiKeyData {
@@ -370,9 +370,9 @@ function buildSendingStatsCard(stats: SendingStats): HTMLElement {
 
   // Sub-metrics
   const dl = createDl([
-    { term: 'Today', value: stats.today.toLocaleString() },
-    { term: 'Rate Limit', value: stats.rateLimit },
-    { term: 'Bounce Rate', value: stats.bounceRate },
+    { term: 'Remaining', value: (stats.remaining ?? 0).toLocaleString() },
+    { term: 'Rate Limit', value: stats.rateLimit ?? '2/sec' },
+    { term: 'Bounce Rate', value: stats.bounceRate ?? '—' },
   ]);
   dl.style.marginTop = 'var(--space-md)';
   card.appendChild(dl);
@@ -489,19 +489,58 @@ export function render(target: HTMLElement): void {
   }
   container.appendChild(skeletons);
 
-  // Parallel fetches
+  // Sequential fetches to respect Resend 2/sec rate limit
   const signal = abortController.signal;
+  const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
   const domainPromise = apiFetch<DomainData>('/api/email/domain', { signal });
-  const statsPromise = apiFetch<SendingStats>('/api/email/stats', { signal });
-  const keyPromise = apiFetch<ApiKeyData>('/api/email/keys', { signal });
+  const statsPromise = domainPromise.then(() => delay(600)).then(() => apiFetch<SendingStats>('/api/email/stats', { signal }));
+  const keyPromise = statsPromise.then(() => delay(600)).then(() => apiFetch<ApiKeyData>('/api/email/keys', { signal }));
 
   Promise.all([domainPromise, statsPromise, keyPromise])
-    .then(([domain, stats, apiKey]) => {
+    .then(([rawDomain, stats, rawKeys]) => {
       if (!container || signal.aborted) return;
+
+      // Normalize domain response to DomainData shape
+      const rd = rawDomain as Record<string, unknown>;
+      const domain: DomainData = {
+        status: (rd.status === 'verified' ? 'verified' : rd.status === 'pending' ? 'pending' : 'not_configured') as DomainData['status'],
+        domain: (rd.name ?? rd.domain ?? '—') as string,
+        provider: (rd.provider ?? 'Resend') as string,
+        plan: (rd.plan ?? 'Free') as string,
+      };
+
+      // Normalize keys response to single ApiKeyData
+      const keysArr = Array.isArray(rawKeys) ? rawKeys as Array<Record<string, unknown>> : [];
+      const firstKey = keysArr[0];
+      const apiKey: ApiKeyData = firstKey ? {
+        name: (firstKey.name ?? '—') as string,
+        created: (firstKey.createdAt ?? firstKey.created ?? '—') as string,
+        permission: (firstKey.permission ?? 'send') as string,
+        domainRestriction: (firstKey.domainId ?? '—') as string,
+        vaultSynced: true,
+        vaultKey: 'RESEND_CCC_SEND',
+      } : {
+        name: '—', created: '—', permission: '—',
+        domainRestriction: '—', vaultSynced: false, vaultKey: '—',
+      };
 
       // Fetch DNS only if domain is configured
       const dnsPromise = domain.status !== 'not_configured'
-        ? apiFetch<DnsRecord[]>('/api/email/dns', { signal })
+        ? apiFetch<Array<Record<string, unknown>>>('/api/email/dns', { signal }).then((raw) =>
+            raw.map((r): DnsRecord => {
+              // Map record type: TXT→SPF, first CNAME→DKIM, second→DMARC
+              const rType = String(r.type ?? r.record ?? 'TXT');
+              const name = String(r.name ?? r.host ?? '');
+              let dnsType: DnsRecord['type'] = 'SPF';
+              if (rType === 'CNAME') dnsType = name.includes('domainkey') ? 'DKIM' : 'DMARC';
+              return {
+                type: dnsType,
+                verified: r.status === 'verified',
+                host: name,
+                value: String(r.value ?? ''),
+              };
+            })
+          )
         : Promise.resolve([] as DnsRecord[]);
 
       return dnsPromise.then((dns) => {

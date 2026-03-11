@@ -4,16 +4,16 @@ import { apiFetch } from './api.js';
 import type { DotStatus } from './components/status-dot.js';
 
 interface HealthResponse {
-  status: string;
-  vault?: { sealed?: boolean };
+  vaultLocked?: boolean;
+  rollup?: string;
 }
 
 function mapHealthToStatus(data: HealthResponse): { status: DotStatus; label: string } {
-  if (data.vault?.sealed === false) {
-    return { status: 'healthy', label: 'unsealed' };
+  if (data.vaultLocked === false) {
+    return { status: 'healthy', label: 'unlocked' };
   }
-  if (data.vault?.sealed === true) {
-    return { status: 'warning', label: 'sealed' };
+  if (data.vaultLocked === true) {
+    return { status: 'warning', label: 'locked' };
   }
   return { status: 'unknown', label: 'unknown' };
 }

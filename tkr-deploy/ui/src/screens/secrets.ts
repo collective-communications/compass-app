@@ -11,7 +11,7 @@ interface VaultStatus {
   secretCount: number;
 }
 
-type SyncState = 'synced' | 'missing' | 'differs' | 'not_applicable';
+type SyncState = 'synced' | 'missing' | 'differs' | 'not_applicable' | 'unverifiable';
 
 interface SecretTarget {
   name: string;
@@ -47,6 +47,7 @@ function syncStateIcon(state: SyncState): string {
     case 'synced': return '\u2713';
     case 'missing': return '\u2717';
     case 'differs': return '~';
+    case 'unverifiable': return '*';
     case 'not_applicable': return '\u2014';
   }
 }
@@ -56,9 +57,12 @@ function syncStateDotStatus(state: SyncState): DotStatus {
     case 'synced': return 'healthy';
     case 'missing': return 'warning';
     case 'differs': return 'warning';
+    case 'unverifiable': return 'unknown';
     case 'not_applicable': return 'unknown';
   }
 }
+
+const SUPABASE_SECRETS_URL = 'https://supabase.com/dashboard/project/gscaczmrruzymzdpzohr/settings/functions';
 
 const TARGET_NAMES = ['Supabase', 'Vercel', 'GitHub'] as const;
 type TargetName = typeof TARGET_NAMES[number];
@@ -68,11 +72,22 @@ function getTargetState(entry: SecretEntry, targetName: string): SyncState {
   return t?.state ?? 'not_applicable';
 }
 
+const FILTER_NAME_PATTERNS: Record<string, RegExp> = {
+  supabase: /supabase/i,
+  vercel: /vercel/i,
+  github: /github/i,
+};
+
 function matchesFilter(entry: SecretEntry, filter: string): boolean {
   if (filter === 'all') return true;
-  return entry.targets.some(
+  // Match if the secret syncs to this target
+  const syncsToTarget = entry.targets.some(
     (t) => t.name.toLowerCase() === filter.toLowerCase() && t.state !== 'not_applicable',
   );
+  // Or if the secret name relates to this provider
+  const namePattern = FILTER_NAME_PATTERNS[filter.toLowerCase()];
+  const nameMatches = namePattern ? namePattern.test(entry.name) : false;
+  return syncsToTarget || nameMatches;
 }
 
 function injectSecretsStyles(): void {
@@ -224,6 +239,40 @@ function buildSyncSummary(secrets: SecretEntry[] | null, onSyncAll: () => Promis
   return card;
 }
 
+function buildLegend(): HTMLElement {
+  const legend = document.createElement('div');
+  legend.style.display = 'flex';
+  legend.style.gap = 'var(--space-md)';
+  legend.style.fontSize = 'var(--font-size-sm)';
+  legend.style.color = 'var(--color-text-secondary)';
+  legend.style.alignItems = 'center';
+
+  const items: Array<[string, string]> = [
+    ['\u2713', 'Synced'],
+    ['\u2717', 'Missing'],
+    ['~', 'Differs'],
+    ['*', 'Verify manually'],
+    ['\u2014', 'N/A'],
+  ];
+
+  for (const [symbol, label] of items) {
+    const item = document.createElement('span');
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.gap = '4px';
+
+    const sym = document.createElement('span');
+    sym.style.fontFamily = 'monospace';
+    sym.style.fontWeight = '600';
+    sym.textContent = symbol;
+    item.appendChild(sym);
+    item.appendChild(document.createTextNode(label));
+    legend.appendChild(item);
+  }
+
+  return legend;
+}
+
 function buildFilterPills(onChange: (filter: string) => void): HTMLElement {
   const bar = document.createElement('div');
   bar.style.display = 'flex';
@@ -333,7 +382,20 @@ function buildSecretsTable(secrets: SecretEntry[], onSync: (name: string) => Pro
       td.style.borderBottom = '1px solid var(--color-border)';
       td.style.fontSize = 'var(--font-size-sm)';
       const state = getTargetState(entry, target);
-      td.textContent = syncStateIcon(state);
+
+      if (state === 'unverifiable' && target === 'Supabase') {
+        const link = document.createElement('a');
+        link.href = SUPABASE_SECRETS_URL;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = '*';
+        link.title = 'Verify manually in Supabase dashboard';
+        link.style.textDecoration = 'none';
+        link.style.fontWeight = '600';
+        td.appendChild(link);
+      } else {
+        td.textContent = syncStateIcon(state);
+      }
       td.setAttribute('aria-label', `${target}: ${state}`);
       tr.appendChild(td);
     }
@@ -643,10 +705,18 @@ export function render(target: HTMLElement): void {
       summarySlot.appendChild(buildSyncSummary(secrets, syncAll));
 
       filterSlot.innerHTML = '';
-      filterSlot.appendChild(buildFilterPills((filter) => {
+      const filterRow = document.createElement('div');
+      filterRow.style.display = 'flex';
+      filterRow.style.alignItems = 'center';
+      filterRow.style.justifyContent = 'space-between';
+      filterRow.style.flexWrap = 'wrap';
+      filterRow.style.gap = 'var(--space-sm)';
+      filterRow.appendChild(buildFilterPills((filter) => {
         activeFilter = filter;
         renderSecretsList(listSlot, secrets, syncSecret);
       }));
+      filterRow.appendChild(buildLegend());
+      filterSlot.appendChild(filterRow);
 
       renderSecretsList(listSlot, secrets, syncSecret);
     })

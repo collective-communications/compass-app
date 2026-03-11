@@ -15,7 +15,12 @@ export async function apiFetch<T>(path: string, options?: RequestInit): Promise<
     throw new Error(`API ${response.status}: ${response.statusText} — ${body}`);
   }
 
-  return response.json() as Promise<T>;
+  const json = await response.json() as { success?: boolean; data?: T };
+  // Unwrap { success, data } envelope if present
+  if (json && typeof json === 'object' && 'success' in json && 'data' in json) {
+    return json.data as T;
+  }
+  return json as T;
 }
 
 /**
