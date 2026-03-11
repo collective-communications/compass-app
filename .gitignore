@@ -38,3 +38,4 @@ e2e/test-results/
 .idea
 *.swp
 *.swo
+.vercel
