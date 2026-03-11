@@ -1,5 +1,5 @@
 export class GitHubApiError extends Error {
-  readonly code = 'GITHUB_API_ERROR' as const;
+  readonly code: string = 'GITHUB_API_ERROR';
   readonly statusCode: number;
 
   constructor(statusCode: number, message?: string) {

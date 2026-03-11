@@ -308,8 +308,8 @@ export class SupabaseAdapter implements ProviderAdapter {
 
     try {
       const [stdout, stderr] = await Promise.all([
-        new Response(proc.stdout).text(),
-        new Response(proc.stderr).text(),
+        new Response(proc.stdout as ReadableStream).text(),
+        new Response(proc.stderr as ReadableStream).text(),
       ]);
 
       const exitCode = await proc.exited;

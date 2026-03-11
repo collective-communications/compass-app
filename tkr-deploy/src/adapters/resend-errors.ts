@@ -1,5 +1,5 @@
 export class ResendApiError extends Error {
-  readonly code = 'RESEND_API_ERROR' as const;
+  readonly code: string = 'RESEND_API_ERROR';
   readonly statusCode: number;
 
   constructor(statusCode: number, message?: string) {

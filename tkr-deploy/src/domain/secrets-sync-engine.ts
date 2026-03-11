@@ -27,6 +27,7 @@ export interface SyncAllReport {
   synced: number;
   failed: number;
   skipped: number;
+  errors: string[];
   rows: Array<{ name: string; results: SyncResult[] }>;
 }
 
@@ -280,6 +281,7 @@ export class SecretsSyncEngine {
       synced: 0,
       failed: 0,
       skipped: 0,
+      errors: [],
       rows: [],
     };
 
@@ -336,6 +338,9 @@ export class SecretsSyncEngine {
 
       report.rows.push({ name: row.name, results });
     }
+
+    report.errors = report.rows
+      .flatMap((r) => r.results.filter((s) => !s.success && s.error).map((s) => `${r.name}/${s.target}: ${s.error}`));
 
     return report;
   }

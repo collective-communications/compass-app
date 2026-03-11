@@ -23,13 +23,13 @@ function mockFetch(handler: (url: string, init?: RequestInit) => MockFetchOption
       status,
       headers: { 'Content-Type': 'application/json', ...headers },
     });
-  }) as typeof fetch;
+  }) as unknown as typeof fetch;
 }
 
 function mockFetchError(error: Error): void {
   globalThis.fetch = mock(async () => {
     throw error;
-  }) as typeof fetch;
+  }) as unknown as typeof fetch;
 }
 
 describe('ResendAdapter', () => {
@@ -215,7 +215,7 @@ describe('ResendAdapter', () => {
           Object.entries(init?.headers ?? {}),
         );
         return new Response(JSON.stringify({ data: [] }), { status: 200 });
-      }) as typeof fetch;
+      }) as unknown as typeof fetch;
 
       await adapter.getDomains();
       expect(capturedHeaders['Authorization']).toBe(`Bearer ${API_KEY}`);

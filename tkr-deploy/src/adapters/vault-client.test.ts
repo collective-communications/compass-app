@@ -18,13 +18,13 @@ function mockFetch(handler: (url: string) => { status: number; body: unknown }):
       status,
       headers: { 'Content-Type': 'application/json' },
     });
-  }) as typeof fetch;
+  }) as unknown as typeof fetch;
 }
 
 function mockFetchError(error: Error): void {
   globalThis.fetch = mock(async () => {
     throw error;
-  }) as typeof fetch;
+  }) as unknown as typeof fetch;
 }
 
 describe('VaultHttpClient', () => {
@@ -91,7 +91,7 @@ describe('VaultHttpClient', () => {
       const name = url.split('/secrets/')[1]!;
       callCount++;
       return new Response(JSON.stringify({ success: true, data: { value: secrets[name] } }), { status: 200 });
-    }) as typeof fetch;
+    }) as unknown as typeof fetch;
 
     const result = await client.getAll();
     expect(result).toBeInstanceOf(Map);
@@ -117,7 +117,7 @@ describe('VaultHttpClient', () => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
       urls.push(url);
       return new Response(JSON.stringify({ success: true, data: { unlocked: true, secretCount: 0 } }), { status: 200 });
-    }) as typeof fetch;
+    }) as unknown as typeof fetch;
 
     await client.health();
     expect(urls[0]).toBe(`${BASE_URL}/api/vaults/${VAULT_NAME}/status`);
@@ -127,7 +127,7 @@ describe('VaultHttpClient', () => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
       urls.push(url);
       return new Response(JSON.stringify({ success: true, data: { order: [] } }), { status: 200 });
-    }) as typeof fetch;
+    }) as unknown as typeof fetch;
     await client.listSecrets();
     expect(urls[0]).toBe(`${BASE_URL}/api/vaults/${VAULT_NAME}/secrets`);
 
@@ -136,7 +136,7 @@ describe('VaultHttpClient', () => {
       const url = typeof input === 'string' ? input : input instanceof URL ? input.toString() : input.url;
       urls.push(url);
       return new Response(JSON.stringify({ success: true, data: { value: 'v' } }), { status: 200 });
-    }) as typeof fetch;
+    }) as unknown as typeof fetch;
     await client.getSecret('MY_SECRET');
     expect(urls[0]).toBe(`${BASE_URL}/api/vaults/${VAULT_NAME}/secrets/MY_SECRET`);
   });

@@ -1,5 +1,5 @@
 export class VercelApiError extends Error {
-  readonly code = 'VERCEL_API_ERROR' as const;
+  readonly code: string = 'VERCEL_API_ERROR';
   readonly statusCode: number;
 
   constructor(statusCode: number, message?: string) {

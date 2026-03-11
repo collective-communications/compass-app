@@ -27,13 +27,13 @@ function mockFetch(handler: (url: string, init?: RequestInit) => MockFetchOption
       status,
       headers: { 'Content-Type': 'application/json', ...headers },
     });
-  }) as typeof fetch;
+  }) as unknown as typeof fetch;
 }
 
 function mockFetchError(error: Error): void {
   globalThis.fetch = mock(async () => {
     throw error;
-  }) as typeof fetch;
+  }) as unknown as typeof fetch;
 }
 
 // Mock encryptSecret to avoid dependency on tweetnacl in tests
@@ -112,7 +112,7 @@ describe('GitHubAdapter', () => {
         }
 
         return new Response(JSON.stringify({}), { status: 200 });
-      }) as typeof fetch;
+      }) as unknown as typeof fetch;
 
       const workflows = await adapter.getWorkflows();
       expect(workflows).toHaveLength(3); // ci.yml, deploy.yml, supabase-keepalive.yml
@@ -196,7 +196,7 @@ describe('GitHubAdapter', () => {
 
         // PUT secret returns 204
         return new Response(null, { status: 204 });
-      }) as typeof fetch;
+      }) as unknown as typeof fetch;
 
       await adapter.setSecret('MY_SECRET', 'my-value');
       expect(urls).toHaveLength(2);
@@ -213,7 +213,7 @@ describe('GitHubAdapter', () => {
       globalThis.fetch = mock(async (_input: string | URL | Request, init?: RequestInit) => {
         capturedBody = JSON.parse(init?.body as string);
         return new Response(JSON.stringify({ content: { sha: 'abc123' } }), { status: 201 });
-      }) as typeof fetch;
+      }) as unknown as typeof fetch;
 
       await adapter.createFile('.github/workflows/ci.yml', 'name: CI', 'Add CI workflow');
       expect(capturedBody.message).toBe('Add CI workflow');
@@ -275,7 +275,7 @@ describe('GitHubAdapter', () => {
       globalThis.fetch = mock(async (_input: string | URL | Request, init?: RequestInit) => {
         capturedHeaders = Object.fromEntries(Object.entries(init?.headers ?? {}));
         return new Response(JSON.stringify({ full_name: 'x/y', private: false }), { status: 200 });
-      }) as typeof fetch;
+      }) as unknown as typeof fetch;
 
       await adapter.healthCheck();
       expect(capturedHeaders['Authorization']).toBe(`Bearer ${TOKEN}`);
