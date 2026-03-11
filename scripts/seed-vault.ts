@@ -94,7 +94,6 @@ const groups: GroupDef[] = [
       { name: "VITE_SUPABASE_ANON_KEY", value: "" },
       { name: "SUPABASE_SERVICE_ROLE_KEY", value: "" },
       { name: "SUPABASE_ACCESS_TOKEN", value: "" },
-      { name: "SUPABASE_DB_PASSWORD", value: "" },
       { name: "SUPABASE_URL", value: "" },
     ],
   },
@@ -146,7 +145,7 @@ const groups: GroupDef[] = [
     name: "Deploy",
     secrets: [
       { name: "HEALTH_CHECK_URL", value: "" },
-      { name: "DEPLOY_PORT", value: "4100", source: "default" },
+      { name: "DEPLOY_PORT", value: "4200", source: "default" },
     ],
   },
 ];
