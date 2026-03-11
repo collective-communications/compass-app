@@ -3,16 +3,15 @@ import { render, screen, cleanup } from '@testing-library/react';
 import type { TabConfig } from '../../lib/navigation';
 
 /**
- * Mock TanStack Router's Link component before importing the component under test.
- * Bun's mock.module is hoisted, so this intercepts the import in bottom-tab-bar.tsx.
+ * Mock AppLink to render as a plain <a> tag for testing.
+ * Avoids mocking @tanstack/react-router directly (bun ESM issue on Linux).
  */
-mock.module('@tanstack/react-router', () => ({
-  Link: ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => (
+mock.module('./app-link', () => ({
+  AppLink: ({ to, children, className }: { to: string; children: React.ReactNode; className?: string }) => (
     <a href={to} className={className}>{children}</a>
   ),
 }));
 
-// Import after mock is registered
 const { BottomTabBar } = await import('./bottom-tab-bar');
 
 const TABS: TabConfig[] = [

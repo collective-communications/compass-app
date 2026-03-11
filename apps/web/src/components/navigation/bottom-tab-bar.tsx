@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import { Link } from '@tanstack/react-router';
+import { AppLink as Link } from './app-link';
 import {
   Building,
   TrendingUp,

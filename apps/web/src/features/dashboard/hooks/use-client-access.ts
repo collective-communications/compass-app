@@ -10,10 +10,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
 
-export const clientAccessKeys = {
-  all: ['client-access'] as const,
-  org: (orgId: string) => [...clientAccessKeys.all, orgId] as const,
-};
+export { clientAccessKeys } from './client-access-keys';
+import { clientAccessKeys } from './client-access-keys';
 
 async function fetchClientAccessEnabled(orgId: string): Promise<boolean> {
   const { data, error } = await supabase

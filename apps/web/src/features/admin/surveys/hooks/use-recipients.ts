@@ -20,12 +20,8 @@ import {
   type RecipientStats,
 } from '../services/recipient-service';
 
-/** Query key factory for recipient queries */
-export const recipientKeys = {
-  all: ['admin', 'recipients'] as const,
-  list: (surveyId: string) => [...recipientKeys.all, 'list', surveyId] as const,
-  stats: (surveyId: string) => [...recipientKeys.all, 'stats', surveyId] as const,
-};
+export { recipientKeys } from './recipient-keys';
+import { recipientKeys } from './recipient-keys';
 
 /** Fetch all recipients for a survey */
 export function useRecipients(surveyId: string): UseQueryResult<SurveyRecipient[]> {

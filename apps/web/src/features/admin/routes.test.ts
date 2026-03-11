@@ -2,6 +2,13 @@ import { describe, it, expect, mock, beforeEach } from 'bun:test';
 import type { AuthUser } from '@compass/types';
 import { UserRole } from '@compass/types';
 
+/**
+ * Tests for admin route guard logic (checkTier1Access, checkCccAdminAccess).
+ *
+ * Guards are pure functions that return a redirect path or null.
+ * No @tanstack/react-router mocking needed.
+ */
+
 // ─── Mock Setup ─────────────────────────────────────────────────────────────
 
 let mockUser: AuthUser | null = null;
@@ -13,58 +20,7 @@ mock.module('../../stores/auth-store', () => ({
   ),
 }));
 
-/**
- * Capture every `createRoute` call so we can extract `beforeLoad` guards
- * by path without instantiating a real router.
- *
- * TanStack Router's `redirect` returns an object — the guard throws it.
- */
-const capturedRoutes: Array<{ path: string; beforeLoad?: () => void }> = [];
-
-mock.module('@tanstack/react-router', () => ({
-  createRoute: (opts: { path?: string; beforeLoad?: () => void }) => {
-    capturedRoutes.push({ path: opts.path ?? '', beforeLoad: opts.beforeLoad });
-    const self: Record<string, unknown> = { ...opts };
-    self.addChildren = () => self;
-    self.useParams = () => ({});
-    self.getParentRoute = opts.getParentRoute;
-    return self;
-  },
-  redirect: (opts: { to: string }) => opts,
-  Outlet: () => null,
-  useNavigate: () => () => undefined,
-  Link: ({ to, children, className }: { to: string; children: unknown; className?: string }) => ({ to, children, className }),
-}));
-
-// Stub all component imports — only guard logic is under test
-mock.module('../../components/shells/app-shell', () => ({ AppShell: () => null }));
-mock.module('./surveys', () => ({
-  SurveyListPage: () => null, SurveyBuilderPage: () => null,
-  DeploymentPanel: () => null, ResponseTracker: () => null,
-}));
-mock.module('./surveys/hooks/use-deployment-management', () => ({ useDeploymentManagement: () => ({}) }));
-mock.module('./surveys/hooks/use-response-tracking', () => ({ useResponseTracking: () => ({}) }));
-mock.module('./surveys/hooks/use-realtime-responses', () => ({ useRealtimeResponses: () => ({}) }));
-mock.module('./surveys/hooks/use-survey-builder', () => ({ useSurveyBuilder: () => ({}) }));
-mock.module('./clients', () => ({ ClientListPage: () => null }));
-mock.module('./clients/pages/client-detail-page', () => ({ ClientDetailPage: () => null }));
-mock.module('./clients/components/client-users-tab', () => ({ ClientUsersTab: () => null }));
-mock.module('./clients/pages/org-settings-page', () => ({ OrgSettingsPage: () => null }));
-mock.module('./settings', () => ({ SystemSettingsPage: () => null }));
-mock.module('./users', () => ({ UsersPage: () => null }));
-
-// Import after mocks are wired, then invoke to populate `capturedRoutes`
-const { createAdminRoutes } = await import('./routes.js');
-const fakeRoot = { addChildren: () => fakeRoot } as never;
-createAdminRoutes(fakeRoot);
-
-function guardFor(path: string): () => void {
-  const entry = capturedRoutes.find((r) => r.path === path);
-  if (!entry?.beforeLoad) {
-    throw new Error(`No beforeLoad guard found for path "${path}"`);
-  }
-  return entry.beforeLoad;
-}
+const { checkTier1Access, checkCccAdminAccess } = await import('./route-guards.js');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -81,72 +37,51 @@ function makeUser(overrides: Partial<AuthUser> = {}): AuthUser {
   };
 }
 
-/** Assert that calling `fn` throws a redirect to `expectedPath`. */
-function expectRedirect(fn: () => void, expectedPath: string): void {
-  try {
-    fn();
-    expect.unreachable('guard should have thrown a redirect');
-  } catch (thrown) {
-    expect((thrown as { to: string }).to).toBe(expectedPath);
-  }
-}
-
 // ─── Tests ──────────────────────────────────────────────────────────────────
 
-describe('Admin route guards', () => {
+describe('checkTier1Access', () => {
   beforeEach(() => {
     mockUser = null;
   });
 
-  describe('/admin layout — tier gate', () => {
-    const guard = guardFor('/admin');
-
-    it('redirects unauthenticated users to /dashboard', () => {
-      mockUser = null;
-      expectRedirect(guard, '/dashboard');
-    });
-
-    it('redirects tier_2 users to /dashboard', () => {
-      mockUser = makeUser({ role: UserRole.CLIENT_DIRECTOR, tier: 'tier_2' });
-      expectRedirect(guard, '/dashboard');
-    });
-
-    it('allows ccc_admin users through', () => {
-      mockUser = makeUser({ role: UserRole.CCC_ADMIN, tier: 'tier_1' });
-      expect(() => guard()).not.toThrow();
-    });
-
-    it('allows ccc_member users through', () => {
-      mockUser = makeUser({ role: UserRole.CCC_MEMBER, tier: 'tier_1' });
-      expect(() => guard()).not.toThrow();
-    });
+  it('returns /dashboard for unauthenticated users', () => {
+    mockUser = null;
+    expect(checkTier1Access()).toBe('/dashboard');
   });
 
-  describe('/settings — ccc_admin-only gate', () => {
-    const guard = guardFor('/settings');
-
-    it('allows ccc_admin users', () => {
-      mockUser = makeUser({ role: UserRole.CCC_ADMIN, tier: 'tier_1' });
-      expect(() => guard()).not.toThrow();
-    });
-
-    it('redirects ccc_member to /admin/surveys', () => {
-      mockUser = makeUser({ role: UserRole.CCC_MEMBER, tier: 'tier_1' });
-      expectRedirect(guard, '/admin/surveys');
-    });
+  it('returns /dashboard for tier_2 users', () => {
+    mockUser = makeUser({ role: UserRole.CLIENT_DIRECTOR, tier: 'tier_2' });
+    expect(checkTier1Access()).toBe('/dashboard');
   });
 
-  describe('/settings/users — ccc_admin-only gate', () => {
-    const guard = guardFor('/settings/users');
+  it('returns null for ccc_admin users', () => {
+    mockUser = makeUser({ role: UserRole.CCC_ADMIN, tier: 'tier_1' });
+    expect(checkTier1Access()).toBeNull();
+  });
 
-    it('allows ccc_admin users', () => {
-      mockUser = makeUser({ role: UserRole.CCC_ADMIN, tier: 'tier_1' });
-      expect(() => guard()).not.toThrow();
-    });
+  it('returns null for ccc_member users', () => {
+    mockUser = makeUser({ role: UserRole.CCC_MEMBER, tier: 'tier_1' });
+    expect(checkTier1Access()).toBeNull();
+  });
+});
 
-    it('redirects ccc_member to /admin/surveys', () => {
-      mockUser = makeUser({ role: UserRole.CCC_MEMBER, tier: 'tier_1' });
-      expectRedirect(guard, '/admin/surveys');
-    });
+describe('checkCccAdminAccess', () => {
+  beforeEach(() => {
+    mockUser = null;
+  });
+
+  it('returns null for ccc_admin users', () => {
+    mockUser = makeUser({ role: UserRole.CCC_ADMIN, tier: 'tier_1' });
+    expect(checkCccAdminAccess()).toBeNull();
+  });
+
+  it('returns /admin/surveys for ccc_member', () => {
+    mockUser = makeUser({ role: UserRole.CCC_MEMBER, tier: 'tier_1' });
+    expect(checkCccAdminAccess()).toBe('/admin/surveys');
+  });
+
+  it('returns /admin/surveys for unauthenticated', () => {
+    mockUser = null;
+    expect(checkCccAdminAccess()).toBe('/admin/surveys');
   });
 });

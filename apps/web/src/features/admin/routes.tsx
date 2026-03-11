@@ -20,7 +20,7 @@ import { useResponseTracking } from './surveys/hooks/use-response-tracking';
 import { useRealtimeResponses } from './surveys/hooks/use-realtime-responses';
 import { useSurveyBuilder } from './surveys/hooks/use-survey-builder';
 import { useAuthStore } from '../../stores/auth-store';
-import { UserRole } from '@compass/types';
+import { checkTier1Access, checkCccAdminAccess } from './route-guards';
 import { ClientListPage } from './clients';
 import { ClientDetailPage } from './clients/pages/client-detail-page';
 import { ClientUsersTab } from './clients/components/client-users-tab';
@@ -39,10 +39,8 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => parentRoute,
     path: '/admin',
     beforeLoad: () => {
-      const { user } = useAuthStore.getState();
-      if (!user || user.tier !== 'tier_1') {
-        throw redirect({ to: '/dashboard' });
-      }
+      const redirectTo = checkTier1Access();
+      if (redirectTo) throw redirect({ to: redirectTo });
     },
     component: function AdminLayout(): ReactElement {
       return (
@@ -187,10 +185,8 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => adminLayoutRoute,
     path: '/settings',
     beforeLoad: () => {
-      const { user } = useAuthStore.getState();
-      if (user?.role !== UserRole.CCC_ADMIN) {
-        throw redirect({ to: '/admin/surveys' });
-      }
+      const redirectTo = checkCccAdminAccess();
+      if (redirectTo) throw redirect({ to: redirectTo });
     },
     component: function AdminSettingsPage(): ReactElement {
       return <SystemSettingsPage />;
@@ -201,10 +197,8 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => adminLayoutRoute,
     path: '/settings/users',
     beforeLoad: () => {
-      const { user } = useAuthStore.getState();
-      if (user?.role !== UserRole.CCC_ADMIN) {
-        throw redirect({ to: '/admin/surveys' });
-      }
+      const redirectTo = checkCccAdminAccess();
+      if (redirectTo) throw redirect({ to: redirectTo });
     },
     component: function AdminUsersPage(): ReactElement {
       return <UsersPage />;

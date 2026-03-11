@@ -11,10 +11,8 @@ import { render, screen, cleanup } from '@testing-library/react';
 
 // ─── Mock Setup ─────────────────────────────────────────────────────────────
 
-const mockNavigate = mock(() => {});
-
-mock.module('@tanstack/react-router', () => ({
-  useNavigate: () => mockNavigate,
+mock.module('../../../hooks/use-app-navigate', () => ({
+  useAppNavigate: () => () => {},
 }));
 
 /** AppShell pass-through — just render children */

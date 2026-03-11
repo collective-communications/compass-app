@@ -5,7 +5,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useAppNavigate } from '../../../hooks/use-app-navigate';
 import { AppShell } from '../../../components/shells/app-shell';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useDashboardData } from '../hooks/use-dashboard-data';
@@ -26,7 +26,7 @@ export function DashboardPage(): ReactElement {
     organizationId: user?.organizationId ?? null,
   });
 
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const firstName = getFirstName(user?.fullName ?? null);
   const hasSurveys = activeSurvey !== null || previousSurveys.length > 0;
 
