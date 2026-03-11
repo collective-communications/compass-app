@@ -6,6 +6,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { authorize } from './auth.ts';
+import { escapeHtml, renderTemplate, daysBetween, shouldSkipReminder } from './_lib.ts';
 
 // ─── JSON Helpers ────────────────────────────────────────────────────────────
 
@@ -20,32 +21,7 @@ function errorResponse(error: string, message: string, status: number): Response
   return jsonResponse({ error, message }, status);
 }
 
-// ─── HTML Escaping ──────────────────────────────────────────────────────────
-
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-// ─── Template Rendering ──────────────────────────────────────────────────────
-
-function renderTemplate(
-  html: string,
-  variables: Record<string, string>,
-): string {
-  let rendered = html;
-  for (const [key, value] of Object.entries(variables)) {
-    rendered = rendered.replaceAll(`{{${key}}}`, value);
-  }
-  return rendered;
-}
-
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function daysBetween(from: string, to: Date): number {
-  const fromDate = new Date(from);
-  const diffMs = to.getTime() - fromDate.getTime();
-  return Math.floor(diffMs / (1000 * 60 * 60 * 24));
-}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -89,7 +65,6 @@ Deno.serve(async (req: Request) => {
     }
 
     const now = new Date();
-    const TWENTY_THREE_HOURS_MS = 23 * 60 * 60 * 1000;
     let totalRemindersSent = 0;
     let totalFailed = 0;
     const BATCH_SIZE = 14;
@@ -155,10 +130,7 @@ Deno.serve(async (req: Request) => {
         if (!recipient.invitation_sent_at) continue;
 
         // Dedup guard: skip if reminder sent within last 23 hours
-        if (recipient.reminder_sent_at) {
-          const lastReminder = new Date(recipient.reminder_sent_at).getTime();
-          if (now.getTime() - lastReminder < TWENTY_THREE_HOURS_MS) continue;
-        }
+        if (shouldSkipReminder(recipient.reminder_sent_at, now)) continue;
 
         const daysSinceInvite = daysBetween(recipient.invitation_sent_at, now);
 

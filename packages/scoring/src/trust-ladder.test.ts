@@ -98,6 +98,52 @@ describe('calculateTrustLadderPosition', () => {
     expect(result.nextActions).toEqual(['Purpose', 'Values']);
   });
 
+  test('boundary: all scores 1.0 → all rungs not_started, currentLevel=0', () => {
+    const result = calculateTrustLadderPosition(
+      makeScoreMap({ core: 1.0, clarity: 1.0, connection: 1.0, collaboration: 1.0 }),
+    );
+
+    for (const rung of result.rungs) {
+      expect(rung.status).toBe('not_started');
+    }
+    expect(result.currentLevel).toBe(0);
+  });
+
+  test('boundary: all scores 1.99 → all rungs not_started (just below 2.0 threshold)', () => {
+    const result = calculateTrustLadderPosition(
+      makeScoreMap({ core: 1.99, clarity: 1.99, connection: 1.99, collaboration: 1.99 }),
+    );
+
+    for (const rung of result.rungs) {
+      expect(rung.status).toBe('not_started');
+    }
+    expect(result.currentLevel).toBe(0);
+  });
+
+  test('boundary: all scores 2.99 → all rungs in_progress, currentLevel=0', () => {
+    const result = calculateTrustLadderPosition(
+      makeScoreMap({ core: 2.99, clarity: 2.99, connection: 2.99, collaboration: 2.99 }),
+    );
+
+    for (const rung of result.rungs) {
+      expect(rung.status).toBe('in_progress');
+    }
+    expect(result.currentLevel).toBe(0);
+  });
+
+  test('boundary: all scores 4.0 → all rungs achieved, nextActions empty', () => {
+    const result = calculateTrustLadderPosition(
+      makeScoreMap({ core: 4.0, clarity: 4.0, connection: 4.0, collaboration: 4.0 }),
+    );
+
+    for (const rung of result.rungs) {
+      expect(rung.status).toBe('achieved');
+      expect(rung.score).toBe(4.0);
+    }
+    expect(result.currentLevel).toBe(9);
+    expect(result.nextActions).toEqual([]);
+  });
+
   test('rung names and dimension codes are correct', () => {
     const result = calculateTrustLadderPosition(
       makeScoreMap({ core: 3.0, clarity: 3.0, connection: 3.0, collaboration: 3.0 }),

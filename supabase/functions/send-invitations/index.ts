@@ -6,6 +6,7 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { authorize } from './auth.ts';
+import { escapeHtml, renderTemplate } from './_lib.ts';
 
 // ─── JSON Helpers ────────────────────────────────────────────────────────────
 
@@ -18,25 +19,6 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
 
 function errorResponse(error: string, message: string, status: number): Response {
   return jsonResponse({ error, message }, status);
-}
-
-// ─── HTML Escaping ──────────────────────────────────────────────────────────
-
-function escapeHtml(str: string): string {
-  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-}
-
-// ─── Template Rendering ──────────────────────────────────────────────────────
-
-function renderTemplate(
-  html: string,
-  variables: Record<string, string>,
-): string {
-  let rendered = html;
-  for (const [key, value] of Object.entries(variables)) {
-    rendered = rendered.replaceAll(`{{${key}}}`, value);
-  }
-  return rendered;
 }
 
 // ─── Types ───────────────────────────────────────────────────────────────────

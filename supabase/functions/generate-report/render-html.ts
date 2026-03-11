@@ -8,6 +8,7 @@
 
 import type { ReportPayload } from './assemble.ts';
 import type { ReportRow } from './db.ts';
+import { escapeHtml, getDimensionColor } from './_lib.ts';
 
 // ─── Brand Colors ────────────────────────────────────────────────────────────
 
@@ -536,25 +537,3 @@ function renderFooter(date: string): string {
   </div>`;
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-function getDimensionColor(code: string): string {
-  const map: Record<string, string> = {
-    clarity: BRAND.clarity,
-    connection: BRAND.connection,
-    collaboration: BRAND.collaboration,
-    culture: BRAND.core,
-    communication: BRAND.core,
-    community: BRAND.core,
-  };
-  return map[code] ?? BRAND.core;
-}
