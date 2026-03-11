@@ -30,7 +30,7 @@ interface SendInvitationsRequest {
 
 // ─── Batch Delay ─────────────────────────────────────────────────────────────
 
-/** Delay to respect SES rate limits (~14/sec production) */
+/** Delay to respect Resend rate limits */
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }

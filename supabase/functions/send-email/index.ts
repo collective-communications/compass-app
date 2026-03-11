@@ -1,72 +1,55 @@
 /**
- * Edge function for sending emails via AWS SES.
+ * Edge function for sending emails via Resend API.
  * Accepts service_role requests only. Logs all sends to email_log table.
+ *
+ * Uses the RESEND_CCC_SEND (send-only) API key stored as RESEND_API_KEY.
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { AwsClient } from 'https://esm.sh/aws4fetch@1.0.18';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const SES_REGION = Deno.env.get('AWS_SES_REGION') ?? 'us-east-1';
-const FROM_ADDRESS = Deno.env.get('SES_FROM_ADDRESS') ?? 'noreply@collectivecommunication.ca';
+const FROM_ADDRESS = Deno.env.get('RESEND_FROM_ADDRESS') ?? 'noreply@mail.tuckers.link';
 
-// ─── SES Client ──────────────────────────────────────────────────────────────
-
-function createAwsClient(): AwsClient {
-  const accessKeyId = Deno.env.get('AWS_SES_ACCESS_KEY_ID');
-  const secretAccessKey = Deno.env.get('AWS_SES_SECRET_ACCESS_KEY');
-
-  if (!accessKeyId || !secretAccessKey) {
-    throw new Error('AWS_SES_ACCESS_KEY_ID and AWS_SES_SECRET_ACCESS_KEY must be set');
-  }
-
-  return new AwsClient({
-    accessKeyId,
-    secretAccessKey,
-    region: SES_REGION,
-  });
-}
-
-// ─── SES Send ────────────────────────────────────────────────────────────────
+// ─── Resend Send ─────────────────────────────────────────────────────────────
 
 interface SendResult {
   messageId: string;
 }
 
-async function sendViaSes(
-  aws: AwsClient,
+async function sendViaResend(
   to: string,
   subject: string,
   html: string,
   replyTo?: string,
 ): Promise<SendResult> {
-  const endpoint = `https://email.${SES_REGION}.amazonaws.com/v2/email/outgoing-emails`;
-  const body = {
-    Content: {
-      Simple: {
-        Subject: { Data: subject },
-        Body: { Html: { Data: html } },
-      },
-    },
-    Destination: { ToAddresses: [to] },
-    FromEmailAddress: FROM_ADDRESS,
-    ...(replyTo ? { ReplyToAddresses: [replyTo] } : {}),
-  };
+  const apiKey = Deno.env.get('RESEND_API_KEY');
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY must be set');
+  }
 
-  const response = await aws.fetch(endpoint, {
+  const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: FROM_ADDRESS,
+      to: [to],
+      subject,
+      html,
+      ...(replyTo ? { reply_to: [replyTo] } : {}),
+    }),
   });
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`SES error ${response.status}: ${err}`);
+    throw new Error(`Resend error ${response.status}: ${err}`);
   }
 
-  const data = await response.json();
-  return { messageId: data.MessageId };
+  const data = await response.json() as { id: string };
+  return { messageId: data.id };
 }
 
 // ─── JSON Helpers ────────────────────────────────────────────────────────────
@@ -144,17 +127,16 @@ Deno.serve(async (req: Request) => {
 
   const logId = logEntry.id;
 
-  // Send via SES
+  // Send via Resend
   try {
-    const aws = createAwsClient();
-    const { messageId } = await sendViaSes(aws, body.to, body.subject, body.html, body.replyTo);
+    const { messageId } = await sendViaResend(body.to, body.subject, body.html, body.replyTo);
 
     // Update log to sent
     await client
       .from('email_log')
       .update({
         status: 'sent',
-        ses_message_id: messageId,
+        provider_message_id: messageId,
         sent_at: new Date().toISOString(),
       })
       .eq('id', logId);
