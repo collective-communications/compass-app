@@ -1,5 +1,6 @@
 import { navigate, getCurrentPath } from './router.js';
 import { createStatusDot, type DotStatus } from './components/status-dot.js';
+import { createThemeToggle } from './components/theme-toggle.js';
 
 interface NavItem {
   label: string;
@@ -36,11 +37,20 @@ export function renderShell(root: HTMLElement): ShellHandle {
   wordmark.textContent = 'tkr-deploy';
   topbar.appendChild(wordmark);
 
+  const rightGroup = document.createElement('div');
+  rightGroup.style.display = 'flex';
+  rightGroup.style.alignItems = 'center';
+  rightGroup.style.gap = 'var(--space-md)';
+
+  createThemeToggle(rightGroup);
+
   const vaultContainer = document.createElement('div');
   vaultContainer.className = 'shell-topbar__vault-status';
   let vaultDot = createStatusDot('unknown', 'Vault: checking...');
   vaultContainer.appendChild(vaultDot);
-  topbar.appendChild(vaultContainer);
+  rightGroup.appendChild(vaultContainer);
+
+  topbar.appendChild(rightGroup);
 
   // Pill nav
   const nav = document.createElement('nav');

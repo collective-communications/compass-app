@@ -153,12 +153,10 @@ function buildVaultBanner(vault: VaultStatus | null): HTMLElement {
   badge.style.borderRadius = 'var(--radius-pill)';
   badge.style.fontWeight = '500';
   if (vault.locked) {
-    badge.style.background = 'var(--color-border)';
-    badge.style.color = 'var(--color-text-secondary)';
+    badge.className = 'badge--warning';
     badge.textContent = 'Locked';
   } else {
-    badge.style.background = 'var(--color-active)';
-    badge.style.color = 'var(--color-active-text)';
+    badge.className = 'badge--healthy';
     badge.textContent = 'Unlocked';
   }
 
@@ -353,7 +351,7 @@ function buildSecretsTable(secrets: SecretEntry[], onSync: (name: string) => Pro
     const tr = document.createElement('tr');
 
     if (entry.outOfSync) {
-      tr.style.borderLeft = '4px solid var(--color-text-secondary)';
+      tr.style.borderLeft = '4px solid var(--color-status-warning)';
     }
 
     // Secret name
@@ -395,6 +393,9 @@ function buildSecretsTable(secrets: SecretEntry[], onSync: (name: string) => Pro
         td.appendChild(link);
       } else {
         td.textContent = syncStateIcon(state);
+        if (state === 'synced') td.style.color = 'var(--color-status-healthy)';
+        else if (state === 'missing') td.style.color = 'var(--color-status-error)';
+        else if (state === 'differs') td.style.color = 'var(--color-status-warning)';
       }
       td.setAttribute('aria-label', `${target}: ${state}`);
       tr.appendChild(td);
@@ -475,7 +476,7 @@ function buildSecretsMobile(secrets: SecretEntry[], onSync: (name: string) => Pr
   for (const entry of secrets) {
     if (!matchesFilter(entry, activeFilter)) continue;
 
-    const card = createCard(entry.outOfSync ? { borderColor: 'var(--color-text-secondary)' } : undefined);
+    const card = createCard(entry.outOfSync ? { severity: 'warning' } : undefined);
     card.style.marginBottom = 'var(--space-sm)';
 
     // Name

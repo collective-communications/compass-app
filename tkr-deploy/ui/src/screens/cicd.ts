@@ -77,21 +77,15 @@ function createCodeBadge(text: string): HTMLElement {
   return code;
 }
 
-function createBadge(text: string, variant: 'healthy' | 'warning' | 'unknown' = 'unknown'): HTMLElement {
+function createBadge(text: string, variant: 'healthy' | 'warning' | 'error' | 'unknown' = 'unknown'): HTMLElement {
   const badge = document.createElement('span');
   badge.textContent = text;
+  badge.className = `badge--${variant}`;
   badge.style.display = 'inline-block';
   badge.style.padding = '2px 8px';
   badge.style.borderRadius = 'var(--radius-pill)';
   badge.style.fontSize = 'var(--font-size-sm)';
   badge.style.fontWeight = '500';
-  const colorMap: Record<string, string> = {
-    healthy: 'var(--color-active)',
-    warning: 'var(--color-text-secondary)',
-    unknown: 'var(--color-text-muted)',
-  };
-  badge.style.background = colorMap[variant];
-  badge.style.color = 'var(--color-active-text)';
   return badge;
 }
 
@@ -194,7 +188,7 @@ function buildWorkflowCards(workflows: WorkflowData[]): HTMLElement {
   for (const wf of workflows) {
     const isWarning = wf.status === 'warning';
     const isNotCreated = wf.status === 'not_created';
-    const card = createCard(isWarning ? { borderColor: 'var(--color-text-secondary)' } : undefined);
+    const card = createCard(isWarning ? { severity: 'warning' } : wf.status === 'healthy' ? { severity: 'healthy' } : undefined);
 
     const header = document.createElement('div');
     header.style.display = 'flex';
@@ -321,7 +315,7 @@ function buildSecretsCard(data: SecretsData): HTMLElement {
 
     if (!secret.configured) {
       li.style.borderLeftWidth = '4px';
-      li.style.borderLeftColor = 'var(--color-text-secondary)';
+      li.style.borderLeftColor = 'var(--color-status-warning)';
     }
 
     const nameEl = document.createElement('code');

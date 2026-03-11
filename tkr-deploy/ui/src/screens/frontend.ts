@@ -61,7 +61,7 @@ function createSkeleton(height = '120px'): HTMLElement {
   return el;
 }
 
-function createBadge(text: string, variant: 'default' | 'accent' | 'warning' | 'error' = 'default'): HTMLElement {
+function createBadge(text: string, variant: 'default' | 'healthy' | 'warning' | 'error' = 'default'): HTMLElement {
   const badge = document.createElement('span');
   badge.textContent = text;
   badge.style.display = 'inline-block';
@@ -69,23 +69,11 @@ function createBadge(text: string, variant: 'default' | 'accent' | 'warning' | '
   badge.style.borderRadius = 'var(--radius-pill)';
   badge.style.fontSize = 'var(--font-size-sm)';
   badge.style.fontWeight = '500';
-
-  switch (variant) {
-    case 'accent':
-      badge.style.background = 'var(--color-active)';
-      badge.style.color = 'var(--color-active-text)';
-      break;
-    case 'warning':
-      badge.style.background = '#FFF3E0';
-      badge.style.color = '#E65100';
-      break;
-    case 'error':
-      badge.style.background = '#FFEBEE';
-      badge.style.color = '#C62828';
-      break;
-    default:
-      badge.style.background = 'var(--color-border)';
-      badge.style.color = 'var(--color-text-secondary)';
+  if (variant !== 'default') {
+    badge.className = `badge--${variant}`;
+  } else {
+    badge.style.background = 'var(--color-border)';
+    badge.style.color = 'var(--color-text-secondary)';
   }
   return badge;
 }
@@ -137,9 +125,9 @@ function createDl(entries: Array<{ label: string; value: string | HTMLElement }>
   return dl;
 }
 
-function statusBadgeVariant(status: DeploymentData['status']): 'accent' | 'warning' | 'error' | 'default' {
+function statusBadgeVariant(status: DeploymentData['status']): 'healthy' | 'warning' | 'error' | 'default' {
   switch (status) {
-    case 'Ready': return 'accent';
+    case 'Ready': return 'healthy';
     case 'Building': return 'warning';
     case 'Error': return 'error';
     default: return 'default';
@@ -236,7 +224,7 @@ function buildCurrentDeploymentCard(deployment: DeploymentData): HTMLElement {
   if (deployment.status === 'Error' && deployment.errorMessage) {
     const errEl = document.createElement('span');
     errEl.textContent = deployment.errorMessage;
-    errEl.style.color = '#C62828';
+    errEl.style.color = 'var(--color-status-error)';
     errEl.style.fontSize = 'var(--font-size-sm)';
     entries.push({ label: 'Error', value: errEl });
   }
@@ -339,7 +327,7 @@ function buildEnvVarsCard(envData: EnvResponse): HTMLElement {
         : 'Unknown';
       tdMatch.textContent = `${matchIcon} ${matchText}`;
       if (v.vaultMatch === 'mismatch') {
-        tdMatch.style.color = '#E65100';
+        tdMatch.style.color = 'var(--color-status-warning)';
       } else if (v.vaultMatch === 'missing') {
         tdMatch.style.color = 'var(--color-text-muted)';
       }

@@ -1,3 +1,4 @@
+import { initTheme } from './theme.js';
 import { renderShell } from './shell.js';
 import { initRouter } from './router.js';
 import { apiFetch } from './api.js';
@@ -19,6 +20,8 @@ function mapHealthToStatus(data: HealthResponse): { status: DotStatus; label: st
 }
 
 function bootstrap(): void {
+  initTheme();
+
   const app = document.getElementById('app');
   if (!app) return;
 

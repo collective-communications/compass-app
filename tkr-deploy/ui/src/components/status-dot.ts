@@ -1,4 +1,4 @@
-export type DotStatus = 'healthy' | 'warning' | 'unknown';
+export type DotStatus = 'healthy' | 'warning' | 'error' | 'unknown';
 
 /**
  * Create a status dot with label.

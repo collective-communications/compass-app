@@ -56,7 +56,7 @@ function createSkeleton(): HTMLElement {
   return el;
 }
 
-function createBadge(text: string, variant: 'default' | 'accent' = 'default'): HTMLElement {
+function createBadge(text: string, variant: 'default' | 'healthy' | 'warning' | 'error' = 'default'): HTMLElement {
   const badge = document.createElement('span');
   badge.textContent = text;
   badge.style.display = 'inline-block';
@@ -64,9 +64,8 @@ function createBadge(text: string, variant: 'default' | 'accent' = 'default'): H
   badge.style.borderRadius = 'var(--radius-pill)';
   badge.style.fontSize = 'var(--font-size-sm)';
   badge.style.fontWeight = '500';
-  if (variant === 'accent') {
-    badge.style.background = 'var(--color-active)';
-    badge.style.color = 'var(--color-active-text)';
+  if (variant !== 'default') {
+    badge.className = `badge--${variant}`;
   } else {
     badge.style.background = 'var(--color-border)';
     badge.style.color = 'var(--color-text-secondary)';
@@ -131,16 +130,17 @@ function createDl(entries: Array<{ label: string; value: string | HTMLElement }>
 // ── Card Builders ──
 
 function buildConnectionCard(data: HealthData): HTMLElement {
-  const card = createCard();
-  const dotStatus: DotStatus = data.status === 'connected' ? 'healthy' : 'unknown';
-  const dot = createStatusDot(dotStatus, data.status === 'connected' ? 'Connected' : 'Disconnected');
+  const isConnected = data.status === 'connected';
+  const card = createCard(isConnected ? { severity: 'healthy' } : { severity: 'error' });
+  const dotStatus: DotStatus = isConnected ? 'healthy' : 'error';
+  const dot = createStatusDot(dotStatus, isConnected ? 'Connected' : 'Disconnected');
 
   const header = createCardHeader('Connection Status');
   card.appendChild(header);
   card.appendChild(dot);
 
-  const statusBadge = createBadge(data.status === 'connected' ? 'Online' : 'Offline',
-    data.status === 'connected' ? 'accent' : 'default');
+  const statusBadge = createBadge(isConnected ? 'Online' : 'Offline',
+    isConnected ? 'healthy' : 'error');
 
   const dl = createDl([
     { label: 'Project Ref', value: data.projectRef },
@@ -195,7 +195,7 @@ function buildMigrationsCard(data: MigrationsData, disabled: boolean): HTMLEleme
     li.style.borderRadius = 'var(--radius-button)';
 
     if (!mig.applied) {
-      li.style.borderLeft = '3px solid var(--color-active)';
+      li.style.borderLeft = '3px solid var(--color-status-warning)';
       li.style.paddingLeft = 'var(--space-md)';
     } else {
       li.style.color = 'var(--color-text-muted)';
@@ -308,7 +308,7 @@ function buildPgvectorCard(data: ExtensionData, disabled: boolean): HTMLElement 
   const statusText = data.pgvector === 'enabled' ? 'Enabled'
     : data.pgvector === 'available' ? 'Available'
     : 'Unavailable';
-  const badge = createBadge(statusText, data.pgvector === 'enabled' ? 'accent' : 'default');
+  const badge = createBadge(statusText, data.pgvector === 'enabled' ? 'healthy' : 'default');
 
   const header = createCardHeader('pgvector', badge);
 

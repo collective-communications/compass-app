@@ -1,5 +1,6 @@
 export interface CardOptions {
   borderColor?: string;
+  severity?: 'healthy' | 'warning' | 'error';
 }
 
 /**
@@ -9,7 +10,9 @@ export function createCard(options?: CardOptions): HTMLElement {
   const el = document.createElement('div');
   el.className = 'card';
 
-  if (options?.borderColor) {
+  if (options?.severity) {
+    el.classList.add(`card--${options.severity}`);
+  } else if (options?.borderColor) {
     el.classList.add('card--accent');
     el.style.borderLeftColor = options.borderColor;
   }

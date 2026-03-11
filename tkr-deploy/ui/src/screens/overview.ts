@@ -131,7 +131,10 @@ function buildProviderGrid(providers: ProviderInfo[] | null): HTMLElement {
   }
 
   for (const provider of providers) {
-    const card = createCard();
+    const severity = provider.status === 'healthy' ? 'healthy' as const
+      : provider.status === 'warning' ? 'warning' as const
+      : undefined;
+    const card = createCard(severity ? { severity } : undefined);
     card.style.cursor = 'pointer';
     card.setAttribute('role', 'button');
     card.setAttribute('tabindex', '0');

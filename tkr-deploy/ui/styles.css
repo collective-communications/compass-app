@@ -7,6 +7,14 @@
   --color-text-muted:     #9E9E9E;
   --color-active:         #424242;
   --color-active-text:    #FFFFFF;
+  --color-status-healthy:    #2E7D32;
+  --color-status-healthy-bg: #E8F5E9;
+  --color-status-warning:    #E65100;
+  --color-status-warning-bg: #FFF3E0;
+  --color-status-error:      #B71C1C;
+  --color-status-error-bg:   #FFEBEE;
+  --color-status-unknown:    #9E9E9E;
+  --color-status-unknown-bg: #F5F5F5;
   --radius-card:          8px;
   --radius-button:        6px;
   --radius-pill:          16px;
@@ -19,6 +27,25 @@
   --font-size-base:       15px;
   --font-size-lg:         18px;
   --font-size-xl:         24px;
+}
+
+[data-theme="dark"] {
+  --color-bg:             #121212;
+  --color-surface:        #1E1E1E;
+  --color-border:         #333333;
+  --color-text:           #E0E0E0;
+  --color-text-secondary: #9E9E9E;
+  --color-text-muted:     #616161;
+  --color-active:         #E0E0E0;
+  --color-active-text:    #121212;
+  --color-status-healthy:    #4CAF50;
+  --color-status-healthy-bg: #1B3A1B;
+  --color-status-warning:    #FF9100;
+  --color-status-warning-bg: #3E2200;
+  --color-status-error:      #EF5350;
+  --color-status-error-bg:   #3E1111;
+  --color-status-unknown:    #616161;
+  --color-status-unknown-bg: #252525;
 }
 
 /* ── Reset ── */
@@ -162,9 +189,35 @@ body {
   border-radius: 50%;
   flex-shrink: 0;
 }
-.status-dot__circle--healthy  { background: var(--color-text); }
-.status-dot__circle--warning  { background: var(--color-text-secondary); }
-.status-dot__circle--unknown  { background: var(--color-text-muted); }
+.status-dot__circle--healthy  { background: var(--color-status-healthy); }
+.status-dot__circle--warning  { background: var(--color-status-warning); }
+.status-dot__circle--error    { background: var(--color-status-error); }
+.status-dot__circle--unknown  { background: var(--color-status-unknown); }
+
+/* ── Card severity borders ── */
+.card--healthy { border-left: 4px solid var(--color-status-healthy); }
+.card--warning { border-left: 4px solid var(--color-status-warning); }
+.card--error   { border-left: 4px solid var(--color-status-error); }
+
+/* ── Badge variants ── */
+.badge--healthy { background: var(--color-status-healthy-bg); color: var(--color-status-healthy); }
+.badge--warning { background: var(--color-status-warning-bg); color: var(--color-status-warning); }
+.badge--error   { background: var(--color-status-error-bg); color: var(--color-status-error); }
+.badge--unknown { background: var(--color-status-unknown-bg); color: var(--color-status-unknown); }
+
+/* ── Theme toggle ── */
+.theme-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: var(--radius-button);
+  transition: color 0.15s;
+}
+.theme-toggle:hover { color: var(--color-text); }
 
 /* ── Button ── */
 .btn {
