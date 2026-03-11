@@ -1,5 +1,6 @@
 import type { VercelAdapter } from '../../adapters/vercel-adapter.js';
 import type { SecretsSyncEngine } from '../../domain/secrets-sync-engine.js';
+import type { VaultClient } from '../../types/vault.js';
 import type { Router } from '../router.js';
 import { jsonSuccess, jsonError } from '../router.js';
 
@@ -7,6 +8,7 @@ export function registerFrontendRoutes(
   router: Router,
   vercel: VercelAdapter,
   syncEngine: SecretsSyncEngine,
+  vaultClient: VaultClient,
 ): void {
   router.get('/api/frontend/project', async () => {
     const project = await vercel.getProject();
@@ -56,13 +58,44 @@ export function registerFrontendRoutes(
 
   router.get('/api/frontend/env', async () => {
     const envVars = await vercel.getEnvVars();
-    const variables = envVars.map((e) => ({
-      key: e.key,
-      value: e.value ?? '(encrypted)',
-      vaultMatch: 'unknown' as const,
-      target: e.target?.[0] ?? 'production',
-    }));
-    return jsonSuccess({ variables, vaultOnline: true });
+
+    let vaultSecrets: Map<string, string> = new Map();
+    let vaultOnline = false;
+    try {
+      const health = await vaultClient.health();
+      if (health.connected && !health.locked) {
+        vaultOnline = true;
+        vaultSecrets = await vaultClient.getAll();
+      }
+    } catch {
+      // vault unavailable
+    }
+
+    const variables = envVars.map((e) => {
+      const vercelValue = e.value ?? '';
+      const vaultValue = vaultSecrets.get(e.key) ?? '';
+      const isEncrypted = vercelValue.startsWith('eyJ') || vercelValue === '(encrypted)' || vercelValue === '';
+
+      let vaultMatch: 'match' | 'mismatch' | 'missing' | 'unknown';
+      if (!vaultOnline) {
+        vaultMatch = 'unknown';
+      } else if (!vaultValue) {
+        vaultMatch = 'missing';
+      } else if (isEncrypted) {
+        // Can't compare encrypted values — existence in vault is sufficient
+        vaultMatch = 'match';
+      } else {
+        vaultMatch = vercelValue === vaultValue ? 'match' : 'mismatch';
+      }
+
+      return {
+        key: e.key,
+        value: vercelValue || '(encrypted)',
+        vaultMatch,
+        target: e.target?.[0] ?? 'production',
+      };
+    });
+    return jsonSuccess({ variables, vaultOnline });
   });
 
   router.post('/api/frontend/env/sync', async () => {

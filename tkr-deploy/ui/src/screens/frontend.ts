@@ -306,6 +306,12 @@ function buildEnvVarsCard(envData: EnvResponse): HTMLElement {
     tdVal.style.padding = 'var(--space-sm)';
     tdVal.style.borderBottom = '1px solid var(--color-border)';
     tdVal.style.color = 'var(--color-text-muted)';
+    tdVal.style.fontFamily = 'monospace';
+    tdVal.style.fontSize = 'var(--font-size-sm)';
+    tdVal.style.maxWidth = '180px';
+    tdVal.style.overflow = 'hidden';
+    tdVal.style.textOverflow = 'ellipsis';
+    tdVal.style.whiteSpace = 'nowrap';
     tdVal.textContent = v.value;
     tr.appendChild(tdVal);
 

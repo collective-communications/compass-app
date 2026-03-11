@@ -44,11 +44,16 @@ export function renderShell(root: HTMLElement): ShellHandle {
 
   createThemeToggle(rightGroup);
 
-  const vaultContainer = document.createElement('div');
-  vaultContainer.className = 'shell-topbar__vault-status';
+  const vaultLink = document.createElement('a');
+  vaultLink.href = 'http://localhost:42042';
+  vaultLink.target = '_blank';
+  vaultLink.rel = 'noopener noreferrer';
+  vaultLink.className = 'shell-topbar__vault-status';
+  vaultLink.style.textDecoration = 'none';
+  vaultLink.style.color = 'inherit';
   let vaultDot = createStatusDot('unknown', 'Vault: checking...');
-  vaultContainer.appendChild(vaultDot);
-  rightGroup.appendChild(vaultContainer);
+  vaultLink.appendChild(vaultDot);
+  rightGroup.appendChild(vaultLink);
 
   topbar.appendChild(rightGroup);
 
@@ -90,9 +95,9 @@ export function renderShell(root: HTMLElement): ShellHandle {
     contentArea: content,
 
     updateVaultStatus(status: DotStatus, label: string): void {
-      vaultContainer.innerHTML = '';
+      vaultLink.innerHTML = '';
       vaultDot = createStatusDot(status, `Vault: ${label}`);
-      vaultContainer.appendChild(vaultDot);
+      vaultLink.appendChild(vaultDot);
     },
 
     updateActivePill(path: string): void {

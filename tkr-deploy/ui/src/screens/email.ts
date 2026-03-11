@@ -402,6 +402,7 @@ function buildGrid(data: EmailData): HTMLElement {
   grid.style.display = 'grid';
   grid.style.gap = 'var(--space-md)';
   grid.style.gridTemplateColumns = '1fr';
+  grid.style.minWidth = '0';
 
   const domainCard = buildDomainStatusCard(data.domain);
   const dnsCard = buildDnsRecordsCard(data.dns, data.domain.status !== 'not_configured');
@@ -448,7 +449,10 @@ function injectEmailStyles(): void {
     }
     @media (min-width: 768px) {
       .email-grid__row {
-        grid-template-columns: 3fr 2fr !important;
+        grid-template-columns: 1fr 1fr !important;
+      }
+      .email-grid__row > * {
+        min-width: 0;
       }
       .dns-expand-toggle { display: none !important; }
       .dns-row { display: flex !important; }

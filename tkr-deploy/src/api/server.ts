@@ -55,7 +55,7 @@ export function createServer(config: ServerConfig): ReturnType<typeof Bun.serve>
   registerHealthRoutes(router, config.healthAggregator);
   registerSecretsRoutes(router, config.syncEngine, config.vaultClient);
   registerDatabaseRoutes(router, config.adapters.supabase);
-  registerFrontendRoutes(router, config.adapters.vercel, config.syncEngine);
+  registerFrontendRoutes(router, config.adapters.vercel, config.syncEngine, config.vaultClient);
   registerEmailRoutes(router, config.adapters.resend);
   registerCicdRoutes(router, config.adapters.github, config.syncEngine, config.vaultClient);
   registerActivityRoutes(router, config.orchestrator);
