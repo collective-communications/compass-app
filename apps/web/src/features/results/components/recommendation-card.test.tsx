@@ -38,7 +38,7 @@ describe('RecommendationCard', () => {
 
   test('severity border class is applied', () => {
     const { container } = render(<RecommendationCard {...defaultProps} />);
-    expect(container.innerHTML).toContain('border-l-[#E65100]');
+    expect(container.innerHTML).toContain('border-l-[#F57C00]');
   });
 
   test('has accessible aria-label with dimension and title', () => {
