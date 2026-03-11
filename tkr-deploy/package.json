@@ -1,18 +1,13 @@
 {
   "name": "tkr-deploy",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
   "scripts": {
     "dev": "bun run --watch serve.ts",
     "start": "bun run serve.ts",
-    "test": "bun test"
-  },
-  "dependencies": {
-    "pino": "^9.6.0"
+    "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/bun": "^1.2.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.0.0"
   }
 }

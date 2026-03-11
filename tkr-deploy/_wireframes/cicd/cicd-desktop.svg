@@ -1,0 +1,377 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1200" width="1280" height="1200">
+  <defs>
+    <style>
+      .text-primary   { fill: #212121; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-secondary  { fill: #616161; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-tertiary   { fill: #9E9E9E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-inverse    { fill: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="1200" fill="#F5F5F5"/>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <rect width="1280" height="64" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1" y="0"/>
+
+  <!-- Wordmark: tkr-deploy -->
+  <text x="32" y="40" class="text-primary" font-size="18" font-weight="700" letter-spacing="-0.3">tkr-deploy</text>
+
+  <!-- Vault status indicator (right side) -->
+  <g transform="translate(1148, 22)">
+    <rect x="0" y="7" width="16" height="12" rx="2" fill="none" stroke="#616161" stroke-width="1.5"/>
+    <path d="M3,7 L3,3 Q3,0 8,0 Q13,0 13,3" fill="none" stroke="#616161" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="8" cy="13" r="2" fill="#616161"/>
+  </g>
+  <text x="1170" y="36" class="text-secondary" font-size="12">tkr-secrets</text>
+  <!-- status dot: connected -->
+  <circle cx="1140" cy="32" r="4" fill="#212121"/>
+
+  <!-- ==================== PILL NAV BAR ==================== -->
+  <rect y="64" width="1280" height="48" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Pill nav — all visible on desktop, CI/CD active -->
+  <text x="32" y="95" class="text-secondary" font-size="13">Overview</text>
+  <text x="120" y="95" class="text-secondary" font-size="13">Secrets</text>
+  <text x="195" y="95" class="text-secondary" font-size="13">Database</text>
+  <text x="280" y="95" class="text-secondary" font-size="13">Frontend</text>
+  <text x="360" y="95" class="text-secondary" font-size="13">Email</text>
+
+  <!-- CI/CD pill (active) -->
+  <g transform="translate(415, 76)">
+    <rect width="56" height="28" rx="14" fill="#424242"/>
+    <text x="28" y="18.5" text-anchor="middle" class="text-inverse" font-size="13" font-weight="500">CI/CD</text>
+  </g>
+
+  <!-- ==================== REPOSITORY CARD ==================== -->
+  <g transform="translate(32, 132)">
+    <rect width="1216" height="64" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Label -->
+    <text x="24" y="22" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.4">REPOSITORY</text>
+
+    <!-- Repo name -->
+    <text x="24" y="44" class="text-primary" font-size="15" font-weight="600">collective-communications/compass-app</text>
+
+    <!-- Default branch -->
+    <text x="400" y="44" class="text-tertiary" font-size="12">Default branch</text>
+    <text x="502" y="44" class="text-secondary" font-size="12" font-weight="500">main</text>
+
+    <!-- External link icon -->
+    <g transform="translate(1178, 22)">
+      <rect x="0" y="4" width="12" height="12" rx="1.5" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+      <path d="M7,0 L16,0 L16,9" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="9" y1="7" x2="16" y2="0" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round"/>
+    </g>
+  </g>
+
+  <!-- ==================== TWO-COLUMN LAYOUT (55% / 45%) ==================== -->
+  <!-- Left column: Workflows (x=32, width=666) -->
+  <!-- Right column: Repo Secrets (x=714, width=534) -->
+
+  <!-- Left column header -->
+  <text x="32" y="228" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">WORKFLOWS</text>
+  <text x="130" y="228" class="text-tertiary" font-size="12">3 workflows</text>
+
+  <!-- Workflow card 1: ci.yml — success -->
+  <g transform="translate(32, 238)">
+    <rect width="666" height="128" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- ci.yml filename + status -->
+    <text x="24" y="28" class="text-primary" font-size="14" font-weight="600">ci.yml</text>
+    <!-- status dot success -->
+    <circle cx="380" cy="23" r="5" fill="#212121"/>
+    <text x="390" y="27" class="text-primary" font-size="12" font-weight="500">Passed</text>
+
+    <!-- Trigger + branch -->
+    <text x="24" y="48" class="text-tertiary" font-size="10" letter-spacing="0.3">TRIGGER</text>
+    <text x="74" y="48" class="text-secondary" font-size="11">push · main</text>
+
+    <!-- View Runs link right-aligned -->
+    <text x="618" y="28" class="text-secondary" font-size="12">View Runs</text>
+    <line x1="618" y1="31" x2="668" y2="31" stroke="#616161" stroke-width="1"/>
+
+    <line x1="24" y1="58" x2="642" y2="58" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Duration + Last run in a row -->
+    <text x="24" y="78" class="text-secondary" font-size="12">Duration</text>
+    <text x="88" y="78" class="text-primary" font-size="12" font-weight="500">2m 14s</text>
+
+    <text x="200" y="78" class="text-secondary" font-size="12">Branch</text>
+    <text x="248" y="78" class="text-primary" font-size="12" font-weight="500">main</text>
+
+    <text x="24" y="100" class="text-secondary" font-size="12">Last run</text>
+    <text x="80" y="100" class="text-tertiary" font-size="12">today at 14:21 UTC</text>
+  </g>
+
+  <!-- Workflow card 2: deploy.yml — failed with bug warning -->
+  <g transform="translate(32, 378)">
+    <!-- Warning left border -->
+    <rect width="4" height="148" rx="2" fill="#616161"/>
+    <rect x="4" width="662" height="148" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- deploy.yml filename + status -->
+    <text x="28" y="28" class="text-primary" font-size="14" font-weight="600">deploy.yml</text>
+    <!-- status dot failed -->
+    <circle cx="380" cy="23" r="5" fill="#616161"/>
+    <text x="390" y="27" class="text-secondary" font-size="12" font-weight="500">Failed</text>
+
+    <!-- Bug warning indicator -->
+    <g transform="translate(460, 13)">
+      <path d="M9,0 L18,18 L0,18 Z" fill="none" stroke="#616161" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="9" y="15" text-anchor="middle" class="text-secondary" font-size="10" font-weight="700">!</text>
+    </g>
+    <text x="484" y="27" class="text-tertiary" font-size="11">Known bug</text>
+
+    <!-- Trigger + branch -->
+    <text x="28" y="48" class="text-tertiary" font-size="10" letter-spacing="0.3">TRIGGER</text>
+    <text x="78" y="48" class="text-secondary" font-size="11">push · main</text>
+
+    <!-- View Runs link right-aligned -->
+    <text x="614" y="28" class="text-secondary" font-size="12">View Runs</text>
+    <line x1="614" y1="31" x2="664" y2="31" stroke="#616161" stroke-width="1"/>
+
+    <line x1="28" y1="58" x2="642" y2="58" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Bug note -->
+    <text x="28" y="76" class="text-tertiary" font-size="11">Known issue: --project-ref flag missing in deploy step. Fix required before deploy can succeed.</text>
+
+    <!-- Duration + Last run -->
+    <text x="28" y="100" class="text-secondary" font-size="12">Duration</text>
+    <text x="92" y="100" class="text-primary" font-size="12" font-weight="500">0m 47s</text>
+
+    <text x="200" y="100" class="text-secondary" font-size="12">Branch</text>
+    <text x="248" y="100" class="text-primary" font-size="12" font-weight="500">main</text>
+
+    <text x="28" y="122" class="text-secondary" font-size="12">Last run</text>
+    <text x="84" y="122" class="text-tertiary" font-size="12">today at 14:22 UTC</text>
+  </g>
+
+  <!-- Workflow card 3: supabase-keepalive.yml — Not Created -->
+  <g transform="translate(32, 538)">
+    <!-- Not-created indicator border (lighter) -->
+    <rect width="4" height="148" rx="2" fill="#9E9E9E"/>
+    <rect x="4" width="662" height="148" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- supabase-keepalive.yml filename + status badge -->
+    <text x="28" y="28" class="text-primary" font-size="14" font-weight="600">supabase-keepalive.yml</text>
+    <!-- not created badge -->
+    <rect x="290" y="14" width="90" height="20" rx="10" fill="#E0E0E0"/>
+    <text x="335" y="28" text-anchor="middle" class="text-secondary" font-size="11" font-weight="600">Not Created</text>
+
+    <!-- Warning indicator -->
+    <g transform="translate(390, 13)">
+      <path d="M9,0 L18,18 L0,18 Z" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-linejoin="round"/>
+      <text x="9" y="15" text-anchor="middle" class="text-tertiary" font-size="10" font-weight="700">!</text>
+    </g>
+
+    <line x1="28" y1="40" x2="642" y2="40" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Description -->
+    <text x="28" y="60" class="text-secondary" font-size="12">Keeps Supabase free-tier project from pausing. Runs on a schedule to ping the DB.</text>
+    <text x="28" y="78" class="text-tertiary" font-size="11">Workflow file not found in .github/workflows/</text>
+
+    <!-- Create Workflow button -->
+    <g transform="translate(28, 94)">
+      <rect width="148" height="32" rx="6" fill="#424242"/>
+      <text x="74" y="20.5" text-anchor="middle" class="text-inverse" font-size="12" font-weight="500">Create Workflow</text>
+    </g>
+
+    <!-- View Runs disabled -->
+    <text x="192" y="116" class="text-tertiary" font-size="12">View Runs</text>
+
+    <!-- Right-aligned: preview of what will be created -->
+    <text x="420" y="70" class="text-tertiary" font-size="11">Schedule: every 7 days (cron)</text>
+    <text x="420" y="88" class="text-tertiary" font-size="11">Action: ping Supabase DB endpoint</text>
+  </g>
+
+  <!-- ==================== RIGHT COLUMN: REPO SECRETS ==================== -->
+  <!-- Right column header -->
+  <text x="714" y="228" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">REPOSITORY SECRETS</text>
+  <text x="882" y="228" class="text-tertiary" font-size="12">3/9 configured</text>
+
+  <!-- Sync from Vault button -->
+  <g transform="translate(1068, 212)">
+    <rect width="148" height="28" rx="6" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1.5"/>
+    <text x="74" y="18.5" text-anchor="middle" class="text-secondary" font-size="12" font-weight="500">Sync from Vault</text>
+  </g>
+
+  <!-- Secrets card -->
+  <g transform="translate(714, 238)">
+    <rect width="534" height="436" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- API capability note -->
+    <text x="24" y="22" class="text-tertiary" font-size="10">GitHub API shows existence only — values are never readable.</text>
+
+    <line x1="24" y1="30" x2="510" y2="30" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret rows — two columns: name | status -->
+    <!-- Secret 1: SUPABASE_ACCESS_TOKEN — configured -->
+    <g transform="translate(0, 38)">
+      <text x="24" y="16" class="text-primary" font-size="12">SUPABASE_ACCESS_TOKEN</text>
+      <rect x="376" y="4" width="90" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="421" y="17" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Configured</text>
+    </g>
+    <line x1="24" y1="64" x2="510" y2="64" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 2: SUPABASE_DB_PASSWORD — configured -->
+    <g transform="translate(0, 72)">
+      <text x="24" y="16" class="text-primary" font-size="12">SUPABASE_DB_PASSWORD</text>
+      <rect x="376" y="4" width="90" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="421" y="17" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Configured</text>
+    </g>
+    <line x1="24" y1="98" x2="510" y2="98" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 3: SUPABASE_PROJECT_REF — configured -->
+    <g transform="translate(0, 106)">
+      <text x="24" y="16" class="text-primary" font-size="12">SUPABASE_PROJECT_REF</text>
+      <rect x="376" y="4" width="90" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="421" y="17" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Configured</text>
+    </g>
+    <line x1="24" y1="132" x2="510" y2="132" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 4: VERCEL_TOKEN — missing -->
+    <g transform="translate(0, 140)">
+      <rect x="0" y="0" width="3" height="28" fill="#212121" rx="1.5"/>
+      <text x="24" y="16" class="text-primary" font-size="12">VERCEL_TOKEN</text>
+      <rect x="392" y="4" width="72" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="428" y="17" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Missing</text>
+    </g>
+    <line x1="24" y1="176" x2="510" y2="176" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 5: VERCEL_ORG_ID — missing -->
+    <g transform="translate(0, 184)">
+      <rect x="0" y="0" width="3" height="28" fill="#212121" rx="1.5"/>
+      <text x="24" y="16" class="text-primary" font-size="12">VERCEL_ORG_ID</text>
+      <rect x="392" y="4" width="72" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="428" y="17" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Missing</text>
+    </g>
+    <line x1="24" y1="220" x2="510" y2="220" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 6: VERCEL_PROJECT_ID — missing -->
+    <g transform="translate(0, 228)">
+      <rect x="0" y="0" width="3" height="28" fill="#212121" rx="1.5"/>
+      <text x="24" y="16" class="text-primary" font-size="12">VERCEL_PROJECT_ID</text>
+      <rect x="392" y="4" width="72" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="428" y="17" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Missing</text>
+    </g>
+    <line x1="24" y1="264" x2="510" y2="264" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 7: VITE_SUPABASE_URL — missing -->
+    <g transform="translate(0, 272)">
+      <rect x="0" y="0" width="3" height="28" fill="#212121" rx="1.5"/>
+      <text x="24" y="16" class="text-primary" font-size="12">VITE_SUPABASE_URL</text>
+      <rect x="392" y="4" width="72" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="428" y="17" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Missing</text>
+    </g>
+    <line x1="24" y1="308" x2="510" y2="308" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 8: VITE_SUPABASE_ANON_KEY — missing -->
+    <g transform="translate(0, 316)">
+      <rect x="0" y="0" width="3" height="28" fill="#212121" rx="1.5"/>
+      <text x="24" y="16" class="text-primary" font-size="12">VITE_SUPABASE_ANON_KEY</text>
+      <rect x="376" y="4" width="90" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="421" y="17" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Missing</text>
+    </g>
+    <line x1="24" y1="352" x2="510" y2="352" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Secret 9: E2E_SUPABASE_SERVICE_KEY — missing -->
+    <g transform="translate(0, 360)">
+      <rect x="0" y="0" width="3" height="28" fill="#212121" rx="1.5"/>
+      <text x="24" y="16" class="text-primary" font-size="12">E2E_SUPABASE_SERVICE_KEY</text>
+      <rect x="376" y="4" width="90" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="421" y="17" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Missing</text>
+    </g>
+    <line x1="24" y1="396" x2="510" y2="396" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Summary + inline CTA -->
+    <text x="24" y="418" class="text-tertiary" font-size="10">6 secrets missing — Sync from Vault to configure</text>
+  </g>
+
+  <!-- ==================== RECENT RUNS — FULL WIDTH BELOW ==================== -->
+  <text x="32" y="724" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">RECENT RUNS</text>
+  <text x="138" y="724" class="text-tertiary" font-size="12">last 5 across all workflows</text>
+
+  <!-- Recent runs table card — full width -->
+  <g transform="translate(32, 734)">
+    <rect width="1216" height="292" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Table header row -->
+    <rect width="1216" height="36" rx="8" fill="#F5F5F5"/>
+    <!-- Only top corners rounded for table header -->
+    <rect y="18" width="1216" height="18" fill="#F5F5F5"/>
+
+    <text x="48" y="22" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.5">STATUS</text>
+    <text x="124" y="22" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.5">WORKFLOW</text>
+    <text x="380" y="22" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.5">EVENT</text>
+    <text x="560" y="22" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.5">BRANCH</text>
+    <text x="740" y="22" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.5">DURATION</text>
+    <text x="920" y="22" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.5">TIMESTAMP</text>
+
+    <line x1="24" y1="36" x2="1192" y2="36" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 1: ci.yml success -->
+    <g transform="translate(24, 44)">
+      <circle cx="16" cy="12" r="6" fill="#212121"/>
+      <text x="40" y="16" class="text-primary" font-size="12">Passed</text>
+      <text x="100" y="16" class="text-primary" font-size="12">ci.yml</text>
+      <text x="356" y="16" class="text-secondary" font-size="12">push</text>
+      <text x="536" y="16" class="text-secondary" font-size="12">main</text>
+      <text x="716" y="16" class="text-secondary" font-size="12">2m 14s</text>
+      <text x="896" y="16" class="text-tertiary" font-size="12">today 14:21 UTC</text>
+    </g>
+    <line x1="24" y1="92" x2="1192" y2="92" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 2: deploy.yml failed -->
+    <g transform="translate(24, 100)">
+      <circle cx="16" cy="12" r="6" fill="#616161"/>
+      <text x="40" y="16" class="text-secondary" font-size="12">Failed</text>
+      <text x="100" y="16" class="text-primary" font-size="12">deploy.yml</text>
+      <text x="356" y="16" class="text-secondary" font-size="12">push</text>
+      <text x="536" y="16" class="text-secondary" font-size="12">main</text>
+      <text x="716" y="16" class="text-secondary" font-size="12">0m 47s</text>
+      <text x="896" y="16" class="text-tertiary" font-size="12">today 14:22 UTC</text>
+    </g>
+    <line x1="24" y1="148" x2="1192" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 3: ci.yml success -->
+    <g transform="translate(24, 156)">
+      <circle cx="16" cy="12" r="6" fill="#212121"/>
+      <text x="40" y="16" class="text-primary" font-size="12">Passed</text>
+      <text x="100" y="16" class="text-primary" font-size="12">ci.yml</text>
+      <text x="356" y="16" class="text-secondary" font-size="12">pull_request</text>
+      <text x="536" y="16" class="text-secondary" font-size="12">main</text>
+      <text x="716" y="16" class="text-secondary" font-size="12">1m 58s</text>
+      <text x="896" y="16" class="text-tertiary" font-size="12">yesterday 16:44 UTC</text>
+    </g>
+    <line x1="24" y1="204" x2="1192" y2="204" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 4: deploy.yml failed -->
+    <g transform="translate(24, 212)">
+      <circle cx="16" cy="12" r="6" fill="#616161"/>
+      <text x="40" y="16" class="text-secondary" font-size="12">Failed</text>
+      <text x="100" y="16" class="text-primary" font-size="12">deploy.yml</text>
+      <text x="356" y="16" class="text-secondary" font-size="12">push</text>
+      <text x="536" y="16" class="text-secondary" font-size="12">main</text>
+      <text x="716" y="16" class="text-secondary" font-size="12">0m 52s</text>
+      <text x="896" y="16" class="text-tertiary" font-size="12">yesterday 16:45 UTC</text>
+    </g>
+    <line x1="24" y1="260" x2="1192" y2="260" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 5: ci.yml success -->
+    <g transform="translate(24, 268)">
+      <circle cx="16" cy="12" r="6" fill="#212121"/>
+      <text x="40" y="16" class="text-primary" font-size="12">Passed</text>
+      <text x="100" y="16" class="text-primary" font-size="12">ci.yml</text>
+      <text x="356" y="16" class="text-secondary" font-size="12">push</text>
+      <text x="536" y="16" class="text-secondary" font-size="12">main</text>
+      <text x="716" y="16" class="text-secondary" font-size="12">2m 03s</text>
+      <text x="896" y="16" class="text-tertiary" font-size="12">yesterday 09:12 UTC</text>
+    </g>
+
+    <!-- View all link -->
+    <text x="608" y="284" text-anchor="middle" class="text-secondary" font-size="12">View all runs on GitHub</text>
+    <line x1="522" y1="287" x2="694" y2="287" stroke="#616161" stroke-width="1"/>
+  </g>
+
+</svg>

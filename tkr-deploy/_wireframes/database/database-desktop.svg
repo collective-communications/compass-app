@@ -1,0 +1,343 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 1340" width="1280" height="1340">
+  <defs>
+    <style>
+      .text-primary   { fill: #212121; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-secondary  { fill: #616161; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-tertiary   { fill: #9E9E9E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-inverse    { fill: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="1340" fill="#F5F5F5"/>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <rect width="1280" height="64" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1" y="0"/>
+
+  <!-- Wordmark: tkr-deploy -->
+  <text x="32" y="40" class="text-primary" font-size="18" font-weight="700" letter-spacing="-0.3">tkr-deploy</text>
+
+  <!-- Vault status indicator (right side) -->
+  <g transform="translate(1150, 22)">
+    <rect x="0" y="7" width="16" height="12" rx="2" fill="none" stroke="#616161" stroke-width="1.5"/>
+    <path d="M3,7 L3,3 Q3,0 8,0 Q13,0 13,3" fill="none" stroke="#616161" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="8" cy="13" r="2" fill="#616161"/>
+  </g>
+  <text x="1172" y="37" class="text-secondary" font-size="12">tkr-secrets</text>
+  <circle cx="1143" cy="32" r="4" fill="#212121"/>
+  <text x="1220" y="37" class="text-secondary" font-size="12">Connected</text>
+
+  <!-- ==================== PILL NAV BAR ==================== -->
+  <rect y="64" width="1280" height="48" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Overview (inactive) -->
+  <text x="32" y="93" class="text-secondary" font-size="13">Overview</text>
+
+  <!-- Secrets (inactive) -->
+  <text x="115" y="93" class="text-secondary" font-size="13">Secrets</text>
+
+  <!-- Database pill (active) -->
+  <g transform="translate(178, 76)">
+    <rect width="80" height="28" rx="14" fill="#424242"/>
+    <text x="40" y="19" text-anchor="middle" class="text-inverse" font-size="13" font-weight="500">Database</text>
+  </g>
+
+  <!-- Frontend (inactive) -->
+  <text x="272" y="93" class="text-secondary" font-size="13">Frontend</text>
+
+  <!-- Email (inactive) -->
+  <text x="348" y="93" class="text-secondary" font-size="13">Email</text>
+
+  <!-- CI/CD (inactive) -->
+  <text x="405" y="93" class="text-secondary" font-size="13">CI/CD</text>
+
+  <!-- ==================== TOP ROW: Connection Status + pgvector (side by side) ==================== -->
+  <!-- Connection Status card (left, ~50%) -->
+  <g transform="translate(32, 132)">
+    <rect width="596" height="108" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <text x="20" y="30" class="text-primary" font-size="14" font-weight="600">Connection Status</text>
+
+    <!-- Connected status badge -->
+    <rect x="430" y="14" width="105" height="22" rx="11" fill="#E0E0E0"/>
+    <circle cx="447" cy="25" r="4.5" fill="#212121"/>
+    <text x="457" y="30" class="text-primary" font-size="12" font-weight="600">Connected</text>
+
+    <!-- Divider -->
+    <line x1="20" y1="44" x2="576" y2="44" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Project ref -->
+    <text x="20" y="66" class="text-tertiary" font-size="11" letter-spacing="0.4">PROJECT REF</text>
+    <text x="120" y="66" class="text-secondary" font-size="12">xyzabcdef123456</text>
+
+    <!-- Region -->
+    <text x="300" y="66" class="text-tertiary" font-size="11" letter-spacing="0.4">REGION</text>
+    <text x="360" y="66" class="text-secondary" font-size="12">ca-central-1</text>
+
+    <!-- DB version -->
+    <text x="20" y="90" class="text-tertiary" font-size="11" letter-spacing="0.4">DB VERSION</text>
+    <text x="120" y="90" class="text-secondary" font-size="12">PostgreSQL 15.6</text>
+
+    <!-- Pool mode -->
+    <text x="300" y="90" class="text-tertiary" font-size="11" letter-spacing="0.4">POOL MODE</text>
+    <text x="375" y="90" class="text-secondary" font-size="12">Transaction</text>
+  </g>
+
+  <!-- pgvector extension card (right, ~50%) -->
+  <g transform="translate(652, 132)">
+    <rect width="596" height="108" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <text x="20" y="30" class="text-primary" font-size="14" font-weight="600">pgvector</text>
+
+    <!-- Status badge -->
+    <rect x="120" y="16" width="72" height="22" rx="11" fill="#E0E0E0"/>
+    <text x="156" y="31" text-anchor="middle" class="text-secondary" font-size="11" font-weight="600">Available</text>
+
+    <!-- Enable button -->
+    <rect x="500" y="14" width="76" height="26" rx="6" fill="#424242"/>
+    <text x="538" y="31" text-anchor="middle" class="text-inverse" font-size="12" font-weight="500">Enable</text>
+
+    <!-- Divider -->
+    <line x1="20" y1="44" x2="576" y2="44" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Version -->
+    <text x="20" y="66" class="text-tertiary" font-size="11" letter-spacing="0.4">VERSION</text>
+    <text x="90" y="66" class="text-secondary" font-size="12">0.7.4</text>
+
+    <!-- Schema -->
+    <text x="200" y="66" class="text-tertiary" font-size="11" letter-spacing="0.4">SCHEMA</text>
+    <text x="265" y="66" class="text-secondary" font-size="12">extensions</text>
+
+    <!-- Dependency note -->
+    <text x="20" y="90" class="text-tertiary" font-size="11">Required by migration 23 (pgvector_ivfflat). Enable before pushing pending migrations.</text>
+  </g>
+
+  <!-- ==================== MAIN CONTENT: Migrations (left) + Edge Functions (right) ==================== -->
+
+  <!-- MIGRATIONS column (left ~50%) -->
+  <!-- Section header -->
+  <g transform="translate(32, 264)">
+    <text x="0" y="16" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">MIGRATIONS</text>
+
+    <!-- Count badge -->
+    <rect x="96" y="3" width="84" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="138" y="16" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">20/24 applied</text>
+
+    <!-- Push Pending button -->
+    <rect x="424" y="0" width="124" height="26" rx="6" fill="#424242"/>
+    <text x="486" y="18" text-anchor="middle" class="text-inverse" font-size="12" font-weight="500">Push Pending</text>
+  </g>
+
+  <!-- Migrations card -->
+  <g transform="translate(32, 292)">
+    <rect width="596" height="424" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Column headers -->
+    <text x="48" y="24" class="text-tertiary" font-size="10" letter-spacing="0.4">MIGRATION</text>
+    <text x="470" y="24" class="text-tertiary" font-size="10" letter-spacing="0.4">APPLIED</text>
+    <line x1="20" y1="32" x2="576" y2="32" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Applied migration row 1 -->
+    <g transform="translate(0, 32)">
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+        <path d="M4,7 L6.5,9.5 L11,5" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <text x="44" y="26" class="text-tertiary" font-size="12">00000000000017_pgvector_extension.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">Mar 1, 14:02</text>
+      <line x1="20" y1="42" x2="576" y2="42" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Applied migration row 2 -->
+    <g transform="translate(0, 74)">
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+        <path d="M4,7 L6.5,9.5 L11,5" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <text x="44" y="26" class="text-tertiary" font-size="12">00000000000018_dialogue_embeddings.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">Mar 2, 09:15</text>
+      <line x1="20" y1="42" x2="576" y2="42" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Applied migration row 3 -->
+    <g transform="translate(0, 116)">
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+        <path d="M4,7 L6.5,9.5 L11,5" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <text x="44" y="26" class="text-tertiary" font-size="12">00000000000019_safe_segment_scores.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">Mar 3, 11:44</text>
+      <line x1="20" y1="42" x2="576" y2="42" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Applied migration row 4 -->
+    <g transform="translate(0, 158)">
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+        <path d="M4,7 L6.5,9.5 L11,5" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+      <text x="44" y="26" class="text-tertiary" font-size="12">00000000000020_survey_recipients.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">Mar 4, 16:30</text>
+      <line x1="20" y1="42" x2="576" y2="42" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Pending divider label -->
+    <text x="20" y="218" class="text-tertiary" font-size="10" letter-spacing="0.4">PENDING (4)</text>
+    <line x1="108" y1="212" x2="576" y2="212" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Pending migration row 1 -->
+    <g transform="translate(0, 220)">
+      <rect x="0" y="0" width="3" height="48" fill="#424242"/>
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#424242" stroke-width="1.5"/>
+        <circle cx="7" cy="7" r="2.5" fill="#424242"/>
+      </g>
+      <text x="44" y="26" class="text-primary" font-size="12" font-weight="500">00000000000021_report_pipeline.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">pending</text>
+      <line x1="20" y1="48" x2="576" y2="48" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Pending migration row 2 -->
+    <g transform="translate(0, 268)">
+      <rect x="0" y="0" width="3" height="48" fill="#424242"/>
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#424242" stroke-width="1.5"/>
+        <circle cx="7" cy="7" r="2.5" fill="#424242"/>
+      </g>
+      <text x="44" y="26" class="text-primary" font-size="12" font-weight="500">00000000000022_role_filtered_access.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">pending</text>
+      <line x1="20" y1="48" x2="576" y2="48" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Pending migration row 3 -->
+    <g transform="translate(0, 316)">
+      <rect x="0" y="0" width="3" height="48" fill="#424242"/>
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#424242" stroke-width="1.5"/>
+        <circle cx="7" cy="7" r="2.5" fill="#424242"/>
+      </g>
+      <text x="44" y="26" class="text-primary" font-size="12" font-weight="500">00000000000023_pgvector_ivfflat.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">pending</text>
+      <line x1="20" y1="48" x2="576" y2="48" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Pending migration row 4 -->
+    <g transform="translate(0, 364)">
+      <rect x="0" y="0" width="3" height="60" fill="#424242"/>
+      <g transform="translate(20, 14)">
+        <circle cx="7" cy="7" r="7" fill="none" stroke="#424242" stroke-width="1.5"/>
+        <circle cx="7" cy="7" r="2.5" fill="#424242"/>
+      </g>
+      <text x="44" y="26" class="text-primary" font-size="12" font-weight="500">00000000000024_client_reports.sql</text>
+      <text x="540" y="26" text-anchor="end" class="text-tertiary" font-size="11">pending</text>
+    </g>
+  </g>
+
+  <!-- EDGE FUNCTIONS column (right ~50%) -->
+  <!-- Section header -->
+  <g transform="translate(652, 264)">
+    <text x="0" y="16" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">EDGE FUNCTIONS</text>
+
+    <!-- Count badge -->
+    <rect x="128" y="3" width="88" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="172" y="16" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">0/6 deployed</text>
+
+    <!-- Deploy All button -->
+    <rect x="500" y="0" width="96" height="26" rx="6" fill="#424242"/>
+    <text x="548" y="18" text-anchor="middle" class="text-inverse" font-size="12" font-weight="500">Deploy All</text>
+  </g>
+
+  <!-- Edge functions card -->
+  <g transform="translate(652, 292)">
+    <rect width="596" height="424" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Column headers -->
+    <text x="20" y="24" class="text-tertiary" font-size="10" letter-spacing="0.4">FUNCTION</text>
+    <text x="300" y="24" class="text-tertiary" font-size="10" letter-spacing="0.4">LAST DEPLOYED</text>
+    <text x="440" y="24" class="text-tertiary" font-size="10" letter-spacing="0.4">SECRETS NEEDED</text>
+    <line x1="20" y1="32" x2="576" y2="32" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Function row 1: send-email -->
+    <g transform="translate(0, 32)">
+      <rect x="0" y="0" width="3" height="60" fill="#424242"/>
+      <text x="20" y="24" class="text-primary" font-size="13" font-weight="600">send-email</text>
+      <!-- not deployed badge -->
+      <rect x="118" y="10" width="89" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="162" y="23" text-anchor="middle" class="text-secondary" font-size="10">Not deployed</text>
+      <text x="300" y="24" class="text-secondary" font-size="12">—</text>
+      <text x="440" y="24" class="text-tertiary" font-size="10">RESEND_API_KEY, AWS_SES_REGION</text>
+      <!-- Deploy button -->
+      <rect x="528" y="8" width="56" height="24" rx="5" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <text x="556" y="24" text-anchor="middle" class="text-primary" font-size="11" font-weight="500">Deploy</text>
+      <line x1="20" y1="60" x2="576" y2="60" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Function row 2: score-survey -->
+    <g transform="translate(0, 92)">
+      <rect x="0" y="0" width="3" height="60" fill="#424242"/>
+      <text x="20" y="24" class="text-primary" font-size="13" font-weight="600">score-survey</text>
+      <rect x="118" y="10" width="89" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="162" y="23" text-anchor="middle" class="text-secondary" font-size="10">Not deployed</text>
+      <text x="300" y="24" class="text-secondary" font-size="12">—</text>
+      <text x="440" y="24" class="text-tertiary" font-size="10">SUPABASE_SERVICE_ROLE_KEY</text>
+      <rect x="528" y="8" width="56" height="24" rx="5" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <text x="556" y="24" text-anchor="middle" class="text-primary" font-size="11" font-weight="500">Deploy</text>
+      <line x1="20" y1="60" x2="576" y2="60" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Function row 3: generate-report -->
+    <g transform="translate(0, 152)">
+      <rect x="0" y="0" width="3" height="60" fill="#424242"/>
+      <text x="20" y="24" class="text-primary" font-size="13" font-weight="600">generate-report</text>
+      <rect x="140" y="10" width="89" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="184" y="23" text-anchor="middle" class="text-secondary" font-size="10">Not deployed</text>
+      <text x="300" y="24" class="text-secondary" font-size="12">—</text>
+      <text x="440" y="24" class="text-tertiary" font-size="10">AWS_S3_BUCKET, AWS_REGION</text>
+      <rect x="528" y="8" width="56" height="24" rx="5" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <text x="556" y="24" text-anchor="middle" class="text-primary" font-size="11" font-weight="500">Deploy</text>
+      <line x1="20" y1="60" x2="576" y2="60" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Function row 4: embed-responses -->
+    <g transform="translate(0, 212)">
+      <rect x="0" y="0" width="3" height="60" fill="#424242"/>
+      <text x="20" y="24" class="text-primary" font-size="13" font-weight="600">embed-responses</text>
+      <rect x="148" y="10" width="89" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="192" y="23" text-anchor="middle" class="text-secondary" font-size="10">Not deployed</text>
+      <text x="300" y="24" class="text-secondary" font-size="12">—</text>
+      <text x="440" y="24" class="text-tertiary" font-size="10">OPENAI_API_KEY, SUPABASE_URL</text>
+      <rect x="528" y="8" width="56" height="24" rx="5" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <text x="556" y="24" text-anchor="middle" class="text-primary" font-size="11" font-weight="500">Deploy</text>
+      <line x1="20" y1="60" x2="576" y2="60" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Function row 5: notify-complete -->
+    <g transform="translate(0, 272)">
+      <rect x="0" y="0" width="3" height="60" fill="#424242"/>
+      <text x="20" y="24" class="text-primary" font-size="13" font-weight="600">notify-complete</text>
+      <rect x="140" y="10" width="89" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="184" y="23" text-anchor="middle" class="text-secondary" font-size="10">Not deployed</text>
+      <text x="300" y="24" class="text-secondary" font-size="12">—</text>
+      <text x="440" y="24" class="text-tertiary" font-size="10">RESEND_API_KEY</text>
+      <rect x="528" y="8" width="56" height="24" rx="5" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <text x="556" y="24" text-anchor="middle" class="text-primary" font-size="11" font-weight="500">Deploy</text>
+      <line x1="20" y1="60" x2="576" y2="60" stroke="#E0E0E0" stroke-width="1"/>
+    </g>
+
+    <!-- Function row 6: health-check -->
+    <g transform="translate(0, 332)">
+      <rect x="0" y="0" width="3" height="60" fill="#424242"/>
+      <text x="20" y="24" class="text-primary" font-size="13" font-weight="600">health-check</text>
+      <rect x="118" y="10" width="89" height="18" rx="9" fill="#E0E0E0"/>
+      <text x="162" y="23" text-anchor="middle" class="text-secondary" font-size="10">Not deployed</text>
+      <text x="300" y="24" class="text-secondary" font-size="12">—</text>
+      <text x="440" y="24" class="text-tertiary" font-size="10">SUPABASE_URL, SUPABASE_ANON_KEY</text>
+      <rect x="528" y="8" width="56" height="24" rx="5" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <text x="556" y="24" text-anchor="middle" class="text-primary" font-size="11" font-weight="500">Deploy</text>
+    </g>
+  </g>
+
+  <!-- Bottom padding -->
+  <rect x="0" y="1316" width="1280" height="24" fill="#F5F5F5"/>
+
+</svg>

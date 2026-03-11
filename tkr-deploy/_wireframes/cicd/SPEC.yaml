@@ -1,0 +1,123 @@
+# tkr-deploy CI/CD — Wireframe Specification
+# Bridges SVG wireframes to implementation requirements.
+
+section: cicd
+shell: deploy-dashboard
+route_prefix: "/cicd"
+
+screens:
+  - id: cicd
+    file: cicd-mobile.svg
+    desktop: cicd-desktop.svg
+    route: "/cicd"
+    purpose: "Shows GitHub Actions workflow status for the compass-app repo, repo secret configuration coverage, and a cross-workflow recent runs list."
+
+    shell_header:
+      type: minimal
+      left: "tkr-deploy wordmark (text, not image)"
+      center: ""
+      right: "Vault status indicator — lock icon (unlocked/locked state) + vault name (tkr-secrets) + connection status dot"
+
+    data_sources:
+      - derived: workflow_status
+        logic: |
+          GitHub API: GET /repos/collective-communications/compass-app/actions/workflows
+          For each workflow, GET /repos/{owner}/{repo}/actions/workflows/{workflow_id}/runs?per_page=1
+          Returns: { id, name, state, last_run: { status, conclusion, trigger, head_branch, run_duration_ms, created_at } }
+          If workflow file does not exist (404), return { state: 'not_created' }.
+          Known workflows: ci.yml, deploy.yml, supabase-keepalive.yml.
+
+      - derived: repo_secrets
+        logic: |
+          GitHub API: GET /repos/collective-communications/compass-app/actions/secrets
+          Returns list of secret names that exist. API never returns values.
+          Cross-reference against required secrets list (9 total) to derive configured/missing state.
+          Required: SUPABASE_ACCESS_TOKEN, SUPABASE_DB_PASSWORD, SUPABASE_PROJECT_REF,
+            VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID,
+            VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, E2E_SUPABASE_SERVICE_KEY
+
+      - derived: recent_runs
+        logic: |
+          GitHub API: GET /repos/collective-communications/compass-app/actions/runs?per_page=5
+          Returns last 5 workflow runs across all workflows.
+          Fields: workflow_name, event (push/pull_request/schedule), head_branch, run_duration_ms, created_at, conclusion.
+
+      - derived: vault_status
+        logic: "HTTP GET localhost:42042/health — returns { locked: boolean, name: string }. Poll every 30s. Used to enable/disable 'Sync from Vault' button."
+
+    layout:
+      mobile: "Single column stack: top bar → pill nav (CI/CD active) → repository card → WORKFLOWS section label → 3 workflow cards → REPOSITORY SECRETS label + sync button → secrets list card → RECENT RUNS label → recent runs card"
+      desktop: "Top bar full-width → pill nav → repository card full-width → two-column (55% workflows / 45% secrets) → recent runs full-width table below"
+
+    components:
+      - element: repository_card
+        type: card
+        content: "REPOSITORY label, repo full name (collective-communications/compass-app), default branch (main), external link icon to open repo on GitHub."
+        behavior: "External link icon opens the GitHub repo in a new tab."
+        note: "Repo name and default branch read from GitHub API or configured constant. External link icon uses an arrow-box icon consistent with other link indicators in the app."
+
+      - element: workflow_status_cards
+        type: card
+        content: |
+          One card per workflow: ci.yml, deploy.yml, supabase-keepalive.yml.
+          Each card shows: filename, status dot + text label, trigger + branch, divider, duration, last-run timestamp, 'View Runs' link.
+          deploy.yml card has an additional warning indicator and bug note (--project-ref flag missing).
+          supabase-keepalive.yml card shows 'Not Created' badge and a 'Create Workflow' button instead of run stats.
+        behavior: |
+          'View Runs' link opens the workflow's runs page on GitHub (new tab).
+          'Create Workflow' button triggers generation and commit of the keepalive workflow file to the repo.
+          Status dot: #212121 (passed/success), #616161 (failed), #9E9E9E (unknown/pending).
+          Warning-state cards have a 4px left border: #616161 for failed/bug, #9E9E9E for not-created.
+        note: "Status communicated through dot fill density + adjacent text label — never color alone. Warning left border provides secondary structural signal."
+
+      - element: repo_secrets_list
+        type: list
+        content: |
+          Section header with configured count (e.g., '3/9 configured') and 'Sync from Vault' button.
+          API capability note: GitHub API shows existence only — values are never readable.
+          9 required secrets in a compact list, each row: secret name | Configured or Missing badge.
+          Missing secrets have a 3px #212121 left accent bar.
+          Bottom of card: summary count note + inline 'Sync from Vault' CTA.
+        behavior: |
+          'Sync from Vault' reads each required secret from the tkr-secrets vault and calls GitHub API to create/update each secret.
+          Requires vault to be unlocked. If vault is locked, button is disabled with tooltip: 'Unlock vault to sync secrets.'
+          On sync completion, list refreshes to reflect new state.
+        note: "GitHub API supports writing secrets (encrypted with repo's public key). On read, it only returns names — never values. UI reflects this constraint explicitly."
+
+      - element: recent_runs_table
+        type: list
+        content: "Last 5 workflow runs across all workflows. Mobile: status dot | workflow name | event | duration | timestamp (compact, 2-line rows). Desktop: full table with Status, Workflow, Event, Branch, Duration, Timestamp columns. 'View all runs on GitHub' link at bottom."
+        behavior: "Status dot uses same greyscale fill system as workflow cards (#212121=passed, #616161=failed, #9E9E9E=in-progress). 'View all' link opens GitHub Actions page for the repo."
+        note: "Desktop renders as a structured table with a #F5F5F5 header row. Mobile uses a stacked 2-line row pattern (name/event above; branch/timestamp below)."
+
+    edge_cases:
+      - no_github_token: "If GitHub API token is not configured or lacks repo/actions scope, show an error state in each data-dependent card: 'GitHub API unavailable — check token permissions'. Workflow cards and secrets list both degrade independently."
+      - workflow_running: "If a workflow is currently in progress (conclusion=null, status=in_progress), show a pulsing #9E9E9E dot with label 'Running' and suppress duration (show 'in progress' instead)."
+      - all_secrets_configured: "When all 9 secrets are configured, 'Sync from Vault' button is still available for re-sync. Count shows '9/9 configured'. No missing-secret left-border indicators visible."
+      - keepalive_workflow_create_failure: "If 'Create Workflow' fails (e.g., insufficient GitHub token permissions), show an inline error below the button: 'Could not create file — check token has contents:write scope.' Button re-enables."
+      - vault_locked_sync_attempt: "'Sync from Vault' button is visually disabled (greyed out, aria-disabled=true) when vault is locked. Hovering/focusing reveals: 'Unlock tkr-secrets vault to sync.' No action triggered on click."
+      - deploy_bug_awareness: "The deploy.yml warning is a persistent, acknowledged state — not an alert. It surfaces the known --project-ref bug without blocking the UI or requiring dismissal."
+
+    accessibility:
+      - "Status dots must have adjacent text labels (Passed / Failed / Running / Unknown) — dot fill alone is insufficient for color-blind users."
+      - "Warning left borders on cards are structural signals — each card also has a text-level note describing the issue (bug note for deploy.yml, 'Not Created' badge for keepalive)."
+      - "Keyboard navigation: Tab through pill nav → repository card link → workflow cards (View Runs links, Create Workflow button) → secrets section (Sync from Vault button) → recent runs (View all link)."
+      - "Disabled 'Sync from Vault' button (vault locked) uses aria-disabled='true' with aria-describedby pointing to vault status message. Not hidden — greyed and inert."
+      - "Workflow cards with warning state have aria-label including the warning: e.g., aria-label='deploy.yml — Failed. Known issue: --project-ref flag missing.'"
+      - "Recent runs table on desktop has proper table semantics: <table>, <thead>, <th scope='col'>, <tbody>, <tr>, <td>. Mobile list uses role='list' with aria-label per run item."
+
+shared:
+  header:
+    type: minimal
+    left: "tkr-deploy wordmark"
+    right: "Vault status indicator"
+
+  navigation:
+    type: pill_bar
+    items:
+      - { label: "Overview", route: "/" }
+      - { label: "Secrets", route: "/secrets" }
+      - { label: "Database", route: "/database" }
+      - { label: "Frontend", route: "/frontend" }
+      - { label: "Email", route: "/email" }
+      - { label: "CI/CD", route: "/cicd" }

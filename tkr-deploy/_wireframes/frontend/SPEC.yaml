@@ -1,0 +1,107 @@
+# tkr-deploy Frontend Screen — Wireframe Specification
+# Bridges SVG wireframes to implementation requirements.
+
+section: frontend
+shell: deploy-dashboard
+route_prefix: "/frontend"
+
+screens:
+  - id: frontend
+    file: frontend-mobile.svg
+    desktop: frontend-desktop.svg
+    route: "/frontend"
+    purpose: "Vercel deployment detail view — project status, current deployment metadata, env var sync health, and last 5 deployment history rows."
+
+    shell_header:
+      type: minimal
+      left: "tkr-deploy wordmark (text, not image)"
+      center: ""
+      right: "Vault status indicator — lock icon (unlocked/locked state) + vault name (tkr-secrets) + connection status dot"
+
+    data_sources:
+      - derived: vercel_project
+        logic: "GET https://api.vercel.com/v9/projects/{projectId} — returns project name, framework, production alias URL. Requires VERCEL_TOKEN + VERCEL_PROJECT_ID env vars. Cache 60s."
+
+      - derived: current_deployment
+        logic: "GET https://api.vercel.com/v13/deployments?projectId={id}&limit=1&target=production — returns most recent production deployment: uid, url, readyState (READY|BUILDING|ERROR), meta.githubCommitSha, meta.githubCommitMessage, meta.githubCommitRef, buildingAt/ready timestamps (derive duration)."
+
+      - derived: vercel_env_vars
+        logic: "GET https://api.vercel.com/v9/projects/{id}/env — returns array of { key, value (always masked), target[], type }. Filter to Production target. Mask value client-side with bullet string."
+
+      - derived: vault_env_vars
+        logic: "HTTP GET localhost:42042/secrets — returns { key: string, value: string }[] from tkr-secrets vault. Compare by key against Vercel env vars. Mark each as match | mismatch | vault_only | vercel_only."
+
+      - derived: deployment_history
+        logic: "GET https://api.vercel.com/v13/deployments?projectId={id}&limit=5 — returns last 5 deployments across all targets. Fields: uid, meta.githubCommitSha, meta.githubCommitMessage, meta.githubCommitRef, target (production|preview), readyState, buildingAt, ready, duration."
+
+    layout:
+      mobile: "Single column stack: top bar → pill nav (horizontally scrollable, Frontend active) → Project Status card → Current Deployment card → Environment Variables card (table with 3 rows) → Deployment History card (5 rows)"
+      desktop: "Top bar full-width → pill nav → top row: Project Status card (left 50%, 600px) + Current Deployment card (right 50%, 600px) with 16px gap → Environment Variables card full-width → Deployment History full-width table card"
+
+    components:
+      - element: top_bar
+        type: custom
+        content: "Wordmark 'tkr-deploy' left-aligned. Vault status right-aligned: connection dot + lock icon + vault name."
+        behavior: "Vault status polls localhost:42042/health every 30s. Clicking vault area opens vault connection panel."
+        note: "Identical to overview screen top bar — shared component."
+
+      - element: pill_nav
+        type: custom
+        content: "Horizontal scrollable pill row: Overview | Secrets | Database | Frontend (active, dark fill) | Email | CI/CD"
+        behavior: "Active pill = #424242 fill, white text. Inactive = text-only #616161. Tapping navigates to that provider view."
+        note: "On mobile the row is horizontally scrollable — CI/CD partially visible to signal scroll affordance."
+
+      - element: project_status_card
+        type: card
+        content: "VERCEL PROJECT label, project name (compass-app), Vite framework badge, production URL (compass-app.vercel.app), Redeploy button right-aligned below divider."
+        behavior: "Redeploy button triggers POST https://api.vercel.com/v13/deployments with forceNew=1 on the most recent deployment. Button transitions to loading state during request. On success, current_deployment data refreshes."
+        note: "Framework badge derived from project.framework field — handle null with 'Unknown'."
+
+      - element: current_deployment_card
+        type: card
+        content: "CURRENT DEPLOYMENT label, Ready/Building/Error status badge, commit hash + truncated message, branch, build duration, created timestamp."
+        behavior: "Status badge reflects live readyState — polls every 10s when state is BUILDING. On desktop, metadata renders in two columns."
+        note: "Duration computed from (ready - buildingAt) in ms, formatted as Xm Ys. Show '—' if deployment never completed."
+
+      - element: env_vars_card
+        type: card
+        content: "Header: 'Environment Variables' title, sync badge (N/M synced), 'Sync from Vault' button. Table: Variable | Value (masked) | Vault match (checkmark/X + text label) | Target."
+        behavior: "'Sync from Vault' button reads vault secrets, diffs against Vercel env, then PATCHes mismatched vars via PUT https://api.vercel.com/v9/projects/{id}/env/{envId}. Button transitions to loading state. On completion, badge and table refresh."
+        note: "Vault match column uses both icon (checkmark/X) and text label ('Match'/'Mismatch') — never icon alone. Masked value is always '•••••' client-side, never the real value."
+
+      - element: deployment_history_list
+        type: list
+        content: "Last 5 deployments. Each row: status dot (solid=production ready, outline=preview, grey=error) + commit message + commit hash + branch + duration + timestamp. Preview rows show 'Promote' link."
+        behavior: "'Promote' link on preview rows triggers POST to promote that deployment to production. 'View all deployments' footer link opens Vercel dashboard URL in new tab."
+        note: "Status dot shape/fill communicates state — text label in each row also encodes state (no color-only signal). Desktop renders as structured table with explicit column headers."
+
+    edge_cases:
+      - vault_offline: "If localhost:42042 is unreachable, env var vault match column shows '—' with tooltip 'Vault offline'. Sync from Vault button is disabled (greyed, aria-disabled). Badge shows 'Vault offline' instead of sync count."
+      - deployment_building: "When readyState is BUILDING, status badge shows 'Building' and an animated pulse indicator replaces the static dot in history. Redeploy button is disabled during an active build."
+      - deployment_error: "When current deployment readyState is ERROR, status badge shows 'Error' (no color fill — text label carries the signal). Row in history shows grey dot + 'Error' text in commit metadata."
+      - no_production_deployment: "If no production deployment exists yet (new project), Current Deployment card shows empty state: 'No production deployment — click Redeploy to trigger the first build.'"
+      - vercel_api_failure: "If Vercel API returns 4xx/5xx, show inline error message within the affected card: 'Failed to load — retry'. Cards that successfully loaded remain visible."
+      - promote_confirmation: "Promoting a preview to production is a destructive replacement — show an inline confirmation row beneath the Promote link ('Promote to production? Confirm / Cancel') rather than a dialog."
+
+    accessibility:
+      - "Status dots (solid/outline/grey) must always be accompanied by a text label in the same row. Dot shape and fill supplement, never replace, text."
+      - "Keyboard navigation: Tab through pill nav → Redeploy button → Sync from Vault → env var table rows (read-only) → deployment history rows → Promote links → View all link. Enter activates focused interactive elements."
+      - "Redeploy and Sync from Vault buttons announce operation result via aria-live region: 'Redeployment triggered' / 'Environment variables synced — 1 updated'."
+      - "Disabled buttons (vault offline, build in progress) use aria-disabled='true' and aria-describedby pointing to the inline reason message."
+      - "Masked env var values have aria-label='Value masked for security' on the bullet-string cell — not read as literal bullet characters."
+
+shared:
+  header:
+    type: minimal
+    left: "tkr-deploy wordmark"
+    right: "Vault status indicator"
+
+  navigation:
+    type: pill_bar
+    items:
+      - { label: "Overview", route: "/" }
+      - { label: "Secrets", route: "/secrets" }
+      - { label: "Database", route: "/database" }
+      - { label: "Frontend", route: "/frontend" }
+      - { label: "Email", route: "/email" }
+      - { label: "CI/CD", route: "/cicd" }

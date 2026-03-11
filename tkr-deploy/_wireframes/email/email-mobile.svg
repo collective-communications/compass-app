@@ -1,0 +1,296 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 1420" width="375" height="1420">
+  <defs>
+    <style>
+      .text-primary   { fill: #212121; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-secondary  { fill: #616161; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-tertiary   { fill: #9E9E9E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-inverse    { fill: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="375" height="1420" fill="#F5F5F5"/>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <rect width="375" height="56" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1" y="0"/>
+
+  <!-- Wordmark: tkr-deploy -->
+  <text x="16" y="35" class="text-primary" font-size="17" font-weight="700" letter-spacing="-0.3">tkr-deploy</text>
+
+  <!-- Vault status indicator (right side) -->
+  <!-- Lock icon (unlocked) -->
+  <g transform="translate(270, 18)">
+    <rect x="0" y="7" width="16" height="12" rx="2" fill="none" stroke="#616161" stroke-width="1.5"/>
+    <path d="M3,7 L3,3 Q3,0 8,0 Q13,0 13,3" fill="none" stroke="#616161" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="8" cy="13" r="2" fill="#616161"/>
+  </g>
+  <text x="292" y="31" class="text-secondary" font-size="11">tkr-secrets</text>
+  <circle cx="262" cy="28" r="4" fill="#212121"/>
+
+  <!-- ==================== PILL NAV BAR ==================== -->
+  <rect y="56" width="375" height="44" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Overview pill (inactive) -->
+  <text x="12" y="85" class="text-secondary" font-size="12">Overview</text>
+
+  <!-- Secrets pill (inactive) -->
+  <text x="76" y="85" class="text-secondary" font-size="12">Secrets</text>
+
+  <!-- Database pill (inactive) -->
+  <text x="130" y="85" class="text-secondary" font-size="12">Database</text>
+
+  <!-- Frontend pill (inactive) -->
+  <text x="194" y="85" class="text-secondary" font-size="12">Frontend</text>
+
+  <!-- Email pill (active) -->
+  <g transform="translate(254, 68)">
+    <rect width="52" height="24" rx="12" fill="#424242"/>
+    <text x="26" y="16.5" text-anchor="middle" class="text-inverse" font-size="12" font-weight="500">Email</text>
+  </g>
+
+  <!-- CI/CD pill (inactive, partially visible) -->
+  <text x="316" y="85" class="text-secondary" font-size="12">CI/C</text>
+
+  <!-- ==================== DOMAIN STATUS CARD ==================== -->
+  <!-- Section label -->
+  <text x="12" y="124" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">EMAIL PROVIDER</text>
+
+  <g transform="translate(12, 132)">
+    <rect width="351" height="124" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Card header: Domain label + verified badge -->
+    <text x="16" y="22" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.4">DOMAIN</text>
+
+    <!-- Verified status badge (top right) -->
+    <rect x="271" y="10" width="64" height="20" rx="10" fill="#E0E0E0"/>
+    <text x="303" y="23" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Verified</text>
+
+    <!-- Domain name -->
+    <text x="16" y="46" class="text-primary" font-size="15" font-weight="600">mail.tuckers.link</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="62" x2="335" y2="62" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Provider row -->
+    <text x="16" y="82" class="text-tertiary" font-size="10" letter-spacing="0.3">PROVIDER</text>
+    <text x="75" y="82" class="text-secondary" font-size="11">Resend</text>
+
+    <!-- Region row -->
+    <text x="16" y="100" class="text-tertiary" font-size="10" letter-spacing="0.3">PLAN</text>
+    <text x="75" y="100" class="text-secondary" font-size="11">Free — 3,000 emails/month · 1 domain · 2 req/s</text>
+
+    <!-- Verify Domain button (disabled, domain already verified) -->
+    <rect x="16" y="108" width="139" height="8" rx="0" fill="none"/>
+    <!-- disabled state: outlined, grey text -->
+    <rect x="16" y="106" width="139" height="32" rx="6" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1"/>
+    <text x="86" y="126" text-anchor="middle" class="text-tertiary" font-size="12">Verify Domain</text>
+  </g>
+
+  <!-- ==================== DNS RECORDS CARD ==================== -->
+  <!-- Section label -->
+  <text x="12" y="284" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">DNS RECORDS</text>
+
+  <g transform="translate(12, 292)">
+    <rect width="351" height="298" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Card header row: title + verified count -->
+    <text x="16" y="26" class="text-primary" font-size="13" font-weight="600">DNS Records</text>
+    <!-- 2/3 verified badge -->
+    <rect x="267" y="12" width="68" height="20" rx="10" fill="#E0E0E0"/>
+    <text x="301" y="25" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">2 / 3 verified</text>
+
+    <!-- Divider under header -->
+    <line x1="16" y1="40" x2="335" y2="40" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- SPF record row (verified) -->
+    <g transform="translate(0, 48)">
+      <!-- checkmark icon -->
+      <circle cx="28" cy="12" r="9" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <path d="M23,12 L27,16 L33,8" fill="none" stroke="#424242" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <text x="46" y="10" class="text-primary" font-size="12" font-weight="600">SPF</text>
+      <!-- TXT badge -->
+      <rect x="46" y="15" width="26" height="14" rx="4" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1"/>
+      <text x="59" y="25" text-anchor="middle" class="text-tertiary" font-size="9" font-weight="500">TXT</text>
+
+      <!-- Host + copy icon -->
+      <text x="82" y="10" class="text-secondary" font-size="10">Host: @</text>
+      <g transform="translate(315, 3)">
+        <rect x="0" y="2" width="10" height="10" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.2"/>
+        <rect x="2" y="0" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.2"/>
+      </g>
+
+      <!-- Value truncated -->
+      <text x="82" y="25" class="text-tertiary" font-size="10">v=spf1 include:re...</text>
+      <g transform="translate(315, 16)">
+        <rect x="0" y="2" width="10" height="10" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.2"/>
+        <rect x="2" y="0" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.2"/>
+      </g>
+
+      <!-- Expand hint -->
+      <text x="82" y="40" class="text-tertiary" font-size="10">Tap to expand full value</text>
+    </g>
+
+    <!-- Divider -->
+    <line x1="16" y1="108" x2="335" y2="108" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- DKIM record row (verified) -->
+    <g transform="translate(0, 116)">
+      <!-- checkmark icon -->
+      <circle cx="28" cy="12" r="9" fill="none" stroke="#424242" stroke-width="1.5"/>
+      <path d="M23,12 L27,16 L33,8" fill="none" stroke="#424242" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+      <text x="46" y="10" class="text-primary" font-size="12" font-weight="600">DKIM</text>
+      <!-- CNAME badge -->
+      <rect x="46" y="15" width="38" height="14" rx="4" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1"/>
+      <text x="65" y="25" text-anchor="middle" class="text-tertiary" font-size="9" font-weight="500">CNAME</text>
+
+      <!-- Host + copy icon -->
+      <text x="94" y="10" class="text-secondary" font-size="10">resend._domainkey...</text>
+      <g transform="translate(315, 3)">
+        <rect x="0" y="2" width="10" height="10" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.2"/>
+        <rect x="2" y="0" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.2"/>
+      </g>
+
+      <!-- Value truncated -->
+      <text x="94" y="25" class="text-tertiary" font-size="10">feedback.resend.co...</text>
+      <g transform="translate(315, 16)">
+        <rect x="0" y="2" width="10" height="10" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.2"/>
+        <rect x="2" y="0" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.2"/>
+      </g>
+
+      <text x="94" y="40" class="text-tertiary" font-size="10">Tap to expand full value</text>
+    </g>
+
+    <!-- Divider -->
+    <line x1="16" y1="176" x2="335" y2="176" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- DMARC record row (NOT verified — left border accent) -->
+    <!-- Unverified left border indicator -->
+    <rect x="0" y="184" width="4" height="98" rx="2" fill="#212121"/>
+
+    <g transform="translate(0, 184)">
+      <!-- X icon (unverified) -->
+      <circle cx="28" cy="12" r="9" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+      <path d="M24,8 L32,16 M32,8 L24,16" fill="none" stroke="#9E9E9E" stroke-width="1.5" stroke-linecap="round"/>
+
+      <text x="46" y="10" class="text-primary" font-size="12" font-weight="600">DMARC</text>
+      <!-- TXT badge -->
+      <rect x="46" y="15" width="26" height="14" rx="4" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1"/>
+      <text x="59" y="25" text-anchor="middle" class="text-tertiary" font-size="9" font-weight="500">TXT</text>
+
+      <!-- Unverified label -->
+      <rect x="200" y="3" width="60" height="16" rx="8" fill="#E0E0E0"/>
+      <text x="230" y="14" text-anchor="middle" class="text-secondary" font-size="9" font-weight="600">Not verified</text>
+
+      <!-- Host + copy icon -->
+      <text x="82" y="40" class="text-secondary" font-size="10">Host: _dmarc</text>
+      <g transform="translate(315, 33)">
+        <rect x="0" y="2" width="10" height="10" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.2"/>
+        <rect x="2" y="0" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.2"/>
+      </g>
+
+      <!-- Value truncated -->
+      <text x="82" y="58" class="text-tertiary" font-size="10">v=DMARC1; p=none; rua=...</text>
+      <g transform="translate(315, 51)">
+        <rect x="0" y="2" width="10" height="10" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.2"/>
+        <rect x="2" y="0" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.2"/>
+      </g>
+
+      <text x="82" y="76" class="text-tertiary" font-size="10">Tap to expand full value</text>
+    </g>
+  </g>
+
+  <!-- ==================== SENDING STATS CARD ==================== -->
+  <!-- Section label -->
+  <text x="12" y="618" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">SENDING STATS</text>
+
+  <g transform="translate(12, 626)">
+    <rect width="351" height="172" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- This month label + usage -->
+    <text x="16" y="26" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.4">THIS MONTH</text>
+    <text x="16" y="50" class="text-primary" font-size="22" font-weight="700">47</text>
+    <text x="50" y="50" class="text-secondary" font-size="14">/ 3,000 emails</text>
+
+    <!-- Usage progress bar track -->
+    <rect x="16" y="60" width="319" height="6" rx="3" fill="#E0E0E0"/>
+    <!-- Usage bar fill: 47/3000 = ~1.6% -->
+    <rect x="16" y="60" width="5" height="6" rx="3" fill="#424242"/>
+
+    <!-- Usage percentage label -->
+    <text x="335" y="70" text-anchor="end" class="text-tertiary" font-size="10">1.6%</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="82" x2="335" y2="82" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Stats grid: Today | Rate Limit | Bounce Rate -->
+    <text x="16" y="102" class="text-tertiary" font-size="10" letter-spacing="0.3">TODAY</text>
+    <text x="16" y="120" class="text-primary" font-size="15" font-weight="600">12</text>
+    <text x="16" y="136" class="text-tertiary" font-size="10">emails sent</text>
+
+    <!-- Vertical divider -->
+    <line x1="126" y1="94" x2="126" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+
+    <text x="140" y="102" class="text-tertiary" font-size="10" letter-spacing="0.3">RATE LIMIT</text>
+    <text x="140" y="120" class="text-primary" font-size="15" font-weight="600">2 req/s</text>
+    <text x="140" y="136" class="text-tertiary" font-size="10">max throughput</text>
+
+    <!-- Vertical divider -->
+    <line x1="252" y1="94" x2="252" y2="148" stroke="#E0E0E0" stroke-width="1"/>
+
+    <text x="266" y="102" class="text-tertiary" font-size="10" letter-spacing="0.3">BOUNCE RATE</text>
+    <text x="266" y="120" class="text-primary" font-size="15" font-weight="600">0.2%</text>
+    <text x="266" y="136" class="text-tertiary" font-size="10">this month</text>
+
+    <!-- Footer note -->
+    <text x="16" y="160" class="text-tertiary" font-size="10">Free tier resets monthly · next reset Mar 1</text>
+  </g>
+
+  <!-- ==================== API KEY STATUS CARD ==================== -->
+  <!-- Section label -->
+  <text x="12" y="826" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.3">API KEY</text>
+
+  <g transform="translate(12, 834)">
+    <rect width="351" height="200" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Key name row -->
+    <text x="16" y="24" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.4">KEY NAME</text>
+    <text x="16" y="46" class="text-primary" font-size="14" font-weight="600">tkr-deploy-production</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="58" x2="335" y2="58" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Created date -->
+    <text x="16" y="78" class="text-tertiary" font-size="10" letter-spacing="0.3">CREATED</text>
+    <text x="90" y="78" class="text-secondary" font-size="11">Feb 12, 2026</text>
+
+    <!-- Permissions -->
+    <text x="16" y="100" class="text-tertiary" font-size="10" letter-spacing="0.3">PERMISSIONS</text>
+    <rect x="110" y="88" width="90" height="16" rx="8" fill="#E0E0E0"/>
+    <text x="155" y="99" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Sending access</text>
+
+    <!-- Domain restriction -->
+    <text x="16" y="122" class="text-tertiary" font-size="10" letter-spacing="0.3">DOMAIN</text>
+    <text x="90" y="122" class="text-secondary" font-size="11">mail.tuckers.link</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="134" x2="335" y2="134" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Vault sync indicator -->
+    <text x="16" y="156" class="text-tertiary" font-size="10" letter-spacing="0.3">VAULT STATUS</text>
+    <!-- synced dot + text -->
+    <circle cx="112" cy="151" r="4" fill="#212121"/>
+    <text x="121" y="156" class="text-primary" font-size="11" font-weight="500">Synced to tkr-secrets</text>
+
+    <!-- Sync timestamp -->
+    <text x="16" y="172" class="text-tertiary" font-size="10">Last synced today at 09:14 UTC</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="182" x2="335" y2="182" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Key stored note -->
+    <text x="16" y="196" class="text-tertiary" font-size="10">Key stored as RESEND_API_KEY in vault · never shown in plaintext</text>
+  </g>
+
+</svg>

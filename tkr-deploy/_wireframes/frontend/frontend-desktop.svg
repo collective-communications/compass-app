@@ -1,0 +1,250 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 980" width="1280" height="980">
+  <defs>
+    <style>
+      .text-primary   { fill: #212121; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-secondary  { fill: #616161; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-tertiary   { fill: #9E9E9E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-inverse    { fill: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="980" fill="#F5F5F5"/>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <rect width="1280" height="64" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1" y="0"/>
+
+  <!-- Wordmark -->
+  <text x="32" y="40" class="text-primary" font-size="18" font-weight="700" letter-spacing="-0.3">tkr-deploy</text>
+
+  <!-- Vault status indicator (right side) -->
+  <g transform="translate(1140, 22)">
+    <rect x="0" y="7" width="16" height="12" rx="2" fill="none" stroke="#616161" stroke-width="1.5"/>
+    <path d="M3,7 L3,3 Q3,0 8,0 Q13,0 13,3" fill="none" stroke="#616161" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="8" cy="13" r="2" fill="#616161"/>
+  </g>
+  <text x="1162" y="38" class="text-secondary" font-size="12">tkr-secrets</text>
+  <circle cx="1130" cy="33" r="4" fill="#212121"/>
+
+  <!-- ==================== PILL NAV BAR ==================== -->
+  <rect y="64" width="1280" height="48" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Overview pill (inactive) -->
+  <text x="32" y="94" class="text-secondary" font-size="13">Overview</text>
+
+  <!-- Secrets pill (inactive) -->
+  <text x="110" y="94" class="text-secondary" font-size="13">Secrets</text>
+
+  <!-- Database pill (inactive) -->
+  <text x="178" y="94" class="text-secondary" font-size="13">Database</text>
+
+  <!-- Frontend pill (active) -->
+  <g transform="translate(258, 76)">
+    <rect width="76" height="28" rx="14" fill="#424242"/>
+    <text x="38" y="19" text-anchor="middle" class="text-inverse" font-size="13" font-weight="500">Frontend</text>
+  </g>
+
+  <!-- Email pill (inactive) -->
+  <text x="350" y="94" class="text-secondary" font-size="13">Email</text>
+
+  <!-- CI/CD pill (inactive) -->
+  <text x="402" y="94" class="text-secondary" font-size="13">CI/CD</text>
+
+  <!-- ==================== TOP ROW: PROJECT STATUS + CURRENT DEPLOYMENT (50/50) ==================== -->
+
+  <!-- PROJECT STATUS CARD — left 50% -->
+  <g transform="translate(32, 132)">
+    <rect width="600" height="140" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Project label -->
+    <text x="24" y="26" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.4">VERCEL PROJECT</text>
+
+    <!-- Project name + framework badge -->
+    <text x="24" y="52" class="text-primary" font-size="18" font-weight="600">compass-app</text>
+    <rect x="158" y="36" width="40" height="20" rx="10" fill="#E0E0E0"/>
+    <text x="178" y="50" text-anchor="middle" class="text-secondary" font-size="11" font-weight="500">Vite</text>
+
+    <!-- Production URL -->
+    <text x="24" y="74" class="text-secondary" font-size="13">compass-app.vercel.app</text>
+
+    <!-- Divider -->
+    <line x1="24" y1="92" x2="576" y2="92" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Redeploy button — right-aligned -->
+    <g transform="translate(466, 106)">
+      <rect width="110" height="36" rx="6" fill="#424242"/>
+      <text x="55" y="23" text-anchor="middle" class="text-inverse" font-size="13" font-weight="500">Redeploy</text>
+    </g>
+
+    <!-- Last activity note left of button -->
+    <text x="24" y="128" class="text-tertiary" font-size="11">Production · Vite + React · Auto-deploy on push to main</text>
+  </g>
+
+  <!-- CURRENT DEPLOYMENT CARD — right 50% -->
+  <g transform="translate(648, 132)">
+    <rect width="600" height="140" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Card header -->
+    <text x="24" y="26" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.4">CURRENT DEPLOYMENT</text>
+
+    <!-- Status badge -->
+    <rect x="24" y="34" width="52" height="20" rx="10" fill="#E0E0E0"/>
+    <text x="50" y="48" text-anchor="middle" class="text-primary" font-size="11" font-weight="600">Ready</text>
+
+    <!-- Divider -->
+    <line x1="24" y1="64" x2="576" y2="64" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Two-column metadata layout on desktop -->
+    <!-- Left column -->
+    <text x="24" y="84" class="text-tertiary" font-size="10" letter-spacing="0.3">COMMIT</text>
+    <text x="24" y="100" class="text-secondary" font-size="12" font-weight="600">a3f9c12</text>
+    <text x="80" y="100" class="text-secondary" font-size="12">feat: add results trust ladder</text>
+
+    <text x="24" y="118" class="text-tertiary" font-size="10" letter-spacing="0.3">BRANCH</text>
+    <text x="24" y="132" class="text-secondary" font-size="12">main</text>
+
+    <!-- Right column -->
+    <text x="320" y="84" class="text-tertiary" font-size="10" letter-spacing="0.3">DURATION</text>
+    <text x="320" y="100" class="text-secondary" font-size="12">1m 42s</text>
+
+    <text x="320" y="118" class="text-tertiary" font-size="10" letter-spacing="0.3">CREATED</text>
+    <text x="320" y="132" class="text-secondary" font-size="12">today at 14:23 UTC</text>
+  </g>
+
+  <!-- ==================== ENVIRONMENT VARIABLES CARD (full width) ==================== -->
+  <g transform="translate(32, 292)">
+    <rect width="1216" height="300" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Header row -->
+    <text x="24" y="32" class="text-primary" font-size="15" font-weight="600">Environment Variables</text>
+
+    <!-- Sync status badge -->
+    <rect x="24" y="42" width="72" height="22" rx="11" fill="#E0E0E0"/>
+    <text x="60" y="57" text-anchor="middle" class="text-secondary" font-size="11" font-weight="500">2/3 synced</text>
+
+    <!-- Sync from Vault button -->
+    <g transform="translate(1076, 38)">
+      <rect width="116" height="32" rx="6" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1.5"/>
+      <text x="58" y="21" text-anchor="middle" class="text-secondary" font-size="12" font-weight="500">Sync from Vault</text>
+    </g>
+
+    <!-- Divider below header -->
+    <line x1="24" y1="76" x2="1192" y2="76" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Table column headers -->
+    <text x="24" y="96" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">VARIABLE</text>
+    <text x="480" y="96" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">VERCEL VALUE</text>
+    <text x="680" y="96" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">VAULT MATCH</text>
+    <text x="880" y="96" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">TARGET</text>
+
+    <!-- Column header divider -->
+    <line x1="24" y1="104" x2="1192" y2="104" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 1: VITE_SUPABASE_URL — match -->
+    <text x="24" y="124" class="text-primary" font-size="13">VITE_SUPABASE_URL</text>
+    <text x="480" y="124" class="text-tertiary" font-size="14" letter-spacing="3">&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</text>
+    <!-- Checkmark -->
+    <path d="M680,117 L686,124 L698,112" fill="none" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="706" y="124" class="text-secondary" font-size="12">Match</text>
+    <text x="880" y="124" class="text-secondary" font-size="12">Production</text>
+    <line x1="24" y1="134" x2="1192" y2="134" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 2: VITE_SUPABASE_ANON_KEY — match -->
+    <text x="24" y="156" class="text-primary" font-size="13">VITE_SUPABASE_ANON_KEY</text>
+    <text x="480" y="156" class="text-tertiary" font-size="14" letter-spacing="3">&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</text>
+    <path d="M680,149 L686,156 L698,144" fill="none" stroke="#212121" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="706" y="156" class="text-secondary" font-size="12">Match</text>
+    <text x="880" y="156" class="text-secondary" font-size="12">Production</text>
+    <line x1="24" y1="166" x2="1192" y2="166" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 3: VITE_APP_URL — mismatch; text label "Mismatch" carries the signal (not color alone) -->
+    <text x="24" y="188" class="text-primary" font-size="13">VITE_APP_URL</text>
+    <text x="480" y="188" class="text-tertiary" font-size="14" letter-spacing="3">&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</text>
+    <!-- X mark -->
+    <path d="M680,180 L692,192 M692,180 L680,192" fill="none" stroke="#616161" stroke-width="2" stroke-linecap="round"/>
+    <text x="706" y="188" class="text-secondary" font-size="12">Mismatch</text>
+    <text x="880" y="188" class="text-secondary" font-size="12">Production</text>
+    <line x1="24" y1="198" x2="1192" y2="198" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Mismatch callout note -->
+    <text x="24" y="218" class="text-tertiary" font-size="11">VITE_APP_URL differs from vault value — run Sync from Vault to update</text>
+
+    <!-- Divider before footer -->
+    <line x1="24" y1="230" x2="1192" y2="230" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Footer -->
+    <text x="24" y="252" class="text-secondary" font-size="12">3 variables total · Source of truth: tkr-secrets vault</text>
+    <text x="1110" y="252" class="text-secondary" font-size="12" text-decoration="underline">Manage in Vercel</text>
+
+    <text x="24" y="272" class="text-tertiary" font-size="11">Variables with preview/development targets not shown. View all environments in Vercel dashboard.</text>
+  </g>
+
+  <!-- ==================== DEPLOYMENT HISTORY CARD (full width) ==================== -->
+  <!-- Last 5 deployments; outline dot = preview; solid dot = production; grey dot = error -->
+  <g transform="translate(32, 612)">
+    <rect width="1216" height="340" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Header -->
+    <text x="24" y="32" class="text-primary" font-size="15" font-weight="600">Deployment History</text>
+    <line x1="24" y1="44" x2="1192" y2="44" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Column headers for table layout on desktop -->
+    <text x="52" y="64" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">COMMIT</text>
+    <text x="560" y="64" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">BRANCH</text>
+    <text x="720" y="64" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">DURATION</text>
+    <text x="860" y="64" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">CREATED</text>
+    <text x="1060" y="64" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.3">ACTION</text>
+    <line x1="24" y1="72" x2="1192" y2="72" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 1 — production, Ready -->
+    <circle cx="36" cy="100" r="5" fill="#212121"/>
+    <text x="52" y="96" class="text-primary" font-size="13" font-weight="500">feat: add results trust ladder</text>
+    <text x="52" y="112" class="text-tertiary" font-size="11">a3f9c12</text>
+    <text x="560" y="104" class="text-secondary" font-size="12">main</text>
+    <text x="720" y="104" class="text-secondary" font-size="12">1m 42s</text>
+    <text x="860" y="104" class="text-secondary" font-size="12">today 14:23</text>
+    <line x1="24" y1="120" x2="1192" y2="120" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 2 — production, Ready -->
+    <circle cx="36" cy="148" r="5" fill="#212121"/>
+    <text x="52" y="144" class="text-primary" font-size="13" font-weight="500">fix(results): update severity borders</text>
+    <text x="52" y="160" class="text-tertiary" font-size="11">63c5006</text>
+    <text x="560" y="152" class="text-secondary" font-size="12">main</text>
+    <text x="720" y="152" class="text-secondary" font-size="12">1m 38s</text>
+    <text x="860" y="152" class="text-secondary" font-size="12">today 11:04</text>
+    <line x1="24" y1="168" x2="1192" y2="168" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 3 — production, Ready -->
+    <circle cx="36" cy="196" r="5" fill="#212121"/>
+    <text x="52" y="192" class="text-primary" font-size="13" font-weight="500">test(coverage): add 58 tests</text>
+    <text x="52" y="208" class="text-tertiary" font-size="11">68fa5b5</text>
+    <text x="560" y="200" class="text-secondary" font-size="12">main</text>
+    <text x="720" y="200" class="text-secondary" font-size="12">1m 51s</text>
+    <text x="860" y="200" class="text-secondary" font-size="12">yesterday 16:42</text>
+    <line x1="24" y1="216" x2="1192" y2="216" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 4 — preview deploy; outline dot signals preview, not promoted to production -->
+    <circle cx="36" cy="244" r="5" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+    <text x="52" y="240" class="text-primary" font-size="13" font-weight="500">feat(nlp): pgvector embeddings</text>
+    <text x="52" y="256" class="text-tertiary" font-size="11">8b78927 · Preview</text>
+    <text x="560" y="248" class="text-secondary" font-size="12">feat/nlp</text>
+    <text x="720" y="248" class="text-secondary" font-size="12">2m 03s</text>
+    <text x="860" y="248" class="text-secondary" font-size="12">yesterday 14:18</text>
+    <!-- Promote link — only on preview deploys -->
+    <text x="1060" y="248" class="text-secondary" font-size="12" text-decoration="underline">Promote</text>
+    <line x1="24" y1="264" x2="1192" y2="264" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 5 — production, Error; grey dot + text "Error" label -->
+    <circle cx="36" cy="292" r="5" fill="#9E9E9E"/>
+    <text x="52" y="288" class="text-primary" font-size="13" font-weight="500">fix(review): address 11 findings</text>
+    <text x="52" y="304" class="text-tertiary" font-size="11">10d5fa0 · Error</text>
+    <text x="560" y="296" class="text-secondary" font-size="12">main</text>
+    <text x="720" y="296" class="text-secondary" font-size="12">failed</text>
+    <text x="860" y="296" class="text-secondary" font-size="12">Mar 9 09:31</text>
+    <line x1="24" y1="312" x2="1192" y2="312" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Footer -->
+    <text x="570" y="330" text-anchor="middle" class="text-secondary" font-size="12" text-decoration="underline">View all deployments in Vercel</text>
+  </g>
+
+</svg>

@@ -1,315 +1,369 @@
-import pino from "pino";
-import type { GitHubAdapter, WorkflowRun } from "../adapters/github-adapter.js";
-import type {
-  DeployEventEmitter,
-  DeployStepName,
-} from "./event-emitter.js";
+import type { VaultClient } from '../types/vault.js';
+import type { ProviderHealth } from '../types/provider.js';
+import type { DeploymentEntry } from '../types/vercel.js';
+import type { ActivityLogEntry } from '../types/activity.js';
+import { join } from 'node:path';
 
-export interface DeployOrchestratorConfig {
-  github: GitHubAdapter;
-  emitter: DeployEventEmitter;
-  logger?: pino.Logger;
-  /** GitHub Actions workflow filename, e.g., "deploy.yml" */
-  workflowFilename?: string;
-  /** Polling interval for pipeline status (ms) */
-  pollIntervalMs?: number;
-  /** Max polling attempts for pipeline completion */
-  maxPollAttempts?: number;
-  /** Health check URL to verify after deploy */
-  healthCheckUrl?: string;
-  /** Hook: sync secrets to providers */
-  syncSecretsHook?: () => Promise<Record<string, unknown>>;
-  /** Hook: push database migrations */
-  pushMigrationsHook?: () => Promise<Record<string, unknown>>;
-  /** Hook: deploy edge functions */
-  deployFunctionsHook?: () => Promise<Record<string, unknown>>;
-  /** Hook: run preflight checks */
-  preflightHook?: () => Promise<Record<string, unknown>>;
+// --- Types ---
+
+export type DeployStepId =
+  | 'syncSecrets'
+  | 'pushMigrations'
+  | 'deployFunctions'
+  | 'triggerBuild'
+  | 'waitForBuild'
+  | 'healthCheck';
+
+export interface DeployStepState {
+  id: DeployStepId;
+  label: string;
+  status: 'pending' | 'running' | 'success' | 'failed' | 'skipped';
+  detail: string;
+  startedAt: number | null;
+  completedAt: number | null;
 }
 
 export interface StepResult {
-  step: DeployStepName;
-  success: boolean;
-  result: Record<string, unknown>;
+  stepId: DeployStepId;
+  status: 'success' | 'failed' | 'skipped';
+  durationMs: number;
+  detail?: string;
   error?: string;
 }
 
-const ALL_STEPS: DeployStepName[] = [
-  "preflight",
-  "syncSecrets",
-  "pushMigrations",
-  "triggerPipeline",
-  "watchPipeline",
-  "healthCheck",
+export interface DeployReport {
+  status: 'success' | 'partial' | 'failed';
+  startedAt: string;
+  completedAt: string;
+  totalDurationMs: number;
+  steps: StepResult[];
+  failedAtStep?: DeployStepId;
+}
+
+export interface ProgressCallbacks {
+  onStepStart?(step: DeployStepState): void;
+  onStepComplete?(step: DeployStepState, result: StepResult): void;
+  onStepFail?(step: DeployStepState, error: Error): void;
+}
+
+export interface SyncAllReport {
+  synced: number;
+  failed: number;
+  errors: string[];
+}
+
+export interface DeployOrchestratorConfig {
+  supabase: {
+    pushMigrations(): Promise<{ applied: string[]; errors: string[] }>;
+    deployAllFunctions(): Promise<{
+      deployed: string[];
+      failed: Array<{ name: string; error: string }>;
+    }>;
+    healthCheck(): Promise<ProviderHealth>;
+  };
+  vercel: {
+    triggerRedeploy(id: string): Promise<string>;
+    pollDeployment(uid: string): Promise<DeploymentEntry>;
+    getCurrentDeployment(): Promise<DeploymentEntry | null>;
+    healthCheck(): Promise<ProviderHealth>;
+  };
+  vaultClient: VaultClient;
+  syncEngine: { syncAll(): Promise<SyncAllReport> };
+  /** Override for testing — poll interval in ms (default 5000) */
+  pollIntervalMs?: number;
+  /** Override for testing — build timeout in ms (default 300000) */
+  buildTimeoutMs?: number;
+  /** Override for activity log path (default: tkr-deploy/activity.json) */
+  activityLogPath?: string;
+}
+
+// --- Errors ---
+
+export class DeployInProgressError extends Error {
+  readonly code = 'DEPLOY_IN_PROGRESS' as const;
+  constructor() {
+    super('A deployment is already in progress');
+    this.name = 'DeployInProgressError';
+  }
+}
+
+// --- Step definitions ---
+
+const STEP_DEFS: Array<{ id: DeployStepId; label: string }> = [
+  { id: 'syncSecrets', label: 'Sync secrets to providers' },
+  { id: 'pushMigrations', label: 'Push database migrations' },
+  { id: 'deployFunctions', label: 'Deploy edge functions' },
+  { id: 'triggerBuild', label: 'Trigger Vercel build' },
+  { id: 'waitForBuild', label: 'Wait for build completion' },
+  { id: 'healthCheck', label: 'Health check all providers' },
 ];
 
-/**
- * Orchestrates a full deploy: local pre-conditions → GitHub Actions pipeline → health check.
- * Emits typed events at every step lifecycle boundary for SSE consumers.
- */
-export class DeployOrchestrator {
-  private readonly logger: pino.Logger;
-  private readonly pollIntervalMs: number;
-  private readonly maxPollAttempts: number;
-  private running = false;
-  private currentStep: DeployStepName | null = null;
-  private stepResults: StepResult[] = [];
+// --- Orchestrator ---
 
-  constructor(private readonly config: DeployOrchestratorConfig) {
-    this.logger = config.logger ?? pino({ name: "deploy-orchestrator" });
-    this.pollIntervalMs = config.pollIntervalMs ?? 10_000;
-    this.maxPollAttempts = config.maxPollAttempts ?? 60;
+export class DeployOrchestrator {
+  private readonly config: DeployOrchestratorConfig;
+  private readonly pollIntervalMs: number;
+  private readonly buildTimeoutMs: number;
+  private readonly activityLogPath: string;
+  private running = false;
+
+  constructor(config: DeployOrchestratorConfig) {
+    this.config = config;
+    this.pollIntervalMs = config.pollIntervalMs ?? 5000;
+    this.buildTimeoutMs = config.buildTimeoutMs ?? 300_000;
+    this.activityLogPath =
+      config.activityLogPath ??
+      join(import.meta.dir, '..', '..', 'activity.json');
   }
 
   get isRunning(): boolean {
     return this.running;
   }
 
-  get status(): {
-    running: boolean;
-    currentStep: DeployStepName | null;
-    steps: StepResult[];
-  } {
-    return {
-      running: this.running,
-      currentStep: this.currentStep,
-      steps: [...this.stepResults],
-    };
-  }
-
-  /**
-   * Run the full deploy pipeline asynchronously.
-   * Returns the aggregated results of all steps.
-   */
-  async fullDeploy(): Promise<StepResult[]> {
+  /** Execute all 6 deployment steps in order. Halts on failure. */
+  async fullDeploy(callbacks?: ProgressCallbacks): Promise<DeployReport> {
     if (this.running) {
-      throw new Error("Deploy already in progress");
+      throw new DeployInProgressError();
+    }
+
+    // Pre-flight: vault must be unlocked
+    const vaultHealth = await this.config.vaultClient.health();
+    if (vaultHealth.locked) {
+      throw new Error('Vault is locked — unlock before deploying');
     }
 
     this.running = true;
-    this.stepResults = [];
-    this.currentStep = null;
-
-    const { emitter } = this.config;
-
-    emitter.emit({
-      type: "deploy:start",
-      timestamp: new Date().toISOString(),
-      steps: ALL_STEPS,
-    });
+    const startedAt = Date.now();
+    const results: StepResult[] = [];
+    let failedAtStep: DeployStepId | undefined;
 
     try {
-      await this.runStep("preflight", () => this.preflight());
-      await this.runStep("syncSecrets", () => this.syncSecrets());
-      await this.runStep("pushMigrations", () => this.pushMigrations());
-      await this.runStep("triggerPipeline", () => this.triggerPipeline());
-      await this.runStep("watchPipeline", () => this.watchPipeline());
-      await this.runStep("healthCheck", () => this.healthCheck());
+      for (const def of STEP_DEFS) {
+        const result = await this.executeStep(def.id, callbacks);
+        results.push(result);
 
-      const allSuccess = this.stepResults.every((s) => s.success);
-
-      emitter.emit({
-        type: "deploy:complete",
-        timestamp: new Date().toISOString(),
-        success: allSuccess,
-        summary: {
-          total: this.stepResults.length,
-          passed: this.stepResults.filter((s) => s.success).length,
-          failed: this.stepResults.filter((s) => !s.success).length,
-        },
-      });
-
-      return this.stepResults;
+        if (result.status === 'failed') {
+          failedAtStep = def.id;
+          break;
+        }
+      }
     } finally {
       this.running = false;
-      this.currentStep = null;
-    }
-  }
-
-  /**
-   * Run a single named step independently.
-   */
-  async runSingle(
-    step: "syncSecrets" | "pushMigrations" | "deployFunctions"
-  ): Promise<StepResult> {
-    const handlers: Record<string, () => Promise<Record<string, unknown>>> = {
-      syncSecrets: () => this.syncSecrets(),
-      pushMigrations: () => this.pushMigrations(),
-      deployFunctions: () => this.deployFunctions(),
-    };
-
-    const handler = handlers[step];
-    if (!handler) {
-      throw new Error(`Unknown step: ${step}`);
     }
 
-    const result = await this.executeStep(step as DeployStepName, handler);
-    return result;
-  }
-
-  // --- Step implementations ---
-
-  private async preflight(): Promise<Record<string, unknown>> {
-    if (this.config.preflightHook) {
-      return this.config.preflightHook();
-    }
-    return { status: "ok", checks: ["vault", "providers", "secrets"] };
-  }
-
-  private async syncSecrets(): Promise<Record<string, unknown>> {
-    if (this.config.syncSecretsHook) {
-      return this.config.syncSecretsHook();
-    }
-    return { synced: true, providers: ["github", "vercel", "supabase"] };
-  }
-
-  private async pushMigrations(): Promise<Record<string, unknown>> {
-    if (this.config.pushMigrationsHook) {
-      return this.config.pushMigrationsHook();
-    }
-    return { pushed: true };
-  }
-
-  private async deployFunctions(): Promise<Record<string, unknown>> {
-    if (this.config.deployFunctionsHook) {
-      return this.config.deployFunctionsHook();
-    }
-    return { deployed: true };
-  }
-
-  private async triggerPipeline(): Promise<Record<string, unknown>> {
-    const { github } = this.config;
-    const filename = this.config.workflowFilename ?? "deploy.yml";
-
-    const workflowId = await github.getWorkflowByFilename(filename);
-    if (!workflowId) {
-      throw new Error(`Workflow '${filename}' not found`);
-    }
-
-    const dispatchTime = new Date().toISOString();
-    await github.dispatchWorkflow(workflowId);
-
-    const run = await github.findLatestDispatchRun(workflowId, dispatchTime);
-    if (!run) {
-      throw new Error("Could not find dispatch run after triggering");
-    }
-
-    // Stash run ID for watchPipeline
-    this.pipelineRunId = run.id;
-    this.pipelineRunUrl = run.html_url;
+    const completedAt = Date.now();
+    const status = failedAtStep
+      ? results.length === 1
+        ? 'failed'
+        : 'partial'
+      : 'success';
 
     return {
-      triggered: true,
-      runId: run.id,
-      url: run.html_url,
+      status,
+      startedAt: new Date(startedAt).toISOString(),
+      completedAt: new Date(completedAt).toISOString(),
+      totalDurationMs: completedAt - startedAt,
+      steps: results,
+      ...(failedAtStep ? { failedAtStep } : {}),
     };
   }
 
-  private pipelineRunId: number | null = null;
-  private pipelineRunUrl: string = "";
+  /** Execute a single step by ID. Throws if a full deploy is running. */
+  async stepDeploy(
+    stepId: DeployStepId,
+    callbacks?: ProgressCallbacks,
+  ): Promise<StepResult> {
+    if (this.running) {
+      throw new DeployInProgressError();
+    }
+    return this.executeStep(stepId, callbacks);
+  }
 
-  private async watchPipeline(): Promise<Record<string, unknown>> {
-    if (!this.pipelineRunId) {
-      throw new Error("No pipeline run to watch — triggerPipeline must run first");
+  /** Read activity log entries, most recent first. */
+  async getActivityLog(limit = 50): Promise<ActivityLogEntry[]> {
+    try {
+      const file = Bun.file(this.activityLogPath);
+      const exists = await file.exists();
+      if (!exists) return [];
+      const text = await file.text();
+      const lines = text.trim().split('\n').filter(Boolean);
+      const entries = lines.map(
+        (line) => JSON.parse(line) as ActivityLogEntry,
+      );
+      return entries.slice(-limit).reverse();
+    } catch {
+      return [];
+    }
+  }
+
+  // --- Private ---
+
+  private async executeStep(
+    stepId: DeployStepId,
+    callbacks?: ProgressCallbacks,
+  ): Promise<StepResult> {
+    const def = STEP_DEFS.find((d) => d.id === stepId);
+    if (!def) {
+      throw new Error(`Unknown step: ${stepId}`);
     }
 
-    const { github, emitter } = this.config;
-    const runId = this.pipelineRunId;
+    const stepState: DeployStepState = {
+      id: stepId,
+      label: def.label,
+      status: 'running',
+      detail: '',
+      startedAt: Date.now(),
+      completedAt: null,
+    };
 
-    for (let attempt = 1; attempt <= this.maxPollAttempts; attempt++) {
-      const run: WorkflowRun = await github.getWorkflowRun(runId);
+    callbacks?.onStepStart?.(stepState);
+    const start = Date.now();
 
-      emitter.emit({
-        type: "pipeline:status",
+    try {
+      const detail = await this.runStep(stepId);
+      const durationMs = Date.now() - start;
+      stepState.status = 'success';
+      stepState.detail = detail;
+      stepState.completedAt = Date.now();
+
+      const result: StepResult = {
+        stepId,
+        status: 'success',
+        durationMs,
+        detail,
+      };
+      callbacks?.onStepComplete?.(stepState, result);
+      await this.appendActivityLog({
         timestamp: new Date().toISOString(),
-        runId: run.id,
-        status: run.status,
-        conclusion: run.conclusion,
-        url: run.html_url,
+        action: stepId,
+        provider: this.providerFor(stepId),
+        status: 'success',
+        durationMs,
       });
+      return result;
+    } catch (err) {
+      const durationMs = Date.now() - start;
+      const error = err instanceof Error ? err : new Error(String(err));
+      stepState.status = 'failed';
+      stepState.detail = error.message;
+      stepState.completedAt = Date.now();
 
-      if (run.status === "completed") {
-        if (run.conclusion !== "success") {
+      callbacks?.onStepFail?.(stepState, error);
+      await this.appendActivityLog({
+        timestamp: new Date().toISOString(),
+        action: stepId,
+        provider: this.providerFor(stepId),
+        status: 'failed',
+        durationMs,
+        error: error.message,
+      });
+      return {
+        stepId,
+        status: 'failed',
+        durationMs,
+        error: error.message,
+      };
+    }
+  }
+
+  private async runStep(stepId: DeployStepId): Promise<string> {
+    const { supabase, vercel, syncEngine } = this.config;
+
+    switch (stepId) {
+      case 'syncSecrets': {
+        const report = await syncEngine.syncAll();
+        return `Synced ${report.synced} secrets, ${report.failed} failed`;
+      }
+      case 'pushMigrations': {
+        const result = await supabase.pushMigrations();
+        if (result.errors.length > 0) {
+          throw new Error(`Migration errors: ${result.errors.join(', ')}`);
+        }
+        return `Applied ${result.applied.length} migrations`;
+      }
+      case 'deployFunctions': {
+        const result = await supabase.deployAllFunctions();
+        if (result.failed.length > 0) {
           throw new Error(
-            `Pipeline failed: conclusion=${run.conclusion} (${run.html_url})`
+            `Function deploy failures: ${result.failed.map((f) => f.name).join(', ')}`,
           );
         }
-        return {
-          completed: true,
-          conclusion: run.conclusion,
-          url: run.html_url,
-          polls: attempt,
-        };
+        return `Deployed ${result.deployed.length} functions`;
       }
+      case 'triggerBuild': {
+        const current = await vercel.getCurrentDeployment();
+        if (!current) {
+          throw new Error('No current deployment found to redeploy');
+        }
+        const newUid = await vercel.triggerRedeploy(current.uid);
+        return `Triggered build ${newUid}`;
+      }
+      case 'waitForBuild': {
+        return await this.waitForBuild();
+      }
+      case 'healthCheck': {
+        const [sbHealth, vcHealth] = await Promise.all([
+          supabase.healthCheck(),
+          vercel.healthCheck(),
+        ]);
+        const issues: string[] = [];
+        if (sbHealth.status !== 'healthy') issues.push(`supabase: ${sbHealth.status}`);
+        if (vcHealth.status !== 'healthy') issues.push(`vercel: ${vcHealth.status}`);
+        if (issues.length > 0) {
+          throw new Error(`Health check failed: ${issues.join(', ')}`);
+        }
+        return 'All providers healthy';
+      }
+    }
+  }
 
+  private async waitForBuild(): Promise<string> {
+    const { vercel } = this.config;
+    const current = await vercel.getCurrentDeployment();
+    if (!current) {
+      throw new Error('No deployment to poll');
+    }
+
+    const deadline = Date.now() + this.buildTimeoutMs;
+
+    while (Date.now() < deadline) {
+      const deployment = await vercel.pollDeployment(current.uid);
+      if (deployment.status === 'READY') {
+        return `Build ${deployment.uid} ready`;
+      }
+      if (deployment.status === 'ERROR' || deployment.status === 'CANCELED') {
+        throw new Error(`Build ${deployment.uid} ${deployment.status.toLowerCase()}`);
+      }
       await this.sleep(this.pollIntervalMs);
     }
 
-    throw new Error(
-      `Pipeline did not complete within ${this.maxPollAttempts} polls`
-    );
+    throw new Error(`Build timed out after ${this.buildTimeoutMs}ms`);
   }
 
-  private async healthCheck(): Promise<Record<string, unknown>> {
-    const url = this.config.healthCheckUrl;
-    if (!url) {
-      return { skipped: true, reason: "no healthCheckUrl configured" };
-    }
-
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`Health check failed: ${response.status} ${url}`);
-    }
-
-    return { healthy: true, status: response.status, url };
-  }
-
-  // --- Helpers ---
-
-  private async runStep(
-    name: DeployStepName,
-    fn: () => Promise<Record<string, unknown>>
-  ): Promise<void> {
-    const result = await this.executeStep(name, fn);
-    this.stepResults.push(result);
-
-    if (!result.success) {
-      throw new Error(`Step '${name}' failed: ${result.error}`);
+  private providerFor(stepId: DeployStepId): string {
+    switch (stepId) {
+      case 'syncSecrets':
+        return 'vault';
+      case 'pushMigrations':
+      case 'deployFunctions':
+        return 'supabase';
+      case 'triggerBuild':
+      case 'waitForBuild':
+        return 'vercel';
+      case 'healthCheck':
+        return 'all';
     }
   }
 
-  private async executeStep(
-    name: DeployStepName,
-    fn: () => Promise<Record<string, unknown>>
-  ): Promise<StepResult> {
-    const { emitter } = this.config;
-    this.currentStep = name;
-
-    emitter.emit({
-      type: "deploy:step-start",
-      step: name,
-      timestamp: new Date().toISOString(),
-    });
-
+  private async appendActivityLog(entry: ActivityLogEntry): Promise<void> {
     try {
-      const result = await fn();
-      emitter.emit({
-        type: "deploy:step-complete",
-        step: name,
-        timestamp: new Date().toISOString(),
-        result,
-      });
-      return { step: name, success: true, result };
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : String(err);
-      emitter.emit({
-        type: "deploy:step-fail",
-        step: name,
-        timestamp: new Date().toISOString(),
-        error: errorMessage,
-      });
-      return { step: name, success: false, result: {}, error: errorMessage };
+      const line = JSON.stringify(entry) + '\n';
+      const file = Bun.file(this.activityLogPath);
+      const exists = await file.exists();
+      const existing = exists ? await file.text() : '';
+      await Bun.write(this.activityLogPath, existing + line);
+    } catch {
+      // Best-effort — log write failure doesn't fail deployment
     }
   }
 

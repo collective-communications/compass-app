@@ -1,0 +1,102 @@
+# tkr-deploy Email — Wireframe Specification
+# Bridges SVG wireframes to implementation requirements.
+
+section: email
+shell: deploy-dashboard
+route_prefix: "/email"
+
+screens:
+  - id: email
+    file: email-mobile.svg
+    desktop: email-desktop.svg
+    route: "/email"
+    purpose: "Resend email provider detail screen showing domain verification status, DNS record checklist with copy-to-clipboard support, monthly sending statistics, and API key vault sync status."
+
+    shell_header:
+      type: minimal
+      left: "tkr-deploy wordmark (text, not image)"
+      center: ""
+      right: "Vault status indicator — lock icon (unlocked/locked state) + vault name (tkr-secrets) + connection status dot"
+
+    data_sources:
+      - derived: domain_status
+        logic: "GET https://api.resend.com/domains — returns array of domain objects. Find entry matching mail.tuckers.link. Fields: id, name, status (verified|pending|not_started), region, created_at."
+
+      - derived: dns_records
+        logic: "Extracted from the domain object returned by GET /domains/{id}. Each record has: type (TXT|CNAME), name (host), value, status (verified|not_started). SPF and DKIM records are system-generated. DMARC record requires manual DNS entry by operator."
+
+      - derived: sending_stats
+        logic: "GET https://api.resend.com/emails with date range filter for current calendar month. Count total sent. GET for today's count separately. Bounce rate derived from email event logs. Rate limit is plan-level metadata (2 req/s on free tier), stored in config — not fetched from API."
+
+      - derived: api_key_meta
+        logic: "GET https://api.resend.com/api-keys — returns array of key objects. Fields: id, name, created_at, permission (full_access|sending_access), domain_id. Key value itself is never returned after creation — only metadata. Vault sync status derived from local vault health check."
+
+    layout:
+      mobile: "Single column stack: top bar → pill nav (Email active) → EMAIL PROVIDER section label → Domain Status card → DNS RECORDS label → DNS Records checklist card (expandable rows) → SENDING STATS label → Sending Stats card → API KEY label → API Key Status card"
+      desktop: "Top bar full-width → pill nav → top row 60/40 split: Domain Status card (left, 740px) + Sending Stats card (right, 452px) → bottom row 60/40 split: DNS Records card with table layout (left, 740px) + API Key card (right sidebar, 452px). Unverified DNS rows show expanded guidance inline on desktop."
+
+    components:
+      - element: domain_status_card
+        type: card
+        content: "Domain name (mail.tuckers.link), verification status badge (Verified/Pending/Not Configured), provider name (Resend), plan details (3,000/month · 1 domain · 2 req/s), Verify Domain button (disabled when verified), Add Domain button (shown only when status is not_started)."
+        behavior: "Verify Domain button triggers POST /domains/{id}/verify — disabled with aria-disabled when domain status is verified. Add Domain (not shown in base state) opens domain creation flow. Status badge reflects live API state, polled on mount."
+        note: "Button states are mutually exclusive: if verified, Verify Domain is disabled and Add Domain is hidden. If pending, Verify Domain is active and Add Domain is hidden. If not configured, both Add Domain is shown and Verify Domain is hidden."
+
+      - element: dns_records_checklist
+        type: card
+        content: "Header row with 'DNS Records' title and '2 / 3 verified' count badge. Three rows: SPF (TXT, @, verified), DKIM (CNAME, resend._domainkey, verified), DMARC (TXT, _dmarc, not verified). Each row shows record type, type badge, status indicator (checkmark/X), truncated host with copy icon, truncated value with copy icon. Unverified rows have a #212121 left border accent. Mobile: rows are expandable (tap to reveal full value). Desktop: full values shown inline; unverified rows include guidance block with exact values to copy."
+        behavior: "Copy icons write the full record value to clipboard. On mobile, tapping an expandable row reveals the full host and value without navigation. Unverified DMARC row includes an inline guidance block on desktop: pre-filled with exact Type, Host, and Value strings the operator needs to paste into their DNS provider."
+        note: "DMARC is the only record operators must add manually — SPF and DKIM are provisioned by Resend. The left border on unverified rows follows the same pattern as severity borders in other cards (border color as the sole status signal, not background fill)."
+
+      - element: sending_stats_card
+        type: card
+        content: "THIS MONTH metric: large count (47) over total (3,000) with progress bar. Three sub-metrics: TODAY (12 emails sent), RATE LIMIT (2 req/s), BOUNCE RATE (0.2%). Free tier reset date note at bottom."
+        behavior: "Progress bar width is proportional to emails_sent / plan_limit. All values are live from Resend API, fetched on mount. No auto-refresh — operator triggers manually."
+        note: "Progress bar intentionally stays narrow at low usage (1.6%) to communicate headroom. When usage exceeds 80% of monthly limit, show a warning label beneath the bar."
+
+      - element: api_key_status_card
+        type: card
+        content: "Key name (tkr-deploy-production), created date, permission badge (Sending access), domain restriction (mail.tuckers.link), vault sync status dot + label, last synced timestamp, vault key name (RESEND_API_KEY) displayed as a code badge."
+        behavior: "Key value is never displayed — only metadata. Vault sync status dot uses same greyscale fill system as top bar: #212121 = synced, #9E9E9E = unknown, #616161 = warning/stale. Clicking the vault key name badge copies the key reference (not the value) to clipboard."
+        note: "API key is stored in vault as RESEND_API_KEY. The card is read-only — key rotation is handled through the vault, not this screen."
+
+      - element: pill_nav
+        type: custom
+        content: "Horizontal scrollable pill row: Overview | Secrets | Database | Frontend | Email (active) | CI/CD"
+        behavior: "Email pill is active (#424242 fill, white text). All others text-only #616161. Tapping navigates to that provider tab."
+        note: "Consistent with all other tabs. On mobile, rightmost pill (CI/CD) is partially clipped to indicate scroll affordance."
+
+    edge_cases:
+      - domain_not_configured: "When no domain is associated with the Resend account, Domain Status card shows 'Not Configured' badge and an active 'Add Domain' button. DNS Records card shows an empty state: 'Add a domain to see DNS records.' Sending Stats still renders from email event logs if any exist."
+      - domain_pending: "When domain is in 'pending' verification state, Domain Status badge reads 'Pending — check DNS records'. Verify Domain button is active (not disabled). DNS record rows show mixed verified/not-verified states."
+      - dns_api_failure: "If the Resend API returns an error or times out, show an inline error state within the DNS Records card: 'Could not load DNS records — check API key' with a Retry button. Other cards that succeeded render normally."
+      - monthly_limit_approaching: "When emails_sent / plan_limit >= 0.8 (80%), display a warning label beneath the progress bar: 'Approaching monthly limit · 600 remaining'. No modal, no toast — inline and contextual."
+      - monthly_limit_reached: "When emails_sent >= plan_limit, progress bar is full, label reads '3,000 / 3,000'. Sending Stats card shows 'Monthly limit reached — emails queued until reset on Mar 1' beneath the bar."
+      - vault_not_synced: "If the API key has not been synced to tkr-secrets (e.g., first setup), API Key card shows vault status dot in #9E9E9E with label 'Not synced' and a 'Sync to Vault' button. Clicking triggers the vault write operation inline."
+      - no_emails_sent: "If emails_sent = 0 for the current month (first use or no sends), TODAY shows '0', progress bar is empty with a 0 label. Bounce rate shows '—'. No empty-state illustration — the zeros are informative."
+      - dmarc_expanded_mobile: "On mobile, tapping the DMARC row expands it in place to show the full host and value strings, with copy buttons. A second tap collapses it. No navigation occurs."
+
+    accessibility:
+      - "Copy buttons for DNS record host and value fields have aria-label='Copy [field] for [record type] record' — e.g., aria-label='Copy value for DMARC record'."
+      - "After copy-to-clipboard activation, an aria-live='polite' region announces '[Record type] value copied' — no visual toast."
+      - "Verification status is communicated by both the status icon (checkmark/X) and an adjacent text label (Verified / Not verified) — icon is aria-hidden, text label is the accessible signal."
+      - "Disabled 'Verify Domain' button uses aria-disabled='true' with aria-describedby pointing to a hidden note: 'Domain is already verified'."
+      - "Expandable DNS rows on mobile are implemented as button elements with aria-expanded='true/false' and aria-controls pointing to the expanded value region."
+      - "Progress bar for monthly usage has role='progressbar', aria-valuenow, aria-valuemin='0', aria-valuemax='3000', and aria-label='Monthly email usage'."
+      - "Keyboard navigation: Tab order follows visual reading order — Domain card → DNS card rows (each row's copy buttons) → Stats card → API Key card."
+
+shared:
+  header:
+    type: minimal
+    left: "tkr-deploy wordmark"
+    right: "Vault status indicator"
+
+  navigation:
+    type: pill_bar
+    items:
+      - { label: "Overview", route: "/" }
+      - { label: "Secrets", route: "/secrets" }
+      - { label: "Database", route: "/database" }
+      - { label: "Frontend", route: "/frontend" }
+      - { label: "Email", route: "/email" }
+      - { label: "CI/CD", route: "/cicd" }

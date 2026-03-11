@@ -1,0 +1,238 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 375 1380" width="375" height="1380">
+  <defs>
+    <style>
+      .text-primary   { fill: #212121; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-secondary  { fill: #616161; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-tertiary   { fill: #9E9E9E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-inverse    { fill: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="375" height="1380" fill="#F5F5F5"/>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <rect width="375" height="56" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1" y="0"/>
+
+  <!-- Wordmark: tkr-deploy -->
+  <text x="16" y="35" class="text-primary" font-size="17" font-weight="700" letter-spacing="-0.3">tkr-deploy</text>
+
+  <!-- Vault status indicator (right side) -->
+  <!-- Lock icon (unlocked) -->
+  <g transform="translate(270, 18)">
+    <rect x="0" y="7" width="16" height="12" rx="2" fill="none" stroke="#616161" stroke-width="1.5"/>
+    <path d="M3,7 L3,3 Q3,0 8,0 Q13,0 13,3" fill="none" stroke="#616161" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="8" cy="13" r="2" fill="#616161"/>
+  </g>
+  <text x="292" y="31" class="text-secondary" font-size="11">tkr-secrets</text>
+  <circle cx="262" cy="28" r="4" fill="#212121"/>
+
+  <!-- ==================== PILL NAV BAR ==================== -->
+  <rect y="56" width="375" height="44" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Overview pill (inactive) -->
+  <text x="12" y="85" class="text-secondary" font-size="12">Overview</text>
+
+  <!-- Secrets pill (inactive) -->
+  <text x="75" y="85" class="text-secondary" font-size="12">Secrets</text>
+
+  <!-- Database pill (inactive) -->
+  <text x="130" y="85" class="text-secondary" font-size="12">Database</text>
+
+  <!-- Frontend pill (active) -->
+  <g transform="translate(196, 68)">
+    <rect width="68" height="24" rx="12" fill="#424242"/>
+    <text x="34" y="16.5" text-anchor="middle" class="text-inverse" font-size="12" font-weight="500">Frontend</text>
+  </g>
+
+  <!-- Email pill (inactive, partially visible) -->
+  <text x="275" y="85" class="text-secondary" font-size="12">Email</text>
+
+  <!-- CI/CD pill (partially visible, signals scroll) -->
+  <text x="322" y="85" class="text-secondary" font-size="12">CI/</text>
+
+  <!-- ==================== PROJECT STATUS CARD ==================== -->
+  <!-- Section communicates project identity and production URL with redeploy CTA -->
+  <g transform="translate(12, 116)">
+    <rect width="351" height="100" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Project label -->
+    <text x="16" y="22" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.4">VERCEL PROJECT</text>
+
+    <!-- Project name + framework badge -->
+    <text x="16" y="42" class="text-primary" font-size="15" font-weight="600">compass-app</text>
+    <!-- Framework badge -->
+    <rect x="128" y="29" width="36" height="16" rx="8" fill="#E0E0E0"/>
+    <text x="146" y="40" text-anchor="middle" class="text-secondary" font-size="10" font-weight="500">Vite</text>
+
+    <!-- Production URL -->
+    <text x="16" y="60" class="text-secondary" font-size="12">compass-app.vercel.app</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="72" x2="335" y2="72" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Redeploy button — right-aligned, primary action -->
+    <g transform="translate(235, 81)">
+      <rect width="100" height="32" rx="6" fill="#424242"/>
+      <text x="50" y="20.5" text-anchor="middle" class="text-inverse" font-size="12" font-weight="500">Redeploy</text>
+    </g>
+  </g>
+
+  <!-- ==================== CURRENT DEPLOYMENT CARD ==================== -->
+  <!-- Shows the live production deployment details — most recent Ready state -->
+  <g transform="translate(12, 232)">
+    <rect width="351" height="148" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Card header -->
+    <text x="16" y="22" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.4">CURRENT DEPLOYMENT</text>
+
+    <!-- Status badge — Ready state -->
+    <rect x="16" y="30" width="46" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="39" y="42" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Ready</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="56" x2="335" y2="56" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Commit hash + message -->
+    <text x="16" y="74" class="text-tertiary" font-size="10" letter-spacing="0.3">COMMIT</text>
+    <text x="68" y="74" class="text-secondary" font-size="11" font-weight="600">a3f9c12</text>
+    <text x="113" y="74" class="text-secondary" font-size="11">feat: add results trust ladder</text>
+
+    <!-- Branch -->
+    <text x="16" y="94" class="text-tertiary" font-size="10" letter-spacing="0.3">BRANCH</text>
+    <text x="68" y="94" class="text-secondary" font-size="11">main</text>
+
+    <!-- Build duration -->
+    <text x="16" y="114" class="text-tertiary" font-size="10" letter-spacing="0.3">DURATION</text>
+    <text x="68" y="114" class="text-secondary" font-size="11">1m 42s</text>
+
+    <!-- Created timestamp -->
+    <text x="16" y="134" class="text-tertiary" font-size="10" letter-spacing="0.3">CREATED</text>
+    <text x="68" y="134" class="text-secondary" font-size="11">today at 14:23 UTC</text>
+  </g>
+
+  <!-- ==================== ENVIRONMENT VARIABLES CARD ==================== -->
+  <!-- Sync status badge and vault-driven sync action communicate source-of-truth pattern -->
+  <g transform="translate(12, 396)">
+    <rect width="351" height="256" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Card header row: label + sync badge + Sync button -->
+    <text x="16" y="24" class="text-primary" font-size="13" font-weight="600">Environment Variables</text>
+
+    <!-- Sync status badge: 2 of 3 synced -->
+    <rect x="16" y="32" width="62" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="47" y="44" text-anchor="middle" class="text-secondary" font-size="10" font-weight="500">2/3 synced</text>
+
+    <!-- Sync from Vault button — secondary -->
+    <g transform="translate(222, 30)">
+      <rect width="113" height="28" rx="6" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1.5"/>
+      <text x="56.5" y="18.5" text-anchor="middle" class="text-secondary" font-size="11" font-weight="500">Sync from Vault</text>
+    </g>
+
+    <!-- Divider below header -->
+    <line x1="16" y1="66" x2="335" y2="66" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Table header row -->
+    <text x="16" y="83" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.3">VARIABLE</text>
+    <text x="176" y="83" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.3">VALUE</text>
+    <text x="228" y="83" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.3">VAULT</text>
+    <text x="272" y="83" class="text-tertiary" font-size="10" font-weight="500" letter-spacing="0.3">TARGET</text>
+
+    <!-- Row divider -->
+    <line x1="16" y1="90" x2="335" y2="90" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 1: VITE_SUPABASE_URL — vault match -->
+    <text x="16" y="108" class="text-primary" font-size="11">VITE_SUPABASE_URL</text>
+    <text x="176" y="108" class="text-tertiary" font-size="12" letter-spacing="2">&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</text>
+    <!-- Checkmark: match -->
+    <path d="M228,101 L232,106 L240,98" fill="none" stroke="#212121" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="272" y="108" class="text-secondary" font-size="10">Production</text>
+
+    <!-- Row divider -->
+    <line x1="16" y1="116" x2="335" y2="116" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 2: VITE_SUPABASE_ANON_KEY — vault match -->
+    <text x="16" y="134" class="text-primary" font-size="11">VITE_SUPABASE_ANON_KEY</text>
+    <text x="176" y="134" class="text-tertiary" font-size="12" letter-spacing="2">&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</text>
+    <!-- Checkmark: match -->
+    <path d="M228,127 L232,132 L240,124" fill="none" stroke="#212121" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="272" y="134" class="text-secondary" font-size="10">Production</text>
+
+    <!-- Row divider -->
+    <line x1="16" y1="142" x2="335" y2="142" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 3: VITE_APP_URL — vault mismatch, warning state -->
+    <text x="16" y="160" class="text-primary" font-size="11">VITE_APP_URL</text>
+    <text x="176" y="160" class="text-tertiary" font-size="12" letter-spacing="2">&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;</text>
+    <!-- X mark: mismatch — uses stroke weight and label, not color alone -->
+    <path d="M228,152 L238,162 M238,152 L228,162" fill="none" stroke="#616161" stroke-width="1.5" stroke-linecap="round"/>
+    <text x="272" y="160" class="text-secondary" font-size="10">Production</text>
+
+    <!-- Row divider -->
+    <line x1="16" y1="168" x2="335" y2="168" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Mismatch callout: communicates the X without relying on color -->
+    <text x="16" y="186" class="text-tertiary" font-size="10">VITE_APP_URL differs from vault value</text>
+
+    <!-- Divider before footer -->
+    <line x1="16" y1="196" x2="335" y2="196" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Show all / manage link -->
+    <text x="16" y="214" class="text-secondary" font-size="11">All 3 variables shown</text>
+    <text x="280" y="214" class="text-secondary" font-size="11" text-decoration="underline">Manage</text>
+
+    <!-- Vault source note -->
+    <text x="16" y="234" class="text-tertiary" font-size="10">Source of truth: tkr-secrets vault</text>
+  </g>
+
+  <!-- ==================== DEPLOYMENT HISTORY CARD ==================== -->
+  <!-- Last 5 deployments; most recent first; preview deploys show Promote link -->
+  <g transform="translate(12, 668)">
+    <rect width="351" height="320" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Header -->
+    <text x="16" y="24" class="text-primary" font-size="13" font-weight="600">Deployment History</text>
+
+    <!-- Divider -->
+    <line x1="16" y1="34" x2="335" y2="34" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 1 — most recent, production, Ready -->
+    <!-- Status dot: filled = Ready -->
+    <circle cx="28" cy="58" r="5" fill="#212121"/>
+    <text x="44" y="62" class="text-primary" font-size="11" font-weight="500">feat: add results trust ladder</text>
+    <text x="44" y="76" class="text-tertiary" font-size="10">main · 1m 42s · today 14:23</text>
+    <line x1="16" y1="88" x2="335" y2="88" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 2 — production, Ready -->
+    <circle cx="28" cy="112" r="5" fill="#212121"/>
+    <text x="44" y="116" class="text-primary" font-size="11" font-weight="500">fix(results): update severity borders</text>
+    <text x="44" y="130" class="text-tertiary" font-size="10">main · 1m 38s · today 11:04</text>
+    <line x1="16" y1="142" x2="335" y2="142" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 3 — production, Ready -->
+    <circle cx="28" cy="166" r="5" fill="#212121"/>
+    <text x="44" y="170" class="text-primary" font-size="11" font-weight="500">test(coverage): add 58 tests</text>
+    <text x="44" y="184" class="text-tertiary" font-size="10">main · 1m 51s · yesterday 16:42</text>
+    <line x1="16" y1="196" x2="335" y2="196" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 4 — preview deploy, shows Promote link -->
+    <!-- Status dot: outline = preview / not promoted -->
+    <circle cx="28" cy="220" r="5" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+    <text x="44" y="224" class="text-primary" font-size="11" font-weight="500">feat(nlp): pgvector embeddings</text>
+    <text x="44" y="238" class="text-tertiary" font-size="10">feat/nlp · 2m 03s · yesterday 14:18</text>
+    <!-- Promote link — visible only on preview deploys -->
+    <text x="300" y="224" class="text-secondary" font-size="11" text-decoration="underline">Promote</text>
+    <line x1="16" y1="250" x2="335" y2="250" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Row 5 — production, Error state -->
+    <!-- Status dot: cross-hatched fill = Error; text label provides accessible signal -->
+    <circle cx="28" cy="274" r="5" fill="#9E9E9E"/>
+    <text x="44" y="278" class="text-primary" font-size="11" font-weight="500">fix(review): address 11 findings</text>
+    <text x="44" y="292" class="text-tertiary" font-size="10">main · failed · Mar 9 09:31 · Error</text>
+    <line x1="16" y1="304" x2="335" y2="304" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Footer: view all link -->
+    <text x="135" y="316" text-anchor="middle" class="text-secondary" font-size="11" text-decoration="underline">View all deployments</text>
+  </g>
+
+</svg>

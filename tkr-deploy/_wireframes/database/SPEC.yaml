@@ -1,0 +1,93 @@
+# tkr-deploy Database — Wireframe Specification
+# Bridges SVG wireframes to implementation requirements.
+
+section: database
+shell: deploy-dashboard
+route_prefix: "/database"
+
+screens:
+  - id: database
+    file: database-mobile.svg
+    desktop: database-desktop.svg
+    route: "/database"
+    purpose: "Supabase cloud database status screen showing migration sync state, edge function deployment state, and pgvector extension status with one-click push and deploy actions."
+
+    shell_header:
+      type: minimal
+      left: "tkr-deploy wordmark (text, not image)"
+      center: ""
+      right: "Vault status indicator — lock icon + vault name (tkr-secrets) + connection status dot"
+
+    data_sources:
+      - derived: migration_status
+        logic: "Run `supabase db remote changes` against configured Supabase project ref. Returns list of applied and pending migrations. Fields: filename, status (applied|pending), applied_at (ISO timestamp or null)."
+
+      - derived: edge_function_status
+        logic: "Run `supabase functions list` against project ref. Returns deployed functions with last_updated timestamp. Compare against local functions/ directory to identify not-yet-deployed functions. Fields: name, deployed (boolean), last_deployed (ISO timestamp or null), required_secrets (string[])."
+
+      - derived: pgvector_extension_status
+        logic: "Query Supabase management API GET /v1/projects/{ref}/database/extensions. Filter for name='vector'. Fields: name, version, status (available|enabled|unavailable), installed_version."
+
+      - derived: connection_status
+        logic: "Attempt TCP connection to Supabase DB host on port 5432. On success read pg_version(). Fields: connected (boolean), project_ref, region, db_version."
+
+    layout:
+      mobile: "Single column stack: top bar → pill nav (Database active) → Connection Status card → MIGRATIONS section label + action row → migration list card (applied rows in #9E9E9E, pending rows in #212121 with left border accent) → EDGE FUNCTIONS section label + action row → edge function list card (per-function deploy buttons) → EXTENSIONS label → pgvector card"
+      desktop: "Top bar full-width → pill nav → top row: Connection Status card (left 50%) + pgvector card (right 50%) side by side → two-column 50/50 split below: Migrations list (left) | Edge Functions list (right), both with section headers above their respective cards"
+
+    components:
+      - element: connection_status_card
+        type: card
+        content: "Project ref, region (ca-central-1), DB version (PostgreSQL 15.6), pool mode. Connected/disconnected status badge top right."
+        behavior: "Badge updates on poll (every 30s). Disconnected state disables Push Pending and Deploy All buttons with explanatory label."
+        note: "Status badge uses filled circle + text label — not color alone. Dark fill = connected, medium grey = unknown, light grey = disconnected."
+
+      - element: migrations_section
+        type: list
+        content: "Section label 'MIGRATIONS' with count badge (e.g., '20/24 applied') and 'Push Pending' primary button. Card contains migration rows: checkmark icon + filename + timestamp for applied; filled circle icon + filename + 'pending' for pending. Pending rows have 3px left border accent."
+        behavior: "'Push Pending' runs `supabase db push` and transitions button to loading state (spinner). On completion refreshes migration list and updates count badge. Applied rows are read-only. Pending rows are not individually actionable — all push together."
+        note: "Pending migrations shown at the bottom, visually separated. Applied rows use #9E9E9E text to de-emphasize. Show last 4 applied + all pending (up to 8 rows before scroll)."
+
+      - element: edge_functions_section
+        type: list
+        content: "Section label 'EDGE FUNCTIONS' with count badge (e.g., '0/6 deployed') and 'Deploy All' primary button. Card contains function rows: name, status badge (deployed/not deployed), last deployed timestamp (or em dash), required secrets list, individual Deploy button."
+        behavior: "'Deploy All' deploys all functions in sequence, showing overall progress. Per-function 'Deploy' button deploys only that function. During deployment the button becomes a spinner. Required secrets with missing vault values are visually flagged."
+        note: "Not-deployed functions have 3px left border accent matching pending migration style. Deployed functions have no border accent — consistent one-channel status communication."
+
+      - element: pgvector_extension_card
+        type: card
+        content: "Extension name 'pgvector', status badge (available/enabled/unavailable), version number, schema, Enable button when available. Dependency note: 'Required by migration 23 (pgvector_ivfflat)'."
+        behavior: "'Enable' button calls Supabase management API to install extension. Transitions to spinner during installation. On success status badge updates to 'Enabled' and button disappears."
+        note: "Desktop: shown in top row beside connection status, not at bottom. Mobile: shown at bottom of the stack."
+
+    edge_cases:
+      - no_pending_migrations: "When all migrations are applied, 'Push Pending' button is disabled (greyed out, not hidden). Count badge reads 'All applied'. Section still shows last 8 applied migrations for context."
+      - push_in_progress: "When push is running, 'Push Pending' button transitions to loading state (spinner + 'Pushing...' label). Migration list shows a progress indicator. 'Deploy All' remains available unless it is a Full Deploy operation."
+      - all_functions_deployed: "When all functions are deployed, 'Deploy All' button is disabled. Count badge reads 'All deployed'. Function rows show last deployed timestamps."
+      - missing_required_secrets: "If a function's required secrets are not present in the vault, its 'Deploy' button is disabled with an inline note 'Missing secrets — check Secrets tab'. 'Deploy All' is also disabled if any function has missing secrets."
+      - vault_locked: "When vault is locked, 'Push Pending' and 'Deploy All' buttons are disabled. Inline note under each section header: 'Unlock vault to enable deployments'."
+      - db_disconnected: "Connection Status card shows disconnected badge. Push Pending and Deploy All are disabled. Migration and edge function status shows as stale with a 'Could not reach database' sub-label."
+      - pgvector_unavailable: "If pgvector extension is not available in the Supabase project plan, status badge shows 'Unavailable' and Enable button is absent. Note explains plan requirement."
+
+    accessibility:
+      - "Status badges never rely on fill color alone. Each badge includes an explicit text label (Connected, Not deployed, Pending, Available, Enabled)."
+      - "Keyboard navigation: Tab through pill nav, section action buttons (Push Pending, Deploy All), then through each function's Deploy button in order."
+      - "Disabled buttons use aria-disabled='true' with aria-describedby pointing to the reason (vault locked, missing secrets, already applied)."
+      - "During push/deploy operations, an aria-live='polite' region announces completion or failure so screen reader users receive feedback without a toast."
+      - "Migration filename text is in monospace-adjacent font via font-family on text nodes — code content should be wrapped in appropriate semantic markup in implementation."
+
+shared:
+  header:
+    type: minimal
+    left: "tkr-deploy wordmark"
+    right: "Vault status indicator"
+
+  navigation:
+    type: pill_bar
+    items:
+      - { label: "Overview", route: "/" }
+      - { label: "Secrets", route: "/secrets" }
+      - { label: "Database", route: "/database" }
+      - { label: "Frontend", route: "/frontend" }
+      - { label: "Email", route: "/email" }
+      - { label: "CI/CD", route: "/cicd" }

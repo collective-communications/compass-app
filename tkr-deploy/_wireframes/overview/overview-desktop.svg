@@ -1,0 +1,275 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 920" width="1280" height="920">
+  <defs>
+    <style>
+      .text-primary   { fill: #212121; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-secondary  { fill: #616161; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-tertiary   { fill: #9E9E9E; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+      .text-inverse    { fill: #FFFFFF; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1280" height="920" fill="#F5F5F5"/>
+
+  <!-- ==================== TOP BAR ==================== -->
+  <rect width="1280" height="64" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Wordmark -->
+  <text x="32" y="40" class="text-primary" font-size="18" font-weight="700" letter-spacing="-0.3">tkr-deploy</text>
+
+  <!-- Vault status (right) -->
+  <!-- Lock icon unlocked -->
+  <g transform="translate(1160, 22)">
+    <rect x="0" y="7" width="16" height="12" rx="2" fill="none" stroke="#616161" stroke-width="1.5"/>
+    <path d="M3,7 L3,3 Q3,0 8,0 Q13,0 13,3" fill="none" stroke="#616161" stroke-width="1.5" stroke-linecap="round"/>
+    <circle cx="8" cy="13" r="2" fill="#616161"/>
+  </g>
+  <!-- vault status dot -->
+  <circle cx="1152" cy="32" r="5" fill="#212121"/>
+  <text x="1182" y="36" class="text-secondary" font-size="13">tkr-secrets · Unlocked</text>
+
+  <!-- ==================== PILL NAV BAR ==================== -->
+  <rect y="64" width="1280" height="48" fill="#FFFFFF" stroke="#E0E0E0" stroke-width="1"/>
+
+  <!-- Overview (active pill) -->
+  <g transform="translate(32, 76)">
+    <rect width="84" height="26" rx="13" fill="#424242"/>
+    <text x="42" y="18" text-anchor="middle" class="text-inverse" font-size="13" font-weight="500">Overview</text>
+  </g>
+
+  <text x="132" y="96" class="text-secondary" font-size="13">Secrets</text>
+  <text x="196" y="96" class="text-secondary" font-size="13">Database</text>
+  <text x="272" y="96" class="text-secondary" font-size="13">Frontend</text>
+  <text x="344" y="96" class="text-secondary" font-size="13">Email</text>
+  <text x="398" y="96" class="text-secondary" font-size="13">CI/CD</text>
+
+  <!-- ==================== DEPLOYMENT URL CARD ==================== -->
+  <g transform="translate(32, 132)">
+    <rect width="1216" height="72" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Label -->
+    <text x="20" y="24" class="text-tertiary" font-size="11" font-weight="500" letter-spacing="0.4">LIVE URL</text>
+
+    <!-- URL value -->
+    <text x="20" y="48" class="text-primary" font-size="18" font-weight="600">compass-app.vercel.app</text>
+
+    <!-- Copy icon -->
+    <g transform="translate(276, 32)">
+      <rect x="0" y="3" width="14" height="14" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.5"/>
+      <rect x="4" y="0" width="14" height="14" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.5"/>
+    </g>
+
+    <!-- Divider vertical -->
+    <line x1="700" y1="16" x2="700" y2="56" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Last deploy info (right side of card) -->
+    <text x="720" y="24" class="text-tertiary" font-size="11">LAST DEPLOYED</text>
+    <text x="720" y="48" class="text-secondary" font-size="14">Today at 14:23 UTC · build #47 · main</text>
+  </g>
+
+  <!-- ==================== PROVIDER HEALTH GRID (2x2 desktop) ==================== -->
+  <text x="32" y="236" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.4">PROVIDER HEALTH</text>
+
+  <!-- Col widths: (1216 - 16) / 2 = 600 each, gap 16 -->
+
+  <!-- SUPABASE card (top-left) -->
+  <g transform="translate(32, 248)">
+    <rect width="600" height="136" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <text x="20" y="30" class="text-primary" font-size="14" font-weight="600">Supabase</text>
+    <!-- status -->
+    <circle cx="520" cy="25" r="6" fill="#212121"/>
+    <text x="532" y="29" class="text-primary" font-size="12" font-weight="500">Healthy</text>
+
+    <!-- DB Connected -->
+    <text x="20" y="52" class="text-tertiary" font-size="10" letter-spacing="0.3">DB CONNECTED</text>
+    <text x="112" y="52" class="text-secondary" font-size="11">Yes</text>
+
+    <line x1="20" y1="64" x2="580" y2="64" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Migrations row -->
+    <text x="20" y="86" class="text-secondary" font-size="12">Migrations</text>
+    <rect x="100" y="77" width="200" height="4" rx="2" fill="#E0E0E0"/>
+    <rect x="100" y="77" width="167" height="4" rx="2" fill="#424242"/>
+    <text x="310" y="86" class="text-secondary" font-size="12">20 / 24 applied</text>
+
+    <!-- Edge functions row -->
+    <text x="20" y="110" class="text-secondary" font-size="12">Edge Functions</text>
+    <rect x="120" y="101" width="200" height="4" rx="2" fill="#E0E0E0"/>
+    <rect x="120" y="101" width="1" height="4" rx="2" fill="#9E9E9E"/>
+    <text x="330" y="110" class="text-secondary" font-size="12">0 / 6 deployed</text>
+
+    <text x="20" y="128" class="text-tertiary" font-size="11">No functions deployed — run Deploy Functions to activate</text>
+  </g>
+
+  <!-- VERCEL card (top-right) -->
+  <g transform="translate(648, 248)">
+    <rect width="600" height="136" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <text x="20" y="30" class="text-primary" font-size="14" font-weight="600">Vercel</text>
+    <circle cx="520" cy="25" r="6" fill="#212121"/>
+    <text x="532" y="29" class="text-primary" font-size="12" font-weight="500">Healthy</text>
+
+    <!-- Last build -->
+    <text x="20" y="52" class="text-tertiary" font-size="10" letter-spacing="0.3">LAST BUILD</text>
+    <rect x="92" y="40" width="56" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="120" y="52" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Success</text>
+
+    <line x1="20" y1="64" x2="580" y2="64" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Metrics row -->
+    <text x="20" y="86" class="text-secondary" font-size="12">Deployments</text>
+    <text x="110" y="86" class="text-primary" font-size="12" font-weight="600">47</text>
+
+    <text x="200" y="86" class="text-secondary" font-size="12">Build time</text>
+    <text x="266" y="86" class="text-primary" font-size="12" font-weight="600">1m 42s</text>
+
+    <text x="20" y="110" class="text-secondary" font-size="12">Branch</text>
+    <text x="62" y="110" class="text-primary" font-size="12" font-weight="600">main</text>
+
+    <text x="20" y="128" class="text-tertiary" font-size="11">Auto-deploy on push enabled</text>
+  </g>
+
+  <!-- RESEND card (bottom-left) -->
+  <g transform="translate(32, 400)">
+    <rect width="600" height="136" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <text x="20" y="30" class="text-primary" font-size="14" font-weight="600">Resend</text>
+    <!-- status: warning -->
+    <circle cx="520" cy="25" r="6" fill="#616161"/>
+    <text x="532" y="29" class="text-secondary" font-size="12" font-weight="500">Warning</text>
+
+    <!-- Domain status -->
+    <text x="20" y="52" class="text-tertiary" font-size="10" letter-spacing="0.3">DOMAIN STATUS</text>
+    <rect x="106" y="40" width="60" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="136" y="52" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Pending</text>
+
+    <line x1="20" y1="64" x2="580" y2="64" stroke="#E0E0E0" stroke-width="1"/>
+
+    <text x="20" y="86" class="text-secondary" font-size="12">Emails today</text>
+    <text x="100" y="86" class="text-primary" font-size="12" font-weight="600">0</text>
+
+    <text x="20" y="110" class="text-tertiary" font-size="11">Domain verification pending — outbound delivery paused until verified</text>
+
+    <text x="20" y="128" class="text-tertiary" font-size="11">Verify DNS records in Resend dashboard to resume</text>
+  </g>
+
+  <!-- GITHUB card (bottom-right) -->
+  <g transform="translate(648, 400)">
+    <rect width="600" height="136" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <text x="20" y="30" class="text-primary" font-size="14" font-weight="600">GitHub</text>
+    <circle cx="520" cy="25" r="6" fill="#212121"/>
+    <text x="532" y="29" class="text-primary" font-size="12" font-weight="500">Healthy</text>
+
+    <!-- Last workflow -->
+    <text x="20" y="52" class="text-tertiary" font-size="10" letter-spacing="0.3">LAST WORKFLOW</text>
+    <rect x="116" y="40" width="52" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="142" y="52" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Passed</text>
+
+    <line x1="20" y1="64" x2="580" y2="64" stroke="#E0E0E0" stroke-width="1"/>
+
+    <text x="20" y="86" class="text-secondary" font-size="12">Branch</text>
+    <text x="62" y="86" class="text-primary" font-size="12" font-weight="600">main</text>
+
+    <text x="180" y="86" class="text-secondary" font-size="12">Keep-alive</text>
+    <rect x="244" y="75" width="50" height="18" rx="9" fill="#424242"/>
+    <text x="269" y="87" text-anchor="middle" class="text-inverse" font-size="10" font-weight="500">Active</text>
+
+    <text x="20" y="110" class="text-secondary" font-size="12">Last ping</text>
+    <text x="78" y="110" class="text-primary" font-size="12" font-weight="600">3 min ago</text>
+
+    <text x="20" y="128" class="text-tertiary" font-size="11">Scheduled ping every 5 min to prevent cold-start</text>
+  </g>
+
+  <!-- ==================== QUICK ACTIONS (horizontal row on desktop) ==================== -->
+  <text x="32" y="572" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.4">QUICK ACTIONS</text>
+
+  <!-- Full Deploy (primary) -->
+  <g transform="translate(32, 584)">
+    <rect width="180" height="44" rx="8" fill="#212121"/>
+    <text x="90" y="26.5" text-anchor="middle" class="text-inverse" font-size="14" font-weight="500">Full Deploy</text>
+  </g>
+
+  <!-- Sync Secrets -->
+  <g transform="translate(224, 584)">
+    <rect width="180" height="44" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1.5"/>
+    <text x="90" y="26.5" text-anchor="middle" class="text-secondary" font-size="14" font-weight="500">Sync Secrets</text>
+  </g>
+
+  <!-- Push Migrations -->
+  <g transform="translate(416, 584)">
+    <rect width="192" height="44" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1.5"/>
+    <text x="96" y="26.5" text-anchor="middle" class="text-secondary" font-size="14" font-weight="500">Push Migrations</text>
+  </g>
+
+  <!-- Deploy Functions -->
+  <g transform="translate(620, 584)">
+    <rect width="192" height="44" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1.5"/>
+    <text x="96" y="26.5" text-anchor="middle" class="text-secondary" font-size="14" font-weight="500">Deploy Functions</text>
+  </g>
+
+  <!-- ==================== RECENT ACTIVITY ==================== -->
+  <text x="32" y="664" class="text-secondary" font-size="12" font-weight="600" letter-spacing="0.4">RECENT ACTIVITY</text>
+
+  <!-- Activity card -->
+  <g transform="translate(32, 676)">
+    <rect width="1216" height="220" rx="8" fill="#FFFFFF" stroke="#E5E4E0" stroke-width="1"/>
+
+    <!-- Column headers -->
+    <text x="20" y="24" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.4">TIME</text>
+    <text x="90" y="24" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.4">ACTION</text>
+    <text x="900" y="24" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.4">PROVIDER</text>
+    <text x="1080" y="24" class="text-tertiary" font-size="10" font-weight="600" letter-spacing="0.4">STATUS</text>
+
+    <line x1="20" y1="32" x2="1196" y2="32" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Event 1 -->
+    <text x="20" y="56" class="text-tertiary" font-size="12">14:23</text>
+    <text x="90" y="56" class="text-primary" font-size="13">Frontend deployed to Vercel</text>
+    <text x="900" y="56" class="text-secondary" font-size="12">Vercel</text>
+    <rect x="1080" y="44" width="56" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="1108" y="56" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Success</text>
+
+    <line x1="20" y1="68" x2="1196" y2="68" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Event 2 -->
+    <text x="20" y="92" class="text-tertiary" font-size="12">14:21</text>
+    <text x="90" y="92" class="text-primary" font-size="13">Secrets synced from vault</text>
+    <text x="900" y="92" class="text-secondary" font-size="12">Secrets</text>
+    <rect x="1080" y="80" width="56" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="1108" y="92" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Success</text>
+
+    <line x1="20" y1="104" x2="1196" y2="104" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Event 3 -->
+    <text x="20" y="128" class="text-tertiary" font-size="12">13:55</text>
+    <text x="90" y="128" class="text-primary" font-size="13">Migration 017 applied</text>
+    <text x="900" y="128" class="text-secondary" font-size="12">Supabase</text>
+    <rect x="1080" y="116" width="56" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="1108" y="128" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Success</text>
+
+    <line x1="20" y1="140" x2="1196" y2="140" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Event 4 -->
+    <text x="20" y="164" class="text-tertiary" font-size="12">12:08</text>
+    <text x="90" y="164" class="text-secondary" font-size="13">Edge function deploy skipped</text>
+    <text x="900" y="164" class="text-secondary" font-size="12">Supabase</text>
+    <rect x="1080" y="152" width="60" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="1110" y="164" text-anchor="middle" class="text-secondary" font-size="10" font-weight="600">Skipped</text>
+
+    <line x1="20" y1="176" x2="1196" y2="176" stroke="#E0E0E0" stroke-width="1"/>
+
+    <!-- Event 5 -->
+    <text x="20" y="200" class="text-tertiary" font-size="12">09:44</text>
+    <text x="90" y="200" class="text-primary" font-size="13">GitHub keep-alive triggered</text>
+    <text x="900" y="200" class="text-secondary" font-size="12">GitHub</text>
+    <rect x="1080" y="188" width="56" height="18" rx="9" fill="#E0E0E0"/>
+    <text x="1108" y="200" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Success</text>
+
+    <!-- View all link -->
+    <text x="608" y="216" text-anchor="middle" class="text-secondary" font-size="12">View all activity</text>
+    <line x1="554" y1="219" x2="662" y2="219" stroke="#616161" stroke-width="1"/>
+  </g>
+
+</svg>

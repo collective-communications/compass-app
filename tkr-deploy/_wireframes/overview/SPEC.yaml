@@ -1,0 +1,108 @@
+# tkr-deploy — Wireframe Specification
+# Bridges SVG wireframes to implementation requirements.
+
+section: overview
+shell: deploy-dashboard
+route_prefix: "/"
+
+screens:
+  - id: overview
+    file: overview-mobile.svg
+    desktop: overview-desktop.svg
+    route: "/"
+    purpose: "Primary landing screen showing live deployment URL, provider health across all 4 providers, quick-action shortcuts, and recent deployment activity."
+
+    shell_header:
+      type: minimal
+      left: "tkr-deploy wordmark (text, not image)"
+      center: ""
+      right: "Vault status indicator — lock icon (unlocked/locked state) + vault name (tkr-secrets) + connection status dot"
+
+    data_sources:
+      - derived: vault_status
+        logic: "HTTP GET localhost:42042/health — returns { locked: boolean, name: string }. Poll every 30s. If request fails, show locked state with error label."
+
+      - derived: provider_health
+        logic: "Parallel health checks to each provider API. Supabase: query db connection + migration status. Vercel: GET /v13/deployments (latest). Resend: GET /domains. GitHub: GET /repos/{owner}/{repo}/actions/runs (latest). Aggregate into { provider, status: healthy|warning|down|unknown, details }."
+
+      - derived: live_url
+        logic: "Read from Vercel latest production deployment alias. Fallback to configured VERCEL_PRODUCTION_URL env var."
+
+      - derived: recent_activity
+        logic: "Local append-only event log written by the deploy CLI on each action. Read last 5 entries. Fields: timestamp, action, provider, status (success|skipped|failed)."
+
+    layout:
+      mobile: "Single column stack: top bar → pill nav (horizontally scrollable) → deployment URL card → PROVIDER HEALTH section label → 4 provider cards stacked → QUICK ACTIONS label → 2x2 grid of action buttons → RECENT ACTIVITY label → activity card"
+      desktop: "Top bar full-width → pill nav → deployment URL card full-width → PROVIDER HEALTH 2x2 card grid (two columns of 600px each, 16px gap) → QUICK ACTIONS horizontal button row → RECENT ACTIVITY full-width table card"
+
+    components:
+      - element: top_bar
+        type: custom
+        content: "Wordmark 'tkr-deploy' left-aligned. Vault status right-aligned: status dot (filled circle — #212121=connected, #9E9E9E=unknown, #616161=warning) + lock icon + vault name + text label."
+        behavior: "Vault status dot and lock icon update on poll. Clicking vault status area opens vault connection detail panel."
+        note: "Status dot communicates state through fill density + accompanying text label — color-blind safe."
+
+      - element: pill_nav
+        type: custom
+        content: "Horizontal scrollable pill row: Overview (active, dark fill) | Secrets | Database | Frontend | Email | CI/CD"
+        behavior: "Tapping a pill navigates to that provider's detail view. Active pill = #424242 fill, white text. Inactive = text-only #616161."
+        note: "On mobile the pill row is horizontally scrollable — CI/CD partially visible to signal scroll affordance."
+
+      - element: deployment_url_card
+        type: card
+        content: "LIVE URL label, compass-app.vercel.app URL in large type, copy-to-clipboard icon, divider, last deployed timestamp and build reference."
+        behavior: "Copy icon copies URL to clipboard. On desktop, right half of card shows build metadata (build #, branch, timestamp)."
+        note: "URL is the production alias — stable link, not the unique deployment URL."
+
+      - element: provider_health_grid
+        type: card
+        content: "4 cards (Supabase, Vercel, Resend, GitHub). Each card: provider name, status dot + text label, divider, provider-specific metrics."
+        behavior: "Each card is tappable — navigates to that provider's detail tab. Status dot uses greyscale fills + text labels (not color alone)."
+        note: |
+          Supabase: DB connected bool, migrations progress bar (applied/total), edge functions progress bar (deployed/total).
+          Vercel: last build status badge, deployment count, build time, branch.
+          Resend: domain status badge (verified/pending/not configured), emails today count.
+          GitHub: last workflow badge, branch, keep-alive status pill, last ping time.
+
+      - element: quick_actions
+        type: toolbar
+        content: "4 actions: Full Deploy (primary, dark fill), Sync Secrets, Push Migrations, Deploy Functions (all secondary outlined)."
+        behavior: "Each button triggers the corresponding CLI operation with an inline status indicator replacing the button during execution. On completion the button restores and the activity log updates."
+        note: "Mobile: 2x2 grid. Desktop: horizontal row. Full Deploy is visually primary — only one dark button."
+
+      - element: recent_activity
+        type: list
+        content: "Last 5 events. Mobile: timestamp + action label + status badge per row. Desktop: adds Provider column and renders as a structured table."
+        behavior: "'View all activity' link opens full activity log view."
+        note: "Status badges: Success (#E0E0E0 background, #212121 text), Skipped (#E0E0E0, #616161 text), Failed (#E0E0E0, #212121 text with failure label). Text labels disambiguate without relying on color."
+
+    edge_cases:
+      - vault_locked: "When tkr-secrets vault is locked or unreachable, display lock icon in locked state, show 'Vault locked — unlock to sync secrets' in the vault status area, and disable Sync Secrets and Full Deploy action buttons (greyed out, non-interactive) with a tooltip explaining why."
+      - provider_unreachable: "If a provider health check fails or times out, show status dot in #9E9E9E (unknown) with label 'Unknown' and a sub-label 'Check failed · retry'. The card is not disabled — the user can still navigate to it."
+      - vault_connection_refused: "If localhost:42042 refuses connection (tkr-secrets not running), show 'Vault offline' state — distinct from locked. Suggest running the vault start command inline."
+      - all_healthy: "When all 4 providers report healthy, no additional UI. No success banner. The cards themselves communicate status."
+      - action_in_progress: "When a quick action is running, the button transitions to a loading state (spinner replaces label, button disabled). Other action buttons remain available unless the operation exclusively locks them (e.g., Full Deploy disables all 4 buttons during execution)."
+      - no_recent_activity: "If the local event log is empty (first run), the Recent Activity card shows an empty state: 'No deployments yet — run Full Deploy to start' centered in the card body."
+
+    accessibility:
+      - "Status dots must never be the sole communication channel. Every dot has an adjacent text label (Healthy / Warning / Down / Unknown) that conveys the same state."
+      - "Keyboard navigation: Tab through pill nav, URL card copy button, provider cards, action buttons, and activity list. Enter activates focused interactive elements."
+      - "Provider cards and action buttons have descriptive aria-label attributes: e.g., aria-label='Supabase — Healthy. 20 of 24 migrations applied.'"
+      - "Disabled action buttons (vault locked state) use aria-disabled='true' and include a descriptive aria-describedby pointing to the vault status message."
+      - "Copy-to-clipboard action announces 'URL copied to clipboard' via an aria-live region after activation — no visual toast."
+
+shared:
+  header:
+    type: minimal
+    left: "tkr-deploy wordmark"
+    right: "Vault status indicator"
+
+  navigation:
+    type: pill_bar
+    items:
+      - { label: "Overview", route: "/" }
+      - { label: "Secrets", route: "/secrets" }
+      - { label: "Database", route: "/database" }
+      - { label: "Frontend", route: "/frontend" }
+      - { label: "Email", route: "/email" }
+      - { label: "CI/CD", route: "/cicd" }

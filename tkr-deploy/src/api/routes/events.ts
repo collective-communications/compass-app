@@ -1,61 +1,38 @@
-import type { Server } from "bun";
-import type { DeployEventEmitter } from "../../domain/event-emitter.js";
+import type { Router } from '../router.js';
 
-/**
- * Registers SSE event routes. Each connected client receives real-time
- * deploy lifecycle events formatted as Server-Sent Events.
- */
-export function registerEventRoutes(
-  emitter: DeployEventEmitter
-): (req: Request) => Response | null {
-  return (req: Request): Response | null => {
-    const url = new URL(req.url);
-
-    if (url.pathname !== "/api/events") {
-      return null;
-    }
-
-    if (req.method !== "GET") {
-      return new Response("Method Not Allowed", { status: 405 });
-    }
-
-    let unsubscribe: (() => void) | null = null;
+export function registerEventRoutes(router: Router): void {
+  router.get('/api/events', async () => {
+    const encoder = new TextEncoder();
+    let keepaliveInterval: ReturnType<typeof setInterval> | null = null;
 
     const stream = new ReadableStream({
       start(controller) {
         // Send initial connection event
-        controller.enqueue(
-          formatSSE("connected", { timestamp: new Date().toISOString() })
-        );
+        controller.enqueue(encoder.encode('event: connected\ndata: {}\n\n'));
 
-        // Subscribe to all deploy events
-        unsubscribe = emitter.on("*", (event) => {
+        // Keepalive every 15 seconds
+        keepaliveInterval = setInterval(() => {
           try {
-            controller.enqueue(formatSSE(event.type, event));
+            controller.enqueue(encoder.encode(': keepalive\n\n'));
           } catch {
-            // Stream closed — cleanup handled in cancel
+            // Stream closed — clean up handled in cancel
           }
-        });
+        }, 15_000);
       },
       cancel() {
-        unsubscribe?.();
+        if (keepaliveInterval) {
+          clearInterval(keepaliveInterval);
+          keepaliveInterval = null;
+        }
       },
     });
 
     return new Response(stream, {
       headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-        "Access-Control-Allow-Origin": "*",
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
       },
     });
-  };
-}
-
-function formatSSE(
-  eventType: string,
-  data: Record<string, unknown>
-): string {
-  return `event: ${eventType}\ndata: ${JSON.stringify(data)}\n\n`;
+  });
 }
