@@ -5,7 +5,7 @@
  */
 
 import { useRef, useEffect, useState, useCallback, type ReactElement, type ChangeEvent } from 'react';
-import { parseCsvContent, type ParsedRecipient } from '../lib/csv-parser';
+import { parseCsvContent, type ParsedRecipient, type ParsedRow } from '../lib/csv-parser';
 
 export type { ParsedRecipient } from '../lib/csv-parser';
 

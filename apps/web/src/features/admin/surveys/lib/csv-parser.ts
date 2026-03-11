@@ -56,7 +56,7 @@ export function parseCsvFields(line: string): string[] {
 
 export function parseCsvContent(content: string, existingEmails: string[]): ParsedRow[] {
   const lines = content.trim().split('\n');
-  if (lines.length === 0) return [];
+  if (lines.length === 0 || !lines[0]) return [];
 
   // Detect header row
   const firstLine = lines[0].toLowerCase().trim();
