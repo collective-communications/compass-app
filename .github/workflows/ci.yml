@@ -45,7 +45,7 @@ jobs:
 
       - name: Install Playwright browsers
         if: env.HAS_E2E_SECRETS == 'true'
-        run: bunx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium firefox
 
       - name: E2E tests
         if: env.HAS_E2E_SECRETS == 'true'

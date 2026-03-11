@@ -34,6 +34,14 @@ export default defineConfig({
 
   globalSetup: './global-setup.ts',
 
+  webServer: {
+    command: 'bun run --filter @compass/web dev',
+    url: 'http://localhost:5173',
+    reuseExistingServer: !isCI,
+    timeout: 30_000,
+    cwd: resolve(__dirname, '..'),
+  },
+
   projects: [
     {
       name: 'auth-setup',
