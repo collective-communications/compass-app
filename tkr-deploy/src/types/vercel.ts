@@ -7,6 +7,8 @@ export interface DeploymentEntry {
   status: string;
   duration: number | null;
   createdAt: string;
+  errorMessage?: string;
+  inspectorUrl?: string;
 }
 
 export interface VercelProject {

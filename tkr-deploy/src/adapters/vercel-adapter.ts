@@ -103,8 +103,10 @@ export class VercelAdapter implements ProviderAdapter {
         ready?: number;
         buildingAt?: number;
         created: number;
+        errorMessage?: string;
+        inspectorUrl?: string;
       }>;
-    }>('GET', `/v13/deployments?projectId=${this.projectId}&limit=${limit}`);
+    }>('GET', `/v6/deployments?projectId=${this.projectId}&limit=${limit}`);
 
     return data.deployments.map((d): DeploymentEntry => ({
       uid: d.uid,
@@ -115,6 +117,8 @@ export class VercelAdapter implements ProviderAdapter {
       status: d.state ?? 'UNKNOWN',
       duration: d.ready && d.buildingAt ? d.ready - d.buildingAt : null,
       createdAt: new Date(d.created).toISOString(),
+      errorMessage: d.errorMessage,
+      inspectorUrl: d.inspectorUrl,
     }));
   }
 
@@ -153,16 +157,17 @@ export class VercelAdapter implements ProviderAdapter {
   }
 
   async triggerRedeploy(deploymentId: string): Promise<string> {
-    const data = await this.request<{ uid: string }>(
+    const project = await this.getProject();
+    const data = await this.request<{ id: string }>(
       'POST',
       `/v13/deployments?forceNew=1`,
-      { deploymentId, target: 'production' },
+      { deploymentId, name: project.name, target: 'production' },
     );
-    return data.uid;
+    return data.id;
   }
 
   async promoteDeployment(uid: string): Promise<void> {
-    await this.request('POST', `/v13/deployments/${uid}/promote`, {});
+    await this.request('POST', `/v6/deployments/${uid}/promote`, {});
   }
 
   async pollDeployment(uid: string): Promise<DeploymentEntry> {
@@ -178,7 +183,7 @@ export class VercelAdapter implements ProviderAdapter {
         ready?: number;
         buildingAt?: number;
         created: number;
-      }>('GET', `/v13/deployments/${uid}`);
+      }>('GET', `/v6/deployments/${uid}`);
 
       const entry: DeploymentEntry = {
         uid: data.uid,

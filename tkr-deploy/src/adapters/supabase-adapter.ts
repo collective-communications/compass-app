@@ -10,6 +10,9 @@ import {
 export interface SupabaseAdapterConfig {
   projectRef: string;
   accessToken: string;
+  serviceRoleKey?: string;
+  supabaseUrl?: string;
+  projectRoot?: string;
   timeoutMs?: number;
 }
 
@@ -20,96 +23,127 @@ interface CliResult {
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000;
+const MGMT_API = 'https://api.supabase.com';
 
 export class SupabaseAdapter implements ProviderAdapter {
   readonly name = 'supabase' as const;
 
   private readonly projectRef: string;
   private readonly accessToken: string;
+  private readonly serviceRoleKey: string;
+  private readonly supabaseUrl: string;
+  private readonly projectRoot: string;
   private readonly timeoutMs: number;
 
   constructor(config: SupabaseAdapterConfig) {
     this.projectRef = config.projectRef;
     this.accessToken = config.accessToken;
+    this.serviceRoleKey = config.serviceRoleKey ?? '';
+    this.supabaseUrl = config.supabaseUrl ?? '';
+    this.projectRoot = config.projectRoot ?? process.cwd();
     this.timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   }
+
+  // ── Management API helper ──
+
+  private async mgmtRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
+    const res = await fetch(`${MGMT_API}${path}`, {
+      method,
+      headers: {
+        'Authorization': `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(this.timeoutMs),
+    });
+
+    if (!res.ok) {
+      throw new SupabaseApiError(res.status, `Supabase API ${method} ${path}: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<T>;
+  }
+
+  // ── Database RPC helper (uses service role key) ──
+
+  private async dbRpc<T>(sql: string): Promise<T> {
+    if (!this.supabaseUrl || !this.serviceRoleKey) {
+      throw new SupabaseApiError(0, 'Database query requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
+    }
+    const res = await fetch(`${this.supabaseUrl}/rest/v1/rpc/`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.serviceRoleKey}`,
+        'apikey': this.serviceRoleKey,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ query: sql }),
+      signal: AbortSignal.timeout(this.timeoutMs),
+    });
+
+    if (!res.ok) {
+      throw new SupabaseApiError(res.status, `Database RPC failed: ${res.statusText}`);
+    }
+
+    return res.json() as Promise<T>;
+  }
+
+  // ── Health (Management API) ──
 
   async healthCheck(): Promise<ProviderHealth> {
     const checkedAt = Date.now();
     try {
-      const result = await this.runCli([
-        'db', 'remote', 'changes',
-        '--project-ref', this.projectRef,
-      ]);
+      const project = await this.mgmtRequest<{
+        id: string;
+        name: string;
+        region: string;
+        status: string;
+        database?: { version?: string };
+      }>('GET', `/v1/projects/${this.projectRef}`);
 
-      if (result.exitCode === 0) {
-        return {
-          provider: this.name,
-          status: 'healthy',
-          label: 'Supabase',
-          details: { projectRef: this.projectRef, pendingChanges: result.stdout.trim() },
-          checkedAt,
-        };
-      }
-
+      const isHealthy = project.status === 'ACTIVE_HEALTHY';
       return {
         provider: this.name,
-        status: 'warning',
+        status: isHealthy ? 'healthy' : 'warning',
         label: 'Supabase',
-        details: { projectRef: this.projectRef, stderr: result.stderr.trim() },
+        details: {
+          projectRef: this.projectRef,
+          region: project.region,
+          version: project.database?.version ?? 'unknown',
+        },
         checkedAt,
       };
     } catch (error) {
-      if (error instanceof CliNotFoundError) {
-        return {
-          provider: this.name,
-          status: 'down',
-          label: 'Supabase',
-          details: { error: 'CLI not found' },
-          checkedAt,
-        };
-      }
-      if (error instanceof SupabaseAuthError) {
-        return {
-          provider: this.name,
-          status: 'down',
-          label: 'Supabase',
-          details: { error: 'Authentication failed' },
-          checkedAt,
-        };
-      }
       return {
         provider: this.name,
-        status: 'unknown',
+        status: error instanceof SupabaseApiError ? 'down' : 'unknown',
         label: 'Supabase',
-        details: { error: String(error) },
+        details: { error: error instanceof Error ? error.message : String(error) },
         checkedAt,
       };
     }
   }
 
+  // ── Migrations (local filesystem scan + CLI for push) ──
+
   async getMigrations(): Promise<MigrationEntry[]> {
-    const result = await this.runCli([
-      'db', 'remote', 'changes',
-      '--project-ref', this.projectRef,
-    ]);
+    const { readdir } = await import('node:fs/promises');
+    const { join } = await import('node:path');
+    const migrationsDir = join(this.projectRoot, 'supabase', 'migrations');
 
-    const entries: MigrationEntry[] = [];
-    const lines = result.stdout.trim().split('\n').filter(Boolean);
-
-    for (const line of lines) {
-      // Parse CLI output lines like: "20240101000000_init.sql (applied)"
-      const match = line.match(/^(\S+\.sql)\s+\((\w+)\)(?:\s+(.+))?$/);
-      if (match) {
-        entries.push({
-          filename: match[1],
-          status: match[2] === 'applied' ? 'applied' : 'pending',
-          appliedAt: match[3] ?? null,
-        });
-      }
+    let files: string[] = [];
+    try {
+      const all = await readdir(migrationsDir);
+      files = all.filter((f) => f.endsWith('.sql')).sort();
+    } catch {
+      return [];
     }
 
-    return entries;
+    return files.map((filename): MigrationEntry => ({
+      filename,
+      status: 'applied',
+      appliedAt: null,
+    }));
   }
 
   async pushMigrations(): Promise<{ applied: string[]; errors: string[] }> {
@@ -133,31 +167,50 @@ export class SupabaseAdapter implements ProviderAdapter {
     };
   }
 
+  // ── Edge Functions (Management API) ──
+
   async getEdgeFunctions(): Promise<EdgeFunction[]> {
-    const result = await this.runCli([
-      'functions', 'list',
-      '--project-ref', this.projectRef,
-    ]);
+    const { readdir } = await import('node:fs/promises');
+    const { join } = await import('node:path');
 
-    const functions: EdgeFunction[] = [];
-    const lines = result.stdout.trim().split('\n').filter(Boolean);
-
-    for (const line of lines) {
-      // Skip header lines
-      if (line.startsWith('─') || line.startsWith('NAME')) continue;
-
-      const parts = line.split(/\s{2,}/).map((p) => p.trim()).filter(Boolean);
-      if (parts.length >= 2) {
-        functions.push({
-          name: parts[0],
-          deployed: parts[1] === 'true' || parts[1] === 'Active',
-          lastDeployed: parts[2] ?? null,
-          requiredSecrets: parts[3] ? parts[3].split(',').map((s) => s.trim()) : [],
-        });
-      }
+    // 1. Scan local function directories
+    const functionsDir = join(this.projectRoot, 'supabase', 'functions');
+    let localNames: string[] = [];
+    try {
+      const entries = await readdir(functionsDir, { withFileTypes: true });
+      localNames = entries
+        .filter((e) => e.isDirectory() && !e.name.startsWith('_'))
+        .map((e) => e.name);
+    } catch {
+      // No local functions directory
     }
 
-    return functions;
+    // 2. Get remote deployed functions from Management API
+    let remoteMap = new Map<string, { status: string; updatedAt: string | null }>();
+    try {
+      const remote = await this.mgmtRequest<Array<{
+        slug: string;
+        status: string;
+        updated_at: string;
+      }>>('GET', `/v1/projects/${this.projectRef}/functions`);
+      for (const fn of remote) {
+        remoteMap.set(fn.slug, { status: fn.status, updatedAt: fn.updated_at });
+      }
+    } catch {
+      // API unavailable — show local only
+    }
+
+    // 3. Merge: local dirs as source of truth, remote status overlaid
+    const allNames = new Set([...localNames, ...remoteMap.keys()]);
+    return Array.from(allNames).sort().map((name): EdgeFunction => {
+      const remote = remoteMap.get(name);
+      return {
+        name,
+        deployed: remote?.status === 'ACTIVE',
+        lastDeployed: remote?.updatedAt ?? null,
+        requiredSecrets: [],
+      };
+    });
   }
 
   async deployFunction(name: string): Promise<void> {
@@ -191,44 +244,36 @@ export class SupabaseAdapter implements ProviderAdapter {
     return { deployed, failed };
   }
 
+  // ── Extensions (Management API database query) ──
+
+  private async dbQuery<T>(sql: string): Promise<T> {
+    return this.mgmtRequest<T>(
+      'POST',
+      `/v1/projects/${this.projectRef}/database/query`,
+      { query: sql },
+    );
+  }
+
   async getExtensionStatus(name: string): Promise<{ installed: boolean; version: string | null }> {
-    const url = `https://api.supabase.com/v1/projects/${this.projectRef}/extensions`;
-    const response = await fetch(url, {
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      signal: AbortSignal.timeout(this.timeoutMs),
-    });
+    const rows = await this.dbQuery<Array<{
+      name: string;
+      installed_version: string | null;
+      default_version: string | null;
+    }>>(
+      `SELECT name, installed_version, default_version FROM pg_available_extensions WHERE name = '${name}'`,
+    );
 
-    if (!response.ok) {
-      throw new SupabaseApiError(response.status, `Failed to get extensions: ${response.statusText}`);
-    }
-
-    const extensions = (await response.json()) as Array<{ name: string; installed_version: string | null }>;
-    const ext = extensions.find((e) => e.name === name);
+    const ext = rows[0];
+    if (!ext) return { installed: false, version: null };
 
     return {
-      installed: ext?.installed_version != null,
-      version: ext?.installed_version ?? null,
+      installed: ext.installed_version != null,
+      version: ext.installed_version ?? ext.default_version ?? null,
     };
   }
 
   async enableExtension(name: string): Promise<void> {
-    const url = `https://api.supabase.com/v1/projects/${this.projectRef}/extensions`;
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ name }),
-      signal: AbortSignal.timeout(this.timeoutMs),
-    });
-
-    if (!response.ok) {
-      throw new SupabaseApiError(response.status, `Failed to enable extension "${name}": ${response.statusText}`);
-    }
+    await this.dbQuery(`CREATE EXTENSION IF NOT EXISTS ${name}`);
   }
 
   async setSecrets(secrets: Record<string, string>): Promise<void> {

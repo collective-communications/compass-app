@@ -25,6 +25,9 @@ export class ResendAdapter implements ProviderAdapter {
 
   private readonly apiKey: string;
   private readonly timeoutMs: number;
+  private lastHealthResult: ProviderHealth | null = null;
+  private lastHealthAt = 0;
+  private static readonly HEALTH_CACHE_MS = 60_000; // cache health for 60s
 
   constructor(config: ResendAdapterConfig) {
     this.apiKey = config.apiKey;
@@ -32,10 +35,16 @@ export class ResendAdapter implements ProviderAdapter {
   }
 
   async healthCheck(): Promise<ProviderHealth> {
+    // Return cached result if fresh (avoids burning rate limit on polling)
+    if (this.lastHealthResult && Date.now() - this.lastHealthAt < ResendAdapter.HEALTH_CACHE_MS) {
+      return this.lastHealthResult;
+    }
+
     const checkedAt = Date.now();
+    let result: ProviderHealth;
     try {
-      await this.request('GET', '/domains');
-      return {
+      await this.request('GET', '/api-keys');
+      result = {
         provider: this.name,
         status: 'healthy',
         label: 'Resend',
@@ -43,7 +52,7 @@ export class ResendAdapter implements ProviderAdapter {
         checkedAt,
       };
     } catch (error: unknown) {
-      return {
+      result = {
         provider: this.name,
         status: 'down',
         label: 'Resend',
@@ -51,6 +60,9 @@ export class ResendAdapter implements ProviderAdapter {
         checkedAt,
       };
     }
+    this.lastHealthResult = result;
+    this.lastHealthAt = Date.now();
+    return result;
   }
 
   async getDomains(): Promise<Array<{ id: string; name: string; status: string }>> {
