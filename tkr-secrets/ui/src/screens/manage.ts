@@ -9,6 +9,7 @@
  */
 
 import { api, ApiError } from "../api.js";
+import { ICON_LOCK, ICON_EYE, ICON_EYE_OFF, ICON_TRASH, ICON_ARROW_LEFT, setIcon } from "../icons.js";
 
 // ── Types ────────────────────────────────────────────────────────────
 
@@ -187,7 +188,7 @@ function createHeader(opts: ManageScreenOptions): HTMLElement {
   const backBtn = document.createElement("button");
   backBtn.type = "button";
   backBtn.className = "btn btn--secondary";
-  backBtn.textContent = "\u2190";
+  setIcon(backBtn, ICON_ARROW_LEFT);
   backBtn.setAttribute("aria-label", "Back to vault picker");
   backBtn.addEventListener("click", () => opts.onBack());
 
@@ -210,7 +211,8 @@ function createHeader(opts: ManageScreenOptions): HTMLElement {
   const lockBtn = document.createElement("button");
   lockBtn.type = "button";
   lockBtn.className = "btn btn--secondary";
-  lockBtn.textContent = "\u{1F512} Lock";
+  setIcon(lockBtn, ICON_LOCK);
+  lockBtn.appendChild(document.createTextNode(" Lock"));
   lockBtn.setAttribute("aria-label", "Lock vault");
   lockBtn.addEventListener("click", async () => {
     try {
@@ -346,13 +348,13 @@ function createAddSecretForm(): HTMLElement | null {
   valueToggle.type = "button";
   valueToggle.className = "input-wrapper__toggle";
   valueToggle.setAttribute("aria-label", "Toggle value visibility");
-  valueToggle.textContent = "\u{1F441}";
+  setIcon(valueToggle, ICON_EYE);
 
   let valueVisible = false;
   valueToggle.addEventListener("click", () => {
     valueVisible = !valueVisible;
     valueInput.type = valueVisible ? "text" : "password";
-    valueToggle.textContent = valueVisible ? "\u{1F441}\u{200D}\u{1F5E8}" : "\u{1F441}";
+    setIcon(valueToggle, valueVisible ? ICON_EYE_OFF : ICON_EYE, valueVisible ? "Hide value" : "Show value");
   });
 
   valueWrapper.append(valueInput, valueToggle);
@@ -585,7 +587,7 @@ function createSecretRow(secretName: string, indented: boolean): HTMLElement {
     revealBtn.type = "button";
     revealBtn.className = "btn btn--secondary";
     revealBtn.style.cssText = "padding:var(--space-1) var(--space-2);font-size:var(--font-size-sm)";
-    revealBtn.textContent = isRevealed ? "\u{1F441}\u{200D}\u{1F5E8}" : "\u{1F441}";
+    setIcon(revealBtn, isRevealed ? ICON_EYE_OFF : ICON_EYE);
     revealBtn.setAttribute("aria-label", isRevealed ? `Hide ${secretName}` : `Reveal ${secretName}`);
     revealBtn.addEventListener("click", async () => {
       if (revealedSecrets.has(secretName)) {
@@ -668,7 +670,7 @@ function createSecretRow(secretName: string, indented: boolean): HTMLElement {
       }
     });
   } else {
-    deleteBtn.textContent = "\u{1F5D1}";
+    setIcon(deleteBtn, ICON_TRASH);
     deleteBtn.setAttribute("aria-label", `Delete ${secretName}`);
     deleteBtn.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -1309,12 +1311,12 @@ function createSettingsSection(status: VaultStatus, opts: ManageScreenOptions): 
     const tog = document.createElement("button");
     tog.type = "button";
     tog.className = "input-wrapper__toggle";
-    tog.textContent = "\u{1F441}";
+    setIcon(tog, ICON_EYE);
     let vis = false;
     tog.addEventListener("click", () => {
       vis = !vis;
       inp.type = vis ? "text" : "password";
-      tog.textContent = vis ? "\u{1F441}\u{200D}\u{1F5E8}" : "\u{1F441}";
+      setIcon(tog, vis ? ICON_EYE_OFF : ICON_EYE, vis ? "Hide password" : "Show password");
     });
     wrap.append(inp, tog);
     const err = document.createElement("div");
