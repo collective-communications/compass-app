@@ -8,7 +8,7 @@ import type { GitHubAdapter } from '../adapters/github-adapter.js';
 // ---------------------------------------------------------------------------
 
 export type TargetName = 'supabase' | 'vercel' | 'github';
-export type SyncState = 'synced' | 'missing' | 'differs' | 'na' | 'error';
+export type SyncState = 'synced' | 'missing' | 'differs' | 'na' | 'error' | 'unverifiable';
 
 export interface SecretSyncRow {
   name: string;
@@ -57,16 +57,46 @@ export class VaultLockedError extends Error {
 type TargetApplicability = Record<TargetName, boolean>;
 
 const SECRET_TARGET_MAP: Record<string, TargetApplicability> = {
+  // Supabase
+  VITE_SUPABASE_URL:         { supabase: false, vercel: true,  github: true },
+  VITE_SUPABASE_ANON_KEY:    { supabase: false, vercel: true,  github: true },
   SUPABASE_URL:              { supabase: false, vercel: true,  github: true },
-  SUPABASE_ANON_KEY:         { supabase: false, vercel: true,  github: true },
   SUPABASE_SERVICE_ROLE_KEY: { supabase: false, vercel: true,  github: true },
-  SUPABASE_DB_PASSWORD:      { supabase: false, vercel: false, github: true },
   SUPABASE_ACCESS_TOKEN:     { supabase: false, vercel: false, github: true },
-  SUPABASE_PROJECT_ID:       { supabase: false, vercel: false, github: true },
+  // Vercel
   VERCEL_TOKEN:              { supabase: false, vercel: false, github: true },
   VERCEL_ORG_ID:             { supabase: false, vercel: false, github: true },
-  RESEND_API_KEY:            { supabase: true,  vercel: true,  github: true },
+  VERCEL_PROJECT_ID:         { supabase: false, vercel: false, github: true },
+  // GitHub
+  GITHUB_TOKEN:              { supabase: false, vercel: false, github: false },
+  GITHUB_OWNER:              { supabase: false, vercel: false, github: false },
+  GITHUB_REPO:               { supabase: false, vercel: false, github: false },
+  // Resend
+  RESEND_CCC_SEND:           { supabase: true,  vercel: true,  github: true },
+  RESEND_CCC_ADMIN:          { supabase: false, vercel: false, github: false },
+  RESEND_FROM_ADDRESS:       { supabase: true,  vercel: true,  github: false },
+  // OpenAI
+  OPENAI_API_KEY:            { supabase: true,  vercel: true,  github: true },
+  // App
+  VITE_APP_URL:              { supabase: false, vercel: true,  github: false },
+  APP_URL:                   { supabase: false, vercel: true,  github: false },
+  // E2E
+  E2E_SUPABASE_URL:          { supabase: false, vercel: false, github: true },
+  E2E_SUPABASE_SERVICE_KEY:  { supabase: false, vercel: false, github: true },
+  // Deploy
+  HEALTH_CHECK_URL:          { supabase: false, vercel: false, github: false },
+  DEPLOY_PORT:               { supabase: false, vercel: false, github: false },
 };
+
+// When syncing to a target, some vault keys need to be renamed
+// e.g. edge functions expect RESEND_API_KEY, but vault stores RESEND_CCC_SEND
+const TARGET_KEY_REMAP: Partial<Record<string, Partial<Record<TargetName, string>>>> = {
+  RESEND_CCC_SEND: { supabase: 'RESEND_API_KEY' },
+};
+
+function targetKeyName(vaultName: string, target: TargetName): string {
+  return TARGET_KEY_REMAP[vaultName]?.[target] ?? vaultName;
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -148,22 +178,29 @@ export class SecretsSyncEngine {
         },
       };
 
-      // Supabase — we can only push, not read back. Mark as 'na' if not applicable.
+      // Supabase — secrets are write-only (no read API). Can't verify.
       if (targets.supabase) {
-        // Supabase doesn't expose a read API for secrets, so we can't determine state.
-        // We mark as 'missing' if vault has a value (conservative: assume needs sync).
-        row.targets.supabase = { state: 'missing' };
+        row.targets.supabase = vaultValue
+          ? { state: 'unverifiable' }
+          : { state: 'missing' };
       }
 
-      // Vercel
+      // Vercel — encrypted env vars can't be value-compared, only check existence
       if (targets.vercel) {
+        const remoteKey = targetKeyName(secretName, 'vercel');
         if (vercelError) {
           row.targets.vercel = { state: 'error', error: vercelError };
-        } else if (vercelEnvVars.has(secretName)) {
-          const remoteHash = hashValue(vercelEnvVars.get(secretName)!);
-          row.targets.vercel = vaultHash === remoteHash
-            ? { state: 'synced', valueHash: remoteHash }
-            : { state: 'differs', valueHash: remoteHash };
+        } else if (vercelEnvVars.has(remoteKey)) {
+          const remoteValue = vercelEnvVars.get(remoteKey)!;
+          // Vercel encrypted values start with 'eyJ' (base64 JSON). Can't compare.
+          if (remoteValue.startsWith('eyJ') || remoteValue === '(encrypted)') {
+            row.targets.vercel = { state: 'synced' };
+          } else {
+            const remoteHash = hashValue(remoteValue);
+            row.targets.vercel = vaultHash === remoteHash
+              ? { state: 'synced', valueHash: remoteHash }
+              : { state: 'differs', valueHash: remoteHash };
+          }
         } else {
           row.targets.vercel = { state: 'missing' };
         }
@@ -171,9 +208,10 @@ export class SecretsSyncEngine {
 
       // GitHub — can only check name existence, never 'differs'
       if (targets.github) {
+        const remoteKey = targetKeyName(secretName, 'github');
         if (githubError) {
           row.targets.github = { state: 'error', error: githubError };
-        } else if (githubSecretNames.has(secretName)) {
+        } else if (githubSecretNames.has(remoteKey)) {
           row.targets.github = { state: 'synced' };
         } else {
           row.targets.github = { state: 'missing' };
@@ -203,15 +241,16 @@ export class SecretsSyncEngine {
           continue;
         }
 
+        const remoteKey = targetKeyName(name, target);
         switch (target) {
           case 'supabase':
-            await this.adapters.supabase.setSecrets({ [name]: vaultValue });
+            await this.adapters.supabase.setSecrets({ [remoteKey]: vaultValue });
             break;
           case 'vercel':
-            await this.adapters.vercel.setEnvVar(name, vaultValue);
+            await this.adapters.vercel.setEnvVar(remoteKey, vaultValue);
             break;
           case 'github':
-            await this.adapters.github.setSecret(name, vaultValue);
+            await this.adapters.github.setSecret(remoteKey, vaultValue);
             break;
         }
 
