@@ -1,6 +1,6 @@
 # tkr-deploy — Required Credentials
 
-All secrets are stored in the `ccc-dev` vault via tkr-secrets (localhost:42042).
+All secrets are stored in the `compass` vault via tkr-secrets (localhost:42042).
 
 ---
 
@@ -89,7 +89,7 @@ GITHUB_OWNER=your-github-org GITHUB_REPO=compass-app bun run tkr-deploy/serve.ts
 | `GITHUB_REPO` | Repository name | `compass-app` |
 | `DEPLOY_PORT` | Server port (default: 42043) | `42043` |
 | `VAULT_URL` | tkr-secrets URL (default: http://localhost:42042) | — |
-| `VAULT_NAME` | Vault name (default: ccc-dev) | — |
+| `VAULT_NAME` | Vault name (default: compass) | — |
 
 ---
 

@@ -94,6 +94,7 @@ const groups: GroupDef[] = [
       { name: "VITE_SUPABASE_ANON_KEY", value: "" },
       { name: "SUPABASE_SERVICE_ROLE_KEY", value: "" },
       { name: "SUPABASE_ACCESS_TOKEN", value: "" },
+      { name: "SUPABASE_PROJECT_REF", value: "", source: "derived from SUPABASE_URL at runtime" },
       { name: "SUPABASE_URL", value: "" },
     ],
   },
@@ -116,8 +117,8 @@ const groups: GroupDef[] = [
   {
     name: "Resend",
     secrets: [
-      { name: "RESEND_API_KEY", value: "", source: "RESEND_CCC_SEND key (send-only)" },
-      { name: "RESEND_ADMIN_API_KEY", value: "", source: "CCC_ADMIN key (full access)" },
+      { name: "RESEND_CCC_SEND", value: "", source: "send-only API key" },
+      { name: "RESEND_CCC_ADMIN", value: "", source: "full access API key" },
       { name: "RESEND_FROM_ADDRESS", value: "noreply@mail.tuckers.link", source: "default" },
     ],
   },

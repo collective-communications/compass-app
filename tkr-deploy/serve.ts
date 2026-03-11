@@ -22,9 +22,8 @@ await $`bun run ${join(import.meta.dir, 'build-ui.ts')}`.quiet();
 
 const port = Number(process.env.DEPLOY_PORT ?? 42043);
 const vaultUrl = process.env.VAULT_URL ?? 'http://localhost:42042';
-const vaultName = process.env.VAULT_NAME ?? 'ccc-dev';
-const githubOwner = process.env.GITHUB_OWNER ?? '';
-const githubRepo = process.env.GITHUB_REPO ?? '';
+const vaultName = process.env.VAULT_NAME ?? 'compass';
+// These are overridden by vault values after vault loads (see below)
 
 // ---------------------------------------------------------------------------
 // 2. Create VaultClient and probe connectivity
@@ -63,12 +62,16 @@ function secret(name: string): string {
 }
 
 const supabaseAccessToken = secret('SUPABASE_ACCESS_TOKEN');
-const supabaseProjectRef = secret('SUPABASE_PROJECT_REF');
+const supabaseProjectRef = secret('SUPABASE_PROJECT_REF')
+  || secret('SUPABASE_URL').match(/https:\/\/([^.]+)\.supabase\.co/)?.[1]
+  || '';
 const vercelToken = secret('VERCEL_TOKEN');
 const vercelProjectId = secret('VERCEL_PROJECT_ID');
 const vercelOrgId = secret('VERCEL_ORG_ID') || undefined;
-const resendApiKey = secret('RESEND_API_KEY');
+const resendApiKey = secret('RESEND_CCC_ADMIN');
 const githubToken = secret('GITHUB_TOKEN');
+const githubOwner = secret('GITHUB_OWNER');
+const githubRepo = secret('GITHUB_REPO');
 
 // ---------------------------------------------------------------------------
 // 4. Create adapters
@@ -77,6 +80,9 @@ const githubToken = secret('GITHUB_TOKEN');
 const supabase = new SupabaseAdapter({
   projectRef: supabaseProjectRef,
   accessToken: supabaseAccessToken,
+  serviceRoleKey: secret('SUPABASE_SERVICE_ROLE_KEY'),
+  supabaseUrl: secret('SUPABASE_URL'),
+  projectRoot: join(import.meta.dir, '..'),
 });
 
 const vercel = new VercelAdapter({
