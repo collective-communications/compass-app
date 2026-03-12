@@ -118,8 +118,8 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
 
   if (!isInitialized) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-[var(--grey-500)]">Loading...</p>
+      <div className="flex min-h-screen items-center justify-center bg-[var(--grey-50)]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--grey-500)]" />
       </div>
     );
   }
