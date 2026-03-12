@@ -112,7 +112,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   if (error || !allQuestions) {
     return (
       <div className="mx-auto flex max-w-[600px] items-center justify-center py-24">
-        <div className="text-sm text-[var(--severity-critical-border)]">
+        <div className="text-sm text-[var(--severity-critical-text)]">
           Failed to load survey questions. Please refresh and try again.
         </div>
       </div>
@@ -161,7 +161,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
 
       {/* Autosave error indicator */}
       {lastError && (
-        <div className="rounded-md border border-[var(--severity-critical-border)]/20 bg-[var(--severity-critical-border)]/5 px-3 py-2 text-xs text-[var(--severity-critical-border)]">
+        <div className="rounded-md border border-[var(--severity-critical-border)]/20 bg-[var(--severity-critical-border)]/5 px-3 py-2 text-xs text-[var(--severity-critical-text)]">
           {lastError}
         </div>
       )}

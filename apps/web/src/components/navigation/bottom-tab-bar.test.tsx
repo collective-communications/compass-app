@@ -44,7 +44,7 @@ describe('BottomTabBar', () => {
   test('active tab has core color styling', () => {
     render(<BottomTabBar tabs={TABS} activeTabId="results" />);
     const link = screen.getByText('Results').closest('a');
-    expect(link?.className).toContain('text-[var(--color-core)]');
+    expect(link?.className).toContain('text-[var(--color-core-text)]');
   });
 
   test('inactive tabs have grey styling', () => {

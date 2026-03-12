@@ -51,7 +51,7 @@ export function SegmentFilterBar({
           id="segment-type-select"
           value={segmentType}
           onChange={(e) => onTypeChange(e.target.value as SegmentType)}
-          className="rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-1.5 text-sm text-[var(--grey-700)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]"
+          className="rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-1.5 text-sm text-[var(--grey-700)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]"
         >
           {SEGMENT_TYPE_OPTIONS.map((type) => (
             <option key={type} value={type}>

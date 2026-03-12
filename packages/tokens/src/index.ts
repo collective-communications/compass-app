@@ -66,10 +66,10 @@ export const shadow = {
 
 /** Severity level color tokens — border, light background, dark background. */
 export const severity = {
-  critical: { border: '#B71C1C', bg: '#FFEBEE', bgDark: '#3E1111' },
-  high: { border: '#E65100', bg: '#FFF3E0', bgDark: '#3E2200' },
-  medium: { border: '#F9A825', bg: '#FFFDE7', bgDark: '#3E3500' },
-  healthy: { border: '#2E7D32', bg: '#E8F5E9', bgDark: '#1B3E1C' },
+  critical: { border: '#B71C1C', bg: '#FFEBEE', bgDark: '#3E1111', textDark: '#FF6B6B' },
+  high: { border: '#E65100', bg: '#FFF3E0', bgDark: '#3E2200', textDark: '#FF8A65' },
+  medium: { border: '#F9A825', bg: '#FFFDE7', bgDark: '#3E3500', textDark: '#F9A825' },
+  healthy: { border: '#2E7D32', bg: '#E8F5E9', bgDark: '#1B3E1C', textDark: '#66BB6A' },
 } as const;
 
 /** Severity level type derived from token keys. */
@@ -104,8 +104,10 @@ export function injectTokens(): void {
   for (const [key, val] of Object.entries(severity)) {
     root.style.setProperty(`--severity-${key}-border`, val.border);
     root.style.setProperty(`--severity-${key}-bg`, val.bg);
+    root.style.setProperty(`--severity-${key}-text`, val.border);
   }
 
+  root.style.setProperty('--color-core-text', colors.core);
   root.style.setProperty('--track-color', greyscale[100]);
   root.style.setProperty('--surface-card', '#FFFFFF');
 

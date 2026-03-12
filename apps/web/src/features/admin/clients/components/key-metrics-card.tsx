@@ -23,7 +23,7 @@ function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' | null }): 
   }
   return (
     <span
-      className={trend === 'up' ? 'text-[var(--severity-healthy-border)]' : 'text-[var(--severity-high-border)]'}
+      className={trend === 'up' ? 'text-[var(--severity-healthy-text)]' : 'text-[var(--severity-high-text)]'}
       aria-label={`Score trending ${trend}`}
     >
       {trend === 'up' ? '\u2191' : '\u2193'}
@@ -62,7 +62,7 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
         <div>
           {organization.activeSurveyId ? (
             <>
-              <p className="text-2xl font-bold text-[var(--severity-healthy-border)]">Active</p>
+              <p className="text-2xl font-bold text-[var(--severity-healthy-text)]">Active</p>
               <p className="mt-1 truncate text-sm text-[var(--grey-500)]">
                 {organization.activeSurveyTitle ?? 'Active Survey'}
               </p>

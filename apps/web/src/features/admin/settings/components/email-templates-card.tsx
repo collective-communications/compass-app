@@ -174,7 +174,7 @@ export function EmailTemplatesCard(): ReactElement {
                       }}
                       aria-expanded={isExpanded}
                       aria-controls={`template-${template.id}`}
-                      className="text-xs font-medium text-[var(--color-core)] hover:underline"
+                      className="text-xs font-medium text-[var(--color-core-text)] hover:underline"
                     >
                       {isExpanded ? 'Collapse' : 'Preview / Edit'}
                     </button>
@@ -197,7 +197,7 @@ export function EmailTemplatesCard(): ReactElement {
                           type="text"
                           value={edits.subject}
                           onChange={(e) => handleEdit(template.id, 'subject', e.target.value)}
-                          className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+                          className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
                         />
                       </div>
                       <div>
@@ -212,7 +212,7 @@ export function EmailTemplatesCard(): ReactElement {
                           value={edits.htmlBody}
                           onChange={(e) => handleEdit(template.id, 'htmlBody', e.target.value)}
                           rows={5}
-                          className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+                          className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
                         />
                       </div>
                       <p className="text-xs text-[var(--grey-400)]">

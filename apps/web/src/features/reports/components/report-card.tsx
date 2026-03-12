@@ -68,7 +68,7 @@ export function ReportCard({
       className={[
         'w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-4 text-left transition-colors',
         leftBorderColor,
-        isSelected ? 'ring-2 ring-[var(--color-core)]' : 'hover:bg-[var(--grey-50)]',
+        isSelected ? 'ring-2 ring-[var(--color-core-text)]' : 'hover:bg-[var(--grey-50)]',
       ].join(' ')}
     >
       {/* Top row: format badge + date + download */}
@@ -84,7 +84,7 @@ export function ReportCard({
             download
             onClick={(e) => e.stopPropagation()}
             aria-label={`Download ${report.format.toUpperCase()} report`}
-            className="rounded-md p-1.5 text-[var(--grey-400)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--color-core)]"
+            className="rounded-md p-1.5 text-[var(--grey-400)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--color-core-text)]"
           >
             <Download size={16} aria-hidden="true" />
           </a>
@@ -97,7 +97,7 @@ export function ReportCard({
           <>
             <span>{formatFileSize(report.fileSize)}</span>
             {report.pageCount !== null && <span>{report.pageCount} pages</span>}
-            <span className="flex items-center gap-1 text-[var(--severity-healthy-border)]">
+            <span className="flex items-center gap-1 text-[var(--severity-healthy-text)]">
               <Download size={12} aria-hidden="true" />
               Ready
             </span>
@@ -112,7 +112,7 @@ export function ReportCard({
         )}
 
         {isFailed && (
-          <span className="flex items-center gap-1 text-[var(--severity-critical-border)]">
+          <span className="flex items-center gap-1 text-[var(--severity-critical-text)]">
             <AlertCircle size={12} aria-hidden="true" />
             {report.error ?? 'Generation failed'}
           </span>

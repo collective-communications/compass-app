@@ -145,7 +145,7 @@ export function KeyFindingsPanel({
         <button
           type="button"
           onClick={onViewRecommendations}
-          className="text-sm font-medium text-[var(--color-core)] underline-offset-2 hover:underline"
+          className="text-sm font-medium text-[var(--color-core-text)] underline-offset-2 hover:underline"
         >
           View all recommendations
         </button>

@@ -78,7 +78,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
         </span>
         <span
           className={`text-xs font-medium ${
-            isReady ? 'text-[var(--severity-healthy-border)]' : report.status === 'failed' ? 'text-[var(--severity-critical-border)]' : 'text-[var(--grey-500)]'
+            isReady ? 'text-[var(--severity-healthy-text)]' : report.status === 'failed' ? 'text-[var(--severity-critical-text)]' : 'text-[var(--grey-500)]'
           }`}
         >
           {report.status === 'completed' ? 'Ready' : report.status === 'failed' ? 'Failed' : 'In progress'}
@@ -123,14 +123,14 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
 
       {/* Error detail */}
       {report.status === 'failed' && report.error !== null && (
-        <p className="rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-xs text-[var(--severity-critical-border)]">
+        <p className="rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-xs text-[var(--severity-critical-text)]">
           {report.error}
         </p>
       )}
 
       {/* Download error */}
       {downloadError !== null && (
-        <p className="rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-xs text-[var(--severity-critical-border)]">
+        <p className="rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-xs text-[var(--severity-critical-text)]">
           {downloadError}
         </p>
       )}
@@ -141,7 +141,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
           type="button"
           onClick={() => void handleDownload()}
           disabled={isDownloading}
-          className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core)] focus:ring-offset-2 disabled:opacity-50"
+          className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)] focus:ring-offset-2 disabled:opacity-50"
         >
           {isDownloading ? (
             <Loader2 size={16} className="animate-spin" aria-hidden="true" />

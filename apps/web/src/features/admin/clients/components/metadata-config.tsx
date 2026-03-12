@@ -236,7 +236,7 @@ export function MetadataConfig({
             onKeyDown={handleKeyDown}
             placeholder={CATEGORY_PLACEHOLDER[category]}
             aria-label={`Add new ${label.toLowerCase().replace(/s$/, '')}`}
-            className="flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+            className="flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
           />
           <button
             type="button"

@@ -20,9 +20,9 @@ interface DimensionNavItemProps {
 }
 
 const RISK_DOT_COLOR: Record<string, string> = {
-  critical: 'bg-[var(--severity-critical-border)]',
-  high: 'bg-[var(--severity-high-border)]',
-  medium: 'bg-[var(--severity-medium-border)]',
+  critical: 'bg-[var(--severity-critical-text)]',
+  high: 'bg-[var(--severity-high-text)]',
+  medium: 'bg-[var(--severity-medium-text)]',
 };
 
 export function DimensionNavItem({

@@ -13,9 +13,9 @@ interface CoreHealthIndicatorProps {
 }
 
 const STATUS_CONFIG: Record<CoreHealthStatus, { label: string; bg: string; text: string; dot: string }> = {
-  healthy: { label: 'Healthy', bg: 'bg-[var(--severity-healthy-bg)]', text: 'text-[var(--severity-healthy-border)]', dot: 'bg-[var(--severity-healthy-border)]' },
-  fragile: { label: 'Fragile', bg: 'bg-[var(--severity-medium-bg)]', text: 'text-[var(--severity-medium-border)]', dot: 'bg-[var(--severity-medium-border)]' },
-  broken: { label: 'Broken', bg: 'bg-[var(--severity-critical-bg)]', text: 'text-[var(--severity-critical-border)]', dot: 'bg-[var(--severity-critical-border)]' },
+  healthy: { label: 'Healthy', bg: 'bg-[var(--severity-healthy-bg)]', text: 'text-[var(--severity-healthy-text)]', dot: 'bg-[var(--severity-healthy-text)]' },
+  fragile: { label: 'Fragile', bg: 'bg-[var(--severity-medium-bg)]', text: 'text-[var(--severity-medium-text)]', dot: 'bg-[var(--severity-medium-text)]' },
+  broken: { label: 'Broken', bg: 'bg-[var(--severity-critical-bg)]', text: 'text-[var(--severity-critical-text)]', dot: 'bg-[var(--severity-critical-text)]' },
 };
 
 export function CoreHealthIndicator({ coreScore }: CoreHealthIndicatorProps): ReactElement {

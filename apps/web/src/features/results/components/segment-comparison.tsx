@@ -49,7 +49,7 @@ export function SegmentComparison({ segments, anonymityMessage = 'Not enough res
               <span className="text-sm tabular-nums text-[var(--grey-700)]">{seg.score.toFixed(1)}</span>
               <span
                 data-testid="delta-indicator"
-                className={`text-xs font-semibold tabular-nums ${delta >= 0 ? 'text-[var(--severity-healthy-border)]' : 'text-[var(--severity-critical-border)]'}`}
+                className={`text-xs font-semibold tabular-nums ${delta >= 0 ? 'text-[var(--severity-healthy-text)]' : 'text-[var(--severity-critical-text)]'}`}
               >
                 {deltaSign}{deltaPercent}%
               </span>

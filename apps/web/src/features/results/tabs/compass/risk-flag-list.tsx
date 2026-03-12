@@ -34,7 +34,7 @@ export function RiskFlagList({ flags }: RiskFlagListProps): ReactElement {
         className="rounded-lg border border-[var(--grey-100)] border-l-4 border-l-[var(--severity-healthy-border)] bg-[var(--grey-50)] p-6"
         role="status"
       >
-        <p className="text-sm font-medium text-[var(--severity-healthy-border)]">
+        <p className="text-sm font-medium text-[var(--severity-healthy-text)]">
           All dimensions within healthy range.
         </p>
       </div>

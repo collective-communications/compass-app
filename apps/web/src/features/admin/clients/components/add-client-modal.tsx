@@ -146,7 +146,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.name
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
-                    : 'border-[var(--grey-100)] focus:border-[var(--color-core)] focus:ring-[var(--color-core)]'
+                    : 'border-[var(--grey-100)] focus:border-[var(--color-core-text)] focus:ring-[var(--color-core-text)]'
                 }`}
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? 'org-name-error' : undefined}
@@ -169,7 +169,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 type="text"
                 value={form.industry}
                 onChange={(e) => updateField('industry', e.target.value)}
-                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
               />
             </div>
 
@@ -187,7 +187,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.employeeCount
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
-                    : 'border-[var(--grey-100)] focus:border-[var(--color-core)] focus:ring-[var(--color-core)]'
+                    : 'border-[var(--grey-100)] focus:border-[var(--color-core-text)] focus:ring-[var(--color-core-text)]'
                 }`}
                 aria-invalid={!!errors.employeeCount}
                 aria-describedby={errors.employeeCount ? 'org-employee-error' : undefined}
@@ -209,7 +209,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 type="text"
                 value={form.primaryContactName}
                 onChange={(e) => updateField('primaryContactName', e.target.value)}
-                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
               />
             </div>
 
@@ -226,7 +226,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.primaryContactEmail
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
-                    : 'border-[var(--grey-100)] focus:border-[var(--color-core)] focus:ring-[var(--color-core)]'
+                    : 'border-[var(--grey-100)] focus:border-[var(--color-core-text)] focus:ring-[var(--color-core-text)]'
                 }`}
                 aria-invalid={!!errors.primaryContactEmail}
                 aria-describedby={errors.primaryContactEmail ? 'org-email-error' : undefined}

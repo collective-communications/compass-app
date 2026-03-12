@@ -35,7 +35,7 @@ function TrendArrow({ trend }: { trend: 'up' | 'down' | 'stable' | null }): Reac
   if (!trend || trend === 'stable') return null;
   return (
     <span
-      className={trend === 'up' ? 'text-[var(--severity-healthy-border)]' : 'text-[var(--severity-high-border)]'}
+      className={trend === 'up' ? 'text-[var(--severity-healthy-text)]' : 'text-[var(--severity-high-text)]'}
       aria-label={`Score trending ${trend}`}
     >
       {trend === 'up' ? '\u2191' : '\u2193'}

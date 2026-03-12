@@ -18,7 +18,7 @@ export function CompassLogo({ size = 'md', className }: CompassLogoProps): React
       aria-label="COLLECTIVE culture + communication logo"
       className={className}
     >
-      <circle cx="16" cy="16" r="15" fill="none" stroke="var(--color-core)" strokeWidth="2" />
+      <circle cx="16" cy="16" r="15" fill="none" stroke="var(--color-core-text)" strokeWidth="2" />
       <polygon points="16,4 20,16 16,28 12,16" fill="var(--color-core)" opacity="0.8" />
       <polygon points="4,16 16,12 28,16 16,20" fill="var(--color-clarity)" opacity="0.6" />
       <circle cx="16" cy="16" r="3" fill="var(--color-core)" />

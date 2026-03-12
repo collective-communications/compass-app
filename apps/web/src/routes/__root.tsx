@@ -73,7 +73,7 @@ const surveyLayoutRoute = createRoute({
       return (
         <SurveyShell orgName="">
           <div className="flex items-center justify-center py-24">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core)]" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core-text)]" />
           </div>
         </SurveyShell>
       );
@@ -84,7 +84,7 @@ const surveyLayoutRoute = createRoute({
       return (
         <SurveyShell orgName="">
           <div className="flex items-center justify-center py-24">
-            <p className="text-sm text-[var(--severity-critical-border)]">
+            <p className="text-sm text-[var(--severity-critical-text)]">
               Unable to load the survey. Please check your connection and try again.
             </p>
           </div>
@@ -163,7 +163,7 @@ function SurveyLayoutInner(): React.ReactElement {
   if (resumeSession.isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core)]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core-text)]" />
       </div>
     );
   }
@@ -395,7 +395,7 @@ const loginRoute = createRoute({
               <p className="mt-4 text-center">
                 <Link
                   to="/auth/forgot-password"
-                  className="text-sm text-[var(--color-core)] hover:underline"
+                  className="text-sm text-[var(--color-core-text)] hover:underline"
                 >
                   Forgot password?
                 </Link>
@@ -488,7 +488,7 @@ const forgotPasswordRoute = createRoute({
               <div className="mb-6">
                 <Link
                   to="/auth/login"
-                  className="inline-flex items-center gap-1 text-sm text-[var(--color-core)] hover:underline"
+                  className="inline-flex items-center gap-1 text-sm text-[var(--color-core-text)] hover:underline"
                 >
                   <ArrowLeft size={16} />
                   Back to sign in
@@ -496,7 +496,7 @@ const forgotPasswordRoute = createRoute({
               </div>
 
               <div className="mb-2 flex justify-center">
-                <Lock size={32} className="text-[var(--color-core)]" />
+                <Lock size={32} className="text-[var(--color-core-text)]" />
               </div>
 
               <h1
@@ -526,7 +526,7 @@ const forgotPasswordRoute = createRoute({
                 Remember your password?{' '}
                 <Link
                   to="/auth/login"
-                  className="text-[var(--color-core)] hover:underline"
+                  className="text-[var(--color-core-text)] hover:underline"
                 >
                   Sign in
                 </Link>
@@ -593,7 +593,7 @@ const forgotPasswordSentRoute = createRoute({
 
               <Link
                 to="/auth/login"
-                className="inline-block text-sm text-[var(--color-core)] hover:underline"
+                className="inline-block text-sm text-[var(--color-core-text)] hover:underline"
               >
                 Return to sign in
               </Link>

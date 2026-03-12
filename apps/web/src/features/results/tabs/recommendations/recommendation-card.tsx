@@ -69,7 +69,7 @@ export function RecommendationCard({
               href={cccServiceLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--color-core)] hover:underline"
+              className="text-[var(--color-core-text)] hover:underline"
             >
               CC+C Service
             </a>
@@ -79,7 +79,7 @@ export function RecommendationCard({
               href={trustLadderLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[var(--color-core)] hover:underline"
+              className="text-[var(--color-core-text)] hover:underline"
             >
               Trust Ladder
             </a>

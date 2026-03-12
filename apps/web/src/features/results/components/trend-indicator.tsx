@@ -35,7 +35,7 @@ export function TrendIndicator({
 
   const isPositive = delta > 0;
   const arrow = isPositive ? '↑' : '↓';
-  const color = isPositive ? 'text-[var(--severity-healthy-border)]' : 'text-[var(--severity-critical-border)]';
+  const color = isPositive ? 'text-[var(--severity-healthy-text)]' : 'text-[var(--severity-critical-text)]';
   const sign = isPositive ? '+' : '';
   const direction = isPositive ? 'increased' : 'decreased';
   const label = `Score ${direction} by ${Math.abs(delta)} percent`;

@@ -111,12 +111,12 @@ export function ProgressSquares({
             className={`h-3 w-3 rounded-[2px]
               ${
                 isCurrent
-                  ? 'bg-[var(--color-core)] ring-2 ring-[var(--color-core)]/30'
+                  ? 'bg-[var(--color-core)] ring-2 ring-[var(--color-core-text)]/30'
                   : isAnswered
                     ? 'bg-[var(--color-core)]'
                     : 'bg-[var(--grey-100)]'
               }
-              cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-core)]`}
+              cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-core-text)]`}
           />
         );
       })}

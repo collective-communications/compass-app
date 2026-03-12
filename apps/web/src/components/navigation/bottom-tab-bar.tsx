@@ -49,7 +49,7 @@ export function BottomTabBar({ tabs, activeTabId }: BottomTabBarProps): ReactEle
               <Link
                 to={tab.href}
                 className={`flex flex-col items-center gap-0.5 px-3 py-1 ${
-                  isActive ? 'text-[var(--color-core)]' : 'text-[var(--grey-500)]'
+                  isActive ? 'text-[var(--color-core-text)]' : 'text-[var(--grey-500)]'
                 }`}
               >
                 {Icon && <Icon size={20} />}

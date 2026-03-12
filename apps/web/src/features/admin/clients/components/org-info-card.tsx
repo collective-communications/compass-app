@@ -62,7 +62,7 @@ export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactEl
                 {organization.primaryContactEmail && (
                   <a
                     href={`mailto:${organization.primaryContactEmail}`}
-                    className="text-[var(--color-core)] hover:underline"
+                    className="text-[var(--color-core-text)] hover:underline"
                   >
                     {organization.primaryContactEmail}
                   </a>
@@ -75,7 +75,7 @@ export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactEl
         <button
           type="button"
           onClick={onEdit}
-          className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-[var(--color-core)] transition-colors hover:bg-[var(--grey-100)]"
+          className="shrink-0 rounded-lg px-3 py-1.5 text-sm font-medium text-[var(--color-core-text)] transition-colors hover:bg-[var(--grey-100)]"
         >
           Edit
         </button>

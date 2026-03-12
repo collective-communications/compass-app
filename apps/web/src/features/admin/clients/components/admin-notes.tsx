@@ -82,7 +82,7 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
             setAddError(null);
           }}
           placeholder="Add a note..."
-          className="min-w-0 flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core)]"
+          className="min-w-0 flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
           disabled={addNote.isPending}
         />
         <button
