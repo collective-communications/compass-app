@@ -2,5 +2,8 @@
   "buildCommand": "bun run build",
   "outputDirectory": "apps/web/dist",
   "installCommand": "bun install --frozen-lockfile",
-  "framework": "vite"
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/((?!assets/).*)", "destination": "/index.html" }
+  ]
 }
