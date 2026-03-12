@@ -7,6 +7,7 @@ export interface DeploymentEntry {
   status: string;
   duration: number | null;
   createdAt: string;
+  url?: string;
   errorMessage?: string;
   inspectorUrl?: string;
 }

@@ -97,6 +97,7 @@ export class VercelAdapter implements ProviderAdapter {
     const data = await this.request<{
       deployments: Array<{
         uid: string;
+        url?: string;
         meta?: { githubCommitSha?: string; githubCommitMessage?: string; githubCommitRef?: string };
         target: 'production' | 'preview' | null;
         state?: string;
@@ -117,6 +118,7 @@ export class VercelAdapter implements ProviderAdapter {
       status: d.state ?? 'UNKNOWN',
       duration: d.ready && d.buildingAt ? d.ready - d.buildingAt : null,
       createdAt: new Date(d.created).toISOString(),
+      url: d.url ? `https://${d.url}` : undefined,
       errorMessage: d.errorMessage,
       inspectorUrl: d.inspectorUrl,
     }));

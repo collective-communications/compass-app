@@ -8,10 +8,12 @@ interface ProjectData {
   name: string;
   framework: string;
   productionUrl: string;
+  dashboardUrl: string;
 }
 
 interface DeploymentData {
   id: string;
+  url?: string;
   status: 'Ready' | 'Building' | 'Error' | 'Queued';
   commitHash: string;
   commitMessage: string;
@@ -178,10 +180,20 @@ function buildProjectStatusCard(project: ProjectData, isBuilding: boolean): HTML
   urlLink.style.textDecoration = 'none';
   urlLink.style.fontSize = 'var(--font-size-sm)';
 
+  const dashboardLink = document.createElement('a');
+  dashboardLink.href = project.dashboardUrl;
+  dashboardLink.textContent = 'Vercel Dashboard';
+  dashboardLink.target = '_blank';
+  dashboardLink.rel = 'noopener noreferrer';
+  dashboardLink.style.color = 'var(--color-active)';
+  dashboardLink.style.textDecoration = 'none';
+  dashboardLink.style.fontSize = 'var(--font-size-sm)';
+
   const dl = createDl([
     { label: 'Name', value: project.name },
     { label: 'Framework', value: frameworkBadge },
     { label: 'Production URL', value: urlLink },
+    { label: 'Dashboard', value: dashboardLink },
   ]);
   card.appendChild(dl);
   return card;
@@ -220,6 +232,18 @@ function buildCurrentDeploymentCard(deployment: DeploymentData): HTMLElement {
     { label: 'Duration', value: deployment.duration },
     { label: 'Deployed', value: deployment.deployedAt },
   ];
+
+  if (deployment.url) {
+    const depLink = document.createElement('a');
+    depLink.href = deployment.url;
+    depLink.textContent = deployment.url.replace('https://', '');
+    depLink.target = '_blank';
+    depLink.rel = 'noopener noreferrer';
+    depLink.style.color = 'var(--color-active)';
+    depLink.style.textDecoration = 'none';
+    depLink.style.fontSize = 'var(--font-size-sm)';
+    entries.push({ label: 'URL', value: depLink });
+  }
 
   if (deployment.status === 'Error' && deployment.errorMessage) {
     const errEl = document.createElement('span');
@@ -375,7 +399,7 @@ function buildDeployHistoryCard(
 
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
-  for (const colName of ['Status', 'Commit', 'Branch', 'Duration', 'Deployed', '']) {
+  for (const colName of ['Status', 'Commit', 'URL', 'Branch', 'Duration', 'Deployed', '']) {
     const th = document.createElement('th');
     th.textContent = colName;
     th.style.textAlign = 'left';
@@ -411,6 +435,27 @@ function buildDeployHistoryCard(
     commitCode.style.fontSize = 'var(--font-size-sm)';
     tdCommit.appendChild(commitCode);
     tr.appendChild(tdCommit);
+
+    // URL
+    const tdUrl = document.createElement('td');
+    tdUrl.style.padding = 'var(--space-sm)';
+    tdUrl.style.borderBottom = '1px solid var(--color-border)';
+    if (dep.url) {
+      const depLink = document.createElement('a');
+      depLink.href = dep.url;
+      depLink.textContent = dep.url.replace('https://', '').split('.')[0].slice(0, 20);
+      depLink.target = '_blank';
+      depLink.rel = 'noopener noreferrer';
+      depLink.style.color = 'var(--color-active)';
+      depLink.style.textDecoration = 'none';
+      depLink.style.fontSize = 'var(--font-size-sm)';
+      depLink.setAttribute('aria-label', `Deployment URL (opens in new tab)`);
+      tdUrl.appendChild(depLink);
+    } else {
+      tdUrl.textContent = '—';
+      tdUrl.style.color = 'var(--color-text-muted)';
+    }
+    tr.appendChild(tdUrl);
 
     // Branch
     const tdBranch = document.createElement('td');

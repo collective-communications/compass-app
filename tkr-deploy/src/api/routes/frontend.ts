@@ -12,10 +12,27 @@ export function registerFrontendRoutes(
 ): void {
   router.get('/api/frontend/project', async () => {
     const project = await vercel.getProject();
+
+    // Derive dashboard URL from a deployment's inspectorUrl (format: https://vercel.com/{team}/{project}/...)
+    let dashboardUrl = '';
+    try {
+      const deployments = await vercel.getDeployments(1);
+      const inspector = deployments[0]?.inspectorUrl;
+      if (inspector) {
+        const parts = new URL(inspector).pathname.split('/').filter(Boolean);
+        if (parts.length >= 2) {
+          dashboardUrl = `https://vercel.com/${parts[0]}/${parts[1]}`;
+        }
+      }
+    } catch {
+      // best-effort
+    }
+
     return jsonSuccess({
       name: project.name,
       framework: project.framework ?? 'unknown',
       productionUrl: project.alias[0] ? `https://${project.alias[0]}` : '',
+      dashboardUrl,
     });
   });
 
@@ -27,6 +44,7 @@ export function registerFrontendRoutes(
     };
     const toUiShape = (d: typeof deployments[number]) => ({
       id: d.uid,
+      url: d.url,
       status: statusMap[d.status] ?? d.status,
       commitHash: d.commitSha?.slice(0, 7) ?? '',
       commitMessage: d.commitMessage ?? '',
