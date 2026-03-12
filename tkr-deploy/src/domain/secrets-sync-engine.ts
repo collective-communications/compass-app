@@ -64,6 +64,8 @@ const SECRET_TARGET_MAP: Record<string, TargetApplicability> = {
   SUPABASE_URL:              { supabase: false, vercel: true,  github: true },
   SUPABASE_SERVICE_ROLE_KEY: { supabase: false, vercel: true,  github: true },
   SUPABASE_ACCESS_TOKEN:     { supabase: false, vercel: false, github: true },
+  SUPABASE_PROJECT_REF:      { supabase: false, vercel: false, github: true },
+  SUPABASE_DB_PASSWORD:      { supabase: false, vercel: false, github: true },
   // Vercel
   VERCEL_TOKEN:              { supabase: false, vercel: false, github: true },
   VERCEL_ORG_ID:             { supabase: false, vercel: false, github: true },
