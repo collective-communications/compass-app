@@ -7,7 +7,7 @@
     "composite": false
   },
   "include": ["src"],
-  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx"],
+  "exclude": ["src/**/*.test.ts", "src/**/*.test.tsx", "src/**/*.stories.tsx", "src/**/*.stories.ts"],
   "references": [
     { "path": "../../packages/types" },
     { "path": "../../packages/utils" },

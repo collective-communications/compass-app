@@ -1,0 +1,9 @@
+@import '../../../apps/web/src/index.css';
+
+/*
+ * Tell Tailwind v4 where to scan for utility classes when building
+ * from the Storybook context. Without this, auto-detection only
+ * scans from the CSS file's own directory.
+ */
+@source "../../../apps/web/src";
+@source "../../../packages/*/src";

@@ -21,7 +21,10 @@
     "typecheck": "tsc -b",
     "test": "bun test apps packages",
     "test:e2e": "bun run --filter @compass/e2e test",
-    "build-storybook": "echo 'storybook not yet configured'",
+    "test:visual": "bun run --filter @compass/storybook test:visual",
+    "test:storybook": "bun run --filter @compass/storybook test-storybook",
+    "storybook": "bun run --filter @compass/storybook storybook",
+    "build-storybook": "bun run --filter @compass/storybook build-storybook",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
   },
   "devDependencies": {

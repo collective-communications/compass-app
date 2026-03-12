@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "paths": {
+      "@compass/compass": ["../../packages/compass/src/index.ts"],
+      "@compass/scoring": ["../../packages/scoring/src/index.ts"],
+      "@compass/tokens": ["../../packages/tokens/src/index.ts"],
+      "@compass/types": ["../../packages/types/src/index.ts"],
+      "@compass/ui": ["../../packages/ui/src/index.ts"],
+      "@compass/utils": ["../../packages/utils/src/index.ts"]
+    }
+  },
+  "include": [
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    "test-utils/**/*.ts"
+  ]
+}
