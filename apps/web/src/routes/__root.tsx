@@ -73,7 +73,7 @@ const surveyLayoutRoute = createRoute({
       return (
         <SurveyShell orgName="">
           <div className="flex items-center justify-center py-24">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[#0A3B4F]" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core)]" />
           </div>
         </SurveyShell>
       );
@@ -84,7 +84,7 @@ const surveyLayoutRoute = createRoute({
       return (
         <SurveyShell orgName="">
           <div className="flex items-center justify-center py-24">
-            <p className="text-sm text-[#D32F2F]">
+            <p className="text-sm text-[var(--severity-critical-border)]">
               Unable to load the survey. Please check your connection and try again.
             </p>
           </div>
@@ -163,7 +163,7 @@ function SurveyLayoutInner(): React.ReactElement {
   if (resumeSession.isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[#0A3B4F]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core)]" />
       </div>
     );
   }

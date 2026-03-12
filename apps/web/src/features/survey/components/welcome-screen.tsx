@@ -56,13 +56,13 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
         {/* Greeting and survey info */}
         <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Hello.</h1>
 
-        <p className="mb-4 text-[#616161]">
+        <p className="mb-4 text-[var(--grey-500)]">
           {survey.settings?.welcomeMessage ??
             `You've been invited to participate in a brief culture assessment for ${survey.title}. Your feedback will help shape the culture of your organization.`}
         </p>
 
         {/* Survey details */}
-        <div className="mb-6 flex flex-wrap gap-4 text-sm text-[#616161]">
+        <div className="mb-6 flex flex-wrap gap-4 text-sm text-[var(--grey-500)]">
           <span>{questionCount} questions</span>
           <span aria-hidden="true">&bull;</span>
           <span>About {timeEstimate} minutes</span>
@@ -82,7 +82,7 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
         {/* Metadata form */}
         {isConfigLoading || !metadataConfig ? (
           <div className="flex items-center justify-center py-8">
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[#0A3B4F]" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core)]" />
           </div>
         ) : (
           <MetadataForm

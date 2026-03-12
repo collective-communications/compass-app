@@ -11,6 +11,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
+import { severity } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface RecommendationsSectionProps {
@@ -18,10 +19,10 @@ interface RecommendationsSectionProps {
 }
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#B71C1C',
-  high: '#E65100',
-  medium: '#F9A825',
-  healthy: '#2E7D32',
+  critical: severity.critical.border,
+  high: severity.high.border,
+  medium: severity.medium.border,
+  healthy: severity.healthy.border,
 };
 
 const SEVERITY_LABELS: Record<string, string> = {

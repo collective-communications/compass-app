@@ -34,7 +34,7 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
       >
         <h3 className="text-lg font-bold text-[var(--grey-900)]">{match.archetype.name}</h3>
         <p className="mt-0.5 text-sm text-[var(--grey-500)]">{CONFIDENCE_LABEL[match.confidence]}</p>
-        <span className="mt-2 inline-block text-xs font-medium text-[#0A3B4F] underline">
+        <span className="mt-2 inline-block text-xs font-medium text-[var(--color-core)] underline">
           {expanded ? 'Show less' : 'Learn more'}
         </span>
       </button>
@@ -42,7 +42,7 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
       {expanded && (
         <p
           id="archetype-description"
-          className="mt-3 text-sm leading-relaxed text-[#616161]"
+          className="mt-3 text-sm leading-relaxed text-[var(--grey-500)]"
         >
           {match.archetype.description}
         </p>

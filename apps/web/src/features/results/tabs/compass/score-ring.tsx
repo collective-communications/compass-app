@@ -19,7 +19,7 @@ interface ScoreRingProps {
   className?: string;
 }
 
-const TRACK_COLOR = '#E5E4E0';
+const TRACK_COLOR = 'var(--track-color)';
 
 export function ScoreRing({
   score,
@@ -72,7 +72,7 @@ export function ScoreRing({
           y="50%"
           dominantBaseline="central"
           textAnchor="middle"
-          className="fill-[#424242] text-xs font-semibold"
+          className="fill-[var(--grey-700)] text-xs font-semibold"
         >
           {Math.round(clampedScore)}
         </text>

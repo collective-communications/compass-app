@@ -9,6 +9,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
+import { dimensions } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface SegmentAnalysisProps {
@@ -18,10 +19,10 @@ interface SegmentAnalysisProps {
 }
 
 const DIMENSION_META: Record<string, { label: string; color: string }> = {
-  core: { label: 'Core', color: '#0A3B4F' },
-  clarity: { label: 'Clarity', color: '#FF7F50' },
-  connection: { label: 'Connection', color: '#9FD7C3' },
-  collaboration: { label: 'Collaboration', color: '#E8B4A8' },
+  core: { label: dimensions.core.label, color: dimensions.core.color },
+  clarity: { label: dimensions.clarity.label, color: dimensions.clarity.color },
+  connection: { label: dimensions.connection.label, color: dimensions.connection.color },
+  collaboration: { label: dimensions.collaboration.label, color: dimensions.collaboration.color },
 };
 
 /** Horizontal bar for segment score comparison. */

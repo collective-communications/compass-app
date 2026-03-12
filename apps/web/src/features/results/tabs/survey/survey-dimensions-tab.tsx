@@ -6,6 +6,7 @@
 
 import { useState, useMemo, type ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
+import { dimensions as dimTokens } from '@compass/tokens';
 import type { DimensionScoreMap } from '@compass/scoring';
 import { useQuestionScores } from '../../hooks/use-question-scores';
 import { useOverallScores } from '../../hooks/use-overall-scores';
@@ -24,10 +25,10 @@ interface DimensionMeta {
 }
 
 const DIMENSIONS: DimensionMeta[] = [
-  { code: 'core', label: 'Core', color: '#0A3B4F' },
-  { code: 'clarity', label: 'Clarity', color: '#FF7F50' },
-  { code: 'connection', label: 'Connection', color: '#9FD7C3' },
-  { code: 'collaboration', label: 'Collaboration', color: '#E8B4A8' },
+  { code: 'core', label: dimTokens.core.label, color: dimTokens.core.color },
+  { code: 'clarity', label: dimTokens.clarity.label, color: dimTokens.clarity.color },
+  { code: 'connection', label: dimTokens.connection.label, color: dimTokens.connection.color },
+  { code: 'collaboration', label: dimTokens.collaboration.label, color: dimTokens.collaboration.color },
 ];
 
 export function SurveyDimensionsTab({
@@ -145,7 +146,7 @@ export function SurveyInsightsContent({
           );
         })}
       </ul>
-      <p className="text-xs leading-relaxed text-[#616161]">
+      <p className="text-xs leading-relaxed text-[var(--grey-500)]">
         Select a dimension above to explore individual question scores and response distributions.
       </p>
     </div>

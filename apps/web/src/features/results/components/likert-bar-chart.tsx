@@ -28,8 +28,8 @@ interface Segment {
   opacity: number;
 }
 
-const DISAGREE_DARK = '#9E9E9E';
-const DISAGREE_LIGHT = '#BDBDBD';
+const DISAGREE_DARK = 'var(--grey-400)';
+const DISAGREE_LIGHT = 'var(--grey-300)';
 
 /** Compute percentage from raw count relative to total. */
 function toPercentage(count: number, total: number): number {

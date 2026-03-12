@@ -28,11 +28,11 @@ export function RiskFlagCard({ title, description, severity, dimension }: RiskFl
       aria-label={`${severity} risk: ${title}`}
     >
       <div className="mb-1 flex items-center gap-2">
-        <span className="text-xs font-medium uppercase text-[#757575]">{dimension}</span>
+        <span className="text-xs font-medium uppercase text-[var(--grey-500)]">{dimension}</span>
         <span className="text-xs font-semibold uppercase">{SEVERITY_LABELS[severity]}</span>
       </div>
-      <h3 className="mb-2 text-base font-semibold text-[#212121]">{title}</h3>
-      <p className="text-sm text-[#616161]">{description}</p>
+      <h3 className="mb-2 text-base font-semibold text-[var(--grey-900)]">{title}</h3>
+      <p className="text-sm text-[var(--grey-500)]">{description}</p>
     </Card>
   );
 }

@@ -9,10 +9,10 @@ import type { ReactNode, HTMLAttributes } from 'react';
 type Severity = 'critical' | 'high' | 'medium' | 'healthy';
 
 const SEVERITY_STYLES: Record<Severity, string> = {
-  critical: 'border-l-4 border-l-[#D32F2F] bg-[#FFEBEE]',
-  high: 'border-l-4 border-l-[#F57C00] bg-[#FFF3E0]',
-  medium: 'border-l-4 border-l-[#FBC02D] bg-[#FFFDE7]',
-  healthy: 'border-l-4 border-l-[#388E3C] bg-[#E8F5E9]',
+  critical: 'border-l-4 border-l-[var(--severity-critical-border)] bg-[var(--severity-critical-bg)]',
+  high: 'border-l-4 border-l-[var(--severity-high-border)] bg-[var(--severity-high-bg)]',
+  medium: 'border-l-4 border-l-[var(--severity-medium-border)] bg-[var(--severity-medium-bg)]',
+  healthy: 'border-l-4 border-l-[var(--severity-healthy-border)] bg-[var(--severity-healthy-bg)]',
 };
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
@@ -22,7 +22,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function Card({ severity, children, className, ...rest }: CardProps): ReactNode {
-  const base = 'bg-white border border-[var(--grey-200,#E5E4E0)] rounded-lg p-6';
+  const base = 'bg-[var(--surface-card)] border border-[var(--grey-200,#E5E4E0)] rounded-lg p-6';
   const severityClass = severity ? SEVERITY_STYLES[severity] : '';
   const classes = [base, severityClass, className].filter(Boolean).join(' ');
 

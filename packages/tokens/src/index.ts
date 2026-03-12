@@ -64,6 +64,28 @@ export const shadow = {
   xl: '0 8px 30px rgba(10, 59, 79, 0.12)',
 } as const;
 
+/** Severity level color tokens — border, light background, dark background. */
+export const severity = {
+  critical: { border: '#B71C1C', bg: '#FFEBEE', bgDark: '#3E1111' },
+  high: { border: '#E65100', bg: '#FFF3E0', bgDark: '#3E2200' },
+  medium: { border: '#F9A825', bg: '#FFFDE7', bgDark: '#3E3500' },
+  healthy: { border: '#2E7D32', bg: '#E8F5E9', bgDark: '#1B3E1C' },
+} as const;
+
+/** Severity level type derived from token keys. */
+export type SeverityLevel = keyof typeof severity;
+
+/** Dimension metadata — label and brand color for each compass dimension. */
+export const dimensions = {
+  core: { label: 'Core', color: colors.core },
+  clarity: { label: 'Clarity', color: colors.clarity },
+  connection: { label: 'Connection', color: colors.connection },
+  collaboration: { label: 'Collaboration', color: colors.collaboration },
+} as const;
+
+/** Dimension key type derived from token keys. */
+export type DimensionKey = keyof typeof dimensions;
+
 /**
  * Injects CSS custom properties into :root.
  * Called once at app bootstrap.
@@ -78,6 +100,14 @@ export function injectTokens(): void {
   for (const [key, value] of Object.entries(greyscale)) {
     root.style.setProperty(`--grey-${key}`, value);
   }
+
+  for (const [key, val] of Object.entries(severity)) {
+    root.style.setProperty(`--severity-${key}-border`, val.border);
+    root.style.setProperty(`--severity-${key}-bg`, val.bg);
+  }
+
+  root.style.setProperty('--track-color', greyscale[100]);
+  root.style.setProperty('--surface-card', '#FFFFFF');
 
   root.style.setProperty('--font-headings', typography.headings);
   root.style.setProperty('--font-body', typography.body);

@@ -12,6 +12,16 @@
   --grey-500: #757575;
   --grey-700: #424242;
   --grey-900: #212121;
+  --severity-critical-border: #B71C1C;
+  --severity-critical-bg: #FFEBEE;
+  --severity-high-border: #E65100;
+  --severity-high-bg: #FFF3E0;
+  --severity-medium-border: #F9A825;
+  --severity-medium-bg: #FFFDE7;
+  --severity-healthy-border: #2E7D32;
+  --severity-healthy-bg: #E8F5E9;
+  --track-color: #E5E4E0;
+  --surface-card: #FFFFFF;
   --font-headings: 'DM Serif Display', serif;
   --font-body: 'DM Sans', sans-serif;
 }
@@ -29,6 +39,12 @@
   --grey-500: #9E9E9E;
   --grey-700: #BDBDBD;
   --grey-900: #F5F5F5;
+  --severity-critical-bg: #3E1111;
+  --severity-high-bg: #3E2200;
+  --severity-medium-bg: #3E3500;
+  --severity-healthy-bg: #1B3E1C;
+  --track-color: #424242;
+  --surface-card: #2E2E2E;
 }
 
 body {

@@ -8,6 +8,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
+import { dimensions, severity } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface DimensionDeepDiveProps {
@@ -15,17 +16,17 @@ interface DimensionDeepDiveProps {
 }
 
 const DIMENSION_META: Record<string, { label: string; color: string }> = {
-  core: { label: 'Core', color: '#0A3B4F' },
-  clarity: { label: 'Clarity', color: '#FF7F50' },
-  connection: { label: 'Connection', color: '#9FD7C3' },
-  collaboration: { label: 'Collaboration', color: '#E8B4A8' },
+  core: { label: dimensions.core.label, color: dimensions.core.color },
+  clarity: { label: dimensions.clarity.label, color: dimensions.clarity.color },
+  connection: { label: dimensions.connection.label, color: dimensions.connection.color },
+  collaboration: { label: dimensions.collaboration.label, color: dimensions.collaboration.color },
 };
 
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#B71C1C',
-  high: '#E65100',
-  medium: '#F9A825',
-  healthy: '#2E7D32',
+  critical: severity.critical.border,
+  high: severity.high.border,
+  medium: severity.medium.border,
+  healthy: severity.healthy.border,
 };
 
 const SEVERITY_LABELS: Record<string, string> = {

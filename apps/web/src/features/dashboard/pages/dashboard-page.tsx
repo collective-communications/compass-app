@@ -123,7 +123,7 @@ export function DashboardPage(): ReactElement {
                   <button
                     type="button"
                     onClick={() => handleSelectSurvey(activeSurvey.survey.id)}
-                    className="mt-4 w-full rounded-lg bg-[#0A3B4F] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                    className="mt-4 w-full rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
                   >
                     View Full Results
                   </button>

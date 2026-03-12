@@ -20,9 +20,9 @@ interface DimensionNavItemProps {
 }
 
 const RISK_DOT_COLOR: Record<string, string> = {
-  critical: 'bg-[#B71C1C]',
-  high: 'bg-[#E65100]',
-  medium: 'bg-[#F9A825]',
+  critical: 'bg-[var(--severity-critical-border)]',
+  high: 'bg-[var(--severity-high-border)]',
+  medium: 'bg-[var(--severity-medium-border)]',
 };
 
 export function DimensionNavItem({
@@ -42,8 +42,8 @@ export function DimensionNavItem({
       onClick={() => onClick(id)}
       className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
         isActive
-          ? 'border-l-[3px] border-l-[#424242] bg-[var(--grey-50)]'
-          : 'hover:bg-[#FAFAFA]'
+          ? 'border-l-[3px] border-l-[var(--grey-700)] bg-[var(--grey-50)]'
+          : 'hover:bg-[var(--grey-50)]'
       }`}
       aria-current={isActive ? 'true' : undefined}
     >
@@ -57,7 +57,7 @@ export function DimensionNavItem({
           />
         )}
       </div>
-      <span className="text-sm font-semibold text-[#616161]">{Math.round(score)}</span>
+      <span className="text-sm font-semibold text-[var(--grey-500)]">{Math.round(score)}</span>
     </button>
   );
 }

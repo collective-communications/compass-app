@@ -11,6 +11,7 @@
 import { useState, useCallback, type ReactElement } from 'react';
 import { Compass } from '@compass/compass';
 import type { DimensionCode } from '@compass/types';
+import { dimensions } from '@compass/tokens';
 import type { DimensionScoreMap, RiskFlag, ArchetypeMatch } from '@compass/scoring';
 import { DimensionNav } from './dimension-nav';
 import { ArchetypeCard } from './archetype-card';
@@ -30,10 +31,10 @@ interface CompassTabProps {
 
 /** Brand colors per compass dimension, matching the Compass component contract. */
 const DIMENSION_COLORS: Record<DimensionCode, string> = {
-  core: '#0A3B4F',
-  clarity: '#FF7F50',
-  connection: '#9FD7C3',
-  collaboration: '#E8B4A8',
+  core: dimensions.core.color,
+  clarity: dimensions.clarity.color,
+  connection: dimensions.connection.color,
+  collaboration: dimensions.collaboration.color,
 };
 
 const DIMENSION_LABELS: Record<DimensionCode, string> = {

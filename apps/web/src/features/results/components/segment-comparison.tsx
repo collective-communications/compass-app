@@ -25,7 +25,7 @@ export function SegmentComparison({ segments, anonymityMessage = 'Not enough res
             <div
               key={i}
               data-testid="segment-hidden"
-              className="rounded-lg border border-[#E5E4E0] bg-[#F5F5F5] p-4 text-sm text-[#757575]"
+              className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-4 text-sm text-[var(--grey-500)]"
               role="status"
             >
               <span className="font-medium">{seg.segmentLabel}</span>
@@ -42,14 +42,14 @@ export function SegmentComparison({ segments, anonymityMessage = 'Not enough res
           <div
             key={i}
             data-testid="segment-row"
-            className="flex items-center justify-between rounded-lg border border-[#E5E4E0] bg-white p-4"
+            className="flex items-center justify-between rounded-lg border border-[var(--grey-100)] bg-white p-4"
           >
-            <span className="font-medium text-[#212121]">{seg.segmentLabel}</span>
+            <span className="font-medium text-[var(--grey-900)]">{seg.segmentLabel}</span>
             <div className="flex items-center gap-3">
-              <span className="text-sm tabular-nums text-[#424242]">{seg.score.toFixed(1)}</span>
+              <span className="text-sm tabular-nums text-[var(--grey-700)]">{seg.score.toFixed(1)}</span>
               <span
                 data-testid="delta-indicator"
-                className={`text-xs font-semibold tabular-nums ${delta >= 0 ? 'text-[#2E7D32]' : 'text-[#B71C1C]'}`}
+                className={`text-xs font-semibold tabular-nums ${delta >= 0 ? 'text-[var(--severity-healthy-border)]' : 'text-[var(--severity-critical-border)]'}`}
               >
                 {deltaSign}{deltaPercent}%
               </span>

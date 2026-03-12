@@ -12,6 +12,11 @@ import { escapeHtml, getDimensionColor } from './_lib.ts';
 
 // ─── Brand Colors ────────────────────────────────────────────────────────────
 
+/**
+ * Brand colors — mirrored from @compass/tokens.
+ * Edge functions can't import workspace packages, so values are duplicated here.
+ * Keep in sync with packages/tokens/src/index.ts.
+ */
 const BRAND = {
   core: '#0A3B4F',
   clarity: '#FF7F50',
@@ -39,11 +44,16 @@ const DIMENSION_LABELS: Record<string, string> = {
 
 // ─── Severity Colors ─────────────────────────────────────────────────────────
 
+/**
+ * Severity colors — mirrored from @compass/tokens.
+ * Keep in sync with packages/tokens/src/index.ts.
+ */
 const SEVERITY_COLORS: Record<string, string> = {
-  critical: '#DC2626',
-  high: '#EA580C',
-  medium: '#CA8A04',
-  low: '#16A34A',
+  critical: '#B71C1C',
+  high: '#E65100',
+  medium: '#F9A825',
+  healthy: '#2E7D32',
+  low: '#2E7D32',
 };
 
 // ─── Main ────────────────────────────────────────────────────────────────────

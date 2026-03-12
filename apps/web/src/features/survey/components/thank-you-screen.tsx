@@ -34,7 +34,7 @@ export function ThankYouScreen({
             viewBox="0 0 48 48"
             fill="none"
             aria-hidden="true"
-            className="text-[#0A3B4F]"
+            className="text-[var(--color-core)]"
           >
             <circle cx="24" cy="24" r="24" fill="currentColor" opacity="0.1" />
             <path
@@ -48,7 +48,7 @@ export function ThankYouScreen({
         </div>
 
         <h1 className="mb-2 text-center text-2xl font-semibold text-[var(--grey-900)]">Thank You!</h1>
-        <p className="mb-8 text-center text-[#616161]">
+        <p className="mb-8 text-center text-[var(--grey-500)]">
           Your responses have been submitted. Here is what happens next:
         </p>
 

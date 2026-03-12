@@ -7,14 +7,15 @@
 import type { ReactElement } from 'react';
 import { Compass, type DimensionScore as CompassDimensionScore } from '@compass/compass';
 import type { DimensionCode } from '@compass/types';
+import { dimensions } from '@compass/tokens';
 import type { DimensionScoreRow } from '../../types';
 
 /** Brand colors per dimension. */
 const DIMENSION_COLORS: Record<DimensionCode, string> = {
-  core: '#0A3B4F',
-  clarity: '#FF7F50',
-  connection: '#9FD7C3',
-  collaboration: '#E8B4A8',
+  core: dimensions.core.color,
+  clarity: dimensions.clarity.color,
+  connection: dimensions.connection.color,
+  collaboration: dimensions.collaboration.color,
 };
 
 /** Display labels per dimension. */

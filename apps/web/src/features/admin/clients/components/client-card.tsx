@@ -25,9 +25,9 @@ function getInitials(name: string): string {
 /** Determines the left border class based on organization survey health */
 function getBorderClass(org: OrganizationSummary): string {
   if (!org.activeSurveyId) return '';
-  if (org.daysRemaining !== null && org.daysRemaining <= 3) return 'border-l-4 border-l-[#E65100]';
-  if (org.completionRate !== null && org.completionRate < 30) return 'border-l-4 border-l-[#E65100]';
-  return 'border-l-4 border-l-[#2E7D32]';
+  if (org.daysRemaining !== null && org.daysRemaining <= 3) return 'border-l-4 border-l-[var(--severity-high-border)]';
+  if (org.completionRate !== null && org.completionRate < 30) return 'border-l-4 border-l-[var(--severity-high-border)]';
+  return 'border-l-4 border-l-[var(--severity-healthy-border)]';
 }
 
 /** Trend arrow indicator for score changes */
@@ -35,7 +35,7 @@ function TrendArrow({ trend }: { trend: 'up' | 'down' | 'stable' | null }): Reac
   if (!trend || trend === 'stable') return null;
   return (
     <span
-      className={trend === 'up' ? 'text-[#2E7D32]' : 'text-[#E65100]'}
+      className={trend === 'up' ? 'text-[var(--severity-healthy-border)]' : 'text-[var(--severity-high-border)]'}
       aria-label={`Score trending ${trend}`}
     >
       {trend === 'up' ? '\u2191' : '\u2193'}

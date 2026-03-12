@@ -5,6 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { DimensionScoreMap, RiskFlag } from '@compass/scoring';
+import { dimensions, greyscale } from '@compass/tokens';
 import { DimensionNavItem, type DimensionNavId } from './dimension-nav-item';
 
 interface DimensionNavProps {
@@ -16,11 +17,11 @@ interface DimensionNavProps {
 
 /** Brand colors per dimension. */
 const DIMENSION_COLORS: Record<DimensionNavId, string> = {
-  overview: '#424242',
-  core: '#0A3B4F',
-  clarity: '#FF7F50',
-  connection: '#9FD7C3',
-  collaboration: '#E8B4A8',
+  overview: greyscale[700],
+  core: dimensions.core.color,
+  clarity: dimensions.clarity.color,
+  connection: dimensions.connection.color,
+  collaboration: dimensions.collaboration.color,
 };
 
 const DIMENSION_LABELS: Record<DimensionNavId, string> = {
@@ -73,7 +74,7 @@ export function DimensionNav({
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-[var(--grey-700)] text-white'
-                  : 'bg-[var(--grey-50)] text-[#616161] hover:bg-[var(--grey-100)]'
+                  : 'bg-[var(--grey-50)] text-[var(--grey-500)] hover:bg-[var(--grey-100)]'
               }`}
               aria-current={isActive ? 'true' : undefined}
             >

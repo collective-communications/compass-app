@@ -18,7 +18,7 @@ export function SurveyNotOpenScreen({ opensDate }: SurveyNotOpenScreenProps): Re
         <h1 className="mb-3 text-xl font-semibold text-[var(--grey-900)]">
           Survey Not Yet Open
         </h1>
-        <p className="text-[#616161]">
+        <p className="text-[var(--grey-500)]">
           {formatted
             ? `This survey opens on ${formatted}.`
             : 'This survey is not yet accepting responses.'}

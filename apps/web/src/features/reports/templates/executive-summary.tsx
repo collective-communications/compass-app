@@ -5,6 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
+import { dimensions } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface ExecutiveSummaryProps {
@@ -19,10 +20,10 @@ const DIMENSION_LABELS: Record<string, string> = {
 };
 
 const DIMENSION_COLORS: Record<string, string> = {
-  core: '#0A3B4F',
-  clarity: '#FF7F50',
-  connection: '#9FD7C3',
-  collaboration: '#E8B4A8',
+  core: dimensions.core.color,
+  clarity: dimensions.clarity.color,
+  connection: dimensions.connection.color,
+  collaboration: dimensions.collaboration.color,
 };
 
 /**

@@ -31,7 +31,7 @@ export function WelcomeBackScreen({
       <div className="w-full max-w-[600px] rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
         <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Welcome back!</h1>
 
-        <p className="mb-6 text-[#616161]">
+        <p className="mb-6 text-[var(--grey-500)]">
           {answeredCount} of {totalCount} questions completed
         </p>
 
@@ -45,7 +45,7 @@ export function WelcomeBackScreen({
           aria-label={`${progressPercent}% complete`}
         >
           <div
-            className="h-full rounded-full bg-[#0A3B4F] transition-[width] duration-300"
+            className="h-full rounded-full bg-[var(--color-core)] transition-[width] duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -54,7 +54,7 @@ export function WelcomeBackScreen({
           type="button"
           onClick={onResume}
           disabled={isLoading}
-          className="w-full rounded-lg bg-[#0A3B4F] px-6 py-3 text-base font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 disabled:opacity-50"
+          className="w-full rounded-lg bg-[var(--color-core)] px-6 py-3 text-base font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">

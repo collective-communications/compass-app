@@ -310,14 +310,14 @@ export function ExportModal({
                   Choose how your report will be delivered
                 </p>
                 <div className="flex flex-col gap-2">
-                  <label className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors hover:bg-[#FAFAFA]">
+                  <label className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors hover:bg-[var(--grey-50)]">
                     <input
                       type="radio"
                       name="report-format"
                       value={ReportFormat.PDF}
                       checked={format === ReportFormat.PDF}
                       onChange={() => setFormat(ReportFormat.PDF)}
-                      className="h-4 w-4 text-[#0A3B4F] focus:ring-[#0A3B4F]"
+                      className="h-4 w-4 text-[var(--color-core)] focus:ring-[var(--color-core)]"
                     />
                     <div className="flex flex-col">
                       <span className="text-sm text-[var(--grey-700)]">PDF</span>
@@ -364,8 +364,8 @@ export function ExportModal({
                       className={[
                         'flex items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors',
                         section.locked
-                          ? 'cursor-default bg-[#FAFAFA]'
-                          : 'cursor-pointer hover:bg-[#FAFAFA]',
+                          ? 'cursor-default bg-[var(--grey-50)]'
+                          : 'cursor-pointer hover:bg-[var(--grey-50)]',
                       ].join(' ')}
                     >
                       <input
@@ -373,7 +373,7 @@ export function ExportModal({
                         checked={section.included}
                         disabled={section.locked}
                         onChange={() => toggleSection(section.id)}
-                        className="h-4 w-4 rounded text-[#0A3B4F] focus:ring-[#0A3B4F]"
+                        className="h-4 w-4 rounded text-[var(--color-core)] focus:ring-[var(--color-core)]"
                       />
                       <span
                         className={`text-sm ${section.locked ? 'text-[var(--grey-400)]' : 'text-[var(--grey-700)]'}`}
@@ -397,7 +397,7 @@ export function ExportModal({
               {generation.error !== null && (
                 <div
                   role="alert"
-                  className="flex items-start gap-2 rounded-md bg-[#FFF5F5] px-3 py-2 text-sm text-[#D32F2F]"
+                  className="flex items-start gap-2 rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-sm text-[var(--severity-critical-border)]"
                 >
                   <AlertCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
                   {generation.error}
@@ -428,7 +428,7 @@ export function ExportModal({
                       cy="40"
                       r="34"
                       fill="none"
-                      stroke="#0A3B4F"
+                      stroke="var(--color-core)"
                       strokeWidth="6"
                       strokeLinecap="round"
                       strokeDasharray={`${2 * Math.PI * 34}`}
@@ -458,9 +458,9 @@ export function ExportModal({
                         className={[
                           'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs',
                           isDone
-                            ? 'bg-[#2E7D32] text-white'
+                            ? 'bg-[var(--severity-healthy-border)] text-white'
                             : isActive
-                              ? 'bg-[#0A3B4F] text-white'
+                              ? 'bg-[var(--color-core)] text-white'
                               : 'bg-[var(--grey-50)] text-[var(--grey-300)]',
                         ].join(' ')}
                       >
@@ -475,7 +475,7 @@ export function ExportModal({
                       <span
                         className={`text-sm ${
                           isDone
-                            ? 'text-[#2E7D32]'
+                            ? 'text-[var(--severity-healthy-border)]'
                             : isActive
                               ? 'font-medium text-[var(--grey-700)]'
                               : 'text-[var(--grey-300)]'
@@ -493,15 +493,15 @@ export function ExportModal({
           {/* ── Complete State ── */}
           {modalState === 'complete' && (
             <div className="flex flex-col items-center gap-5 py-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#E8F5E9]">
-                <CheckCircle2 size={32} className="text-[#2E7D32]" aria-hidden="true" />
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[var(--severity-healthy-bg)]">
+                <CheckCircle2 size={32} className="text-[var(--severity-healthy-border)]" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-semibold text-[var(--grey-900)]">Report Ready</h3>
 
               {/* File card */}
               <div className="w-full rounded-lg border border-[var(--grey-100)] bg-white px-4 py-3">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[#F5F5F5]">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--grey-50)]">
                     <FileText size={20} className="text-[var(--grey-500)]" aria-hidden="true" />
                   </div>
                   <div className="flex min-w-0 flex-col">
@@ -524,7 +524,7 @@ export function ExportModal({
                   <a
                     href={generation.fileUrl}
                     download={filename}
-                    className="flex items-center justify-center gap-2 rounded-md bg-[#0A3B4F] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
+                    className="flex items-center justify-center gap-2 rounded-md bg-[var(--color-core)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core)] focus:ring-offset-2"
                   >
                     <Download size={16} aria-hidden="true" />
                     Download {format.toUpperCase()}
@@ -534,7 +534,7 @@ export function ExportModal({
                   <button
                     type="button"
                     onClick={() => void handleCopyLink()}
-                    className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
                   >
                     <Copy size={16} aria-hidden="true" />
                     {linkCopied ? 'Link Copied' : 'Copy Share Link'}
@@ -543,7 +543,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={handleNewExport}
-                  className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
+                  className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
                 >
                   <Plus size={16} aria-hidden="true" />
                   New Export
@@ -555,14 +555,14 @@ export function ExportModal({
           {/* Generation failure in generating state */}
           {generation.status === 'failed' && modalState !== 'configure' && (
             <div className="mt-4 flex flex-col items-center gap-3 text-center">
-              <AlertCircle size={32} className="text-[#D32F2F]" aria-hidden="true" />
-              <p className="text-sm text-[#D32F2F]">
+              <AlertCircle size={32} className="text-[var(--severity-critical-border)]" aria-hidden="true" />
+              <p className="text-sm text-[var(--severity-critical-border)]">
                 {generation.error ?? 'Report generation failed.'}
               </p>
               <button
                 type="button"
                 onClick={generation.reset}
-                className="text-sm font-medium text-[#0A3B4F] underline hover:no-underline"
+                className="text-sm font-medium text-[var(--color-core)] underline hover:no-underline"
               >
                 Try again
               </button>
@@ -577,7 +577,7 @@ export function ExportModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
+                className="flex-1 rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
               >
                 Cancel
               </button>
@@ -585,7 +585,7 @@ export function ExportModal({
                 type="button"
                 onClick={() => void handleGenerate()}
                 disabled={sections.filter((s) => s.included).length === 0}
-                className="flex-1 rounded-md bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2 disabled:opacity-50"
+                className="flex-1 rounded-md bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core)] focus:ring-offset-2 disabled:opacity-50"
               >
                 Generate Report
               </button>
@@ -602,7 +602,7 @@ export function ExportModal({
             <button
               type="button"
               onClick={handleDone}
-              className="w-full rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[#616161] transition-colors hover:bg-[var(--grey-50)]"
+              className="w-full rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
             >
               Done
             </button>

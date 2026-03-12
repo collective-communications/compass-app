@@ -73,12 +73,12 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
     >
       {/* Header */}
       <div className="flex items-center gap-2">
-        <span className="inline-flex items-center rounded-full bg-[var(--grey-50)] px-2 py-0.5 text-xs font-medium uppercase text-[#616161]">
+        <span className="inline-flex items-center rounded-full bg-[var(--grey-50)] px-2 py-0.5 text-xs font-medium uppercase text-[var(--grey-500)]">
           {report.format}
         </span>
         <span
           className={`text-xs font-medium ${
-            isReady ? 'text-[#2E7D32]' : report.status === 'failed' ? 'text-[#D32F2F]' : 'text-[var(--grey-500)]'
+            isReady ? 'text-[var(--severity-healthy-border)]' : report.status === 'failed' ? 'text-[var(--severity-critical-border)]' : 'text-[var(--grey-500)]'
           }`}
         >
           {report.status === 'completed' ? 'Ready' : report.status === 'failed' ? 'Failed' : 'In progress'}
@@ -113,7 +113,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
           </h4>
           <ul className="flex flex-col gap-1">
             {report.sections.map((sectionId) => (
-              <li key={sectionId} className="text-sm text-[#616161]">
+              <li key={sectionId} className="text-sm text-[var(--grey-500)]">
                 {SECTION_LABELS[sectionId] ?? sectionId}
               </li>
             ))}
@@ -123,14 +123,14 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
 
       {/* Error detail */}
       {report.status === 'failed' && report.error !== null && (
-        <p className="rounded-md bg-[#FFF5F5] px-3 py-2 text-xs text-[#D32F2F]">
+        <p className="rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-xs text-[var(--severity-critical-border)]">
           {report.error}
         </p>
       )}
 
       {/* Download error */}
       {downloadError !== null && (
-        <p className="rounded-md bg-[#FFF5F5] px-3 py-2 text-xs text-[#D32F2F]">
+        <p className="rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-xs text-[var(--severity-critical-border)]">
           {downloadError}
         </p>
       )}
@@ -141,7 +141,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
           type="button"
           onClick={() => void handleDownload()}
           disabled={isDownloading}
-          className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2 disabled:opacity-50"
+          className="mt-2 flex items-center justify-center gap-2 rounded-md bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core)] focus:ring-offset-2 disabled:opacity-50"
         >
           {isDownloading ? (
             <Loader2 size={16} className="animate-spin" aria-hidden="true" />

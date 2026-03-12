@@ -76,7 +76,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
           className="h-2 w-full overflow-hidden rounded-full bg-[var(--grey-100)]"
         >
           <div
-            className="h-full rounded-full bg-[#0A3B4F] transition-[width] duration-300"
+            className="h-full rounded-full bg-[var(--color-core)] transition-[width] duration-300"
             style={{
               width: expectedCount > 0 ? `${Math.min(completionPercent, 100)}%` : '0%',
             }}

@@ -66,7 +66,7 @@ describe('ProgressSquares', () => {
     const { container } = render(
       <ProgressSquares total={3} currentIndex={2} answeredIndices={new Set([0, 1, 2])} onJump={() => {}} />,
     );
-    const darkSquares = (container.innerHTML.match(/bg-\[#0A3B4F\]/g) ?? []).length;
+    const darkSquares = (container.innerHTML.match(/bg-\[var\(--color-core\)\]/g) ?? []).length;
     expect(darkSquares).toBe(3);
   });
 });

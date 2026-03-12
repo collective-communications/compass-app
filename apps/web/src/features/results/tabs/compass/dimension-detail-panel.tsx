@@ -6,6 +6,7 @@
 
 import type { ReactElement } from 'react';
 import type { DimensionScoreMap, RiskFlag } from '@compass/scoring';
+import { dimensions, greyscale } from '@compass/tokens';
 import type { DimensionNavId } from './dimension-nav-item';
 import { ScoreRing } from './score-ring';
 
@@ -16,11 +17,11 @@ interface DimensionDetailPanelProps {
 }
 
 const DIMENSION_COLORS: Record<DimensionNavId, string> = {
-  overview: '#424242',
-  core: '#0A3B4F',
-  clarity: '#FF7F50',
-  connection: '#9FD7C3',
-  collaboration: '#E8B4A8',
+  overview: greyscale[700],
+  core: dimensions.core.color,
+  clarity: dimensions.clarity.color,
+  connection: dimensions.connection.color,
+  collaboration: dimensions.collaboration.color,
 };
 
 const DIMENSION_DESCRIPTIONS: Record<DimensionNavId, string> = {
@@ -71,13 +72,13 @@ export function DimensionDetailPanel({
         </div>
       </div>
 
-      <p className="text-sm leading-relaxed text-[#616161]">
+      <p className="text-sm leading-relaxed text-[var(--grey-500)]">
         {DIMENSION_DESCRIPTIONS[dimension]}
       </p>
 
       {flag && flag.severity !== 'healthy' && (
-        <div className="rounded-lg bg-[#FFF8E1] p-3">
-          <p className="text-sm font-medium text-[#616161]">{flag.message}</p>
+        <div className="rounded-lg bg-[var(--severity-medium-bg)] p-3">
+          <p className="text-sm font-medium text-[var(--grey-500)]">{flag.message}</p>
         </div>
       )}
     </div>

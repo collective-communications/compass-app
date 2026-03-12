@@ -61,7 +61,7 @@ describe('LikertScale', () => {
   test('applies selected styling class on chosen value', () => {
     const { container } = render(<LikertScale value={2} onChange={() => {}} name="q1" />);
     const html = container.innerHTML;
-    expect(html).toContain('bg-[#0A3B4F] text-white');
+    expect(html).toContain('bg-[var(--color-core)] text-white');
   });
 
   test('each button has an aria-label matching its option label', () => {

@@ -135,7 +135,7 @@ describe('ClientCard', () => {
         onClick={() => {}}
       />,
     );
-    expect(container.innerHTML).toContain('border-l-[#2E7D32]');
+    expect(container.innerHTML).toContain('border-l-[var(--severity-healthy-border)]');
   });
 
   test('applies orange border when days remaining <= 3', () => {
@@ -149,6 +149,6 @@ describe('ClientCard', () => {
         onClick={() => {}}
       />,
     );
-    expect(container.innerHTML).toContain('border-l-[#E65100]');
+    expect(container.innerHTML).toContain('border-l-[var(--severity-high-border)]');
   });
 });

@@ -103,7 +103,7 @@ export function ReportsPage({
           <button
             type="button"
             onClick={() => setIsExportOpen(true)}
-            className="flex items-center gap-2 rounded-md bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F] focus:ring-offset-2"
+            className="flex items-center gap-2 rounded-md bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core)] focus:ring-offset-2"
           >
             <Plus size={16} aria-hidden="true" />
             Generate Report
@@ -115,7 +115,7 @@ export function ReportsPage({
       {error !== null && (
         <div
           role="alert"
-          className="rounded-md border border-[#FFCDD2] bg-[#FFF5F5] px-4 py-3 text-sm text-[#D32F2F]"
+          className="rounded-md border border-[var(--severity-critical-border)]/20 bg-[var(--severity-critical-bg)] px-4 py-3 text-sm text-[var(--severity-critical-border)]"
         >
           {error}
         </div>

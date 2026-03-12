@@ -40,7 +40,7 @@ export function RecommendationCard({
     >
       {/* Priority badge */}
       <span
-        className="absolute right-4 top-4 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[var(--grey-50)] px-2 text-xs font-medium text-[#616161]"
+        className="absolute right-4 top-4 inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-[var(--grey-50)] px-2 text-xs font-medium text-[var(--grey-500)]"
         aria-label={`Priority ${priority}`}
       >
         #{priority}
@@ -52,7 +52,7 @@ export function RecommendationCard({
       </span>
 
       <h3 className="mb-1 pr-12 text-base font-semibold text-[var(--grey-900)]">{title}</h3>
-      <p className="text-sm leading-relaxed text-[#616161]">{body}</p>
+      <p className="text-sm leading-relaxed text-[var(--grey-500)]">{body}</p>
 
       {actions.length > 0 && (
         <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm leading-relaxed text-[var(--grey-700)]">

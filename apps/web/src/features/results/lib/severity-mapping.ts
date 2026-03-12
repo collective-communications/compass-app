@@ -3,17 +3,17 @@
  * for recommendation severity indicators.
  */
 
-import type { RiskSeverity } from '@compass/scoring';
+import { severity, type SeverityLevel } from '@compass/tokens';
 
-/** Severity display metadata. */
-export type SeverityLevel = RiskSeverity;
+/** Re-export for backward compatibility. */
+export type { SeverityLevel };
 
-/** Left-border colors per severity level. */
+/** Left-border colors per severity level, derived from design tokens. */
 export const SEVERITY_COLORS: Record<SeverityLevel, string> = {
-  critical: '#B71C1C',
-  high: '#E65100',
-  medium: '#F9A825',
-  healthy: '#2E7D32',
+  critical: severity.critical.border,
+  high: severity.high.border,
+  medium: severity.medium.border,
+  healthy: severity.healthy.border,
 } as const;
 
 /** Sort order for severity (most severe first). Excludes "healthy" — filter shows only actionable severities. */
@@ -35,7 +35,7 @@ export const SEVERITY_LABELS: Record<SeverityLevel, string> = {
  * Returns a numeric sort key for a severity level.
  * Lower numbers sort first (higher severity).
  */
-export function severitySortKey(severity: SeverityLevel): number {
-  const index = SEVERITY_ORDER.indexOf(severity);
+export function severitySortKey(sev: SeverityLevel): number {
+  const index = SEVERITY_ORDER.indexOf(sev);
   return index === -1 ? SEVERITY_ORDER.length : index;
 }

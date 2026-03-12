@@ -22,28 +22,28 @@ describe('RiskFlagCard', () => {
     const { container } = render(
       <RiskFlagCard title="Test" description="Desc" severity="critical" dimension="Core" />,
     );
-    expect(container.innerHTML).toContain('border-l-[#D32F2F]');
+    expect(container.innerHTML).toContain('border-l-[var(--severity-critical-border)]');
   });
 
   test('high severity applies orange left border class', () => {
     const { container } = render(
       <RiskFlagCard title="Test" description="Desc" severity="high" dimension="Clarity" />,
     );
-    expect(container.innerHTML).toContain('border-l-[#F57C00]');
+    expect(container.innerHTML).toContain('border-l-[var(--severity-high-border)]');
   });
 
   test('medium severity applies yellow left border class', () => {
     const { container } = render(
       <RiskFlagCard title="Test" description="Desc" severity="medium" dimension="Connection" />,
     );
-    expect(container.innerHTML).toContain('border-l-[#FBC02D]');
+    expect(container.innerHTML).toContain('border-l-[var(--severity-medium-border)]');
   });
 
   test('healthy severity applies green left border class', () => {
     const { container } = render(
       <RiskFlagCard title="Test" description="Desc" severity="healthy" dimension="Collaboration" />,
     );
-    expect(container.innerHTML).toContain('border-l-[#388E3C]');
+    expect(container.innerHTML).toContain('border-l-[var(--severity-healthy-border)]');
   });
 
   test('has accessible aria-label with severity and title', () => {

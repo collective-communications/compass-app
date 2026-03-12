@@ -33,7 +33,7 @@ export function OpenEndedScreen({
 
         <div className="mb-2">
           <textarea
-            className="w-full resize-y rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-[var(--grey-900)] placeholder-[#9E9E9E] transition-colors focus:border-[#0A3B4F] focus:outline-none"
+            className="w-full resize-y rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-[var(--grey-900)] placeholder-[var(--grey-400)] transition-colors focus:border-[var(--color-core)] focus:outline-none"
             rows={5}
             maxLength={MAX_CHARS}
             value={text}
@@ -60,7 +60,7 @@ export function OpenEndedScreen({
             type="button"
             onClick={() => onSubmit(text)}
             disabled={isSubmitting}
-            className="flex-1 rounded-lg bg-[#0A3B4F] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 disabled:opacity-50"
+            className="flex-1 rounded-lg bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 disabled:opacity-50"
           >
             {isSubmitting ? 'Submitting...' : 'Submit Survey'}
           </button>

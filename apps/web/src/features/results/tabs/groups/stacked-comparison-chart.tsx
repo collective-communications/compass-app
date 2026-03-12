@@ -113,7 +113,7 @@ export function StackedComparisonChart({
                         {isBelowThreshold || score === null ? (
                           <>
                             <div
-                              className="h-4 rounded bg-[#E0E0E0]"
+                              className="h-4 rounded bg-[var(--grey-300)]"
                               style={{ width: '20%' }}
                             />
                             <span className="absolute inset-0 flex items-center pl-2 text-[10px] text-[var(--grey-400)]">
@@ -161,7 +161,7 @@ export function StackedComparisonChart({
               className="inline-block size-2.5 rounded-sm"
               style={{
                 backgroundColor: belowThresholdValues.has(val)
-                  ? '#E0E0E0'
+                  ? 'var(--grey-300)'
                   : colorMap.get(val),
               }}
             />

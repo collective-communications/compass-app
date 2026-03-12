@@ -27,11 +27,11 @@ export function RecommendationCard({
       role="article"
       aria-label={`${dimension} recommendation: ${title}`}
     >
-      <h3 className="mb-2 text-base font-semibold text-[#212121]">{title}</h3>
-      <p className="mb-4 text-sm text-[#616161]">{description}</p>
+      <h3 className="mb-2 text-base font-semibold text-[var(--grey-900)]">{title}</h3>
+      <p className="mb-4 text-sm text-[var(--grey-500)]">{description}</p>
       {actions.length > 0 && (
         <div aria-live="polite">
-          <ol className="list-decimal space-y-1 pl-5 text-sm text-[#424242]">
+          <ol className="list-decimal space-y-1 pl-5 text-sm text-[var(--grey-700)]">
             {actions.map((action, i) => (
               <li key={i}>{action}</li>
             ))}

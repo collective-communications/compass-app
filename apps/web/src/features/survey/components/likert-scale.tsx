@@ -33,10 +33,10 @@ export function LikertScale({ value, onChange, name }: LikertScaleProps): React.
               flex items-center gap-3 px-4 py-3 md:flex-col md:items-stretch md:gap-0 md:px-3 md:py-4
               ${
                 isSelected
-                  ? 'border-[#0A3B4F] bg-[#0A3B4F] text-white'
+                  ? 'border-[var(--color-core)] bg-[var(--color-core)] text-white'
                   : 'border-[var(--grey-100)] bg-[var(--grey-50)] text-[var(--grey-700)] hover:border-[var(--grey-400)] hover:bg-[var(--grey-50)]'
               }
-              cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0A3B4F]`}
+              cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-core)]`}
           >
             {/* Radio circle indicator — visible on mobile, hidden on desktop */}
             <span

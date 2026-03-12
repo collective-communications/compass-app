@@ -53,7 +53,7 @@ export function SaveProgressScreen({
       <div className="w-full max-w-[600px] rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
         <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Progress saved</h1>
 
-        <p className="mb-6 text-[#616161]">
+        <p className="mb-6 text-[var(--grey-500)]">
           You can return to this survey anytime on this device.
         </p>
 
@@ -78,7 +78,7 @@ export function SaveProgressScreen({
           <button
             type="button"
             onClick={onContinue}
-            className="w-full rounded-lg bg-[#0A3B4F] px-6 py-3 text-base font-medium text-white transition-colors hover:bg-[#0A3B4F]/90"
+            className="w-full rounded-lg bg-[var(--color-core)] px-6 py-3 text-base font-medium text-white transition-colors hover:opacity-90"
           >
             Continue Survey
           </button>

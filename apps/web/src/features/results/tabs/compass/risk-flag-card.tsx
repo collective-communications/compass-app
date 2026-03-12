@@ -12,10 +12,10 @@ interface RiskFlagCardProps {
 }
 
 const SEVERITY_LABEL: Record<string, string> = {
-  critical: 'text-[#B71C1C]',
-  high: 'text-[#E65100]',
-  medium: 'text-[#F9A825]',
-  healthy: 'text-[#2E7D32]',
+  critical: 'text-[var(--severity-critical-border)]',
+  high: 'text-[var(--severity-high-border)]',
+  medium: 'text-[var(--severity-medium-border)]',
+  healthy: 'text-[var(--severity-healthy-border)]',
 };
 
 export function RiskFlagCard({ flag }: RiskFlagCardProps): ReactElement {
@@ -35,7 +35,7 @@ export function RiskFlagCard({ flag }: RiskFlagCardProps): ReactElement {
           <span className="mx-2 text-[var(--grey-400)]">&middot;</span>
           <span className="text-sm font-medium text-[var(--grey-700)]">{flag.dimensionName}</span>
         </div>
-        <span className="text-sm font-semibold text-[#616161]">{Math.round(flag.score)}</span>
+        <span className="text-sm font-semibold text-[var(--grey-500)]">{Math.round(flag.score)}</span>
       </div>
       <p className="mt-1 text-sm text-[var(--grey-500)]">{flag.message}</p>
     </Card>

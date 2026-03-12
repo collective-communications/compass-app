@@ -38,7 +38,7 @@ function formatDate(iso: string): string {
 /** Map report format to display badge */
 function FormatBadge({ format }: { format: string }): ReactElement {
   return (
-    <span className="inline-flex items-center rounded-full bg-[var(--grey-50)] px-2 py-0.5 text-xs font-medium uppercase text-[#616161]">
+    <span className="inline-flex items-center rounded-full bg-[var(--grey-50)] px-2 py-0.5 text-xs font-medium uppercase text-[var(--grey-500)]">
       {format}
     </span>
   );
@@ -54,9 +54,9 @@ export function ReportCard({
   const isInProgress = report.status === 'queued' || report.status === 'generating';
 
   const leftBorderColor = isReady
-    ? 'border-l-[#2E7D32]'
+    ? 'border-l-[var(--severity-healthy-border)]'
     : isFailed
-      ? 'border-l-[#D32F2F]'
+      ? 'border-l-[var(--severity-critical-border)]'
       : 'border-l-transparent';
 
   return (
@@ -68,7 +68,7 @@ export function ReportCard({
       className={[
         'w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-4 text-left transition-colors',
         leftBorderColor,
-        isSelected ? 'ring-2 ring-[#0A3B4F]' : 'hover:bg-[#FAFAFA]',
+        isSelected ? 'ring-2 ring-[var(--color-core)]' : 'hover:bg-[var(--grey-50)]',
       ].join(' ')}
     >
       {/* Top row: format badge + date + download */}
@@ -84,7 +84,7 @@ export function ReportCard({
             download
             onClick={(e) => e.stopPropagation()}
             aria-label={`Download ${report.format.toUpperCase()} report`}
-            className="rounded-md p-1.5 text-[var(--grey-400)] transition-colors hover:bg-[var(--grey-100)] hover:text-[#0A3B4F]"
+            className="rounded-md p-1.5 text-[var(--grey-400)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--color-core)]"
           >
             <Download size={16} aria-hidden="true" />
           </a>
@@ -97,7 +97,7 @@ export function ReportCard({
           <>
             <span>{formatFileSize(report.fileSize)}</span>
             {report.pageCount !== null && <span>{report.pageCount} pages</span>}
-            <span className="flex items-center gap-1 text-[#2E7D32]">
+            <span className="flex items-center gap-1 text-[var(--severity-healthy-border)]">
               <Download size={12} aria-hidden="true" />
               Ready
             </span>
@@ -112,7 +112,7 @@ export function ReportCard({
         )}
 
         {isFailed && (
-          <span className="flex items-center gap-1 text-[#D32F2F]">
+          <span className="flex items-center gap-1 text-[var(--severity-critical-border)]">
             <AlertCircle size={12} aria-hidden="true" />
             {report.error ?? 'Generation failed'}
           </span>

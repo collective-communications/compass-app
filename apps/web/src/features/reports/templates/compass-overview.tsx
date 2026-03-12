@@ -9,6 +9,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
+import { dimensions } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface CompassOverviewProps {
@@ -16,10 +17,10 @@ interface CompassOverviewProps {
 }
 
 const DIMENSION_CONFIG = [
-  { key: 'core', label: 'Core', color: '#0A3B4F', angle: 225 },
-  { key: 'clarity', label: 'Clarity', color: '#FF7F50', angle: 315 },
-  { key: 'connection', label: 'Connection', color: '#9FD7C3', angle: 45 },
-  { key: 'collaboration', label: 'Collaboration', color: '#E8B4A8', angle: 135 },
+  { key: 'core', label: dimensions.core.label, color: dimensions.core.color, angle: 225 },
+  { key: 'clarity', label: dimensions.clarity.label, color: dimensions.clarity.color, angle: 315 },
+  { key: 'connection', label: dimensions.connection.label, color: dimensions.connection.color, angle: 45 },
+  { key: 'collaboration', label: dimensions.collaboration.label, color: dimensions.collaboration.color, angle: 135 },
 ] as const;
 
 const CENTER = 160;

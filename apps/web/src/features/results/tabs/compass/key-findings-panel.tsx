@@ -7,6 +7,7 @@
 import type { ReactElement } from 'react';
 import type { DimensionScoreMap, RiskFlag, RiskSeverity } from '@compass/scoring';
 import type { DimensionCode } from '@compass/types';
+import { dimensions, severity as severityTokens } from '@compass/tokens';
 import { ScoreRing } from './score-ring';
 
 interface KeyFindingsPanelProps {
@@ -16,17 +17,17 @@ interface KeyFindingsPanelProps {
 }
 
 const DIMENSION_COLORS: Record<DimensionCode, string> = {
-  core: '#0A3B4F',
-  clarity: '#FF7F50',
-  connection: '#9FD7C3',
-  collaboration: '#E8B4A8',
+  core: dimensions.core.color,
+  clarity: dimensions.clarity.color,
+  connection: dimensions.connection.color,
+  collaboration: dimensions.collaboration.color,
 };
 
 const SEVERITY_DOT_COLORS: Record<RiskSeverity, string> = {
-  critical: '#B71C1C',
-  high: '#E65100',
-  medium: '#F9A825',
-  healthy: '#4CAF50',
+  critical: severityTokens.critical.border,
+  high: severityTokens.high.border,
+  medium: severityTokens.medium.border,
+  healthy: severityTokens.healthy.border,
 };
 
 interface Observation {
@@ -112,7 +113,7 @@ export function KeyFindingsPanel({
                 strokeWidth={3}
                 showLabel={false}
               />
-              <span className="text-sm leading-relaxed text-[#616161]">{obs.text}</span>
+              <span className="text-sm leading-relaxed text-[var(--grey-500)]">{obs.text}</span>
             </li>
           ))}
         </ul>
@@ -132,7 +133,7 @@ export function KeyFindingsPanel({
                   style={{ backgroundColor: SEVERITY_DOT_COLORS[flag.severity] }}
                   aria-label={`${flag.severity} severity`}
                 />
-                <span className="text-sm leading-relaxed text-[#616161]">{flag.message}</span>
+                <span className="text-sm leading-relaxed text-[var(--grey-500)]">{flag.message}</span>
               </li>
             ))}
           </ul>
@@ -144,7 +145,7 @@ export function KeyFindingsPanel({
         <button
           type="button"
           onClick={onViewRecommendations}
-          className="text-sm font-medium text-[#0A3B4F] underline-offset-2 hover:underline"
+          className="text-sm font-medium text-[var(--color-core)] underline-offset-2 hover:underline"
         >
           View all recommendations
         </button>

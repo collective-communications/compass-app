@@ -43,9 +43,9 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
           value={field.value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
-          className={`h-10 w-full appearance-none rounded-lg border bg-[var(--grey-50)] px-3 pr-8 text-sm text-[var(--grey-900)] transition-colors focus:outline-none focus:ring-2 focus:ring-[#0A3B4F]/30 ${
+          className={`h-10 w-full appearance-none rounded-lg border bg-[var(--grey-50)] px-3 pr-8 text-sm text-[var(--grey-900)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/30 ${
             showError ? 'border-red-500' : 'border-[var(--grey-100)]'
-          } ${!field.value ? 'text-[#9E9E9E]' : ''}`}
+          } ${!field.value ? 'text-[var(--grey-400)]' : ''}`}
           aria-invalid={showError}
           aria-describedby={showError ? `${fieldId}-error` : undefined}
         >
@@ -129,7 +129,7 @@ export function MetadataForm({ config, onSubmit, isSubmitting }: MetadataFormPro
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
       <h2 className="text-base font-semibold text-[var(--grey-900)]">About You</h2>
-      <p className="text-sm text-[#616161]">
+      <p className="text-sm text-[var(--grey-500)]">
         This information helps group responses for meaningful insights. It is never used to identify
         individuals.
       </p>
@@ -150,7 +150,7 @@ export function MetadataForm({ config, onSubmit, isSubmitting }: MetadataFormPro
       <button
         type="submit"
         disabled={!allSelected || isSubmitting}
-        className="mt-2 h-11 w-full rounded-lg bg-[#0A3B4F] text-sm font-medium text-white transition-colors hover:bg-[#0A3B4F]/90 focus:outline-none focus:ring-2 focus:ring-[#0A3B4F]/30 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-2 h-11 w-full rounded-lg bg-[var(--color-core)] text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core)]/30 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isSubmitting ? 'Starting...' : 'Start Survey'}
       </button>
