@@ -30,6 +30,7 @@ interface SecretsData {
 interface RunData {
   status: DotStatus;
   workflow: string;
+  url: string;
   event: string;
   branch: string;
   duration: string;
@@ -387,7 +388,25 @@ function buildRecentRunsCard(runs: RunData[], repoUrl: string): HTMLElement {
     tdStatus.appendChild(createStatusDot(run.status, run.status));
     tr.appendChild(tdStatus);
 
-    for (const val of [run.workflow, run.event, run.branch, run.duration, run.timestamp]) {
+    // Workflow column — linked to GitHub run
+    const tdWorkflow = document.createElement('td');
+    tdWorkflow.style.padding = 'var(--space-sm)';
+    if (run.url) {
+      const link = document.createElement('a');
+      link.href = run.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.textContent = run.workflow;
+      link.style.color = 'var(--color-text-secondary)';
+      link.style.textDecoration = 'underline';
+      link.setAttribute('aria-label', `${run.workflow} on GitHub (opens in new tab)`);
+      tdWorkflow.appendChild(link);
+    } else {
+      tdWorkflow.textContent = run.workflow;
+    }
+    tr.appendChild(tdWorkflow);
+
+    for (const val of [run.event, run.branch, run.duration, run.timestamp]) {
       const td = document.createElement('td');
       td.style.padding = 'var(--space-sm)';
       td.textContent = val;
@@ -415,10 +434,24 @@ function buildRecentRunsCard(runs: RunData[], repoUrl: string): HTMLElement {
     line1.style.alignItems = 'center';
     line1.style.gap = 'var(--space-sm)';
     line1.appendChild(createStatusDot(run.status, run.status));
-    const wfName = document.createElement('strong');
-    wfName.textContent = run.workflow;
-    wfName.style.fontSize = 'var(--font-size-sm)';
-    line1.appendChild(wfName);
+    if (run.url) {
+      const wfLink = document.createElement('a');
+      wfLink.href = run.url;
+      wfLink.target = '_blank';
+      wfLink.rel = 'noopener noreferrer';
+      wfLink.style.fontSize = 'var(--font-size-sm)';
+      wfLink.style.color = 'var(--color-text-secondary)';
+      wfLink.style.textDecoration = 'underline';
+      wfLink.style.fontWeight = '600';
+      wfLink.textContent = run.workflow;
+      wfLink.setAttribute('aria-label', `${run.workflow} on GitHub (opens in new tab)`);
+      line1.appendChild(wfLink);
+    } else {
+      const wfName = document.createElement('strong');
+      wfName.textContent = run.workflow;
+      wfName.style.fontSize = 'var(--font-size-sm)';
+      line1.appendChild(wfName);
+    }
     item.appendChild(line1);
 
     const line2 = document.createElement('div');

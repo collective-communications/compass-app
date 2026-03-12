@@ -55,6 +55,7 @@ export function registerCicdRoutes(
         : run.conclusion === 'failure' ? 'warning' as const
         : 'unknown' as const,
       workflow: `Run #${run.id}`,
+      url: run.htmlUrl,
       event: run.event,
       branch: run.branch,
       duration: run.durationMs

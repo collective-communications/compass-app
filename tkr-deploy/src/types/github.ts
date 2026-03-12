@@ -14,6 +14,7 @@ export interface WorkflowRun {
   branch: string;
   durationMs: number | null;
   createdAt: string;
+  htmlUrl: string;
 }
 
 export interface RepoSecret {

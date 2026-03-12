@@ -121,6 +121,7 @@ export class GitHubAdapter implements ProviderAdapter {
         conclusion: string | null;
         event: string;
         head_branch: string;
+        html_url: string;
         created_at: string;
         updated_at: string;
         run_started_at: string | null;
@@ -138,6 +139,7 @@ export class GitHubAdapter implements ProviderAdapter {
         conclusion: string | null;
         event: string;
         head_branch: string;
+        html_url: string;
         created_at: string;
         updated_at: string;
         run_started_at: string | null;
@@ -230,6 +232,7 @@ function mapRun(r: {
   conclusion: string | null;
   event: string;
   head_branch: string;
+  html_url: string;
   created_at: string;
   updated_at: string;
   run_started_at: string | null;
@@ -246,5 +249,6 @@ function mapRun(r: {
     branch: r.head_branch,
     durationMs,
     createdAt: r.created_at,
+    htmlUrl: r.html_url,
   };
 }
