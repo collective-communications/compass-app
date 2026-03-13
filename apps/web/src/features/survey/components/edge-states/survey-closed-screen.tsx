@@ -18,7 +18,7 @@ export function SurveyClosedScreen({ closedDate }: SurveyClosedScreenProps): Rea
         <h1 className="mb-3 text-xl font-semibold text-[var(--grey-900)]">
           Survey Closed
         </h1>
-        <p className="text-[var(--grey-500)]">
+        <p className="text-[var(--text-secondary)]">
           {formatted
             ? `This survey closed on ${formatted}.`
             : 'This survey is no longer accepting responses.'}

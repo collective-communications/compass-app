@@ -28,11 +28,11 @@ function NoteItem({ note }: { note: AdminNote }): ReactElement {
     <div className="border-b border-[var(--grey-100)] py-3 last:border-b-0">
       <div className="flex items-baseline justify-between gap-2">
         <p className="text-sm font-medium text-[var(--grey-700)]">{note.authorName}</p>
-        <time className="shrink-0 text-xs text-[var(--grey-400)]" dateTime={note.createdAt}>
+        <time className="shrink-0 text-xs text-[var(--text-tertiary)]" dateTime={note.createdAt}>
           {formatNoteDate(note.createdAt)}
         </time>
       </div>
-      <p className="mt-1 text-sm text-[var(--grey-600)]">{note.content}</p>
+      <p className="mt-1 text-sm text-[var(--text-tertiary)]">{note.content}</p>
     </div>
   );
 }
@@ -67,10 +67,10 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
 
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-      <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+      <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         Notes
       </h3>
-      <p className="mb-4 text-sm text-[var(--grey-500)]">Notes are visible only to CC+C team</p>
+      <p className="mb-4 text-sm text-[var(--text-secondary)]">Notes are visible only to CC+C team</p>
 
       {/* Add note form */}
       <form onSubmit={handleSubmit} className="mb-4 flex gap-2">
@@ -101,7 +101,7 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
       )}
 
       {isLoading && (
-        <p className="py-4 text-center text-sm text-[var(--grey-500)]">Loading notes...</p>
+        <p className="py-4 text-center text-sm text-[var(--text-secondary)]">Loading notes...</p>
       )}
 
       {error && (
@@ -111,7 +111,7 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
       )}
 
       {!isLoading && !error && notes && notes.length === 0 && (
-        <p className="py-4 text-center text-sm text-[var(--grey-500)]">
+        <p className="py-4 text-center text-sm text-[var(--text-secondary)]">
           No notes yet. Add a note about this client.
         </p>
       )}

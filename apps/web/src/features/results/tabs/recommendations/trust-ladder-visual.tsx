@@ -14,7 +14,7 @@ export interface TrustLadderVisualProps {
 const STATUS_STYLES: Record<TrustRungStatus, string> = {
   achieved: 'bg-green-100 text-green-800 border-green-300',
   in_progress: 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  not_started: 'bg-[var(--grey-50)] text-[var(--grey-500)] border-[var(--grey-100)]',
+  not_started: 'bg-[var(--grey-50)] text-[var(--text-secondary)] border-[var(--grey-100)]',
 };
 
 const STATUS_LABELS: Record<TrustRungStatus, string> = {
@@ -53,7 +53,7 @@ function RungRow({ rung, isCurrentLevel }: { rung: TrustRungScore; isCurrentLeve
       </button>
 
       {expanded && (
-        <div className="mt-1 ml-6 rounded-md border border-[var(--grey-100)] bg-white px-3 py-2 text-xs text-[var(--grey-600)]">
+        <div className="mt-1 ml-6 rounded-md border border-[var(--grey-100)] bg-white px-3 py-2 text-xs text-[var(--text-tertiary)]">
           <div className="flex items-center justify-between">
             <span>Dimension: <strong>{dimensionLabel(rung.dimensionCode)}</strong></span>
             <span className="font-medium">{STATUS_LABELS[rung.status]}</span>
@@ -75,11 +75,11 @@ export function TrustLadderVisual({ result }: TrustLadderVisualProps): ReactElem
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between">
-        <h4 className="text-xs font-semibold text-[var(--grey-500)] uppercase tracking-wide">
+        <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wide">
           Trust Ladder
         </h4>
         {result.currentLevel > 0 && (
-          <span className="text-xs text-[var(--grey-500)]">
+          <span className="text-xs text-[var(--text-secondary)]">
             Level {result.currentLevel} of 9
           </span>
         )}

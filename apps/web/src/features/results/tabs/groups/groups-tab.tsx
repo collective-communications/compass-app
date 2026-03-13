@@ -165,7 +165,7 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
 
   if (!overallScores || !allSegmentRows) {
     return (
-      <p className="py-8 text-center text-sm text-[var(--grey-500)]">
+      <p className="py-8 text-center text-sm text-[var(--text-secondary)]">
         No segment data available.
       </p>
     );
@@ -217,7 +217,7 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
               />
             </>
           ) : (
-            <p className="py-8 text-center text-sm text-[var(--grey-500)]">
+            <p className="py-8 text-center text-sm text-[var(--text-secondary)]">
               No data available for this segment.
             </p>
           )}

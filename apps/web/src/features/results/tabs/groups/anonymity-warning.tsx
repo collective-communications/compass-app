@@ -23,7 +23,7 @@ export function AnonymityWarning({ segmentValue }: AnonymityWarningProps): React
         <p className="text-sm font-medium text-[var(--grey-700)]">
           Not enough responses to display this segment.
         </p>
-        <p className="mt-1 text-xs text-[var(--grey-500)]">
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
           Results for &ldquo;{segmentValue}&rdquo; are hidden to protect respondent anonymity.
         </p>
       </div>

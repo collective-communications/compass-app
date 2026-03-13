@@ -70,7 +70,7 @@ export function SegmentComparisonCard({
           return (
             <div key={dim} className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-medium text-[var(--grey-500)]">
+                <span className="text-xs font-medium text-[var(--text-secondary)]">
                   {DIMENSION_LABELS[dim]}
                 </span>
                 <span
@@ -82,7 +82,7 @@ export function SegmentComparisonCard({
 
               {/* Segment bar */}
               <div className="flex items-center gap-2">
-                <span className="w-14 text-right text-xs text-[var(--grey-500)]">
+                <span className="w-14 text-right text-xs text-[var(--text-secondary)]">
                   {segmentLabel}
                 </span>
                 <div className="h-3 flex-1 rounded-full bg-[var(--grey-50)]">
@@ -101,7 +101,7 @@ export function SegmentComparisonCard({
 
               {/* Overall bar */}
               <div className="flex items-center gap-2">
-                <span className="w-14 text-right text-xs text-[var(--grey-500)]">
+                <span className="w-14 text-right text-xs text-[var(--text-secondary)]">
                   Overall
                 </span>
                 <div className="h-3 flex-1 rounded-full bg-[var(--grey-50)]">

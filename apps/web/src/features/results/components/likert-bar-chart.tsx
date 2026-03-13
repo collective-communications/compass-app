@@ -102,13 +102,13 @@ export function LikertBarChart({
                 opacity: segment.opacity,
                 minWidth: segment.percentage > 0 ? '2px' : 0,
               }}
-              aria-label={`${segment.label}: ${segment.percentage}%`}
+              aria-hidden="true"
             />
           ) : null,
         )}
       </div>
       {showLabels && (
-        <p className="mt-1 text-xs text-[var(--grey-500)]">
+        <p className="mt-1 text-xs text-[var(--text-secondary)]">
           {segments.map((s, i) => (
             <span key={s.key}>
               {i > 0 && <span className="mx-1">&middot;</span>}

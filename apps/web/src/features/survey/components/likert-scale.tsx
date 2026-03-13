@@ -27,7 +27,6 @@ export function LikertScale({ value, onChange, name }: LikertScaleProps): React.
             role="radio"
             aria-checked={isSelected}
             aria-label={option.label}
-            name={name}
             onClick={() => onChange(option.value)}
             className={`flex-1 rounded-lg border-2 text-sm font-medium transition-colors
               flex items-center gap-3 px-4 py-3 md:flex-col md:items-stretch md:gap-0 md:px-3 md:py-4

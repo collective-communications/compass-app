@@ -141,7 +141,7 @@ export function MetadataConfig({
           <AutoSaveIndicator status={SAVE_TO_AUTOSAVE[saveStatus]} />
         </legend>
 
-        <p className="mb-4 text-sm text-[var(--grey-500)]">{description}</p>
+        <p className="mb-4 text-sm text-[var(--text-secondary)]">{description}</p>
 
         {/* Item list */}
         <ul className="mb-4 space-y-1" role="list" aria-label={`${label} items`}>
@@ -157,7 +157,7 @@ export function MetadataConfig({
                   onClick={() => handleMoveUp(index)}
                   disabled={index === 0}
                   aria-label={`Move ${item.label} up`}
-                  className="text-[var(--grey-400)] hover:text-[var(--grey-700)] disabled:opacity-30"
+                  className="text-[var(--text-tertiary)] hover:text-[var(--grey-700)] disabled:opacity-30"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                     <path d="M6 2L2 7h8L6 2z" fill="currentColor" />
@@ -168,7 +168,7 @@ export function MetadataConfig({
                   onClick={() => handleMoveDown(index)}
                   disabled={index === sorted.length - 1}
                   aria-label={`Move ${item.label} down`}
-                  className="text-[var(--grey-400)] hover:text-[var(--grey-700)] disabled:opacity-30"
+                  className="text-[var(--text-tertiary)] hover:text-[var(--grey-700)] disabled:opacity-30"
                 >
                   <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                     <path d="M6 10L2 5h8L6 10z" fill="currentColor" />
@@ -179,18 +179,18 @@ export function MetadataConfig({
               <span className="flex-1 text-sm text-[var(--grey-900)]">{item.label}</span>
 
               {inUseLabels.has(item.label) && (
-                <span className="text-xs text-[var(--grey-400)]">in use</span>
+                <span className="text-xs text-[var(--text-tertiary)]">in use</span>
               )}
 
               {pendingRemoval === item.id ? (
                 <span className="flex items-center gap-2">
-                  <span className="text-xs text-red-600">
+                  <span className="text-xs text-red-700">
                     This value is referenced by active responses. Remove anyway?
                   </span>
                   <button
                     type="button"
                     onClick={() => handleRemove(item.id)}
-                    className="text-xs font-medium text-red-600 hover:underline"
+                    className="text-xs font-medium text-red-700 hover:underline"
                     aria-label={`Confirm remove ${item.label}`}
                   >
                     Remove
@@ -198,7 +198,7 @@ export function MetadataConfig({
                   <button
                     type="button"
                     onClick={handleCancelRemoval}
-                    className="text-xs font-medium text-[var(--grey-500)] hover:underline"
+                    className="text-xs font-medium text-[var(--text-secondary)] hover:underline"
                     aria-label="Cancel removal"
                   >
                     Cancel
@@ -209,7 +209,7 @@ export function MetadataConfig({
                   type="button"
                   onClick={() => handleRemove(item.id)}
                   aria-label={`Remove ${item.label}`}
-                  className="text-[var(--grey-400)] hover:text-red-600"
+                  className="text-[var(--text-tertiary)] hover:text-red-700"
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -220,7 +220,7 @@ export function MetadataConfig({
           ))}
 
           {sorted.length === 0 && (
-            <li className="py-3 text-center text-sm text-[var(--grey-400)]">
+            <li className="py-3 text-center text-sm text-[var(--text-tertiary)]">
               No {label.toLowerCase()} configured yet.
             </li>
           )}
@@ -236,7 +236,7 @@ export function MetadataConfig({
             onKeyDown={handleKeyDown}
             placeholder={CATEGORY_PLACEHOLDER[category]}
             aria-label={`Add new ${label.toLowerCase().replace(/s$/, '')}`}
-            className="flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
+            className="flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
           />
           <button
             type="button"

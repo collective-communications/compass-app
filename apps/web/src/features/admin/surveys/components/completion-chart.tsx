@@ -20,7 +20,7 @@ export function CompletionChart({ dailyCompletions }: CompletionChartProps): Rea
     return (
       <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
         <h3 className="text-sm font-semibold text-[var(--grey-900)]">Daily Completions</h3>
-        <p className="mt-4 text-sm text-[var(--grey-500)]">No completions yet</p>
+        <p className="mt-4 text-sm text-[var(--text-secondary)]">No completions yet</p>
       </div>
     );
   }
@@ -35,7 +35,7 @@ export function CompletionChart({ dailyCompletions }: CompletionChartProps): Rea
         {dailyCompletions.map((day) => (
           <div key={day.date} className="flex items-center gap-3">
             {/* Date label */}
-            <span className="w-16 shrink-0 text-right text-xs text-[var(--grey-500)]">
+            <span className="w-16 shrink-0 text-right text-xs text-[var(--text-secondary)]">
               {formatShortDate(day.date)}
             </span>
 

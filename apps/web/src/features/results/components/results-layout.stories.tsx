@@ -18,7 +18,7 @@ const meta = {
     activeSurveyId: 's1',
     onSurveyChange: fn(),
     children: (
-      <div className="rounded-lg border border-dashed border-[var(--grey-300)] p-8 text-center text-sm text-[var(--grey-500)]">
+      <div className="rounded-lg border border-dashed border-[var(--grey-300)] p-8 text-center text-sm text-[var(--text-secondary)]">
         Tab content area
       </div>
     ),
@@ -35,7 +35,7 @@ export const WithInsightsPanel: Story = {
     insightsContent: (
       <div className="flex flex-col gap-4 p-4">
         <h3 className="text-sm font-semibold">Key Findings</h3>
-        <p className="text-sm text-[var(--grey-500)]">Core is your strongest dimension at 82%.</p>
+        <p className="text-sm text-[var(--text-secondary)]">Core is your strongest dimension at 82%.</p>
       </div>
     ),
   },

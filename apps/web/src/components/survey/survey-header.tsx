@@ -29,7 +29,7 @@ export function SurveyHeader({ orgName, logoUrl, onSave }: SurveyHeaderProps): R
           <button
             type="button"
             onClick={onSave}
-            className="ml-auto text-sm font-medium text-[var(--grey-500)] hover:text-[var(--grey-700)] transition-colors"
+            className="ml-auto text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--grey-700)] transition-colors"
           >
             Save
           </button>

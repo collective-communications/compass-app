@@ -101,7 +101,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       if (deployment.isLoading || metricsQuery.isLoading || builderQuery.isLoading) {
         return (
           <div className="flex items-center justify-center py-12">
-            <p className="text-[var(--grey-500)]">Loading deployment...</p>
+            <p className="text-[var(--text-secondary)]">Loading deployment...</p>
           </div>
         );
       }
@@ -109,7 +109,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       if (!deployment.data || !builderQuery.data) {
         return (
           <div className="flex items-center justify-center py-12">
-            <p className="text-[var(--grey-500)]">No active deployment found.</p>
+            <p className="text-[var(--text-secondary)]">No active deployment found.</p>
           </div>
         );
       }

@@ -25,7 +25,7 @@ export function SegmentComparison({ segments, anonymityMessage = 'Not enough res
             <div
               key={i}
               data-testid="segment-hidden"
-              className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-4 text-sm text-[var(--grey-500)]"
+              className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-4 text-sm text-[var(--text-secondary)]"
               role="status"
             >
               <span className="font-medium">{seg.segmentLabel}</span>

@@ -25,19 +25,18 @@ export function RiskFlagCard({ flag }: RiskFlagCardProps): ReactElement {
     <Card
       severity={flag.severity as 'critical' | 'high' | 'medium' | 'healthy'}
       className="p-4"
-      role="listitem"
     >
       <div className="flex items-center justify-between">
         <div>
           <span className={`text-xs font-semibold uppercase tracking-wide ${labelClass}`}>
             {flag.severity}
           </span>
-          <span className="mx-2 text-[var(--grey-400)]">&middot;</span>
+          <span className="mx-2 text-[var(--text-tertiary)]">&middot;</span>
           <span className="text-sm font-medium text-[var(--grey-700)]">{flag.dimensionName}</span>
         </div>
-        <span className="text-sm font-semibold text-[var(--grey-500)]">{Math.round(flag.score)}</span>
+        <span className="text-sm font-semibold text-[var(--text-secondary)]">{Math.round(flag.score)}</span>
       </div>
-      <p className="mt-1 text-sm text-[var(--grey-500)]">{flag.message}</p>
+      <p className="mt-1 text-sm text-[var(--text-secondary)]">{flag.message}</p>
     </Card>
   );
 }

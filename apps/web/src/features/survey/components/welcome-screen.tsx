@@ -56,13 +56,13 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
         {/* Greeting and survey info */}
         <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Hello.</h1>
 
-        <p className="mb-4 text-[var(--grey-500)]">
+        <p className="mb-4 text-[var(--text-secondary)]">
           {survey.settings?.welcomeMessage ??
             `You've been invited to participate in a brief culture assessment for ${survey.title}. Your feedback will help shape the culture of your organization.`}
         </p>
 
         {/* Survey details */}
-        <div className="mb-6 flex flex-wrap gap-4 text-sm text-[var(--grey-500)]">
+        <div className="mb-6 flex flex-wrap gap-4 text-sm text-[var(--text-secondary)]">
           <span>{questionCount} questions</span>
           <span aria-hidden="true">&bull;</span>
           <span>About {timeEstimate} minutes</span>
@@ -94,7 +94,7 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
 
         {/* Submission error */}
         {createResponse.isError && (
-          <p className="mt-4 text-center text-sm text-red-600" role="alert">
+          <p className="mt-4 text-center text-sm text-red-700" role="alert">
             Something went wrong. Please try again.
           </p>
         )}

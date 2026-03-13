@@ -21,7 +21,7 @@ export function TopIssuesCard({ questions, limit = 3 }: TopIssuesCardProps): Rea
     return (
       <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
         <h3 className="text-sm font-semibold text-[var(--grey-700)]">Top Issues</h3>
-        <p className="mt-2 text-xs text-[var(--grey-500)]">No question data available.</p>
+        <p className="mt-2 text-xs text-[var(--text-secondary)]">No question data available.</p>
       </div>
     );
   }
@@ -34,12 +34,12 @@ export function TopIssuesCard({ questions, limit = 3 }: TopIssuesCardProps): Rea
       <ol className="flex flex-col gap-3">
         {sorted.map((q, idx) => (
           <li key={q.questionId} className="flex items-start gap-2">
-            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--grey-50)] text-xs font-medium text-[var(--grey-500)]">
+            <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--grey-50)] text-xs font-medium text-[var(--text-secondary)]">
               {idx + 1}
             </span>
             <div className="flex flex-col gap-0.5">
               <p className="text-sm text-[var(--grey-700)]">{q.questionText}</p>
-              <p className="text-xs text-[var(--grey-500)]">
+              <p className="text-xs text-[var(--text-secondary)]">
                 Mean: {q.meanScore.toFixed(1)} / 4.0
               </p>
             </div>

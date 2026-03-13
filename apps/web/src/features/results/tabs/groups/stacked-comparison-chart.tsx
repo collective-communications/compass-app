@@ -94,7 +94,7 @@ export function StackedComparisonChart({
                 <span className="text-xs font-medium text-[var(--grey-700)]">
                   {DIMENSION_LABELS[dim]}
                 </span>
-                <span className="text-xs text-[var(--grey-500)]">
+                <span className="text-xs text-[var(--text-secondary)]">
                   Overall: {Math.round(overallScore)}%
                 </span>
               </div>
@@ -106,7 +106,7 @@ export function StackedComparisonChart({
 
                   return (
                     <div key={val} className="flex items-center gap-2">
-                      <span className="w-20 truncate text-right text-xs text-[var(--grey-500)]">
+                      <span className="w-20 truncate text-right text-xs text-[var(--text-secondary)]">
                         {val}
                       </span>
                       <div className="relative h-4 flex-1 rounded bg-[var(--grey-50)]">
@@ -116,7 +116,7 @@ export function StackedComparisonChart({
                               className="h-4 rounded bg-[var(--grey-300)]"
                               style={{ width: '20%' }}
                             />
-                            <span className="absolute inset-0 flex items-center pl-2 text-[10px] text-[var(--grey-400)]">
+                            <span className="absolute inset-0 flex items-center pl-2 text-[10px] text-[var(--text-tertiary)]">
                               n &lt; threshold
                             </span>
                           </>
@@ -165,12 +165,12 @@ export function StackedComparisonChart({
                   : colorMap.get(val),
               }}
             />
-            <span className="text-xs text-[var(--grey-500)]">{val}</span>
+            <span className="text-xs text-[var(--text-secondary)]">{val}</span>
           </div>
         ))}
         <div className="flex items-center gap-1.5">
           <span className="inline-block h-2.5 w-px bg-[var(--grey-700)]" />
-          <span className="text-xs text-[var(--grey-500)]">Overall</span>
+          <span className="text-xs text-[var(--text-secondary)]">Overall</span>
         </div>
       </div>
     </div>

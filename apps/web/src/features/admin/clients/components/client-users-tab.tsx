@@ -91,7 +91,7 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
   if (membersLoading) {
     return (
       <div role="tabpanel" aria-label="Users">
-        <p className="py-12 text-center text-sm text-[var(--grey-500)]">Loading users...</p>
+        <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Loading users...</p>
       </div>
     );
   }
@@ -126,13 +126,13 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Users — left column */}
         <div className="flex flex-col gap-4 lg:w-[560px] lg:shrink-0">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
             Client Users ({members.length})
           </h2>
 
           {members.length === 0 ? (
             <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-              <p className="text-sm text-[var(--grey-500)]">No users assigned to this client. Send an invite above.</p>
+              <p className="text-sm text-[var(--text-secondary)]">No users assigned to this client. Send an invite above.</p>
             </div>
           ) : (
             members.map((member) => (
@@ -155,7 +155,7 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
         {/* Pending invitations — right column */}
         <div className="flex-1">
           {invitationsLoading ? (
-            <p className="py-6 text-center text-sm text-[var(--grey-500)]">Loading invitations...</p>
+            <p className="py-6 text-center text-sm text-[var(--text-secondary)]">Loading invitations...</p>
           ) : (
             <PendingInvitations
               invitations={invitations}

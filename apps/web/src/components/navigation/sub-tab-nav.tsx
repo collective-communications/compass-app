@@ -29,7 +29,7 @@ export function SubTabNav({ tabs, activeId, onSelect }: SubTabNavProps): ReactEl
                 className={`relative pb-2 text-sm transition-colors ${
                   isActive
                     ? 'border-b-2 border-[var(--grey-900)] text-[var(--grey-900)]'
-                    : 'text-[var(--grey-500)] hover:text-[var(--grey-700)]'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--grey-700)]'
                 } ${isDisabled ? 'opacity-40 cursor-default' : 'cursor-pointer'}`}
               >
                 {tab.label}

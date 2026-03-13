@@ -200,7 +200,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
 
   if (isLoading) {
     return (
-      <div className="py-12 text-center text-sm text-[var(--grey-500)]">
+      <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
         Loading survey builder...
       </div>
     );
@@ -231,7 +231,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
         className="mb-6 flex items-start gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-4 text-sm text-[var(--grey-700)]"
         role="status"
       >
-        <Info size={16} className="mt-0.5 shrink-0 text-[var(--grey-500)]" />
+        <Info size={16} className="mt-0.5 shrink-0 text-[var(--text-secondary)]" />
         <p>
           This survey uses the <span className="font-medium">CC+C Culture Assessment</span> template.
           Questions are organized by dimension. Drag to reorder within the survey.
@@ -273,7 +273,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
         {/* Question list with drag-and-drop */}
         <div className="min-w-0 flex-1">
           {filteredQuestions.length === 0 ? (
-            <div className="py-12 text-center text-sm text-[var(--grey-500)]">
+            <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
               No questions in this dimension.
             </div>
           ) : (
@@ -295,9 +295,9 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
                           className="mb-2 flex w-full items-center gap-2 text-left"
                         >
                           {isCollapsed ? (
-                            <ChevronRight size={16} className="text-[var(--grey-500)]" />
+                            <ChevronRight size={16} className="text-[var(--text-secondary)]" />
                           ) : (
-                            <ChevronDown size={16} className="text-[var(--grey-500)]" />
+                            <ChevronDown size={16} className="text-[var(--text-secondary)]" />
                           )}
                           <span
                             className="inline-block h-2.5 w-2.5 rounded-full"
@@ -306,7 +306,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
                           <span className="text-sm font-medium text-[var(--grey-800)]">
                             {group.dimension.name}
                           </span>
-                          <span className="text-xs text-[var(--grey-500)]">
+                          <span className="text-xs text-[var(--text-secondary)]">
                             ({group.questions.length})
                           </span>
                         </button>
@@ -338,7 +338,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
       {/* Sticky footer with Done button */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--grey-100)] bg-white px-4 py-3">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <p className="text-sm text-[var(--grey-500)]">
+          <p className="text-sm text-[var(--text-secondary)]">
             {data.questions.length} question{data.questions.length !== 1 ? 's' : ''} across{' '}
             {dimensions.length} dimension{dimensions.length !== 1 ? 's' : ''}
           </p>

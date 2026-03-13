@@ -30,7 +30,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-semibold text-[var(--grey-900)]">{survey.title}</h2>
-          <p className="mt-1 text-sm text-[var(--grey-600)]">
+          <p className="mt-1 text-sm text-[var(--text-tertiary)]">
             Closes {formatDate(survey.closesAt)}
           </p>
         </div>
@@ -42,7 +42,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
       {/* Stats row */}
       <div className="mt-5 grid grid-cols-3 gap-4 text-center">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
             Responses
           </p>
           <p className="mt-1 text-lg font-semibold text-[var(--grey-900)]">
@@ -50,13 +50,13 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
           </p>
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
             Completion
           </p>
           <p className="mt-1 text-lg font-semibold text-[var(--grey-900)]">{completionPercent}%</p>
         </div>
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
             Days Left
           </p>
           <p className="mt-1 text-lg font-semibold text-[var(--grey-900)]">

@@ -30,7 +30,7 @@ export function ReminderConfig({ value, onChange }: ReminderConfigProps): ReactE
   return (
     <div className="flex flex-col gap-1.5">
       <p className="text-sm font-medium text-[var(--grey-700)]">Reminder Schedule</p>
-      <p className="text-xs text-[var(--grey-500)]">
+      <p className="text-xs text-[var(--text-secondary)]">
         Automatic reminders sent to recipients who have not completed the survey
       </p>
       <div className="mt-1 flex flex-col gap-2">

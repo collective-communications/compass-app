@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ResponseTracker } from './response-tracker';
 import type { ResponseMetrics } from '../services/deployment-service';
+import { AppShellDecorator } from '../../../../../../storybook/.storybook/decorators/shells';
 
 const baseMetrics: ResponseMetrics = {
   totalResponses: 87,
@@ -19,6 +20,7 @@ const baseMetrics: ResponseMetrics = {
 const meta = {
   title: 'Features/Admin/Surveys/ResponseTracker',
   component: ResponseTracker,
+  decorators: [AppShellDecorator],
   args: {
     metrics: baseMetrics,
     connectionStatus: 'connected',

@@ -130,7 +130,7 @@ export function SurveyConfigModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-[var(--grey-500)] hover:text-[var(--grey-700)]"
+            className="rounded-md p-1 text-[var(--text-secondary)] hover:text-[var(--grey-700)]"
             aria-label="Close"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -158,7 +158,7 @@ export function SurveyConfigModal({
             required
           />
           {titleError && (
-            <p className="text-xs text-red-600">{titleError}</p>
+            <p className="text-xs text-red-700">{titleError}</p>
           )}
         </div>
 
@@ -206,7 +206,7 @@ export function SurveyConfigModal({
           </div>
         </div>
         {dateError && (
-          <p className="text-xs text-red-600">{dateError}</p>
+          <p className="text-xs text-red-700">{dateError}</p>
         )}
 
         {/* Anonymity Threshold */}
@@ -214,7 +214,7 @@ export function SurveyConfigModal({
           <label htmlFor="config-threshold" className="text-sm font-medium text-[var(--grey-700)]">
             Anonymity Threshold
           </label>
-          <p className="text-xs text-[var(--grey-500)]">
+          <p className="text-xs text-[var(--text-secondary)]">
             Minimum responses before segment data is visible
           </p>
           <input
@@ -236,7 +236,7 @@ export function SurveyConfigModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-[var(--grey-600)] hover:text-[var(--grey-900)]"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
           >
             Cancel
           </button>

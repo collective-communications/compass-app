@@ -135,7 +135,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
             {/* Name (required) */}
             <div>
               <label htmlFor="org-name" className="mb-1 block text-sm font-medium text-[var(--grey-700)]">
-                Organization Name <span className="text-red-600" aria-label="required">*</span>
+                Organization Name <span className="text-red-700" aria-label="required">*</span>
               </label>
               <input
                 ref={nameInputRef}
@@ -153,7 +153,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 required
               />
               {errors.name && (
-                <p id="org-name-error" className="mt-1 text-xs text-red-600" role="alert">
+                <p id="org-name-error" className="mt-1 text-xs text-red-700" role="alert">
                   {errors.name}
                 </p>
               )}
@@ -193,7 +193,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 aria-describedby={errors.employeeCount ? 'org-employee-error' : undefined}
               />
               {errors.employeeCount && (
-                <p id="org-employee-error" className="mt-1 text-xs text-red-600" role="alert">
+                <p id="org-employee-error" className="mt-1 text-xs text-red-700" role="alert">
                   {errors.employeeCount}
                 </p>
               )}
@@ -232,7 +232,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
                 aria-describedby={errors.primaryContactEmail ? 'org-email-error' : undefined}
               />
               {errors.primaryContactEmail && (
-                <p id="org-email-error" className="mt-1 text-xs text-red-600" role="alert">
+                <p id="org-email-error" className="mt-1 text-xs text-red-700" role="alert">
                   {errors.primaryContactEmail}
                 </p>
               )}

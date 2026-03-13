@@ -32,7 +32,7 @@ export function TimelineStepper({ steps }: TimelineStepperProps): ReactNode {
             aria-hidden="true"
           />
           <p className="text-sm font-medium text-[var(--grey-900)]">{step.title}</p>
-          <p className="mt-0.5 text-sm text-[var(--grey-500)]">{step.subtitle}</p>
+          <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{step.subtitle}</p>
         </li>
       ))}
     </ol>

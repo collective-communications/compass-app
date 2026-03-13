@@ -61,7 +61,7 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
       </div>
 
       {isLoading && (
-        <div className="py-12 text-center text-sm text-[var(--grey-500)]">
+        <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
           Loading clients...
         </div>
       )}
@@ -74,7 +74,7 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
 
       {filtered.length === 0 && !isLoading && !error && (
         <div className="py-12 text-center">
-          <p className="text-sm text-[var(--grey-500)]">
+          <p className="text-sm text-[var(--text-secondary)]">
             {searchQuery
               ? 'No clients match your search.'
               : 'Add your first client to get started.'}

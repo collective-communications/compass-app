@@ -101,7 +101,7 @@ export function UsersPage(): ReactElement {
   if (membersLoading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-6">
-        <p className="py-12 text-center text-sm text-[var(--grey-500)]">Loading team...</p>
+        <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Loading team...</p>
       </div>
     );
   }
@@ -149,13 +149,13 @@ export function UsersPage(): ReactElement {
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Team members — left column */}
         <div className="flex flex-col gap-4 lg:w-[560px] lg:shrink-0">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+          <h2 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
             Team Members ({members.length})
           </h2>
 
           {members.length === 0 ? (
             <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-              <p className="text-sm text-[var(--grey-500)]">No team members yet. Send an invite above.</p>
+              <p className="text-sm text-[var(--text-secondary)]">No team members yet. Send an invite above.</p>
             </div>
           ) : (
             members.map((member) => (
@@ -178,7 +178,7 @@ export function UsersPage(): ReactElement {
         {/* Pending invitations — right column */}
         <div className="flex-1">
           {invitationsLoading ? (
-            <p className="py-6 text-center text-sm text-[var(--grey-500)]">Loading invitations...</p>
+            <p className="py-6 text-center text-sm text-[var(--text-secondary)]">Loading invitations...</p>
           ) : (
             <PendingInvitations
               invitations={invitations}

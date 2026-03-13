@@ -32,7 +32,7 @@ export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
           <div className="flex h-28 items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50)]">
             <div className="text-center">
               <svg
-                className="mx-auto mb-1 h-6 w-6 text-[var(--grey-400)]"
+                className="mx-auto mb-1 h-6 w-6 text-[var(--text-tertiary)]"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -45,7 +45,7 @@ export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
                   d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
                 />
               </svg>
-              <span className="text-xs text-[var(--grey-500)]">Upload logo</span>
+              <span className="text-xs text-[var(--text-secondary)]">Upload logo</span>
             </div>
           </div>
         </div>
@@ -66,15 +66,15 @@ export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
                     aria-label={`${label}: ${hex}`}
                     role="img"
                   />
-                  <span className="text-xs text-[var(--grey-600)]">{label}</span>
-                  <span className="text-[10px] uppercase text-[var(--grey-400)]">{hex}</span>
+                  <span className="text-xs text-[var(--text-tertiary)]">{label}</span>
+                  <span className="text-[10px] uppercase text-[var(--text-tertiary)]">{hex}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <p className="text-xs text-[var(--grey-500)]">
+        <p className="text-xs text-[var(--text-secondary)]">
           Per-client branding set in client settings.
         </p>
       </fieldset>

@@ -6,7 +6,7 @@ export function AlreadyCompletedScreen(): React.ReactNode {
         <h1 className="mb-3 text-xl font-semibold text-[var(--grey-900)]">
           Survey Already Completed
         </h1>
-        <p className="text-[var(--grey-500)]">
+        <p className="text-[var(--text-secondary)]">
           You've already completed this survey. Thank you for your participation!
         </p>
       </div>

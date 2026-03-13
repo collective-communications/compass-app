@@ -152,7 +152,7 @@ export function DialogueInsightsContent(): ReactElement {
   return (
     <div className="flex flex-col gap-4 py-4">
       <h3 className="text-sm font-semibold text-[var(--grey-900)]">About Dialogue</h3>
-      <p className="text-sm leading-relaxed text-[var(--grey-500)]">
+      <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
         Open-ended feedback provides qualitative depth beyond numeric scores.
         Use keyword bubbles and filters to explore common patterns across responses.
         All feedback is structurally anonymous — no responses can be attributed to individuals.

@@ -137,7 +137,7 @@ export function ReportsPage({
       {!isLoading && reports.length === 0 && activeSurveyId !== null && (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-12 text-center">
           <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
-          <p className="text-sm text-[var(--grey-500)]">
+          <p className="text-sm text-[var(--text-secondary)]">
             No reports yet. Reports will appear here once your consultant generates them.
           </p>
         </div>
@@ -147,7 +147,7 @@ export function ReportsPage({
       {!isLoading && activeSurveyId === null && (
         <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-12 text-center">
           <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
-          <p className="text-sm text-[var(--grey-500)]">
+          <p className="text-sm text-[var(--text-secondary)]">
             Select a survey above to view its reports.
           </p>
         </div>
@@ -161,7 +161,7 @@ export function ReportsPage({
             {/* Active survey reports */}
             {isActiveSurvey && (
               <div className="flex flex-col gap-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--grey-400)]">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
                   Available Reports
                 </h2>
                 <div role="list" aria-label="Available reports">
@@ -181,7 +181,7 @@ export function ReportsPage({
             {/* Previous survey reports */}
             {!isActiveSurvey && (
               <div className="flex flex-col gap-3">
-                <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--grey-400)]">
+                <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--text-tertiary)]">
                   Previous Surveys
                 </h2>
                 <div role="list" aria-label="Previous survey reports">

@@ -93,7 +93,7 @@ export function BulkImportModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-[var(--grey-500)] hover:text-[var(--grey-700)]"
+            className="rounded-md p-1 text-[var(--text-secondary)] hover:text-[var(--grey-700)]"
             aria-label="Close"
           >
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
@@ -115,7 +115,7 @@ export function BulkImportModal({
             className={`rounded-full px-3 py-1 text-sm font-medium ${
               inputMethod === 'file'
                 ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
-                : 'text-[var(--grey-600)] hover:text-[var(--grey-900)]'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
             }`}
           >
             Upload CSV
@@ -126,7 +126,7 @@ export function BulkImportModal({
             className={`rounded-full px-3 py-1 text-sm font-medium ${
               inputMethod === 'paste'
                 ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
-                : 'text-[var(--grey-600)] hover:text-[var(--grey-900)]'
+                : 'text-[var(--text-tertiary)] hover:text-[var(--text-primary)]'
             }`}
           >
             Paste Data
@@ -136,14 +136,17 @@ export function BulkImportModal({
         {/* Input area */}
         {inputMethod === 'file' ? (
           <div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv,text/csv"
-              onChange={handleFileChange}
-              className="block w-full text-sm text-[var(--grey-700)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--grey-100)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--grey-700)] hover:file:bg-[var(--grey-200)]"
-            />
-            <p className="mt-2 text-xs text-[var(--grey-500)]">
+            <label className="block text-sm font-medium text-[var(--text-secondary)]">
+              <span className="sr-only">Choose CSV file</span>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                onChange={handleFileChange}
+                className="block w-full text-sm text-[var(--grey-700)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--grey-100)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--grey-700)] hover:file:bg-[var(--grey-200)]"
+              />
+            </label>
+            <p className="mt-2 text-xs text-[var(--text-secondary)]">
               CSV format: email, name, department, role, location, tenure (email required, rest optional)
             </p>
           </div>
@@ -154,7 +157,7 @@ export function BulkImportModal({
               onChange={(e) => setPasteContent(e.target.value)}
               placeholder="email,name,department,role,location,tenure&#10;jane@example.com,Jane Doe,Engineering,Manager,Remote,3-5 years"
               rows={6}
-              className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--grey-500)] focus:outline-none resize-none"
+              className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--grey-500)] focus:outline-none resize-none"
             />
             <button
               type="button"
@@ -173,7 +176,7 @@ export function BulkImportModal({
             <p className="text-sm font-medium text-red-700">
               {invalidRows.length} invalid row{invalidRows.length !== 1 ? 's' : ''}
             </p>
-            <ul className="mt-1 space-y-0.5 text-xs text-red-600">
+            <ul className="mt-1 space-y-0.5 text-xs text-red-700">
               {invalidRows.slice(0, 5).map((r, i) => (
                 <li key={i}>
                   {r.email || '(empty)'}: {r.error}
@@ -192,9 +195,9 @@ export function BulkImportModal({
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 bg-[var(--grey-50)]">
                 <tr>
-                  <th className="px-3 py-1.5 font-medium text-[var(--grey-600)]">Email</th>
-                  <th className="px-3 py-1.5 font-medium text-[var(--grey-600)]">Name</th>
-                  <th className="px-3 py-1.5 font-medium text-[var(--grey-600)]">Status</th>
+                  <th className="px-3 py-1.5 font-medium text-[var(--text-tertiary)]">Email</th>
+                  <th className="px-3 py-1.5 font-medium text-[var(--text-tertiary)]">Name</th>
+                  <th className="px-3 py-1.5 font-medium text-[var(--text-tertiary)]">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[var(--grey-100)]">
@@ -206,7 +209,7 @@ export function BulkImportModal({
                       {r.valid ? (
                         <span className="text-green-700">Valid</span>
                       ) : (
-                        <span className="text-red-600">{r.error}</span>
+                        <span className="text-red-700">{r.error}</span>
                       )}
                     </td>
                   </tr>
@@ -221,7 +224,7 @@ export function BulkImportModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg px-4 py-2 text-sm font-medium text-[var(--grey-600)] hover:text-[var(--grey-900)]"
+            className="rounded-lg px-4 py-2 text-sm font-medium text-[var(--text-tertiary)] hover:text-[var(--text-primary)]"
           >
             Cancel
           </button>

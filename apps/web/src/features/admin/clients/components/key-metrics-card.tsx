@@ -16,7 +16,7 @@ function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' | null }): 
   if (!trend) return null;
   if (trend === 'stable') {
     return (
-      <span className="text-[var(--grey-500)]" aria-label="Score stable">
+      <span className="text-[var(--text-secondary)]" aria-label="Score stable">
         &mdash;
       </span>
     );
@@ -36,7 +36,7 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
 
   return (
     <Card className="rounded-lg">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         Key Metrics
       </h3>
 
@@ -44,7 +44,7 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
         {/* Total Surveys */}
         <div>
           <p className="text-2xl font-bold text-[var(--grey-900)]">{organization.totalSurveys}</p>
-          <p className="mt-1 text-sm text-[var(--grey-500)]">
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">
             Total Survey{organization.totalSurveys !== 1 ? 's' : ''}
           </p>
         </div>
@@ -55,7 +55,7 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
             {hasScore ? organization.lastScore!.toFixed(1) : '\u2014'}
             {hasScore && <TrendIndicator trend={organization.scoreTrend} />}
           </p>
-          <p className="mt-1 text-sm text-[var(--grey-500)]">Culture Score</p>
+          <p className="mt-1 text-sm text-[var(--text-secondary)]">Culture Score</p>
         </div>
 
         {/* Active Survey */}
@@ -63,14 +63,14 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
           {organization.activeSurveyId ? (
             <>
               <p className="text-2xl font-bold text-[var(--severity-healthy-text)]">Active</p>
-              <p className="mt-1 truncate text-sm text-[var(--grey-500)]">
+              <p className="mt-1 truncate text-sm text-[var(--text-secondary)]">
                 {organization.activeSurveyTitle ?? 'Active Survey'}
               </p>
             </>
           ) : (
             <>
-              <p className="text-2xl font-bold text-[var(--grey-400)]">{'\u2014'}</p>
-              <p className="mt-1 text-sm text-[var(--grey-500)]">No Active Survey</p>
+              <p className="text-2xl font-bold text-[var(--text-tertiary)]">{'\u2014'}</p>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">No Active Survey</p>
             </>
           )}
         </div>

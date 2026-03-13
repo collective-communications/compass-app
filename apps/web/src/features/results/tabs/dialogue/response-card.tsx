@@ -17,7 +17,7 @@ interface ResponseCardProps {
 export function ResponseCard({ response }: ResponseCardProps): ReactElement {
   return (
     <Card className="rounded-[10px] px-6 py-5" role="article">
-      <p className="mb-2 text-xs font-medium text-[var(--grey-500)]">{response.questionText}</p>
+      <p className="mb-2 text-xs font-medium text-[var(--text-secondary)]">{response.questionText}</p>
       <p className="text-sm leading-relaxed text-[var(--grey-900)]">{response.responseText}</p>
     </Card>
   );

@@ -26,7 +26,7 @@ interface BottomTabBarProps {
 
 export function BottomTabBar({ tabs, activeTabId }: BottomTabBarProps): ReactElement {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-10 border-t border-[var(--grey-300)] bg-[var(--grey-50)] lg:hidden">
+    <nav aria-label="Main navigation" className="fixed bottom-0 left-0 right-0 z-10 border-t border-[var(--grey-300)] bg-[var(--grey-50)] lg:hidden">
       <ul className="flex items-center justify-around py-2">
         {tabs.map((tab) => {
           const Icon = ICON_MAP[tab.icon];
@@ -49,7 +49,7 @@ export function BottomTabBar({ tabs, activeTabId }: BottomTabBarProps): ReactEle
               <Link
                 to={tab.href}
                 className={`flex flex-col items-center gap-0.5 px-3 py-1 ${
-                  isActive ? 'text-[var(--color-core-text)]' : 'text-[var(--grey-500)]'
+                  isActive ? 'text-[var(--color-core-text)]' : 'text-[var(--text-secondary)]'
                 }`}
               >
                 {Icon && <Icon size={20} />}

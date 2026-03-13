@@ -22,7 +22,7 @@ export function EmptyState({ icon, title, subtitle, actions }: EmptyStateProps):
     <div role="status" className="flex flex-col items-center justify-center px-8 py-12 text-center">
       {icon !== undefined && <div className="mb-4">{icon}</div>}
       <h3 className="text-lg font-semibold">{title}</h3>
-      <p className="mt-1 text-sm text-[var(--grey-500)]">{subtitle}</p>
+      <p className="mt-1 text-sm text-[var(--text-secondary)]">{subtitle}</p>
       {actions !== undefined && actions.length > 0 && (
         <div className="mt-6 flex gap-3">
           {actions.map((action) => (

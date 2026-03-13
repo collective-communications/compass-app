@@ -56,7 +56,7 @@ export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPagePro
   if (isLoading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-6">
-        <p className="py-12 text-center text-sm text-[var(--grey-500)]">Loading client...</p>
+        <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Loading client...</p>
       </div>
     );
   }
@@ -95,7 +95,7 @@ export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPagePro
           <button
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="rounded-lg px-3 py-1.5 text-lg text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)]"
+            className="rounded-lg px-3 py-1.5 text-lg text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)]"
             aria-label="Actions menu"
             aria-expanded={menuOpen}
             aria-haspopup="menu"
@@ -154,7 +154,7 @@ export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPagePro
               className={`relative pb-3 text-sm transition-colors ${
                 activeTab === tab.id
                   ? 'font-semibold text-[var(--grey-900)]'
-                  : 'font-medium text-[var(--grey-500)] hover:text-[var(--grey-700)]'
+                  : 'font-medium text-[var(--text-secondary)] hover:text-[var(--grey-700)]'
               }`}
             >
               {tab.label}
@@ -182,7 +182,7 @@ export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPagePro
 
             {/* Quick Actions */}
             <nav aria-label="Quick actions" className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
                 Quick Actions
               </h3>
               <div className="flex flex-col gap-2">
@@ -215,7 +215,7 @@ export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPagePro
 
       {activeTab === 'results' && (
         <div role="tabpanel" aria-label="Results">
-          <p className="py-12 text-center text-sm text-[var(--grey-500)]">Results tab content will be added in a future wave.</p>
+          <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Results tab content will be added in a future wave.</p>
         </div>
       )}
 

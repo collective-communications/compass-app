@@ -62,7 +62,7 @@ export function ProfileMenu({ user, tier, onSignOut }: ProfileMenuProps): ReactE
             <p className="text-sm font-medium text-[var(--grey-900)]">
               {user.fullName ?? user.email}
             </p>
-            <p className="text-xs text-[var(--grey-500)]">{user.email}</p>
+            <p className="text-xs text-[var(--text-secondary)]">{user.email}</p>
           </div>
 
           <button

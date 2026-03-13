@@ -33,7 +33,7 @@ export function SurveyPicker({
 
   if (surveys.length === 0) {
     return (
-      <div className="h-10 w-64 rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-2 text-sm text-[var(--grey-400)]">
+      <div className="h-10 w-64 rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-2 text-sm text-[var(--text-tertiary)]">
         No surveys available
       </div>
     );

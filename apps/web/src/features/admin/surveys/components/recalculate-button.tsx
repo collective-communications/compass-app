@@ -57,11 +57,11 @@ export function RecalculateButton({
       </div>
 
       {state === 'error' && errorMessage && (
-        <p className="text-xs text-red-600">{errorMessage}</p>
+        <p className="text-xs text-red-700">{errorMessage}</p>
       )}
 
       {scoresCalculated && scoresCalculatedAt && state === 'idle' && (
-        <p className="text-xs text-[var(--grey-500)]">
+        <p className="text-xs text-[var(--text-secondary)]">
           Last calculated:{' '}
           {new Date(scoresCalculatedAt).toLocaleString(undefined, {
             month: 'short',

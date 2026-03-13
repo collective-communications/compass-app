@@ -24,7 +24,7 @@ const footerBase: React.CSSProperties = {
   backgroundColor: 'var(--grey-0, #ffffff)',
   fontFamily: 'var(--font-body)',
   fontSize: '13px',
-  color: 'var(--grey-500)',
+  color: 'var(--text-secondary, #424242)',
 };
 
 const shellContainer: React.CSSProperties = {
@@ -132,7 +132,7 @@ const pillStyle = (isActive: boolean): React.CSSProperties => ({
   fontWeight: 500,
   cursor: 'default',
   backgroundColor: isActive ? '#424242' : 'transparent',
-  color: isActive ? '#ffffff' : 'var(--grey-600)',
+  color: isActive ? '#ffffff' : 'var(--text-secondary, #424242)',
   border: 'none',
   fontFamily: 'var(--font-body)',
 });
@@ -168,6 +168,7 @@ export const AppShellDecorator: Decorator = (Story) => (
 
     {/* Pill navigation bar */}
     <nav
+      aria-label="Main navigation"
       style={{
         display: 'flex',
         gap: '8px',
@@ -201,7 +202,7 @@ export const AppShellDecorator: Decorator = (Story) => (
           key={tab}
           style={{
             fontSize: '11px',
-            color: tab === 'Home' ? '#0A3B4F' : 'var(--grey-400)',
+            color: tab === 'Home' ? '#0A3B4F' : 'var(--text-secondary, #424242)',
             fontWeight: tab === 'Home' ? 600 : 400,
             textAlign: 'center',
           }}

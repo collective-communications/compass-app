@@ -53,7 +53,7 @@ export function OrgSettingsPage(): ReactElement {
 
   if (!orgId) {
     return (
-      <div className="p-6 text-sm text-[var(--grey-500)]">
+      <div className="p-6 text-sm text-[var(--text-secondary)]">
         No organization selected.
       </div>
     );
@@ -61,7 +61,7 @@ export function OrgSettingsPage(): ReactElement {
 
   if (!settings) {
     return (
-      <div className="p-6 text-sm text-[var(--grey-500)]">
+      <div className="p-6 text-sm text-[var(--text-secondary)]">
         Loading organization settings...
       </div>
     );
@@ -73,7 +73,7 @@ export function OrgSettingsPage(): ReactElement {
         <h1 className="text-2xl font-semibold text-[var(--grey-900)]">
           {org.data?.name ?? 'Organization'} Settings
         </h1>
-        <p className="mt-1 text-sm text-[var(--grey-500)]">
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">
           Configure metadata options, branding, and access controls for this organization.
         </p>
       </header>

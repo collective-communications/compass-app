@@ -126,10 +126,10 @@ export function UserCard({
               <h3 className="truncate text-base font-semibold text-[var(--grey-900)]">
                 {member.fullName}
                 {isSelf && (
-                  <span className="ml-2 text-xs font-normal text-[var(--grey-500)]">(you)</span>
+                  <span className="ml-2 text-xs font-normal text-[var(--text-secondary)]">(you)</span>
                 )}
               </h3>
-              <p className="truncate text-sm text-[var(--grey-600)]">{member.email}</p>
+              <p className="truncate text-sm text-[var(--text-tertiary)]">{member.email}</p>
             </div>
 
             {/* Role selector */}
@@ -157,7 +157,7 @@ export function UserCard({
           </div>
 
           {/* Metadata row */}
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[var(--grey-500)]">
+          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-[var(--text-secondary)]">
             {member.assignedClients.length > 0 && (
               <span>
                 {member.assignedClients.length} client{member.assignedClients.length !== 1 ? 's' : ''}
@@ -168,12 +168,12 @@ export function UserCard({
 
           {/* Inline errors */}
           {roleChangeError && (
-            <p className="mt-2 text-xs text-red-600" role="alert">
+            <p className="mt-2 text-xs text-red-700" role="alert">
               {roleChangeError}
             </p>
           )}
           {removeError && (
-            <p className="mt-2 text-xs text-red-600" role="alert">
+            <p className="mt-2 text-xs text-red-700" role="alert">
               {removeError}
             </p>
           )}
@@ -183,19 +183,19 @@ export function UserCard({
             <div className="mt-3">
               {confirmRemove ? (
                 <div className="flex items-center gap-2">
-                  <span className="text-xs text-[var(--grey-600)]">Remove this person?</span>
+                  <span className="text-xs text-[var(--text-tertiary)]">Remove this person?</span>
                   <button
                     type="button"
                     onClick={handleRemoveClick}
                     disabled={isLastAdmin || isUpdating}
-                    className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+                    className="text-xs font-medium text-red-700 hover:text-red-700 disabled:opacity-50"
                   >
                     Confirm
                   </button>
                   <button
                     type="button"
                     onClick={handleCancelRemove}
-                    className="text-xs font-medium text-[var(--grey-600)] hover:text-[var(--grey-700)]"
+                    className="text-xs font-medium text-[var(--text-tertiary)] hover:text-[var(--grey-700)]"
                   >
                     Cancel
                   </button>
@@ -205,7 +205,7 @@ export function UserCard({
                   type="button"
                   onClick={handleRemoveClick}
                   disabled={isLastAdmin || isUpdating}
-                  className="text-xs font-medium text-[var(--grey-500)] hover:text-red-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="text-xs font-medium text-[var(--text-secondary)] hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label={
                     isLastAdmin
                       ? 'Cannot remove the last admin'

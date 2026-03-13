@@ -6,7 +6,7 @@ export function InvalidTokenScreen(): React.ReactNode {
         <h1 className="mb-3 text-xl font-semibold text-[var(--grey-900)]">
           Invalid Survey Link
         </h1>
-        <p className="text-[var(--grey-500)]">
+        <p className="text-[var(--text-secondary)]">
           This survey link is not valid. Please check the link and try again, or
           contact the person who shared it with you.
         </p>

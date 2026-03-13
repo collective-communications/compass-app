@@ -34,7 +34,7 @@ export function DrilldownHeader({
           onClick={() => {
             void navigate({ to: backTo });
           }}
-          className="flex items-center justify-center rounded-lg p-1.5 text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          className="flex items-center justify-center rounded-lg p-1.5 text-[var(--text-secondary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label={backLabel}
         >
           <ArrowLeft className="h-5 w-5" />

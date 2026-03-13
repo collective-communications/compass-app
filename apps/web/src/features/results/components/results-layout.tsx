@@ -67,13 +67,13 @@ export function ResultsLayout({
 
       {/* Content: responsive 65/35 split */}
       <div className="flex flex-col gap-6 lg:flex-row">
-        <main
+        <div
           role="tabpanel"
           aria-label={`${activeTab} results`}
           className="min-w-0 lg:w-[65%]"
         >
           {children}
-        </main>
+        </div>
 
         {insightsContent !== undefined && (
           <InsightsPanel>{insightsContent}</InsightsPanel>

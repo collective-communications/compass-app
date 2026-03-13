@@ -57,7 +57,7 @@ export function DimensionNavItem({
           />
         )}
       </div>
-      <span className="text-sm font-semibold text-[var(--grey-500)]">{Math.round(score)}</span>
+      <span className="text-sm font-semibold text-[var(--text-secondary)]">{Math.round(score)}</span>
     </button>
   );
 }

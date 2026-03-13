@@ -32,7 +32,7 @@ export function TrustLadderCard({ surveyId }: TrustLadderCardProps): ReactElemen
   if (error || !data) {
     return (
       <section className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-        <p className="text-xs text-[var(--grey-400)]">Unable to load Trust Ladder.</p>
+        <p className="text-xs text-[var(--text-tertiary)]">Unable to load Trust Ladder.</p>
       </section>
     );
   }

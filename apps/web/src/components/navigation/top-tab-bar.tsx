@@ -9,7 +9,7 @@ interface TopTabBarProps {
 
 export function TopTabBar({ tabs, activeTabId }: TopTabBarProps): ReactElement {
   return (
-    <nav className="hidden lg:block">
+    <nav aria-label="Main navigation" className="hidden lg:block">
       <ul className="flex items-center gap-1">
         {tabs.map((tab) => {
           const isActive = tab.id === activeTabId;

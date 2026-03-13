@@ -29,7 +29,7 @@ const STATUS_BADGE_CLASS: Record<SurveyStatus, string> = {
   active: 'bg-green-50 text-green-700',
   paused: 'bg-yellow-50 text-yellow-700',
   closed: 'bg-orange-50 text-orange-700',
-  archived: 'bg-[var(--grey-100)] text-[var(--grey-500)]',
+  archived: 'bg-[var(--grey-100)] text-[var(--text-secondary)]',
 };
 
 const STATUS_LABEL: Record<SurveyStatus, string> = {
@@ -54,18 +54,26 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
   const daysRemaining = getDaysRemaining(survey.closesAt);
 
   return (
-    <button
-      type="button"
-      onClick={() => onClick(survey.id)}
-      className={`w-full cursor-pointer rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-6 text-left transition-shadow hover:shadow-md ${STATUS_BORDER_COLOR[survey.status]}`}
+    <div
+      role="group"
+      aria-label={survey.title}
+      className={`relative w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-6 text-left transition-shadow hover:shadow-md ${STATUS_BORDER_COLOR[survey.status]}`}
     >
+      {/* Stretched overlay for primary click target */}
+      <button
+        type="button"
+        onClick={() => onClick(survey.id)}
+        className="absolute inset-0 z-0 cursor-pointer rounded-lg"
+        aria-label={`Open ${survey.title}`}
+      />
+
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-base font-semibold text-[var(--grey-900)]">
             {survey.title}
           </h3>
           {survey.description && (
-            <p className="mt-1 line-clamp-2 text-sm text-[var(--grey-600)]">
+            <p className="mt-1 line-clamp-2 text-sm text-[var(--text-tertiary)]">
               {survey.description}
             </p>
           )}
@@ -77,7 +85,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         </span>
       </div>
 
-      <div className="mt-4 flex items-center gap-4 text-sm text-[var(--grey-600)]">
+      <div className="mt-4 flex items-center gap-4 text-sm text-[var(--text-tertiary)]">
         <span>{survey.responseCount} responses</span>
         {survey.completionPercent > 0 && (
           <span>{survey.completionPercent}% complete</span>
@@ -85,12 +93,12 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         {daysRemaining && <span>{daysRemaining}</span>}
       </div>
 
-      {/* Action buttons */}
-      <div className="mt-4 flex items-center gap-2 border-t border-[var(--grey-100)] pt-4">
+      {/* Action buttons — elevated above the overlay */}
+      <div className="relative z-10 mt-4 flex items-center gap-2 border-t border-[var(--grey-100)] pt-4">
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); }}
-          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="Configure survey"
         >
           <Settings size={14} />
@@ -99,7 +107,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); }}
-          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="Edit questions"
         >
           <Edit size={14} />
@@ -108,7 +116,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); }}
-          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="Copy survey link"
         >
           <Link size={14} />
@@ -117,13 +125,13 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); }}
-          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--grey-600)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--grey-900)]"
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="View results"
         >
           <BarChart3 size={14} />
           View Results
         </button>
       </div>
-    </button>
+    </div>
   );
 }

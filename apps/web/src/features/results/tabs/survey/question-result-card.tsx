@@ -30,7 +30,7 @@ export function QuestionResultCard({
           </p>
           {question.isReverseScored && (
             <span
-              className="inline-flex shrink-0 items-center rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--grey-500)]"
+              className="inline-flex shrink-0 items-center rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-[10px] font-medium text-[var(--text-secondary)]"
               title="Reverse-scored question"
             >
               (R)

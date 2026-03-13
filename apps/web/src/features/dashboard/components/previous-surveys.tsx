@@ -42,11 +42,11 @@ export function PreviousSurveys({ surveys, onSelectSurvey }: PreviousSurveysProp
               <p className="truncate text-sm font-semibold text-[var(--grey-900)]">
                 {item.survey.title}
               </p>
-              <p className="mt-0.5 text-xs text-[var(--grey-500)]">
+              <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
                 {item.responseCount} responses &middot; Closed {formatDate(item.closedAt)}
               </p>
             </div>
-            <ChevronRight className="h-5 w-5 shrink-0 text-[var(--grey-400)]" aria-hidden="true" />
+            <ChevronRight className="h-5 w-5 shrink-0 text-[var(--text-tertiary)]" aria-hidden="true" />
           </button>
         ))}
       </div>

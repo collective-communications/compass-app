@@ -29,7 +29,7 @@ export function ResponseList({
   if (!hasAnyResponses) {
     return (
       <div className="rounded-[10px] border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-10 text-center">
-        <p className="text-sm text-[var(--grey-500)]">
+        <p className="text-sm text-[var(--text-secondary)]">
           No open-ended responses were collected in this survey.
         </p>
       </div>
@@ -39,13 +39,13 @@ export function ResponseList({
   if (responses.length === 0) {
     return (
       <div className="rounded-[10px] border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-10 text-center">
-        <p className="mb-3 text-sm text-[var(--grey-500)]">
+        <p className="mb-3 text-sm text-[var(--text-secondary)]">
           No responses match your filters. Try adjusting your search or removing filters.
         </p>
         <button
           type="button"
           onClick={onClearFilters}
-          className="text-sm font-medium text-[var(--grey-700)] underline hover:text-[var(--grey-900)]"
+          className="text-sm font-medium text-[var(--grey-700)] underline hover:text-[var(--text-primary)]"
         >
           Clear all filters
         </button>

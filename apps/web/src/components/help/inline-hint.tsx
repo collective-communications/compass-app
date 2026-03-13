@@ -12,7 +12,7 @@ interface InlineHintProps {
  */
 export function InlineHint({ text, id }: InlineHintProps): ReactElement {
   return (
-    <p id={id} className="text-sm text-[var(--grey-500)]">
+    <p id={id} className="text-sm text-[var(--text-secondary)]">
       {text}
     </p>
   );

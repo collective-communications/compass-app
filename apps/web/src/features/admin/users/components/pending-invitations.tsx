@@ -66,28 +66,28 @@ export function PendingInvitations({
   if (invitations.length === 0) {
     return (
       <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
           Pending Invitations
         </h3>
-        <p className="text-sm text-[var(--grey-500)]">No pending invitations.</p>
+        <p className="text-sm text-[var(--text-secondary)]">No pending invitations.</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         Pending Invitations ({invitations.length})
       </h3>
 
       {/* Inline errors */}
       {resendError && (
-        <p className="mb-3 text-xs text-red-600" role="alert">
+        <p className="mb-3 text-xs text-red-700" role="alert">
           {resendError}
         </p>
       )}
       {revokeError && (
-        <p className="mb-3 text-xs text-red-600" role="alert">
+        <p className="mb-3 text-xs text-red-700" role="alert">
           {revokeError}
         </p>
       )}
@@ -106,7 +106,7 @@ export function PendingInvitations({
                   <span className="truncate text-sm font-medium text-[var(--grey-900)]">
                     {inv.email}
                   </span>
-                  <span className="shrink-0 rounded-full bg-[var(--grey-100)] px-2 py-0.5 text-xs font-medium text-[var(--grey-600)]">
+                  <span className="shrink-0 rounded-full bg-[var(--grey-100)] px-2 py-0.5 text-xs font-medium text-[var(--text-tertiary)]">
                     {ROLE_LABELS[inv.role] ?? inv.role}
                   </span>
                   {expired && (
@@ -115,7 +115,7 @@ export function PendingInvitations({
                     </span>
                   )}
                 </div>
-                <p className="mt-0.5 text-xs text-[var(--grey-500)]">
+                <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
                   {formatExpiry(inv.expiresAt)}
                 </p>
               </div>
@@ -138,14 +138,14 @@ export function PendingInvitations({
                       type="button"
                       onClick={() => handleRevoke(inv.id)}
                       disabled={isRevoking}
-                      className="text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-50"
+                      className="text-xs font-medium text-red-700 hover:text-red-700 disabled:opacity-50"
                     >
                       Confirm
                     </button>
                     <button
                       type="button"
                       onClick={() => setConfirmRevokeId(null)}
-                      className="text-xs font-medium text-[var(--grey-600)]"
+                      className="text-xs font-medium text-[var(--text-tertiary)]"
                     >
                       Cancel
                     </button>
@@ -155,7 +155,7 @@ export function PendingInvitations({
                     type="button"
                     onClick={() => handleRevoke(inv.id)}
                     disabled={isRevoking}
-                    className="text-xs font-medium text-[var(--grey-500)] hover:text-red-600 disabled:opacity-50"
+                    className="text-xs font-medium text-[var(--text-secondary)] hover:text-red-700 disabled:opacity-50"
                   >
                     Revoke
                   </button>

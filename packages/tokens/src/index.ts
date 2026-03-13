@@ -29,6 +29,19 @@ export const greyscale = {
   900: '#212121',
 } as const;
 
+/**
+ * Semantic text color tokens — AA-compliant on greyscale backgrounds.
+ * Light values target --grey-50 (#F5F5F5) backgrounds.
+ * Dark values target --grey-50 (#212121) backgrounds in dark mode.
+ */
+export const textColors = {
+  primary: { light: greyscale[900], dark: '#F5F5F5' },
+  secondary: { light: greyscale[700], dark: '#BDBDBD' },
+  tertiary: { light: '#616161', dark: '#A0A0A0' },
+  placeholder: { light: '#757575', dark: '#8A8A8A' },
+  disabled: { light: greyscale[400], dark: '#8A8A8A' },
+} as const;
+
 /** Typography tokens. */
 export const typography = {
   headings: "'DM Serif Display', serif",
@@ -105,6 +118,10 @@ export function injectTokens(): void {
     root.style.setProperty(`--severity-${key}-border`, val.border);
     root.style.setProperty(`--severity-${key}-bg`, val.bg);
     root.style.setProperty(`--severity-${key}-text`, val.border);
+  }
+
+  for (const [key, val] of Object.entries(textColors)) {
+    root.style.setProperty(`--text-${key}`, val.light);
   }
 
   root.style.setProperty('--color-core-text', colors.core);

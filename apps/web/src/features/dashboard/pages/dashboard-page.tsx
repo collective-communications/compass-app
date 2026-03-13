@@ -60,7 +60,7 @@ export function DashboardPage(): ReactElement {
         {/* Loading state */}
         {isLoading && (
           <div className="flex items-center justify-center py-12">
-            <p className="text-sm text-[var(--grey-500)]">Loading dashboard...</p>
+            <p className="text-sm text-[var(--text-secondary)]">Loading dashboard...</p>
           </div>
         )}
 
@@ -76,7 +76,7 @@ export function DashboardPage(): ReactElement {
         {/* Empty state — no surveys at all */}
         {!isLoading && !error && !hasSurveys && (
           <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
-            <p className="text-sm text-[var(--grey-600)]">
+            <p className="text-sm text-[var(--text-tertiary)]">
               No surveys yet. Your organization&apos;s first culture assessment is coming soon.
             </p>
           </div>
@@ -101,7 +101,7 @@ export function DashboardPage(): ReactElement {
 
               {!activeSurvey && !resultsEnabled && (
                 <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
-                  <p className="text-sm text-[var(--grey-600)]">
+                  <p className="text-sm text-[var(--text-tertiary)]">
                     Results are being prepared. Your consultant will let you know when they&apos;re
                     ready to review.
                   </p>
@@ -117,7 +117,7 @@ export function DashboardPage(): ReactElement {
                 </h2>
                 {/* Mini compass preview placeholder */}
                 <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-200)] bg-white">
-                  <p className="text-xs text-[var(--grey-400)]">Compass Preview</p>
+                  <p className="text-xs text-[var(--text-tertiary)]">Compass Preview</p>
                 </div>
                 {resultsEnabled && activeSurvey && (
                   <button

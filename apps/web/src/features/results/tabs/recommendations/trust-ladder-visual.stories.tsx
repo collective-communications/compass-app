@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TrustLadderVisual } from './trust-ladder-visual';
 import type { TrustLadderResult, TrustRungScore } from '@compass/types';
+import { AppShellDecorator } from '../../../../../../storybook/.storybook/decorators/shells';
 
 function makeRung(
   rung: number,
@@ -63,6 +64,7 @@ const highTrustResult: TrustLadderResult = {
 const meta = {
   title: 'Features/Results/Recommendations/TrustLadderVisual',
   component: TrustLadderVisual,
+  decorators: [AppShellDecorator],
   args: {
     result: fullResult,
   },

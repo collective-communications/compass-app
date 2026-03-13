@@ -91,7 +91,7 @@ export function SurveyListPage({
       </div>
 
       {isLoading && (
-        <div className="py-12 text-center text-sm text-[var(--grey-500)]">
+        <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
           Loading surveys...
         </div>
       )}
@@ -103,7 +103,7 @@ export function SurveyListPage({
       )}
 
       {surveys && surveys.length === 0 && !isLoading && (
-        <div className="py-12 text-center text-sm text-[var(--grey-500)]">
+        <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
           {statusFilter
             ? `No ${statusFilter} surveys found.`
             : 'No surveys yet. Create your first survey to get started.'}

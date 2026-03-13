@@ -113,7 +113,7 @@ export function CompassTab({ scores, archetype, riskFlags, activeDimension: cont
 
           {/* Risk flags */}
           <div>
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--grey-400)]">
+            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
               Risk Flags
             </h3>
             <RiskFlagList flags={riskFlags} />

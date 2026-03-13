@@ -68,17 +68,17 @@ export function DimensionDetailPanel({
         />
         <div>
           <h3 className="text-lg font-bold text-[var(--grey-900)]">{label}</h3>
-          <p className="text-sm text-[var(--grey-500)]">{Math.round(score)}% score</p>
+          <p className="text-sm text-[var(--text-secondary)]">{Math.round(score)}% score</p>
         </div>
       </div>
 
-      <p className="text-sm leading-relaxed text-[var(--grey-500)]">
+      <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
         {DIMENSION_DESCRIPTIONS[dimension]}
       </p>
 
       {flag && flag.severity !== 'healthy' && (
         <div className="rounded-lg bg-[var(--severity-medium-bg)] p-3">
-          <p className="text-sm font-medium text-[var(--grey-500)]">{flag.message}</p>
+          <p className="text-sm font-medium text-[var(--text-secondary)]">{flag.message}</p>
         </div>
       )}
     </div>

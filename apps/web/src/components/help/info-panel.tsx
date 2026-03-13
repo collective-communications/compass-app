@@ -81,7 +81,7 @@ export function InfoPanel({ id, title, content, defaultOpen = false }: InfoPanel
         aria-expanded={isOpen}
         aria-controls={contentId}
         onClick={handleToggle}
-        className="inline-flex items-center gap-1 text-[var(--grey-400)] hover:text-[var(--grey-500)]"
+        className="inline-flex items-center gap-1 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
       >
         <Info size={16} aria-hidden="true" />
         <span className="sr-only">{isOpen ? `Collapse ${title}` : `Expand ${title}`}</span>

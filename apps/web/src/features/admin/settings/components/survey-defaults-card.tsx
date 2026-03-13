@@ -67,7 +67,7 @@ export function SurveyDefaultsCard({
           <AutoSaveIndicator status={SAVE_TO_AUTOSAVE[saveStatus]} />
         </legend>
 
-        <p className="mb-6 text-sm text-[var(--grey-500)]">
+        <p className="mb-6 text-sm text-[var(--text-secondary)]">
           Changes apply to new surveys only &mdash; existing surveys keep their values.
         </p>
 
@@ -89,7 +89,7 @@ export function SurveyDefaultsCard({
             aria-label={`Anonymity threshold, current value ${settings.anonymity_threshold}, range 3 to 20`}
             className="w-24 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
           />
-          <p className="mt-1 text-xs text-[var(--grey-500)]">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
             Minimum: 3. Applied as the default for all new surveys.
           </p>
         </div>
@@ -134,7 +134,7 @@ export function SurveyDefaultsCard({
               className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
             />
           ) : (
-            <p className="rounded-lg bg-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-600)]">
+            <p className="rounded-lg bg-[var(--grey-100)] px-3 py-2 text-sm text-[var(--text-tertiary)]">
               {settings.welcome_message}
             </p>
           )}
@@ -161,7 +161,7 @@ export function SurveyDefaultsCard({
               className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
             />
           ) : (
-            <p className="rounded-lg bg-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-600)]">
+            <p className="rounded-lg bg-[var(--grey-100)] px-3 py-2 text-sm text-[var(--text-tertiary)]">
               {settings.completion_message}
             </p>
           )}

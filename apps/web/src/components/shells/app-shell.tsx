@@ -24,7 +24,7 @@ export function AppShell({ children }: AppShellProps): ReactElement {
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-[var(--grey-500)]">Loading...</p>
+        <p className="text-[var(--text-secondary)]">Loading...</p>
       </div>
     );
   }

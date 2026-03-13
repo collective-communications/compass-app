@@ -65,7 +65,7 @@ export function SurveyDimensionsTab({
                 className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
                   activeDimension === dim.code
                     ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
-                    : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
+                    : 'text-[var(--text-secondary)] hover:bg-[var(--grey-50)]'
                 }`}
                 aria-current={activeDimension === dim.code ? 'true' : undefined}
               >
@@ -146,7 +146,7 @@ export function SurveyInsightsContent({
           );
         })}
       </ul>
-      <p className="text-xs leading-relaxed text-[var(--grey-500)]">
+      <p className="text-xs leading-relaxed text-[var(--text-secondary)]">
         Select a dimension above to explore individual question scores and response distributions.
       </p>
     </div>

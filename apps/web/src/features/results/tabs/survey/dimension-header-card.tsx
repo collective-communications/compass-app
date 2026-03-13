@@ -48,7 +48,7 @@ export function DimensionHeaderCard({
           <h3 className="text-base font-semibold text-[var(--grey-900)]">
             {dimensionName}
           </h3>
-          <p className="text-sm text-[var(--grey-500)]">
+          <p className="text-sm text-[var(--text-secondary)]">
             {questions.length} question{questions.length !== 1 ? 's' : ''} &middot; Overall score: {Math.round(score)}%
           </p>
         </div>

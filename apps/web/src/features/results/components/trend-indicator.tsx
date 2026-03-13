@@ -27,7 +27,7 @@ export function TrendIndicator({
 
   if (delta === 0) {
     return (
-      <span className={`${base} font-medium text-[var(--grey-500)]`} aria-label="No change">
+      <span className={`${base} font-medium text-[var(--text-secondary)]`} aria-label="No change">
         —
       </span>
     );

@@ -35,6 +35,7 @@ function TrendArrow({ trend }: { trend: 'up' | 'down' | 'stable' | null }): Reac
   if (!trend || trend === 'stable') return null;
   return (
     <span
+      role="img"
       className={trend === 'up' ? 'text-[var(--severity-healthy-text)]' : 'text-[var(--severity-high-text)]'}
       aria-label={`Score trending ${trend}`}
     >
@@ -84,7 +85,7 @@ export function ClientCard({ organization, onClick }: ClientCardProps): ReactEle
           </div>
 
           {/* Industry and employee count */}
-          <div className="mt-1 flex items-center gap-2 text-sm text-[var(--grey-600)]">
+          <div className="mt-1 flex items-center gap-2 text-sm text-[var(--text-tertiary)]">
             {organization.industry && <span>{organization.industry}</span>}
             {organization.industry && organization.employeeCount && (
               <span aria-hidden="true">&middot;</span>
@@ -95,7 +96,7 @@ export function ClientCard({ organization, onClick }: ClientCardProps): ReactEle
           </div>
 
           {/* Metrics row */}
-          <div className="mt-3 flex items-center gap-4 text-sm text-[var(--grey-600)]">
+          <div className="mt-3 flex items-center gap-4 text-sm text-[var(--text-tertiary)]">
             <span>{organization.totalSurveys} survey{organization.totalSurveys !== 1 ? 's' : ''}</span>
             {organization.lastScore !== null && (
               <span className="flex items-center gap-1">
@@ -110,7 +111,7 @@ export function ClientCard({ organization, onClick }: ClientCardProps): ReactEle
 
           {/* Assigned consultant */}
           {organization.assignedConsultant && (
-            <div className="mt-2 text-xs text-[var(--grey-500)]">
+            <div className="mt-2 text-xs text-[var(--text-secondary)]">
               Consultant: {organization.assignedConsultant}
             </div>
           )}

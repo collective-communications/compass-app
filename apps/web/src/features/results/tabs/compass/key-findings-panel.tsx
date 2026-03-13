@@ -100,7 +100,7 @@ export function KeyFindingsPanel({
     <div className="flex flex-col gap-6">
       {/* Observations */}
       <div>
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--grey-400)]">
+        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
           Observations
         </h3>
         <ul className="flex flex-col gap-3" aria-label="Key observations">
@@ -113,7 +113,7 @@ export function KeyFindingsPanel({
                 strokeWidth={3}
                 showLabel={false}
               />
-              <span className="text-sm leading-relaxed text-[var(--grey-500)]">{obs.text}</span>
+              <span className="text-sm leading-relaxed text-[var(--text-secondary)]">{obs.text}</span>
             </li>
           ))}
         </ul>
@@ -122,7 +122,7 @@ export function KeyFindingsPanel({
       {/* Priority Actions */}
       {actionableFlags.length > 0 && (
         <div>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--grey-400)]">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
             Priority Actions
           </h3>
           <ul className="flex flex-col gap-3" aria-label="Priority actions">
@@ -131,9 +131,9 @@ export function KeyFindingsPanel({
                 <span
                   className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full"
                   style={{ backgroundColor: SEVERITY_DOT_COLORS[flag.severity] }}
-                  aria-label={`${flag.severity} severity`}
+                  aria-hidden="true"
                 />
-                <span className="text-sm leading-relaxed text-[var(--grey-500)]">{flag.message}</span>
+                <span className="text-sm leading-relaxed text-[var(--text-secondary)]">{flag.message}</span>
               </li>
             ))}
           </ul>

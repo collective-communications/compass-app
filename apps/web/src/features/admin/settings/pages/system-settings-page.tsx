@@ -17,7 +17,7 @@ export function SystemSettingsPage(): ReactElement {
   if (query.isLoading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-6">
-        <div className="py-12 text-center text-sm text-[var(--grey-500)]">
+        <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
           Loading settings...
         </div>
       </div>
@@ -40,7 +40,7 @@ export function SystemSettingsPage(): ReactElement {
   if (!settings) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-6">
-        <div className="py-12 text-center text-sm text-[var(--grey-500)]">
+        <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
           No settings found.
         </div>
       </div>

@@ -54,7 +54,7 @@ export function SurveyFooter({ onHelpClick }: SurveyFooterProps): React.ReactEle
           type="button"
           onClick={onHelpClick}
           aria-label="Get help"
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--grey-400)] hover:text-[var(--grey-600)] transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] transition-colors"
         >
           <HelpCircle size={16} />
           <span>Help</span>
@@ -64,7 +64,7 @@ export function SurveyFooter({ onHelpClick }: SurveyFooterProps): React.ReactEle
           type="button"
           onClick={toggleTheme}
           aria-label={theme === 'light' ? 'Switch to dark theme' : 'Switch to light theme'}
-          className="inline-flex items-center gap-1.5 text-sm text-[var(--grey-400)] hover:text-[var(--grey-600)] transition-colors"
+          className="inline-flex items-center gap-1.5 text-sm text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] transition-colors"
         >
           {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
           <span>{theme === 'light' ? 'Dark' : 'Light'}</span>

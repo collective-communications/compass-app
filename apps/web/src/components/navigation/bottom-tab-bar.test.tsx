@@ -50,7 +50,7 @@ describe('BottomTabBar', () => {
   test('inactive tabs have grey styling', () => {
     render(<BottomTabBar tabs={TABS} activeTabId="results" />);
     const link = screen.getByText('Dashboard').closest('a');
-    expect(link?.className).toContain('text-[var(--grey-500)]');
+    expect(link?.className).toContain('text-[var(--text-secondary)]');
   });
 
   test('links point to correct hrefs', () => {
@@ -65,7 +65,7 @@ describe('BottomTabBar', () => {
     render(<BottomTabBar tabs={TABS} activeTabId={null} />);
     const links = screen.getAllByRole('link');
     for (const link of links) {
-      expect(link.className).toContain('text-[var(--grey-500)]');
+      expect(link.className).toContain('text-[var(--text-secondary)]');
     }
   });
 

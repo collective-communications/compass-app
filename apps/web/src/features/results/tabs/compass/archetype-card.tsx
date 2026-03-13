@@ -22,7 +22,7 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
 
   return (
     <Card className="rounded-lg">
-      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--grey-400)]">
+      <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-[var(--text-tertiary)]">
         Culture Archetype
       </p>
       <button
@@ -33,7 +33,7 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
         aria-controls="archetype-description"
       >
         <h3 className="text-lg font-bold text-[var(--grey-900)]">{match.archetype.name}</h3>
-        <p className="mt-0.5 text-sm text-[var(--grey-500)]">{CONFIDENCE_LABEL[match.confidence]}</p>
+        <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{CONFIDENCE_LABEL[match.confidence]}</p>
         <span className="mt-2 inline-block text-xs font-medium text-[var(--color-core-text)] underline">
           {expanded ? 'Show less' : 'Learn more'}
         </span>
@@ -42,7 +42,7 @@ export function ArchetypeCard({ match }: ArchetypeCardProps): ReactElement {
       {expanded && (
         <p
           id="archetype-description"
-          className="mt-3 text-sm leading-relaxed text-[var(--grey-500)]"
+          className="mt-3 text-sm leading-relaxed text-[var(--text-secondary)]"
         >
           {match.archetype.description}
         </p>

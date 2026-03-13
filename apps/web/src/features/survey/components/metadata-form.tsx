@@ -35,7 +35,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
     <div className="flex flex-col gap-1.5">
       <label htmlFor={fieldId} className="text-sm font-medium text-[var(--grey-700)]">
         {label}
-        <span className="text-red-600"> *</span>
+        <span className="text-red-700"> *</span>
       </label>
       <div className="relative">
         <select
@@ -45,7 +45,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
           onBlur={onBlur}
           className={`h-10 w-full appearance-none rounded-lg border bg-[var(--grey-50)] px-3 pr-8 text-sm text-[var(--grey-900)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/30 ${
             showError ? 'border-red-500' : 'border-[var(--grey-100)]'
-          } ${!field.value ? 'text-[var(--grey-400)]' : ''}`}
+          } ${!field.value ? 'text-[var(--text-tertiary)]' : ''}`}
           aria-invalid={showError}
           aria-describedby={showError ? `${fieldId}-error` : undefined}
         >
@@ -59,7 +59,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
           ))}
         </select>
         <svg
-          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--grey-400)]"
+          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]"
           width="16"
           height="16"
           viewBox="0 0 24 24"
@@ -74,7 +74,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
         </svg>
       </div>
       {showError && (
-        <p id={`${fieldId}-error`} className="text-xs text-red-600" role="alert">
+        <p id={`${fieldId}-error`} className="text-xs text-red-700" role="alert">
           Required
         </p>
       )}
@@ -129,7 +129,7 @@ export function MetadataForm({ config, onSubmit, isSubmitting }: MetadataFormPro
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
       <h2 className="text-base font-semibold text-[var(--grey-900)]">About You</h2>
-      <p className="text-sm text-[var(--grey-500)]">
+      <p className="text-sm text-[var(--text-secondary)]">
         This information helps group responses for meaningful insights. It is never used to identify
         individuals.
       </p>

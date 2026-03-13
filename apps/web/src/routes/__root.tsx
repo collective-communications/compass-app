@@ -459,14 +459,14 @@ const callbackRoute = createRoute({
     if (status === 'error') {
       return (
         <div className="flex min-h-screen items-center justify-center">
-          <p className="text-[var(--grey-500)]">Authentication failed. Redirecting...</p>
+          <p className="text-[var(--text-secondary)]">Authentication failed. Redirecting...</p>
         </div>
       );
     }
 
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-[var(--grey-500)]">Completing sign-in...</p>
+        <p className="text-[var(--text-secondary)]">Completing sign-in...</p>
       </div>
     );
   },
@@ -505,7 +505,7 @@ const forgotPasswordRoute = createRoute({
               >
                 Reset your password
               </h1>
-              <p className="mb-8 text-center text-sm text-[var(--grey-500)]">
+              <p className="mb-8 text-center text-sm text-[var(--text-secondary)]">
                 Enter your email and we'll send you a link to reset your password.
               </p>
 
@@ -515,14 +515,14 @@ const forgotPasswordRoute = createRoute({
                 <p className="mb-2 text-sm font-medium text-[var(--grey-700)]">
                   Didn&apos;t receive the email?
                 </p>
-                <ul className="list-disc pl-4 text-xs text-[var(--grey-500)] space-y-1">
+                <ul className="list-disc pl-4 text-xs text-[var(--text-secondary)] space-y-1">
                   <li>Check your spam or junk folder</li>
                   <li>Make sure you entered the correct email address</li>
                   <li>Wait a few minutes and try again</li>
                 </ul>
               </div>
 
-              <p className="mt-4 text-center text-sm text-[var(--grey-500)]">
+              <p className="mt-4 text-center text-sm text-[var(--text-secondary)]">
                 Remember your password?{' '}
                 <Link
                   to="/auth/login"
@@ -571,12 +571,12 @@ const forgotPasswordSentRoute = createRoute({
               </h1>
 
               {email && (
-                <p className="mb-6 text-sm text-[var(--grey-500)]">
+                <p className="mb-6 text-sm text-[var(--text-secondary)]">
                   We sent a reset link to <span className="font-medium text-[var(--grey-700)]">{email}</span>
                 </p>
               )}
 
-              <ol className="mb-8 space-y-3 text-left text-sm text-[var(--grey-600)]">
+              <ol className="mb-8 space-y-3 text-left text-sm text-[var(--text-tertiary)]">
                 <li className="flex gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-xs font-medium text-[var(--grey-700)]">1</span>
                   Check your inbox (and spam folder)

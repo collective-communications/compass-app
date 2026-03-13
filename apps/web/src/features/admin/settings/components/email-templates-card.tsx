@@ -150,7 +150,7 @@ export function EmailTemplatesCard(): ReactElement {
         </legend>
 
         {isLoading ? (
-          <p className="text-sm text-[var(--grey-500)]">Loading templates...</p>
+          <p className="text-sm text-[var(--text-secondary)]">Loading templates...</p>
         ) : (
           <div className="flex flex-col divide-y divide-[var(--grey-100)]">
             {templates.map((template) => {
@@ -188,7 +188,7 @@ export function EmailTemplatesCard(): ReactElement {
                       <div>
                         <label
                           htmlFor={`subject-${template.id}`}
-                          className="mb-1 block text-xs font-medium text-[var(--grey-500)]"
+                          className="mb-1 block text-xs font-medium text-[var(--text-secondary)]"
                         >
                           Subject
                         </label>
@@ -203,7 +203,7 @@ export function EmailTemplatesCard(): ReactElement {
                       <div>
                         <label
                           htmlFor={`body-${template.id}`}
-                          className="mb-1 block text-xs font-medium text-[var(--grey-500)]"
+                          className="mb-1 block text-xs font-medium text-[var(--text-secondary)]"
                         >
                           Body
                         </label>
@@ -215,7 +215,7 @@ export function EmailTemplatesCard(): ReactElement {
                           className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
                         />
                       </div>
-                      <p className="text-xs text-[var(--grey-400)]">
+                      <p className="text-xs text-[var(--text-tertiary)]">
                         Variables: {'{{organization_name}}'}, {'{{survey_link}}'}, {'{{close_date}}'}, {'{{dashboard_link}}'}, {'{{recipient_name}}'}
                       </p>
                       {hasChanges && (

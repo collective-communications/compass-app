@@ -54,7 +54,7 @@ export function QuestionRow({ question, isLocked, onEdit, questionCode }: Questi
       {!isLocked && (
         <button
           type="button"
-          className="mt-0.5 shrink-0 cursor-grab touch-none text-[var(--grey-400)] hover:text-[var(--grey-600)] active:cursor-grabbing"
+          className="mt-0.5 shrink-0 cursor-grab touch-none text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] active:cursor-grabbing"
           aria-label="Drag to reorder"
           {...attributes}
           {...listeners}
@@ -64,7 +64,7 @@ export function QuestionRow({ question, isLocked, onEdit, questionCode }: Questi
       )}
 
       {/* Question code */}
-      <span className="mt-0.5 shrink-0 rounded bg-[var(--grey-100)] px-1.5 py-0.5 text-xs font-mono font-medium text-[var(--grey-600)]">
+      <span className="mt-0.5 shrink-0 rounded bg-[var(--grey-100)] px-1.5 py-0.5 text-xs font-mono font-medium text-[var(--text-tertiary)]">
         {questionCode}
       </span>
 
@@ -77,14 +77,14 @@ export function QuestionRow({ question, isLocked, onEdit, questionCode }: Questi
       >
         <p className="text-sm text-[var(--grey-900)]">{question.text}</p>
         {question.diagnosticFocus && (
-          <p className="mt-0.5 text-xs text-[var(--grey-500)]">
+          <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
             Focus: {question.diagnosticFocus}
           </p>
         )}
       </button>
 
       <div className="flex shrink-0 items-center gap-2">
-        <span className="rounded bg-[var(--grey-100)] px-2 py-0.5 text-xs text-[var(--grey-600)]">
+        <span className="rounded bg-[var(--grey-100)] px-2 py-0.5 text-xs text-[var(--text-tertiary)]">
           {TYPE_LABEL[question.type]}
         </span>
         {question.reverseScored && (

@@ -44,9 +44,9 @@ export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactEl
 
           <div className="min-w-0">
             <h2 className="text-xl font-semibold text-[var(--grey-900)]">{organization.name}</h2>
-            <p className="mt-0.5 text-sm text-[var(--grey-500)]">{organization.slug}</p>
+            <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{organization.slug}</p>
 
-            <div className="mt-3 flex flex-col gap-1 text-sm text-[var(--grey-600)]">
+            <div className="mt-3 flex flex-col gap-1 text-sm text-[var(--text-tertiary)]">
               {organization.industry && <span>{organization.industry}</span>}
               {organization.employeeCount != null && (
                 <span>{organization.employeeCount.toLocaleString()} employees</span>
@@ -57,7 +57,7 @@ export function OrgInfoCard({ organization, onEdit }: OrgInfoCardProps): ReactEl
               <div className="mt-3 text-sm">
                 <p className="font-medium text-[var(--grey-700)]">Primary Contact</p>
                 {organization.primaryContactName && (
-                  <p className="text-[var(--grey-600)]">{organization.primaryContactName}</p>
+                  <p className="text-[var(--text-tertiary)]">{organization.primaryContactName}</p>
                 )}
                 {organization.primaryContactEmail && (
                   <a

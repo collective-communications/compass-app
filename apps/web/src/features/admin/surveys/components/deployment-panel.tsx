@@ -89,18 +89,18 @@ export function DeploymentPanel({
       {/* Dates */}
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
-          <p className="text-[var(--grey-500)]">Opens</p>
+          <p className="text-[var(--text-secondary)]">Opens</p>
           <p className="font-medium text-[var(--grey-900)]">{formatDate(survey.opensAt)}</p>
         </div>
         <div>
-          <p className="text-[var(--grey-500)]">Closes</p>
+          <p className="text-[var(--text-secondary)]">Closes</p>
           <p className="font-medium text-[var(--grey-900)]">{formatDate(survey.closesAt)}</p>
         </div>
       </div>
 
       {/* Access count */}
       <div className="mt-4 text-sm">
-        <p className="text-[var(--grey-500)]">Link accessed</p>
+        <p className="text-[var(--text-secondary)]">Link accessed</p>
         <p className="font-medium text-[var(--grey-900)]">
           {deployment.accessCount} {deployment.accessCount === 1 ? 'time' : 'times'}
         </p>
@@ -117,7 +117,7 @@ export function DeploymentPanel({
           type="button"
           onClick={onDeactivate}
           disabled={isPending}
-          className="rounded-lg border border-red-200 bg-[var(--grey-50)] px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-red-300 bg-[var(--grey-50)] px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? 'Closing...' : 'Close Early'}
         </button>
@@ -149,12 +149,12 @@ function EmailInviteSection({
   return (
     <div className="mt-4 border-t border-[var(--grey-100)] pt-4">
       <p className="text-sm font-medium text-[var(--grey-700)]">Email Invitations</p>
-      <p className="mt-1 text-xs text-[var(--grey-500)]">
+      <p className="mt-1 text-xs text-[var(--text-secondary)]">
         {stats.pending} pending recipient{stats.pending !== 1 ? 's' : ''} ready to receive invitations
       </p>
 
       {result && (
-        <p className="mt-2 text-xs text-[var(--grey-600)]">
+        <p className="mt-2 text-xs text-[var(--text-tertiary)]">
           Sent: {result.sent}{result.failed > 0 ? `, Failed: ${result.failed}` : ''}
         </p>
       )}

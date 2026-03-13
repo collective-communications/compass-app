@@ -42,7 +42,7 @@ export function OpenEndedScreen({
             disabled={isSubmitting}
             aria-label="Open-ended feedback"
           />
-          <p className="text-right text-xs text-[var(--grey-400)]" aria-live="polite">
+          <p className="text-right text-xs text-[var(--text-tertiary)]" aria-live="polite">
             {text.length} / {MAX_CHARS}
           </p>
         </div>

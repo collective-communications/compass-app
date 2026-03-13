@@ -39,7 +39,7 @@ export function ClientBranding({
           <AutoSaveIndicator status={SAVE_TO_AUTOSAVE[saveStatus]} />
         </legend>
 
-        <p className="mb-6 text-sm text-[var(--grey-500)]">
+        <p className="mb-6 text-sm text-[var(--text-secondary)]">
           Controls how this organization appears to survey respondents and in client-facing reports.
         </p>
 
@@ -59,7 +59,7 @@ export function ClientBranding({
             aria-label="Organization display name"
             className="w-full max-w-md rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
           />
-          <p className="mt-1 text-xs text-[var(--grey-500)]">
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
             Shown in survey headers and reports. Leave blank to use the organization name.
           </p>
         </div>
@@ -76,13 +76,13 @@ export function ClientBranding({
                 alt="Organization logo"
                 className="h-12 w-12 rounded-lg border border-[var(--grey-100)] object-contain"
               />
-              <span className="text-xs text-[var(--grey-500)]">
+              <span className="text-xs text-[var(--text-secondary)]">
                 Logo upload management coming soon.
               </span>
             </div>
           ) : (
             <div className="flex h-24 w-full max-w-md items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50,#F5F5F5)]">
-              <span className="text-sm text-[var(--grey-400)]">
+              <span className="text-sm text-[var(--text-tertiary)]">
                 Logo upload coming soon
               </span>
             </div>

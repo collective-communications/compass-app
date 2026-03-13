@@ -134,7 +134,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
             {/* Name (required) */}
             <div>
               <label htmlFor="edit-org-name" className="mb-1 block text-sm font-medium text-[var(--grey-700)]">
-                Organization Name <span className="text-red-600" aria-label="required">*</span>
+                Organization Name <span className="text-red-700" aria-label="required">*</span>
               </label>
               <input
                 ref={nameInputRef}
@@ -152,7 +152,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 required
               />
               {errors.name && (
-                <p id="edit-org-name-error" className="mt-1 text-xs text-red-600" role="alert">
+                <p id="edit-org-name-error" className="mt-1 text-xs text-red-700" role="alert">
                   {errors.name}
                 </p>
               )}
@@ -192,7 +192,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 aria-describedby={errors.employeeCount ? 'edit-org-employee-error' : undefined}
               />
               {errors.employeeCount && (
-                <p id="edit-org-employee-error" className="mt-1 text-xs text-red-600" role="alert">
+                <p id="edit-org-employee-error" className="mt-1 text-xs text-red-700" role="alert">
                   {errors.employeeCount}
                 </p>
               )}
@@ -231,7 +231,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 aria-describedby={errors.primaryContactEmail ? 'edit-org-email-error' : undefined}
               />
               {errors.primaryContactEmail && (
-                <p id="edit-org-email-error" className="mt-1 text-xs text-red-600" role="alert">
+                <p id="edit-org-email-error" className="mt-1 text-xs text-red-700" role="alert">
                   {errors.primaryContactEmail}
                 </p>
               )}

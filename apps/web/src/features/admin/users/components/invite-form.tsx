@@ -77,14 +77,14 @@ export function InviteForm({
   return (
     <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+        <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
           Invite Team Member
         </h3>
         {onClose && (
           <button
             type="button"
             onClick={onClose}
-            className="text-sm text-[var(--grey-500)] hover:text-[var(--grey-700)]"
+            className="text-sm text-[var(--text-secondary)] hover:text-[var(--grey-700)]"
             aria-label="Close invite form"
           >
             Cancel
@@ -95,7 +95,7 @@ export function InviteForm({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         {/* Email input */}
         <div className="flex-1">
-          <label htmlFor="invite-email" className="mb-1 block text-xs font-medium text-[var(--grey-600)]">
+          <label htmlFor="invite-email" className="mb-1 block text-xs font-medium text-[var(--text-tertiary)]">
             Email address
           </label>
           <input
@@ -108,7 +108,7 @@ export function InviteForm({
             }}
             placeholder="name@example.com"
             disabled={isPending}
-            className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)] disabled:opacity-50"
+            className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)] disabled:opacity-50"
             aria-invalid={!!displayError}
             aria-describedby={displayError ? 'invite-error' : undefined}
           />
@@ -116,7 +116,7 @@ export function InviteForm({
 
         {/* Role selector */}
         <div className="sm:w-40">
-          <label htmlFor="invite-role" className="mb-1 block text-xs font-medium text-[var(--grey-600)]">
+          <label htmlFor="invite-role" className="mb-1 block text-xs font-medium text-[var(--text-tertiary)]">
             Role
           </label>
           <select
@@ -146,7 +146,7 @@ export function InviteForm({
 
       {/* Inline error */}
       {displayError && (
-        <p id="invite-error" className="mt-2 text-xs text-red-600" role="alert">
+        <p id="invite-error" className="mt-2 text-xs text-red-700" role="alert">
           {displayError}
         </p>
       )}

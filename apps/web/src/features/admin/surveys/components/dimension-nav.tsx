@@ -72,7 +72,7 @@ export function DimensionNav({
               }`}
             >
               <span>All Questions</span>
-              <span className="text-xs text-[var(--grey-500)]">{totalCount}</span>
+              <span className="text-xs text-[var(--text-secondary)]">{totalCount}</span>
             </button>
           </li>
           {dimensions.map((dim) => (
@@ -93,7 +93,7 @@ export function DimensionNav({
                   />
                   {dim.name}
                 </span>
-                <span className="text-xs text-[var(--grey-500)]">
+                <span className="text-xs text-[var(--text-secondary)]">
                   {questionCounts[dim.id] ?? 0}
                 </span>
               </button>

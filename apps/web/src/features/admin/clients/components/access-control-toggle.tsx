@@ -70,7 +70,7 @@ export function AccessControlToggle({
           <p className="mb-2 text-sm font-medium text-[var(--grey-700)]">
             How client access works (PB-005)
           </p>
-          <ul className="space-y-2 text-sm text-[var(--grey-600)]">
+          <ul className="space-y-2 text-sm text-[var(--text-tertiary)]">
             <li className="flex gap-2">
               <span className="mt-0.5 block h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--grey-400)]" aria-hidden="true" />
               <span>

@@ -281,14 +281,14 @@ export function ExportModal({
           <div className="flex flex-col">
             <h2 className="text-lg font-semibold text-[var(--grey-900)]">Export Report</h2>
             {surveyName && (
-              <p className="mt-0.5 text-sm text-[var(--grey-500)]">{surveyName}</p>
+              <p className="mt-0.5 text-sm text-[var(--text-secondary)]">{surveyName}</p>
             )}
           </div>
           {modalState !== 'generating' && (
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-md p-1 text-[var(--grey-500)] hover:bg-[var(--grey-50)] hover:text-[var(--grey-700)]"
+              className="rounded-md p-1 text-[var(--text-secondary)] hover:bg-[var(--grey-50)] hover:text-[var(--grey-700)]"
               aria-label="Close export modal"
             >
               <X size={20} aria-hidden="true" />
@@ -306,7 +306,7 @@ export function ExportModal({
                 <legend className="mb-1 text-sm font-medium text-[var(--grey-700)]">
                   Output Format
                 </legend>
-                <p className="mb-3 text-xs text-[var(--grey-400)]">
+                <p className="mb-3 text-xs text-[var(--text-tertiary)]">
                   Choose how your report will be delivered
                 </p>
                 <div className="flex flex-col gap-2">
@@ -321,7 +321,7 @@ export function ExportModal({
                     />
                     <div className="flex flex-col">
                       <span className="text-sm text-[var(--grey-700)]">PDF</span>
-                      <span className="text-xs text-[var(--grey-400)]">
+                      <span className="text-xs text-[var(--text-tertiary)]">
                         {FORMAT_DESCRIPTIONS[ReportFormat.PDF]}
                       </span>
                     </div>
@@ -335,13 +335,13 @@ export function ExportModal({
                       className="h-4 w-4"
                     />
                     <div className="flex flex-col">
-                      <span className="text-sm text-[var(--grey-400)]">
+                      <span className="text-sm text-[var(--text-tertiary)]">
                         PPTX
-                        <span className="ml-2 rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-xs text-[var(--grey-400)]">
+                        <span className="ml-2 rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-xs text-[var(--text-tertiary)]">
                           Coming soon
                         </span>
                       </span>
-                      <span className="text-xs text-[var(--grey-300)]">
+                      <span className="text-xs text-[var(--text-tertiary)]">
                         {FORMAT_DESCRIPTIONS[ReportFormat.PPTX]}
                       </span>
                     </div>
@@ -354,7 +354,7 @@ export function ExportModal({
                 <legend className="mb-1 text-sm font-medium text-[var(--grey-700)]">
                   Report Sections
                 </legend>
-                <p className="mb-3 text-xs text-[var(--grey-400)]">
+                <p className="mb-3 text-xs text-[var(--text-tertiary)]">
                   Select which sections to include in your report
                 </p>
                 <div className="flex flex-col gap-2">
@@ -376,11 +376,11 @@ export function ExportModal({
                         className="h-4 w-4 rounded text-[var(--color-core-text)] focus:ring-[var(--color-core-text)]"
                       />
                       <span
-                        className={`text-sm ${section.locked ? 'text-[var(--grey-400)]' : 'text-[var(--grey-700)]'}`}
+                        className={`text-sm ${section.locked ? 'text-[var(--text-tertiary)]' : 'text-[var(--grey-700)]'}`}
                       >
                         {section.label}
                         {section.locked && (
-                          <span className="ml-2 text-xs text-[var(--grey-300)]">(required)</span>
+                          <span className="ml-2 text-xs text-[var(--text-tertiary)]">(required)</span>
                         )}
                       </span>
                     </label>
@@ -388,7 +388,7 @@ export function ExportModal({
                 </div>
 
                 {/* Estimated page count */}
-                <p className="mt-3 text-xs text-[var(--grey-400)]">
+                <p className="mt-3 text-xs text-[var(--text-tertiary)]">
                   Estimated length: ~{estimatedPages} pages
                 </p>
               </fieldset>
@@ -461,7 +461,7 @@ export function ExportModal({
                             ? 'bg-[var(--severity-healthy-text)] text-white'
                             : isActive
                               ? 'bg-[var(--color-core)] text-white'
-                              : 'bg-[var(--grey-50)] text-[var(--grey-300)]',
+                              : 'bg-[var(--grey-50)] text-[var(--text-tertiary)]',
                         ].join(' ')}
                       >
                         {isDone ? (
@@ -478,7 +478,7 @@ export function ExportModal({
                             ? 'text-[var(--severity-healthy-text)]'
                             : isActive
                               ? 'font-medium text-[var(--grey-700)]'
-                              : 'text-[var(--grey-300)]'
+                              : 'text-[var(--text-tertiary)]'
                         }`}
                       >
                         {step.label}
@@ -502,13 +502,13 @@ export function ExportModal({
               <div className="w-full rounded-lg border border-[var(--grey-100)] bg-white px-4 py-3">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--grey-50)]">
-                    <FileText size={20} className="text-[var(--grey-500)]" aria-hidden="true" />
+                    <FileText size={20} className="text-[var(--text-secondary)]" aria-hidden="true" />
                   </div>
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-medium text-[var(--grey-700)]">
                       {filename}
                     </span>
-                    <span className="text-xs text-[var(--grey-400)]">
+                    <span className="text-xs text-[var(--text-tertiary)]">
                       {generation.fileSize !== null && formatFileSize(generation.fileSize)}
                       {generation.fileSize !== null && generation.pageCount !== null && ' · '}
                       {generation.pageCount !== null &&
@@ -534,7 +534,7 @@ export function ExportModal({
                   <button
                     type="button"
                     onClick={() => void handleCopyLink()}
-                    className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
+                    className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--grey-50)]"
                   >
                     <Copy size={16} aria-hidden="true" />
                     {linkCopied ? 'Link Copied' : 'Copy Share Link'}
@@ -543,7 +543,7 @@ export function ExportModal({
                 <button
                   type="button"
                   onClick={handleNewExport}
-                  className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
+                  className="flex items-center justify-center gap-2 rounded-md border border-[var(--grey-100)] px-6 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--grey-50)]"
                 >
                   <Plus size={16} aria-hidden="true" />
                   New Export
@@ -577,7 +577,7 @@ export function ExportModal({
               <button
                 type="button"
                 onClick={handleClose}
-                className="flex-1 rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
+                className="flex-1 rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--grey-50)]"
               >
                 Cancel
               </button>
@@ -593,7 +593,7 @@ export function ExportModal({
           )}
 
           {modalState === 'generating' && (
-            <p className="text-center text-xs text-[var(--grey-400)]">
+            <p className="text-center text-xs text-[var(--text-tertiary)]">
               Please wait while your report is being generated.
             </p>
           )}
@@ -602,7 +602,7 @@ export function ExportModal({
             <button
               type="button"
               onClick={handleDone}
-              className="w-full rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[var(--grey-500)] transition-colors hover:bg-[var(--grey-50)]"
+              className="w-full rounded-md border border-[var(--grey-100)] px-4 py-2.5 text-sm font-medium text-[var(--text-secondary)] transition-colors hover:bg-[var(--grey-50)]"
             >
               Done
             </button>

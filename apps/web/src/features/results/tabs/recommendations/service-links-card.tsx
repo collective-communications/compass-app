@@ -56,7 +56,7 @@ export function ServiceLinksCard(): ReactElement {
               <span className="text-sm font-medium text-[var(--color-core-text)] underline-offset-2 group-hover:underline">
                 {service.label}
               </span>
-              <p className="mt-0.5 text-xs leading-relaxed text-[var(--grey-500)]">
+              <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-secondary)]">
                 {service.description}
               </p>
             </a>

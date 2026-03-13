@@ -68,11 +68,11 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
           onBlur={() => setEmailTouched(true)}
           disabled={isLoading}
           aria-invalid={emailTouched && !emailValid ? true : undefined}
-          className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
           placeholder="Enter your email"
         />
         {emailTouched && !emailValid && (
-          <p className="text-xs text-red-600">Enter a valid email address.</p>
+          <p className="text-xs text-red-700">Enter a valid email address.</p>
         )}
       </div>
 
@@ -93,13 +93,13 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={isLoading}
-            className="w-full rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 pr-10 text-sm text-[var(--grey-900)] placeholder:text-[var(--grey-400)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+            className="w-full rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 pr-10 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
             placeholder="Enter your password"
           />
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--grey-400)] hover:text-[var(--grey-600)] focus:outline-none"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] focus:outline-none"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
             tabIndex={-1}
           >
@@ -118,7 +118,7 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
       </button>
 
       {error && (
-        <p id={errorId} role="alert" className="text-center text-sm text-red-600">
+        <p id={errorId} role="alert" className="text-center text-sm text-red-700">
           {error}
         </p>
       )}

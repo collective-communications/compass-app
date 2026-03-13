@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn, expect, within, userEvent } from 'storybook/test';
+import { fn, expect, within, userEvent, waitFor } from 'storybook/test';
 import { LoginForm } from './login-form';
 import { PublicShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 import {
   fillForm,
   expectDisabled,
   expectEnabled,
-  expectInlineError,
 } from '../../../../../../apps/storybook/test-utils/interaction-helpers';
 
 /**
@@ -85,8 +84,10 @@ export const InvalidEmail: Story = {
     // Step 2 — Blur the field to trigger validation
     await userEvent.tab();
 
-    // Step 3 — Inline error appears
-    await expectInlineError(canvas, 'Email', 'Enter a valid email address.');
+    // Step 3 — Inline error appears (wait for React re-render after blur)
+    await waitFor(() => {
+      expect(canvas.getByText('Enter a valid email address.')).toBeVisible();
+    });
 
     // Step 4 — Submit button stays disabled
     await expectDisabled(canvas, 'Sign In');

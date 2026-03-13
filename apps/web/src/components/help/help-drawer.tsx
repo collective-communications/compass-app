@@ -136,7 +136,7 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-md p-1 text-[var(--grey-500)] hover:bg-[var(--grey-50)] hover:text-[var(--grey-700)]"
+            className="rounded-md p-1 text-[var(--text-secondary)] hover:bg-[var(--grey-50)] hover:text-[var(--grey-700)]"
             aria-label="Close help"
           >
             <X size={20} aria-hidden="true" />
@@ -150,7 +150,7 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {
               {helpContent.sections.map((section) => (
                 <section key={section.heading}>
                   <h3 className="font-semibold text-[var(--grey-700)]">{section.heading}</h3>
-                  <p className="mt-1 text-sm text-[var(--grey-500)]">{section.content}</p>
+                  <p className="mt-1 text-sm text-[var(--text-secondary)]">{section.content}</p>
                   {section.keyboardShortcuts !== undefined &&
                     section.keyboardShortcuts.length > 0 && (
                       <ul className="mt-2 flex flex-wrap gap-2">
@@ -167,7 +167,7 @@ export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-[var(--grey-500)]">
+            <p className="text-sm text-[var(--text-secondary)]">
               Need help? Contact your administrator.
             </p>
           )}

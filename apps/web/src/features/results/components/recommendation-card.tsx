@@ -28,7 +28,7 @@ export function RecommendationCard({
       aria-label={`${dimension} recommendation: ${title}`}
     >
       <h3 className="mb-2 text-base font-semibold text-[var(--grey-900)]">{title}</h3>
-      <p className="mb-4 text-sm text-[var(--grey-500)]">{description}</p>
+      <p className="mb-4 text-sm text-[var(--text-secondary)]">{description}</p>
       {actions.length > 0 && (
         <div aria-live="polite">
           <ol className="list-decimal space-y-1 pl-5 text-sm text-[var(--grey-700)]">

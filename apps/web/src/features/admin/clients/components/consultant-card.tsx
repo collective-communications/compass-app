@@ -33,16 +33,16 @@ export function ConsultantCard({ orgId }: ConsultantCardProps): ReactElement {
 
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--grey-500)]">
+      <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         Assigned Consultant
       </h3>
 
       {isLoading && (
-        <p className="text-sm text-[var(--grey-500)]">Loading...</p>
+        <p className="text-sm text-[var(--text-secondary)]">Loading...</p>
       )}
 
       {!isLoading && !consultant && (
-        <p className="text-sm text-[var(--grey-500)]">No consultant assigned.</p>
+        <p className="text-sm text-[var(--text-secondary)]">No consultant assigned.</p>
       )}
 
       {!isLoading && consultant && (
@@ -55,7 +55,7 @@ export function ConsultantCard({ orgId }: ConsultantCardProps): ReactElement {
           </div>
           <div>
             <p className="text-sm font-medium text-[var(--grey-900)]">{consultant.name}</p>
-            <p className="text-xs text-[var(--grey-500)]">
+            <p className="text-xs text-[var(--text-secondary)]">
               Assigned {formatDate(consultant.assignedAt)}
             </p>
           </div>

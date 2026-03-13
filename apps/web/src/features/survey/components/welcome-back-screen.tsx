@@ -31,7 +31,7 @@ export function WelcomeBackScreen({
       <div className="w-full max-w-[600px] rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 sm:p-8">
         <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Welcome back!</h1>
 
-        <p className="mb-6 text-[var(--grey-500)]">
+        <p className="mb-6 text-[var(--text-secondary)]">
           {answeredCount} of {totalCount} questions completed
         </p>
 

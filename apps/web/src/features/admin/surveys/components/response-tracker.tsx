@@ -50,7 +50,7 @@ export function ResponseTracker({
         <h3 className="text-sm font-semibold text-[var(--grey-900)]">Responses</h3>
         <div className="flex items-center gap-1.5">
           <span className={`inline-block h-2 w-2 rounded-full ${indicator.className}`} />
-          <span className="text-xs text-[var(--grey-500)]">{indicator.label}</span>
+          <span className="text-xs text-[var(--text-secondary)]">{indicator.label}</span>
         </div>
       </div>
 
@@ -58,17 +58,17 @@ export function ResponseTracker({
       <div className="mt-4 grid grid-cols-3 gap-4">
         <div>
           <p className="text-2xl font-semibold text-[var(--grey-900)]">{totalResponses}</p>
-          <p className="text-xs text-[var(--grey-500)]">Total</p>
+          <p className="text-xs text-[var(--text-secondary)]">Total</p>
         </div>
         <div>
           <p className="text-2xl font-semibold text-[var(--grey-900)]">{completedResponses}</p>
-          <p className="text-xs text-[var(--grey-500)]">Completed</p>
+          <p className="text-xs text-[var(--text-secondary)]">Completed</p>
         </div>
         <div>
           <p className="text-2xl font-semibold text-[var(--grey-900)]">
             {averageCompletionTimeMs !== null ? formatDuration(averageCompletionTimeMs) : '--'}
           </p>
-          <p className="text-xs text-[var(--grey-500)]">Avg. Time</p>
+          <p className="text-xs text-[var(--text-secondary)]">Avg. Time</p>
         </div>
       </div>
 

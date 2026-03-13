@@ -20,7 +20,7 @@ export function DataSecurityCard(): ReactElement {
             <span className="mb-1 block text-sm font-medium text-[var(--grey-700)]">
               Data retention
             </span>
-            <p className="text-sm text-[var(--grey-600)]">
+            <p className="text-sm text-[var(--text-tertiary)]">
               Responses retained indefinitely.
             </p>
           </div>
@@ -33,12 +33,12 @@ export function DataSecurityCard(): ReactElement {
             <button
               type="button"
               aria-disabled="true"
-              className="cursor-not-allowed rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm text-[var(--grey-400)]"
+              className="cursor-not-allowed rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm text-[var(--text-tertiary)]"
               onClick={(e) => e.preventDefault()}
             >
               Export all data
             </button>
-            <p className="mt-1 text-xs text-[var(--grey-500)]">
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
               Contact support to request a full data export.
             </p>
           </div>
@@ -48,7 +48,7 @@ export function DataSecurityCard(): ReactElement {
             <span className="mb-1 block text-sm font-medium text-[var(--grey-700)]">
               API access
             </span>
-            <p className="text-sm text-[var(--grey-600)]">
+            <p className="text-sm text-[var(--text-tertiary)]">
               Not configured.
             </p>
           </div>

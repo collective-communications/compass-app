@@ -50,7 +50,7 @@ export function Compass(props: CompassProps): React.JSX.Element {
       viewBox={`0 0 ${size} ${size}`}
       width={size}
       height={size}
-      role="img"
+      role="group"
       aria-label={`Culture Compass scores: ${ariaLabel}`}
       className={className}
       style={{ overflow: 'visible' }}
