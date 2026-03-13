@@ -1,0 +1,223 @@
+import type { ProviderAdapter, ProviderHealth } from '../../src/types/provider.js';
+import type { DnsRecord, ResendDomain, ApiKeyMeta } from './types.js';
+import {
+  ResendApiError,
+  ResendTimeoutError,
+} from './errors.js';
+
+export interface ResendAdapterConfig {
+  apiKey: string;
+  timeoutMs?: number;
+  /** Lazy credential resolver — called per-request to get fresh API key from vault. */
+  resolve?: {
+    apiKey: () => Promise<string>;
+  };
+}
+
+interface ResendSendingStats {
+  sent: number;
+  limit: number;
+  remaining: number;
+}
+
+const BASE_URL = 'https://api.resend.com';
+const DEFAULT_TIMEOUT_MS = 10_000;
+const FREE_TIER_LIMIT = 3000;
+
+export class ResendAdapter implements ProviderAdapter {
+  readonly name = 'resend' as const;
+
+  private readonly initialApiKey: string;
+  private readonly timeoutMs: number;
+  private readonly resolve?: ResendAdapterConfig['resolve'];
+  private lastHealthResult: ProviderHealth | null = null;
+  private lastHealthAt = 0;
+  private static readonly HEALTH_CACHE_MS = 60_000; // cache health for 60s
+
+  constructor(config: ResendAdapterConfig) {
+    this.initialApiKey = config.apiKey;
+    this.timeoutMs = config.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+    this.resolve = config.resolve;
+  }
+
+  private async getApiKey(): Promise<string> {
+    if (this.resolve?.apiKey) {
+      const resolved = await this.resolve.apiKey();
+      if (resolved) return resolved;
+    }
+    return this.initialApiKey;
+  }
+
+  async healthCheck(): Promise<ProviderHealth> {
+    // Return cached result if fresh (avoids burning rate limit on polling)
+    if (this.lastHealthResult && Date.now() - this.lastHealthAt < ResendAdapter.HEALTH_CACHE_MS) {
+      return this.lastHealthResult;
+    }
+
+    const checkedAt = Date.now();
+    let result: ProviderHealth;
+    try {
+      await this.request('GET', '/api-keys');
+      result = {
+        provider: this.name,
+        status: 'healthy',
+        label: 'Resend',
+        details: {},
+        checkedAt,
+      };
+    } catch (error: unknown) {
+      result = {
+        provider: this.name,
+        status: 'down',
+        label: 'Resend',
+        details: { error: error instanceof Error ? error.message : String(error) },
+        checkedAt,
+      };
+    }
+    this.lastHealthResult = result;
+    this.lastHealthAt = Date.now();
+    return result;
+  }
+
+  async getDomains(): Promise<Array<{ id: string; name: string; status: string }>> {
+    const body = await this.request<{ data: Array<{ id: string; name: string; status: string }> }>(
+      'GET',
+      '/domains',
+    );
+    return body.data.map((d) => ({
+      id: d.id,
+      name: d.name,
+      status: d.status,
+    }));
+  }
+
+  async getDomain(id: string): Promise<ResendDomain> {
+    const body = await this.request<{
+      id: string;
+      name: string;
+      status: string;
+      region: string;
+      created_at: string;
+      records: Array<{
+        record: string;
+        name: string;
+        type: string;
+        value: string;
+        status: string;
+        ttl: string;
+      }>;
+    }>('GET', `/domains/${id}`);
+
+    const records: DnsRecord[] = body.records
+      .filter((r) => r.record !== 'MX')
+      .map((r) => ({
+        type: r.record === 'SPF' ? 'TXT' as const : 'CNAME' as const,
+        name: r.name,
+        value: r.value,
+        status: r.status === 'verified' ? 'verified' as const : 'not_started' as const,
+      }));
+
+    return {
+      id: body.id,
+      name: body.name,
+      status: body.status as ResendDomain['status'],
+      region: body.region,
+      createdAt: body.created_at,
+      records,
+    };
+  }
+
+  async addDomain(name: string): Promise<{ id: string; records: DnsRecord[] }> {
+    const body = await this.request<{
+      id: string;
+      records: Array<{
+        record: string;
+        name: string;
+        type: string;
+        value: string;
+        status: string;
+        ttl: string;
+      }>;
+    }>('POST', '/domains', { name });
+
+    const records: DnsRecord[] = body.records
+      .filter((r) => r.record !== 'MX')
+      .map((r) => ({
+        type: r.record === 'SPF' ? 'TXT' as const : 'CNAME' as const,
+        name: r.name,
+        value: r.value,
+        status: r.status === 'verified' ? 'verified' as const : 'not_started' as const,
+      }));
+
+    return { id: body.id, records };
+  }
+
+  async verifyDomain(id: string): Promise<void> {
+    await this.request('POST', `/domains/${id}/verify`);
+  }
+
+  async getSendingStats(month?: string): Promise<ResendSendingStats> {
+    const params = month ? `?month=${month}` : '';
+    const body = await this.request<{ data: { sent: number } }>('GET', `/emails${params}`);
+    const sent = body.data?.sent ?? 0;
+    return {
+      sent,
+      limit: FREE_TIER_LIMIT,
+      remaining: Math.max(0, FREE_TIER_LIMIT - sent),
+    };
+  }
+
+  async getApiKeys(): Promise<ApiKeyMeta[]> {
+    const body = await this.request<{
+      data: Array<{
+        id: string;
+        name: string;
+        created_at: string;
+        permission: string;
+        domain_id: string | null;
+      }>;
+    }>('GET', '/api-keys');
+
+    return body.data.map((k) => ({
+      id: k.id,
+      name: k.name,
+      createdAt: k.created_at,
+      permission: k.permission as ApiKeyMeta['permission'],
+      domainId: k.domain_id,
+    }));
+  }
+
+  private async request<T = unknown>(
+    method: string,
+    path: string,
+    body?: unknown,
+  ): Promise<T> {
+    const apiKey = await this.getApiKey();
+    const url = `${BASE_URL}${path}`;
+    const headers: Record<string, string> = {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    };
+
+    let response: Response;
+    try {
+      response = await fetch(url, {
+        method,
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: AbortSignal.timeout(this.timeoutMs),
+      });
+    } catch (error: unknown) {
+      if (error instanceof DOMException && error.name === 'TimeoutError') {
+        throw new ResendTimeoutError(this.timeoutMs);
+      }
+      throw error;
+    }
+
+    if (!response.ok) {
+      throw await ResendApiError.fromResponse(response);
+    }
+
+    return response.json() as Promise<T>;
+  }
+}
