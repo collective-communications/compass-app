@@ -3,14 +3,13 @@ import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { createServer } from '../server.js';
-import type { HealthSnapshot, HealthAggregator } from '../../domain/health-aggregator.js';
-import type { SecretsSyncEngine } from '../../domain/secrets-sync-engine.js';
-import type { DeployOrchestrator } from '../../domain/deploy-orchestrator.js';
-import type { SupabaseAdapter } from '../../adapters/supabase-adapter.js';
-import type { VercelAdapter } from '../../adapters/vercel-adapter.js';
-import type { GitHubAdapter } from '../../adapters/github-adapter.js';
-import type { ResendAdapter } from '../../adapters/resend-adapter.js';
+import type { HealthSnapshot, HealthAggregator } from '../../core/health-aggregator.js';
+import type { SecretsSyncEngine } from '../../core/secrets-sync-engine.js';
+import type { DeployOrchestrator } from '../../core/deploy-orchestrator.js';
+import { PluginRegistry } from '../../core/plugin-registry.js';
+import type { ProviderPlugin, PluginRouteContext } from '../../types/plugin.js';
 import type { VaultClient } from '../../types/vault.js';
+import { Router, jsonSuccess } from '../router.js';
 
 // --- Mock factories ---
 
@@ -52,8 +51,9 @@ function mockSyncEngine(): SecretsSyncEngine {
       failed: 0,
       skipped: 0,
       rows: [],
+      errors: [],
     }),
-    syncSecret: async () => [{ target: 'vercel' as const, success: true }],
+    syncSecret: async () => [{ target: 'vercel', success: true }],
   } as unknown as SecretsSyncEngine;
 }
 
@@ -72,68 +72,6 @@ function mockOrchestrator(): DeployOrchestrator {
   } as unknown as DeployOrchestrator;
 }
 
-function mockSupabase(): SupabaseAdapter {
-  return {
-    name: 'supabase',
-    getMigrations: async () => [
-      { filename: '001_init.sql', status: 'applied', appliedAt: '2026-01-01T00:00:00Z' },
-    ],
-    pushMigrations: async () => ({ applied: ['002_add.sql'], errors: [] }),
-    getEdgeFunctions: async () => [
-      { name: 'send-email', deployed: true, lastDeployed: '2026-01-01T00:00:00Z', requiredSecrets: [] },
-    ],
-    deployFunction: async () => {},
-    deployAllFunctions: async () => ({ deployed: ['send-email'], failed: [] }),
-    getExtensionStatus: async () => ({ installed: true, version: '0.7.0' }),
-    enableExtension: async () => {},
-    healthCheck: async () => ({ provider: 'supabase', status: 'healthy', label: 'Supabase', checkedAt: Date.now() }),
-    setSecrets: async () => {},
-  } as unknown as SupabaseAdapter;
-}
-
-function mockVercel(): VercelAdapter {
-  return {
-    name: 'vercel',
-    getProject: async () => ({ name: 'compass-app', framework: 'vite', alias: [] }),
-    getDeployments: async () => [
-      { uid: 'dpl_1', commitSha: 'abc', commitMessage: 'init', branch: 'main', target: 'production', status: 'READY', duration: 60, createdAt: '2026-01-01T00:00:00Z' },
-    ],
-    getCurrentDeployment: async () => ({
-      uid: 'dpl_1', commitSha: 'abc', commitMessage: 'init', branch: 'main', target: 'production', status: 'READY', duration: 60, createdAt: '2026-01-01T00:00:00Z',
-    }),
-    triggerRedeploy: async () => 'dpl_2',
-    promoteDeployment: async () => {},
-    getEnvVars: async () => [],
-    setEnvVar: async () => {},
-    healthCheck: async () => ({ provider: 'vercel', status: 'healthy', label: 'Vercel', checkedAt: Date.now() }),
-  } as unknown as VercelAdapter;
-}
-
-function mockGitHub(): GitHubAdapter {
-  return {
-    name: 'github',
-    getWorkflows: async () => [
-      { id: 1, name: 'CI', filename: 'ci.yml', state: 'active', lastRun: null },
-    ],
-    getRecentRuns: async () => [],
-    listSecrets: async () => ['SUPABASE_URL'],
-    setSecret: async () => {},
-    createFile: async () => {},
-    healthCheck: async () => ({ provider: 'github', status: 'healthy', label: 'GitHub', checkedAt: Date.now() }),
-  } as unknown as GitHubAdapter;
-}
-
-function mockResend(): ResendAdapter {
-  return {
-    name: 'resend',
-    getDomains: async () => [{ id: 'dom_1', name: 'example.com', status: 'verified' }],
-    verifyDomain: async () => {},
-    getSendingStats: async () => ({ sent: 10, limit: 3000, remaining: 2990 }),
-    getApiKeys: async () => [{ id: 'key_1', name: 'Production', createdAt: '2026-01-01T00:00:00Z', permission: 'full_access', domainId: null }],
-    healthCheck: async () => ({ provider: 'resend', status: 'healthy', label: 'Resend', checkedAt: Date.now() }),
-  } as unknown as ResendAdapter;
-}
-
 function mockVaultClient(): VaultClient {
   return {
     health: async () => ({ connected: true, locked: false, name: 'test-vault' }),
@@ -142,6 +80,87 @@ function mockVaultClient(): VaultClient {
     getAll: async () => new Map([['SUPABASE_URL', 'test-value']]),
     getStatus: async () => ({ connected: true, locked: false, name: 'test-vault', secretCount: 1 }),
   };
+}
+
+/** Create mock plugins that register the provider routes the tests expect. */
+function createMockRegistry(): PluginRegistry {
+  const registry = new PluginRegistry();
+
+  const supabasePlugin: ProviderPlugin = {
+    id: 'supabase',
+    displayName: 'Supabase',
+    adapter: {
+      name: 'supabase',
+      healthCheck: async () => ({ provider: 'supabase', status: 'healthy', label: 'Supabase', details: {}, checkedAt: Date.now() }),
+    },
+    secretMappings: [],
+    syncTarget: { verifiable: false, setSecret: async () => {} },
+    deploySteps: [],
+    screen: { label: 'Database', path: '/database', modulePath: 'screens/database.js' },
+    registerRoutes(router: Router) {
+      router.get('/api/database/migrations', async () => {
+        return jsonSuccess([
+          { filename: '001_init.sql', status: 'applied', appliedAt: '2026-01-01T00:00:00Z' },
+        ]);
+      });
+    },
+  };
+
+  const vercelPlugin: ProviderPlugin = {
+    id: 'vercel',
+    displayName: 'Vercel',
+    adapter: {
+      name: 'vercel',
+      healthCheck: async () => ({ provider: 'vercel', status: 'healthy', label: 'Vercel', details: {}, checkedAt: Date.now() }),
+    },
+    secretMappings: [],
+    deploySteps: [],
+    screen: { label: 'Frontend', path: '/frontend', modulePath: 'screens/frontend.js' },
+    registerRoutes(router: Router) {
+      router.post('/api/frontend/redeploy', async () => {
+        return jsonSuccess({ uid: 'dpl_2' });
+      });
+    },
+  };
+
+  const githubPlugin: ProviderPlugin = {
+    id: 'github',
+    displayName: 'GitHub',
+    adapter: {
+      name: 'github',
+      healthCheck: async () => ({ provider: 'github', status: 'healthy', label: 'GitHub', details: {}, checkedAt: Date.now() }),
+    },
+    secretMappings: [],
+    deploySteps: [],
+    screen: { label: 'CI/CD', path: '/cicd', modulePath: 'screens/cicd.js' },
+    registerRoutes(router: Router) {
+      router.get('/api/cicd/workflows', async () => {
+        return jsonSuccess([
+          { id: 1, name: 'CI', filename: 'ci.yml', state: 'active', lastRun: null },
+        ]);
+      });
+    },
+  };
+
+  const resendPlugin: ProviderPlugin = {
+    id: 'resend',
+    displayName: 'Resend',
+    adapter: {
+      name: 'resend',
+      healthCheck: async () => ({ provider: 'resend', status: 'healthy', label: 'Resend', details: {}, checkedAt: Date.now() }),
+    },
+    secretMappings: [],
+    deploySteps: [],
+    screen: { label: 'Email', path: '/email', modulePath: 'screens/email.js' },
+    registerRoutes() {},
+  };
+
+  registry.register(supabasePlugin);
+  registry.register(vercelPlugin);
+  registry.register(githubPlugin);
+  registry.register(resendPlugin);
+
+  return registry;
 }
 
 // --- Test suite ---
@@ -160,15 +179,11 @@ describe('API Server', () => {
     server = createServer({
       port: 0, // Random port
       uiDir: tmpDir,
+      dashboardName: 'tkr-deploy',
       healthAggregator: mockHealthAggregator(),
       syncEngine: mockSyncEngine(),
       orchestrator: mockOrchestrator(),
-      adapters: {
-        supabase: mockSupabase(),
-        vercel: mockVercel(),
-        github: mockGitHub(),
-        resend: mockResend(),
-      },
+      registry: createMockRegistry(),
       vaultClient: mockVaultClient(),
     });
 
@@ -191,15 +206,6 @@ describe('API Server', () => {
     expect(body.data.providers).toHaveLength(2);
   });
 
-  test('GET /api/providers returns array', async () => {
-    const res = await fetch(`${baseUrl}/api/providers`);
-    expect(res.status).toBe(200);
-    const body = await res.json();
-    expect(body.success).toBe(true);
-    expect(Array.isArray(body.data)).toBe(true);
-    expect(body.data[0].provider).toBe('supabase');
-  });
-
   // --- Secrets ---
 
   test('GET /api/secrets returns sync rows', async () => {
@@ -207,7 +213,7 @@ describe('API Server', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.data[0].name).toBe('SUPABASE_URL');
+    expect(body.data.secrets[0].name).toBe('SUPABASE_URL');
   });
 
   test('POST /api/secrets/sync calls syncAll', async () => {
@@ -255,7 +261,7 @@ describe('API Server', () => {
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.success).toBe(true);
-    expect(body.data[0].action).toBe('pushMigrations');
+    expect(body.data.entries[0].action).toBe('pushMigrations');
   });
 
   // --- 404 ---

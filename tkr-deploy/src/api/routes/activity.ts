@@ -1,4 +1,4 @@
-import type { DeployOrchestrator } from '../../domain/deploy-orchestrator.js';
+import type { DeployOrchestrator } from '../../core/deploy-orchestrator.js';
 import type { Router } from '../router.js';
 import { jsonSuccess } from '../router.js';
 

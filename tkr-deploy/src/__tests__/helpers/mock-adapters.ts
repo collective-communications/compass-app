@@ -1,8 +1,8 @@
 import type { ProviderHealth } from '../../types/provider.js';
-import type { MigrationEntry, EdgeFunction } from '../../types/supabase.js';
-import type { DeploymentEntry, VercelEnvVar } from '../../types/vercel.js';
-import type { DnsRecord, ApiKeyMeta } from '../../types/resend.js';
-import type { WorkflowStatus, WorkflowRun } from '../../types/github.js';
+import type { MigrationEntry, EdgeFunction } from '../../../providers/supabase/types.js';
+import type { DeploymentEntry, VercelEnvVar } from '../../../providers/vercel/types.js';
+import type { DnsRecord, ApiKeyMeta } from '../../../providers/resend/types.js';
+import type { WorkflowStatus, WorkflowRun } from '../../../providers/github/types.js';
 import { createProviderHealth, createDeploymentEntry } from './factories.js';
 
 // ---------------------------------------------------------------------------

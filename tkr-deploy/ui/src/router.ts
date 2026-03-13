@@ -1,20 +1,12 @@
-export interface Route {
+export interface RouteDefinition {
   path: string;
-  module: () => Promise<{ render: (container: HTMLElement) => void; cleanup: () => void }>;
+  modulePath: string;
 }
-
-const routes: Route[] = [
-  { path: '/',         module: () => import('./screens/overview.js') },
-  { path: '/secrets',  module: () => import('./screens/secrets.js') },
-  { path: '/database', module: () => import('./screens/database.js') },
-  { path: '/frontend', module: () => import('./screens/frontend.js') },
-  { path: '/email',    module: () => import('./screens/email.js') },
-  { path: '/cicd',     module: () => import('./screens/cicd.js') },
-];
 
 let currentCleanup: (() => void) | null = null;
 let contentArea: HTMLElement | null = null;
 let onNavigateCallback: ((path: string) => void) | null = null;
+let routeTable: RouteDefinition[] = [];
 
 /**
  * Get the current pathname.
@@ -41,8 +33,10 @@ async function loadRoute(path: string): Promise<void> {
     currentCleanup = null;
   }
 
-  const route = routes.find((r) => r.path === path) ?? routes[0];
-  const mod = await route.module();
+  const route = routeTable.find((r) => r.path === path) ?? routeTable[0];
+  if (!route) return;
+
+  const mod = await import(`./${route.modulePath}`) as { render: (container: HTMLElement) => void; cleanup: () => void };
   mod.render(contentArea);
   currentCleanup = mod.cleanup;
 
@@ -52,13 +46,15 @@ async function loadRoute(path: string): Promise<void> {
 }
 
 /**
- * Initialize the router.
+ * Initialize the router with dynamically-discovered routes.
  */
 export function initRouter(
   container: HTMLElement,
+  routes: RouteDefinition[],
   onNavigate?: (path: string) => void,
 ): void {
   contentArea = container;
+  routeTable = routes;
   onNavigateCallback = onNavigate ?? null;
 
   window.addEventListener('popstate', () => {

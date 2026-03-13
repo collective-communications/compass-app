@@ -1,8 +1,8 @@
-import type { MigrationEntry, EdgeFunction } from '../../types/supabase.js';
-import type { DeploymentEntry } from '../../types/vercel.js';
-import type { DnsRecord } from '../../types/resend.js';
+import type { MigrationEntry, EdgeFunction } from '../../../providers/supabase/types.js';
+import type { DeploymentEntry } from '../../../providers/vercel/types.js';
+import type { DnsRecord } from '../../../providers/resend/types.js';
 import type { ProviderHealth } from '../../types/provider.js';
-import type { SecretSyncRow } from '../../types/sync.js';
+import type { SecretSyncRow } from '../../core/secrets-sync-engine.js';
 
 const FIXED_TS = '2026-03-01T00:00:00.000Z';
 
@@ -69,11 +69,11 @@ export function createProviderHealth(overrides?: Partial<ProviderHealth>): Provi
 export function createSecretSyncRow(overrides?: Partial<SecretSyncRow>): SecretSyncRow {
   return {
     name: 'RESEND_API_KEY',
-    vaultPreview: 're_****abcd',
+    vaultValueHash: 'abc123',
     targets: {
-      supabase: 'synced',
-      vercel: 'synced',
-      github: 'synced',
+      supabase: { state: 'synced' },
+      vercel: { state: 'synced' },
+      github: { state: 'synced' },
     },
     ...overrides,
   };

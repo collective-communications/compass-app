@@ -1,35 +1,25 @@
 import { join } from 'node:path';
-import type { HealthAggregator } from '../domain/health-aggregator.js';
-import type { SecretsSyncEngine } from '../domain/secrets-sync-engine.js';
-import type { DeployOrchestrator } from '../domain/deploy-orchestrator.js';
-import type { SupabaseAdapter } from '../adapters/supabase-adapter.js';
-import type { VercelAdapter } from '../adapters/vercel-adapter.js';
-import type { GitHubAdapter } from '../adapters/github-adapter.js';
-import type { ResendAdapter } from '../adapters/resend-adapter.js';
+import type { HealthAggregator } from '../core/health-aggregator.js';
+import type { SecretsSyncEngine } from '../core/secrets-sync-engine.js';
+import type { DeployOrchestrator } from '../core/deploy-orchestrator.js';
+import type { PluginRegistry } from '../core/plugin-registry.js';
 import type { VaultClient } from '../types/vault.js';
-import { VaultLockedError } from '../domain/secrets-sync-engine.js';
+import { VaultLockedError } from '../core/secrets-sync-engine.js';
 import { Router, jsonError } from './router.js';
 import { registerHealthRoutes } from './routes/health.js';
 import { registerSecretsRoutes } from './routes/secrets.js';
-import { registerDatabaseRoutes } from './routes/database.js';
-import { registerFrontendRoutes } from './routes/frontend.js';
-import { registerEmailRoutes } from './routes/email.js';
-import { registerCicdRoutes } from './routes/cicd.js';
 import { registerActivityRoutes } from './routes/activity.js';
 import { registerEventRoutes } from './routes/events.js';
+import { registerManifestRoutes } from './routes/manifest.js';
 
 export interface ServerConfig {
   port: number;
   uiDir: string;
+  dashboardName: string;
   healthAggregator: HealthAggregator;
   syncEngine: SecretsSyncEngine;
   orchestrator: DeployOrchestrator;
-  adapters: {
-    supabase: SupabaseAdapter;
-    vercel: VercelAdapter;
-    github: GitHubAdapter;
-    resend: ResendAdapter;
-  };
+  registry: PluginRegistry;
   vaultClient: VaultClient;
 }
 
@@ -51,15 +41,21 @@ function getMimeType(path: string): string {
 export function createServer(config: ServerConfig): ReturnType<typeof Bun.serve> {
   const router = new Router();
 
-  // Register all API routes
+  // Core routes
   registerHealthRoutes(router, config.healthAggregator);
-  registerSecretsRoutes(router, config.syncEngine, config.vaultClient);
-  registerDatabaseRoutes(router, config.adapters.supabase);
-  registerFrontendRoutes(router, config.adapters.vercel, config.syncEngine, config.vaultClient);
-  registerEmailRoutes(router, config.adapters.resend);
-  registerCicdRoutes(router, config.adapters.github, config.syncEngine, config.vaultClient);
+  registerSecretsRoutes(router, config.syncEngine, config.vaultClient, config.registry);
   registerActivityRoutes(router, config.orchestrator);
   registerEventRoutes(router);
+  registerManifestRoutes(router, config.registry, config.dashboardName);
+
+  // Provider routes — each plugin registers its own
+  const routeCtx = {
+    vaultClient: config.vaultClient,
+    syncEngine: config.syncEngine,
+  };
+  for (const plugin of config.registry.getAll()) {
+    plugin.registerRoutes(router, routeCtx);
+  }
 
   return Bun.serve({
     port: config.port,

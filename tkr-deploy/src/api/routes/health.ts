@@ -1,4 +1,4 @@
-import type { HealthAggregator } from '../../domain/health-aggregator.js';
+import type { HealthAggregator } from '../../core/health-aggregator.js';
 import type { Router } from '../router.js';
 import { jsonSuccess, jsonError } from '../router.js';
 

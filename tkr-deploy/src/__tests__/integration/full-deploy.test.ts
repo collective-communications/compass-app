@@ -1,10 +1,8 @@
 import { describe, it, expect } from 'bun:test';
 import { MockVaultClient } from '../helpers/mock-vault-client.js';
-import { createMockSupabaseAdapter, createMockVercelAdapter } from '../helpers/mock-adapters.js';
-import { createDeploymentEntry } from '../helpers/factories.js';
-import { SecretsSyncEngine } from '../../domain/secrets-sync-engine.js';
-import { DeployOrchestrator } from '../../domain/deploy-orchestrator.js';
-import type { DeployStepState, StepResult } from '../../domain/deploy-orchestrator.js';
+import { DeployOrchestrator } from '../../core/deploy-orchestrator.js';
+import type { DeployStepState, StepResult } from '../../core/deploy-orchestrator.js';
+import type { PluginDeployStep } from '../../types/plugin.js';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -18,44 +16,60 @@ function buildStack() {
     },
   });
 
-  const supabase = createMockSupabaseAdapter({
-    pushMigrations: async () => ({ applied: ['001_init.sql'], errors: [] }),
-    deployAllFunctions: async () => ({ deployed: ['send-report-email'], failed: [] }),
-  });
-
-  const vercel = createMockVercelAdapter({
-    getCurrentDeployment: async () => createDeploymentEntry({ uid: 'dpl_current' }),
-    triggerRedeploy: async () => 'dpl_new_456',
-    pollDeployment: async () => createDeploymentEntry({ uid: 'dpl_new_456', status: 'READY' }),
-  });
-
-  const github = {
-    setSecret: async () => {},
-    listSecrets: async () => [] as string[],
-  };
-
-  const syncEngine = new SecretsSyncEngine({
-    vaultClient: vault,
-    adapters: {
-      supabase,
-      vercel,
-      github,
-    },
-  });
-
   const activityLogPath = join(tmpdir(), `tkr-deploy-test-${Date.now()}.jsonl`);
 
+  const steps: PluginDeployStep[] = [
+    {
+      id: 'syncSecrets',
+      label: 'Sync secrets',
+      provider: 'core',
+      order: 0,
+      execute: async () => 'Synced 3 secrets',
+    },
+    {
+      id: 'pushMigrations',
+      label: 'Push database migrations',
+      provider: 'supabase',
+      order: 100,
+      execute: async () => 'Applied 1 migration(s)',
+    },
+    {
+      id: 'deployFunctions',
+      label: 'Deploy edge functions',
+      provider: 'supabase',
+      order: 200,
+      execute: async () => 'Deployed 1 function(s)',
+    },
+    {
+      id: 'triggerRedeploy',
+      label: 'Trigger redeploy',
+      provider: 'vercel',
+      order: 300,
+      execute: async () => 'Triggered redeploy dpl_new_456',
+    },
+    {
+      id: 'waitForBuild',
+      label: 'Wait for build',
+      provider: 'vercel',
+      order: 400,
+      execute: async () => 'Build complete',
+    },
+    {
+      id: 'healthCheck',
+      label: 'Health check',
+      provider: 'core',
+      order: 900,
+      execute: async () => 'All providers healthy',
+    },
+  ];
+
   const orchestrator = new DeployOrchestrator({
-    supabase,
-    vercel,
     vaultClient: vault,
-    syncEngine,
-    pollIntervalMs: 0,
-    buildTimeoutMs: 5000,
+    steps,
     activityLogPath,
   });
 
-  return { vault, supabase, vercel, syncEngine, orchestrator, activityLogPath };
+  return { vault, steps, orchestrator, activityLogPath };
 }
 
 describe('integration: fullDeploy', () => {
@@ -73,7 +87,7 @@ describe('integration: fullDeploy', () => {
   });
 
   it('writes activity log entries for each step', async () => {
-    const { orchestrator, activityLogPath } = buildStack();
+    const { orchestrator } = buildStack();
     await orchestrator.fullDeploy();
 
     const log = await orchestrator.getActivityLog(10);
@@ -99,11 +113,14 @@ describe('integration: fullDeploy', () => {
 
   it('halts on migration failure and reports partial status', async () => {
     const { orchestrator } = buildStack();
-    // Override supabase to fail on pushMigrations
-    (orchestrator as any).config.supabase.pushMigrations = async () => ({
-      applied: [],
-      errors: ['syntax error at line 42'],
-    });
+    // Override pushMigrations step to fail
+    (orchestrator as any).config.steps[1] = {
+      id: 'pushMigrations',
+      label: 'Push database migrations',
+      provider: 'supabase',
+      order: 100,
+      execute: async () => { throw new Error('syntax error at line 42'); },
+    };
 
     const report = await orchestrator.fullDeploy();
 
@@ -125,10 +142,16 @@ describe('integration: fullDeploy', () => {
   it('prevents concurrent deploys', async () => {
     const { orchestrator } = buildStack();
 
-    // Make syncAll slow so the deploy is still running when we try the second
-    (orchestrator as any).config.syncEngine.syncAll = async () => {
-      await new Promise((r) => setTimeout(r, 200));
-      return { synced: 0, failed: 0, errors: [] };
+    // Make first step slow so the deploy is still running when we try the second
+    (orchestrator as any).config.steps[0] = {
+      id: 'syncSecrets',
+      label: 'Sync secrets',
+      provider: 'core',
+      order: 0,
+      execute: async () => {
+        await new Promise((r) => setTimeout(r, 200));
+        return 'Synced';
+      },
     };
 
     const first = orchestrator.fullDeploy();

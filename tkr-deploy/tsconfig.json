@@ -13,6 +13,6 @@
     "noEmit": true,
     "types": ["bun-types"]
   },
-  "include": ["src/**/*.ts", "serve.ts"],
+  "include": ["src/**/*.ts", "providers/**/*.ts", "serve.ts", "deploy.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

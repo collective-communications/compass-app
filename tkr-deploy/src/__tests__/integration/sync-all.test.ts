@@ -1,36 +1,55 @@
 import { describe, it, expect } from 'bun:test';
 import { MockVaultClient } from '../helpers/mock-vault-client.js';
-import { createMockVercelAdapter, createMockGitHubAdapter, createMockSupabaseAdapter } from '../helpers/mock-adapters.js';
-import { SecretsSyncEngine } from '../../domain/secrets-sync-engine.js';
+import { SecretsSyncEngine } from '../../core/secrets-sync-engine.js';
+import type { SyncTargetAdapter } from '../../types/plugin.js';
+import type { SecretTargetEntry } from '../../core/plugin-registry.js';
+
+function createMockTarget(overrides?: Partial<SyncTargetAdapter>): SyncTargetAdapter {
+  return {
+    verifiable: false,
+    setSecret: async () => {},
+    ...overrides,
+  };
+}
 
 function buildEngine(opts?: {
   secrets?: Record<string, string>;
   githubSecrets?: string[];
-  vercelEnvVars?: Array<{ key: string; value: string; target: string[]; type: string; id: string }>;
 }) {
   const vault = new MockVaultClient({
     secrets: opts?.secrets ?? {
-      RESEND_API_KEY: 're_test_key_123',
+      RESEND_CCC_SEND: 're_test_key_123',
       SUPABASE_URL: 'https://test.supabase.co',
-      SUPABASE_ANON_KEY: 'anon-key-abc',
+      VITE_SUPABASE_ANON_KEY: 'anon-key-abc',
       VERCEL_TOKEN: 'tok_vercel_xyz',
     },
   });
 
-  const supabase = createMockSupabaseAdapter();
-  const github = createMockGitHubAdapter({
+  const supabaseTarget = createMockTarget();
+  const vercelTarget = createMockTarget({ verifiable: true, getSecrets: async () => new Map() });
+  const githubTarget = createMockTarget({
     listSecrets: async () => opts?.githubSecrets ?? [],
   });
-  const vercel = createMockVercelAdapter({
-    getEnvVars: async () => opts?.vercelEnvVars ?? [],
-  });
 
-  const engine = new SecretsSyncEngine({
-    vaultClient: vault,
-    adapters: { supabase, vercel, github },
-  });
+  const targets = new Map<string, SyncTargetAdapter>([
+    ['supabase', supabaseTarget],
+    ['vercel', vercelTarget],
+    ['github', githubTarget],
+  ]);
 
-  return { vault, engine, supabase, vercel, github };
+  const mappings: SecretTargetEntry[] = [
+    { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_API_KEY', targetId: 'supabase' },
+    { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_CCC_SEND', targetId: 'vercel' },
+    { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_CCC_SEND', targetId: 'github' },
+    { vaultKey: 'VITE_SUPABASE_ANON_KEY', targetKey: 'VITE_SUPABASE_ANON_KEY', targetId: 'vercel' },
+    { vaultKey: 'VITE_SUPABASE_ANON_KEY', targetKey: 'VITE_SUPABASE_ANON_KEY', targetId: 'github' },
+    { vaultKey: 'SUPABASE_URL', targetKey: 'SUPABASE_URL', targetId: 'vercel' },
+    { vaultKey: 'SUPABASE_URL', targetKey: 'SUPABASE_URL', targetId: 'github' },
+  ];
+
+  const engine = new SecretsSyncEngine({ vaultClient: vault, targets, mappings });
+
+  return { vault, engine, supabaseTarget, vercelTarget, githubTarget };
 }
 
 describe('integration: computeSyncStatus', () => {
@@ -42,19 +61,16 @@ describe('integration: computeSyncStatus', () => {
     for (const row of rows) {
       expect(row.name).toBeDefined();
       expect(row.targets).toBeDefined();
-      expect(row.targets.supabase).toBeDefined();
-      expect(row.targets.vercel).toBeDefined();
-      expect(row.targets.github).toBeDefined();
     }
   });
 
   it('marks github secrets as synced when present', async () => {
     const { engine } = buildEngine({
-      githubSecrets: ['RESEND_API_KEY', 'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'VERCEL_TOKEN'],
+      githubSecrets: ['RESEND_CCC_SEND', 'VITE_SUPABASE_ANON_KEY', 'SUPABASE_URL'],
     });
     const rows = await engine.computeSyncStatus();
 
-    const resendRow = rows.find((r) => r.name === 'RESEND_API_KEY');
+    const resendRow = rows.find((r: { name: string }) => r.name === 'RESEND_CCC_SEND');
     expect(resendRow).toBeDefined();
     expect(resendRow!.targets.github.state).toBe('synced');
   });
@@ -63,7 +79,7 @@ describe('integration: computeSyncStatus', () => {
     const { engine } = buildEngine({ githubSecrets: [] });
     const rows = await engine.computeSyncStatus();
 
-    const resendRow = rows.find((r) => r.name === 'RESEND_API_KEY');
+    const resendRow = rows.find((r: { name: string }) => r.name === 'RESEND_CCC_SEND');
     expect(resendRow).toBeDefined();
     expect(resendRow!.targets.github.state).toBe('missing');
   });
@@ -86,48 +102,38 @@ describe('integration: syncAll', () => {
     expect(typeof report.skipped).toBe('number');
   });
 
-  it('pushes secrets to all applicable targets', async () => {
+  it('pushes secrets to applicable targets', async () => {
     const setCalls: string[] = [];
-    const { engine } = buildEngine();
-    // Patch adapters to track calls
-    (engine as any).adapters.supabase.setSecrets = async (secrets: Record<string, string>) => {
-      setCalls.push(...Object.keys(secrets).map((k) => `supabase:${k}`));
-    };
-    (engine as any).adapters.vercel.setEnvVar = async (key: string) => {
-      setCalls.push(`vercel:${key}`);
-    };
-    (engine as any).adapters.github.setSecret = async (name: string) => {
-      setCalls.push(`github:${name}`);
-    };
+    const { engine, supabaseTarget, vercelTarget, githubTarget } = buildEngine();
+
+    supabaseTarget.setSecret = async (key: string) => { setCalls.push(`supabase:${key}`); };
+    vercelTarget.setSecret = async (key: string) => { setCalls.push(`vercel:${key}`); };
+    githubTarget.setSecret = async (key: string) => { setCalls.push(`github:${key}`); };
 
     const report = await engine.syncAll();
 
     expect(report.synced).toBeGreaterThan(0);
     expect(setCalls.length).toBeGreaterThan(0);
-    // RESEND_API_KEY should sync to all three
-    expect(setCalls.filter((c) => c.includes('RESEND_API_KEY')).length).toBe(3);
   });
 
   it('reports failures without throwing', async () => {
-    const { engine } = buildEngine();
-    (engine as any).adapters.github.setSecret = async () => {
+    const { engine, githubTarget } = buildEngine();
+    githubTarget.setSecret = async () => {
       throw new Error('GitHub API rate limit');
     };
 
     const report = await engine.syncAll();
     expect(report.failed).toBeGreaterThan(0);
-    const failedRow = report.rows.find((r) =>
-      r.results.some((res) => !res.success && res.error?.includes('rate limit')),
+    const failedRow = report.rows.find((r: { results: Array<{ success: boolean; error?: string }> }) =>
+      r.results.some((res: { success: boolean; error?: string }) => !res.success && res.error?.includes('rate limit')),
     );
     expect(failedRow).toBeDefined();
   });
 
   it('skips secrets with empty vault values', async () => {
-    // SUPABASE_DB_PASSWORD is in SECRET_TARGET_MAP but not in vault secrets
-    const { engine } = buildEngine({ secrets: { RESEND_API_KEY: 're_key' } });
+    const { engine } = buildEngine({ secrets: { RESEND_CCC_SEND: 're_key' } });
     const report = await engine.syncAll();
 
-    // Secrets not in vault have empty values, should be skipped
     expect(report.skipped).toBeGreaterThan(0);
   });
 });

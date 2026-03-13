@@ -2,19 +2,10 @@ import { navigate, getCurrentPath } from './router.js';
 import { createStatusDot, type DotStatus } from './components/status-dot.js';
 import { createThemeToggle } from './components/theme-toggle.js';
 
-interface NavItem {
+export interface NavItem {
   label: string;
   path: string;
 }
-
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Overview',  path: '/' },
-  { label: 'Secrets',   path: '/secrets' },
-  { label: 'Database',  path: '/database' },
-  { label: 'Frontend',  path: '/frontend' },
-  { label: 'Email',     path: '/email' },
-  { label: 'CI/CD',     path: '/cicd' },
-];
 
 export interface ShellHandle {
   contentArea: HTMLElement;
@@ -24,8 +15,13 @@ export interface ShellHandle {
 
 /**
  * Render the application shell: topbar, pill nav, and content area.
+ * Nav items are passed in (from manifest) rather than hardcoded.
  */
-export function renderShell(root: HTMLElement): ShellHandle {
+export function renderShell(
+  root: HTMLElement,
+  navItems: NavItem[],
+  dashboardName: string = 'tkr-deploy',
+): ShellHandle {
   root.innerHTML = '';
 
   // Topbar
@@ -34,7 +30,7 @@ export function renderShell(root: HTMLElement): ShellHandle {
 
   const wordmark = document.createElement('span');
   wordmark.className = 'shell-topbar__wordmark';
-  wordmark.textContent = 'tkr-deploy';
+  wordmark.textContent = dashboardName;
   topbar.appendChild(wordmark);
 
   const rightGroup = document.createElement('div');
@@ -63,7 +59,7 @@ export function renderShell(root: HTMLElement): ShellHandle {
   nav.setAttribute('aria-label', 'Main navigation');
 
   const pills: HTMLAnchorElement[] = [];
-  for (const item of NAV_ITEMS) {
+  for (const item of navItems) {
     const pill = document.createElement('a');
     pill.className = 'shell-pill';
     pill.href = item.path;

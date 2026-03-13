@@ -1,13 +1,11 @@
 import { join } from 'node:path';
 import { $ } from 'bun';
+import config from './deploy.config.js';
 import { VaultHttpClient } from './src/adapters/vault-client.js';
-import { SupabaseAdapter } from './src/adapters/supabase-adapter.js';
-import { VercelAdapter } from './src/adapters/vercel-adapter.js';
-import { ResendAdapter } from './src/adapters/resend-adapter.js';
-import { GitHubAdapter } from './src/adapters/github-adapter.js';
-import { SecretsSyncEngine } from './src/domain/secrets-sync-engine.js';
-import { DeployOrchestrator } from './src/domain/deploy-orchestrator.js';
-import { HealthAggregator } from './src/domain/health-aggregator.js';
+import { PluginRegistry } from './src/core/plugin-registry.js';
+import { SecretsSyncEngine } from './src/core/secrets-sync-engine.js';
+import { DeployOrchestrator } from './src/core/deploy-orchestrator.js';
+import { HealthAggregator } from './src/core/health-aggregator.js';
 import { createServer } from './src/api/server.js';
 
 // ---------------------------------------------------------------------------
@@ -17,13 +15,13 @@ import { createServer } from './src/api/server.js';
 await $`bun run ${join(import.meta.dir, 'build-ui.ts')}`.quiet();
 
 // ---------------------------------------------------------------------------
-// 1. Load env config
+// 1. Load config
 // ---------------------------------------------------------------------------
 
-const port = Number(process.env.DEPLOY_PORT ?? 42043);
-const vaultUrl = process.env.VAULT_URL ?? 'http://localhost:42042';
-const vaultName = process.env.VAULT_NAME ?? 'compass';
-// These are overridden by vault values after vault loads (see below)
+const port = Number(process.env.DEPLOY_PORT ?? config.port ?? 42043);
+const vaultUrl = process.env.VAULT_URL ?? config.vault.url;
+const vaultName = process.env.VAULT_NAME ?? config.vault.vaultName;
+const dashboardName = config.name ?? 'tkr-deploy';
 
 // ---------------------------------------------------------------------------
 // 2. Create VaultClient and probe connectivity
@@ -31,13 +29,11 @@ const vaultName = process.env.VAULT_NAME ?? 'compass';
 
 const vaultClient = new VaultHttpClient({ baseUrl: vaultUrl, vaultName });
 
-let vaultConnected = false;
 let vaultSecrets: Map<string, string> = new Map();
 
 try {
   const health = await vaultClient.health();
   if (health.connected && !health.locked) {
-    vaultConnected = true;
     console.log(`[tkr-deploy] vault connected (${vaultName})`);
     try {
       vaultSecrets = await vaultClient.getAll();
@@ -54,89 +50,75 @@ try {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Read secrets (fall back to empty strings when vault unavailable)
+// 3. Initialize plugins from config
 // ---------------------------------------------------------------------------
 
-function secret(name: string): string {
-  return vaultSecrets.get(name) ?? '';
+const registry = new PluginRegistry();
+const factoryCtx = {
+  secrets: vaultSecrets,
+  vaultClient,
+  getSecret: (name: string) => vaultClient.getSecret(name),
+};
+
+for (const factory of config.providers) {
+  const plugin = factory(factoryCtx);
+  registry.register(plugin);
+  console.log(`[tkr-deploy] loaded provider: ${plugin.displayName}`);
 }
 
-const supabaseAccessToken = secret('SUPABASE_ACCESS_TOKEN');
-const supabaseProjectRef = secret('SUPABASE_PROJECT_REF')
-  || secret('SUPABASE_URL').match(/https:\/\/([^.]+)\.supabase\.co/)?.[1]
-  || '';
-const vercelToken = secret('VERCEL_TOKEN');
-const vercelProjectId = secret('VERCEL_PROJECT_ID');
-const vercelOrgId = secret('VERCEL_ORG_ID') || undefined;
-const resendApiKey = secret('RESEND_CCC_ADMIN');
-const githubToken = secret('GITHUB_TOKEN');
-const githubOwner = secret('GITHUB_OWNER');
-const githubRepo = secret('GITHUB_REPO');
-
 // ---------------------------------------------------------------------------
-// 4. Create adapters
-// ---------------------------------------------------------------------------
-
-const supabase = new SupabaseAdapter({
-  projectRef: supabaseProjectRef,
-  accessToken: supabaseAccessToken,
-  serviceRoleKey: secret('SUPABASE_SERVICE_ROLE_KEY'),
-  supabaseUrl: secret('SUPABASE_URL'),
-  projectRoot: join(import.meta.dir, '..'),
-});
-
-const vercel = new VercelAdapter({
-  token: vercelToken,
-  projectId: vercelProjectId,
-  orgId: vercelOrgId,
-});
-
-const resend = new ResendAdapter({
-  apiKey: resendApiKey,
-});
-
-const github = new GitHubAdapter({
-  token: githubToken,
-  owner: githubOwner,
-  repo: githubRepo,
-});
-
-// ---------------------------------------------------------------------------
-// 5. Create domain services
+// 4. Build domain services from registry
 // ---------------------------------------------------------------------------
 
 const syncEngine = new SecretsSyncEngine({
   vaultClient,
-  adapters: { supabase, vercel, github },
+  targets: registry.allSyncTargets(),
+  mappings: registry.allSecretMappings(),
 });
 
-const orchestrator = new DeployOrchestrator({
-  supabase,
-  vercel,
-  vaultClient,
-  syncEngine: {
-    async syncAll() {
+// Core deploy steps: syncSecrets (order 0) and healthCheck (order 900)
+const coreSteps = [
+  {
+    id: 'syncSecrets',
+    label: 'Sync secrets to providers',
+    provider: 'vault',
+    order: 0,
+    execute: async () => {
       const report = await syncEngine.syncAll();
-      const errors: string[] = [];
-      for (const row of report.rows) {
-        for (const result of row.results) {
-          if (!result.success && result.error) {
-            errors.push(`${row.name}→${result.target}: ${result.error}`);
-          }
-        }
-      }
-      return { synced: report.synced, failed: report.failed, errors };
+      return `Synced ${report.synced} secrets, ${report.failed} failed`;
     },
   },
+  {
+    id: 'healthCheck',
+    label: 'Health check all providers',
+    provider: 'all',
+    order: 900,
+    execute: async () => {
+      const adapters = registry.allAdapters();
+      const results = await Promise.all(adapters.map((a) => a.healthCheck()));
+      const issues = results.filter((r) => r.status !== 'healthy');
+      if (issues.length > 0) {
+        throw new Error(`Health check failed: ${issues.map((i) => `${i.provider}: ${i.status}`).join(', ')}`);
+      }
+      return 'All providers healthy';
+    },
+  },
+];
+
+const allSteps = [...coreSteps, ...registry.allDeploySteps()].sort((a, b) => a.order - b.order);
+
+const orchestrator = new DeployOrchestrator({
+  vaultClient,
+  steps: allSteps,
 });
 
 const healthAggregator = new HealthAggregator({
-  adapters: [supabase, vercel, resend, github],
+  adapters: registry.allAdapters(),
   vaultClient,
 });
 
 // ---------------------------------------------------------------------------
-// 6. Create and start HTTP server
+// 5. Create and start HTTP server
 // ---------------------------------------------------------------------------
 
 const uiDir = join(import.meta.dir, 'ui');
@@ -144,23 +126,24 @@ const uiDir = join(import.meta.dir, 'ui');
 const server = createServer({
   port,
   uiDir,
+  dashboardName,
   healthAggregator,
   syncEngine,
   orchestrator,
-  adapters: { supabase, vercel, github, resend },
+  registry,
   vaultClient,
 });
 
 console.log(`[tkr-deploy] listening on http://localhost:${server.port}`);
 
 // ---------------------------------------------------------------------------
-// 7. Start health polling
+// 6. Start health polling
 // ---------------------------------------------------------------------------
 
 healthAggregator.start();
 
 // ---------------------------------------------------------------------------
-// 8. Shutdown handlers
+// 7. Shutdown handlers
 // ---------------------------------------------------------------------------
 
 function shutdown(): void {

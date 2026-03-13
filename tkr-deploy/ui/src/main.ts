@@ -9,6 +9,18 @@ interface HealthResponse {
   rollup?: string;
 }
 
+interface ManifestScreen {
+  label: string;
+  path: string;
+  modulePath: string;
+  providerId?: string;
+}
+
+interface ManifestResponse {
+  name: string;
+  screens: ManifestScreen[];
+}
+
 function mapHealthToStatus(data: HealthResponse): { status: DotStatus; label: string } {
   if (data.vaultLocked === false) {
     return { status: 'healthy', label: 'unlocked' };
@@ -19,14 +31,32 @@ function mapHealthToStatus(data: HealthResponse): { status: DotStatus; label: st
   return { status: 'unknown', label: 'unknown' };
 }
 
-function bootstrap(): void {
+async function bootstrap(): Promise<void> {
   initTheme();
 
   const app = document.getElementById('app');
   if (!app) return;
 
-  const shell = renderShell(app);
-  initRouter(shell.contentArea, (path) => shell.updateActivePill(path));
+  // Fetch manifest to discover nav items and routes
+  let manifest: ManifestResponse;
+  try {
+    manifest = await apiFetch<ManifestResponse>('/api/manifest');
+  } catch {
+    // Fallback if manifest endpoint unavailable
+    manifest = {
+      name: 'tkr-deploy',
+      screens: [
+        { label: 'Overview', path: '/', modulePath: 'screens/overview.js' },
+        { label: 'Secrets', path: '/secrets', modulePath: 'screens/secrets.js' },
+      ],
+    };
+  }
+
+  const navItems = manifest.screens.map((s) => ({ label: s.label, path: s.path }));
+  const routes = manifest.screens.map((s) => ({ path: s.path, modulePath: s.modulePath }));
+
+  const shell = renderShell(app, navItems, manifest.name);
+  initRouter(shell.contentArea, routes, (path) => shell.updateActivePill(path));
 
   // Health polling
   async function pollHealth(): Promise<void> {
@@ -44,7 +74,7 @@ function bootstrap(): void {
 }
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', bootstrap);
+  document.addEventListener('DOMContentLoaded', () => void bootstrap());
 } else {
-  bootstrap();
+  void bootstrap();
 }
