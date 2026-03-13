@@ -17,6 +17,9 @@ export interface SupabaseAdapterConfig {
   /** Lazy credential resolver — called per-request to get fresh values from vault. */
   resolve?: {
     accessToken: () => Promise<string>;
+    projectRef?: () => Promise<string>;
+    serviceRoleKey?: () => Promise<string>;
+    supabaseUrl?: () => Promise<string>;
   };
 }
 
@@ -58,6 +61,30 @@ export class SupabaseAdapter implements ProviderAdapter {
     return this.initialAccessToken;
   }
 
+  private async getProjectRef(): Promise<string> {
+    if (this.resolve?.projectRef) {
+      const resolved = await this.resolve.projectRef();
+      if (resolved) return resolved;
+    }
+    return this.projectRef;
+  }
+
+  private async getServiceRoleKey(): Promise<string> {
+    if (this.resolve?.serviceRoleKey) {
+      const resolved = await this.resolve.serviceRoleKey();
+      if (resolved) return resolved;
+    }
+    return this.serviceRoleKey;
+  }
+
+  private async getSupabaseUrl(): Promise<string> {
+    if (this.resolve?.supabaseUrl) {
+      const resolved = await this.resolve.supabaseUrl();
+      if (resolved) return resolved;
+    }
+    return this.supabaseUrl;
+  }
+
   // ── Management API helper ──
 
   private async mgmtRequest<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -82,14 +109,16 @@ export class SupabaseAdapter implements ProviderAdapter {
   // ── Database RPC helper (uses service role key) ──
 
   private async dbRpc<T>(sql: string): Promise<T> {
-    if (!this.supabaseUrl || !this.serviceRoleKey) {
+    const supabaseUrl = await this.getSupabaseUrl();
+    const serviceRoleKey = await this.getServiceRoleKey();
+    if (!supabaseUrl || !serviceRoleKey) {
       throw new SupabaseApiError(0, 'Database query requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
     }
-    const res = await fetch(`${this.supabaseUrl}/rest/v1/rpc/`, {
+    const res = await fetch(`${supabaseUrl}/rest/v1/rpc/`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.serviceRoleKey}`,
-        'apikey': this.serviceRoleKey,
+        'Authorization': `Bearer ${serviceRoleKey}`,
+        'apikey': serviceRoleKey,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query: sql }),
@@ -107,6 +136,7 @@ export class SupabaseAdapter implements ProviderAdapter {
 
   async healthCheck(): Promise<ProviderHealth> {
     const checkedAt = Date.now();
+    const projectRef = await this.getProjectRef();
     try {
       const project = await this.mgmtRequest<{
         id: string;
@@ -114,7 +144,7 @@ export class SupabaseAdapter implements ProviderAdapter {
         region: string;
         status: string;
         database?: { version?: string };
-      }>('GET', `/v1/projects/${this.projectRef}`);
+      }>('GET', `/v1/projects/${projectRef}`);
 
       const isHealthy = project.status === 'ACTIVE_HEALTHY';
       return {
@@ -122,7 +152,7 @@ export class SupabaseAdapter implements ProviderAdapter {
         status: isHealthy ? 'healthy' : 'warning',
         label: 'Supabase',
         details: {
-          projectRef: this.projectRef,
+          projectRef,
           region: project.region,
           version: project.database?.version ?? 'unknown',
         },
@@ -162,9 +192,10 @@ export class SupabaseAdapter implements ProviderAdapter {
   }
 
   async pushMigrations(): Promise<{ applied: string[]; errors: string[] }> {
+    const projectRef = await this.getProjectRef();
     const result = await this.runCli([
       'db', 'push',
-      '--project-ref', this.projectRef,
+      '--project-ref', projectRef,
     ]);
 
     if (result.exitCode === 0) {
@@ -207,7 +238,7 @@ export class SupabaseAdapter implements ProviderAdapter {
         slug: string;
         status: string;
         updated_at: string;
-      }>>('GET', `/v1/projects/${this.projectRef}/functions`);
+      }>>('GET', `/v1/projects/${await this.getProjectRef()}/functions`);
       for (const fn of remote) {
         remoteMap.set(fn.slug, { status: fn.status, updatedAt: fn.updated_at });
       }
@@ -229,9 +260,10 @@ export class SupabaseAdapter implements ProviderAdapter {
   }
 
   async deployFunction(name: string): Promise<void> {
+    const projectRef = await this.getProjectRef();
     const result = await this.runCli([
       'functions', 'deploy', name,
-      '--project-ref', this.projectRef,
+      '--project-ref', projectRef,
     ]);
 
     if (result.exitCode !== 0) {
@@ -262,9 +294,10 @@ export class SupabaseAdapter implements ProviderAdapter {
   // ── Extensions (Management API database query) ──
 
   private async dbQuery<T>(sql: string): Promise<T> {
+    const projectRef = await this.getProjectRef();
     return this.mgmtRequest<T>(
       'POST',
-      `/v1/projects/${this.projectRef}/database/query`,
+      `/v1/projects/${projectRef}/database/query`,
       { query: sql },
     );
   }
@@ -292,7 +325,8 @@ export class SupabaseAdapter implements ProviderAdapter {
   }
 
   async setSecrets(secrets: Record<string, string>): Promise<void> {
-    const args: string[] = ['secrets', 'set', '--project-ref', this.projectRef];
+    const projectRef = await this.getProjectRef();
+    const args: string[] = ['secrets', 'set', '--project-ref', projectRef];
     for (const [key, value] of Object.entries(secrets)) {
       args.push(`${key}=${value}`);
     }

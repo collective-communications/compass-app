@@ -6,18 +6,41 @@ import { registerDatabaseRoutes } from './routes.js';
 export type { SupabaseAdapterConfig };
 export { SupabaseAdapter };
 
+/** Extract the project ref from a Supabase URL (e.g. https://abcdef.supabase.co → abcdef). */
+function extractProjectRef(url: string): string {
+  try {
+    const hostname = new URL(url).hostname;
+    const ref = hostname.split('.')[0];
+    return ref ?? '';
+  } catch {
+    return '';
+  }
+}
+
 export function createSupabasePlugin(
   config?: { projectRoot?: string },
 ): ProviderPluginFactory {
   return ({ secrets, getSecret }) => {
+    const supabaseUrl = secrets.get('SUPABASE_URL') ?? '';
+    const projectRef = secrets.get('SUPABASE_PROJECT_REF') ?? extractProjectRef(supabaseUrl);
+
     const adapter = new SupabaseAdapter({
-      projectRef: secrets.get('SUPABASE_PROJECT_REF') ?? '',
+      projectRef,
       accessToken: secrets.get('SUPABASE_ACCESS_TOKEN') ?? '',
       serviceRoleKey: secrets.get('SUPABASE_SERVICE_ROLE_KEY'),
-      supabaseUrl: secrets.get('SUPABASE_URL'),
+      supabaseUrl,
       projectRoot: config?.projectRoot,
       resolve: {
         accessToken: () => getSecret('SUPABASE_ACCESS_TOKEN'),
+        projectRef: async () => {
+          // Try explicit key first, then derive from URL
+          const explicit = await getSecret('SUPABASE_PROJECT_REF').catch(() => '');
+          if (explicit) return explicit;
+          const url = await getSecret('SUPABASE_URL');
+          return extractProjectRef(url);
+        },
+        serviceRoleKey: () => getSecret('SUPABASE_SERVICE_ROLE_KEY'),
+        supabaseUrl: () => getSecret('SUPABASE_URL'),
       },
     });
 

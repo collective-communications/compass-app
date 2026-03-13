@@ -604,6 +604,17 @@ export function render(target: HTMLElement): void {
 
     deploymentsP.then(data => {
       if (signal.aborted) return;
+
+      // Handle degraded response (vault locked / adapter unavailable)
+      if (!data.current) {
+        const msg = (data as Record<string, unknown>).error ?? 'No deployment data available';
+        deploySlot.innerHTML = '';
+        deploySlot.appendChild(buildErrorCard('Current Deployment', msg));
+        historySlot.innerHTML = '';
+        historySlot.appendChild(buildErrorCard('Deployment History', msg));
+        return;
+      }
+
       currentIsBuilding = data.current.status === 'Building';
 
       deploySlot.innerHTML = '';
