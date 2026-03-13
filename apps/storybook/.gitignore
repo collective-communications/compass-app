@@ -1,3 +1,4 @@
 storybook-static/
 test-results/
 playwright-report/
+debug-storybook.log
