@@ -17,8 +17,12 @@ const config: StorybookConfig = {
   ],
   addons: [
     getAbsolutePath("@storybook/addon-a11y"),
+    getAbsolutePath("@storybook/addon-mcp"),
     resolve(__dirname, 'addons/a11y-report/preset.ts'),
   ],
+  features: {
+    experimentalComponentsManifest: true,
+  },
   framework: {
     name: getAbsolutePath("@storybook/react-vite"),
     options: {},
