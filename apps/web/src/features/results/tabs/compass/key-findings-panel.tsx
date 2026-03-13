@@ -104,8 +104,8 @@ export function KeyFindingsPanel({
           Observations
         </h3>
         <ul className="flex flex-col gap-3" aria-label="Key observations">
-          {observations.map((obs) => (
-            <li key={obs.dimension} className="flex items-start gap-3">
+          {observations.map((obs, i) => (
+            <li key={`${obs.dimension}-${i}`} className="flex items-start gap-3">
               <ScoreRing
                 score={scores[obs.dimension]?.score ?? 0}
                 color={DIMENSION_COLORS[obs.dimension] ?? '#424242'}
@@ -126,8 +126,8 @@ export function KeyFindingsPanel({
             Priority Actions
           </h3>
           <ul className="flex flex-col gap-3" aria-label="Priority actions">
-            {actionableFlags.map((flag) => (
-              <li key={flag.dimensionCode} className="flex items-start gap-3">
+            {actionableFlags.map((flag, i) => (
+              <li key={`${flag.dimensionCode}-${i}`} className="flex items-start gap-3">
                 <span
                   className="mt-1.5 h-2.5 w-2.5 flex-shrink-0 rounded-full"
                   style={{ backgroundColor: SEVERITY_DOT_COLORS[flag.severity] }}

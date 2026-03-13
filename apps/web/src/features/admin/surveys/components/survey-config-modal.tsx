@@ -252,7 +252,7 @@ export function SurveyConfigModal({
             onClick={handleDeploy}
             disabled={!canDeploy || isPending}
             title={!hasQuestions ? 'Add at least one question before deploying' : undefined}
-            className="rounded-lg bg-[var(--grey-900)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--grey-800)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-[var(--grey-900)] px-4 py-2 text-sm font-medium text-[var(--grey-50)] hover:bg-[var(--grey-800)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending ? 'Deploying...' : 'Deploy Now'}
           </button>

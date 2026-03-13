@@ -73,7 +73,7 @@ export function DimensionNav({
               onClick={() => onSelect(id)}
               className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
                 isActive
-                  ? 'bg-[var(--grey-700)] text-white'
+                  ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
                   : 'bg-[var(--grey-50)] text-[var(--grey-500)] hover:bg-[var(--grey-100)]'
               }`}
               aria-current={isActive ? 'true' : undefined}

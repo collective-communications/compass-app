@@ -242,7 +242,7 @@ export function MetadataConfig({
             type="button"
             onClick={handleAdd}
             disabled={!newValue.trim()}
-            className="rounded-lg bg-[var(--grey-900,#212121)] px-4 py-2 text-sm font-medium text-white disabled:opacity-40"
+            className="rounded-lg bg-[var(--grey-900,#212121)] px-4 py-2 text-sm font-medium text-[var(--grey-50)] disabled:opacity-40"
           >
             Add
           </button>

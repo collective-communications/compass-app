@@ -114,7 +114,7 @@ export function BulkImportModal({
             onClick={() => setInputMethod('file')}
             className={`rounded-full px-3 py-1 text-sm font-medium ${
               inputMethod === 'file'
-                ? 'bg-[var(--grey-900)] text-white'
+                ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                 : 'text-[var(--grey-600)] hover:text-[var(--grey-900)]'
             }`}
           >
@@ -125,7 +125,7 @@ export function BulkImportModal({
             onClick={() => setInputMethod('paste')}
             className={`rounded-full px-3 py-1 text-sm font-medium ${
               inputMethod === 'paste'
-                ? 'bg-[var(--grey-900)] text-white'
+                ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                 : 'text-[var(--grey-600)] hover:text-[var(--grey-900)]'
             }`}
           >
@@ -229,7 +229,7 @@ export function BulkImportModal({
             type="button"
             onClick={handleImport}
             disabled={validRows.length === 0 || isPending}
-            className="rounded-lg bg-[var(--grey-900)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--grey-800)] disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-[var(--grey-900)] px-4 py-2 text-sm font-medium text-[var(--grey-50)] hover:bg-[var(--grey-800)] disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isPending
               ? 'Importing...'

@@ -75,7 +75,7 @@ export function SegmentFilterBar({
           onClick={() => onValueChange(ALL_VALUE)}
           className={`rounded-full px-3 py-1 text-sm transition-colors ${
             segmentValue === ALL_VALUE
-              ? 'bg-[var(--grey-700)] text-white'
+              ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
               : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
           }`}
         >
@@ -100,7 +100,7 @@ export function SegmentFilterBar({
               onClick={() => onValueChange(value)}
               className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-sm transition-colors ${
                 isActive
-                  ? 'bg-[var(--grey-700)] text-white'
+                  ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
                   : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
               }`}
             >

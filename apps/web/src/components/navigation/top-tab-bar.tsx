@@ -31,7 +31,7 @@ export function TopTabBar({ tabs, activeTabId }: TopTabBarProps): ReactElement {
                 to={tab.href}
                 className={`inline-block rounded-full px-4 py-1 text-sm transition-colors ${
                   isActive
-                    ? 'bg-[var(--grey-900)] text-white'
+                    ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                     : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
                 }`}
               >

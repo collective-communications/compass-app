@@ -35,7 +35,7 @@ export function RecommendationNav({
                 onClick={() => onSelect(i)}
                 className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
                   isActive
-                    ? 'bg-[var(--grey-700)] text-white'
+                    ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
                     : 'text-[var(--grey-500)] hover:bg-[var(--grey-50)]'
                 }`}
                 aria-current={isActive ? 'true' : undefined}

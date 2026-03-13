@@ -35,7 +35,7 @@ export function PreviousSurveys({ surveys, onSelectSurvey }: PreviousSurveysProp
             onClick={() => onSelectSurvey(item.survey.id)}
             className="flex w-full items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-4 text-left transition-shadow hover:shadow-md md:w-[300px] md:shrink-0"
           >
-            <span className="shrink-0 rounded-full bg-[var(--grey-500)] px-3 py-1 text-xs font-semibold uppercase text-white">
+            <span className="shrink-0 rounded-full bg-[var(--grey-500)] px-3 py-1 text-xs font-semibold uppercase text-[var(--grey-50)]">
               Complete
             </span>
             <div className="min-w-0 flex-1">

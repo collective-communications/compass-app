@@ -33,7 +33,7 @@ export function DimensionNav({
               onClick={() => onSelect(null)}
               className={`whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
                 activeDimensionId === null
-                  ? 'bg-[var(--grey-900)] text-white'
+                  ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                   : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
               }`}
             >
@@ -47,7 +47,7 @@ export function DimensionNav({
                 onClick={() => onSelect(dim.id)}
                 className={`whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
                   activeDimensionId === dim.id
-                    ? 'bg-[var(--grey-900)] text-white'
+                    ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                     : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
                 }`}
               >

@@ -67,7 +67,7 @@ export function TopicFilter({ topics, activeTopicId, onTopicChange }: TopicFilte
         onClick={() => handleClick(null)}
         className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
           activeTopicId === null
-            ? 'bg-[var(--grey-900)] text-white'
+            ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
             : 'bg-[var(--grey-50)] text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
         }`}
       >
@@ -81,7 +81,7 @@ export function TopicFilter({ topics, activeTopicId, onTopicChange }: TopicFilte
           title={topic.fullText}
           className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
             activeTopicId === topic.questionId
-              ? 'bg-[var(--grey-900)] text-white'
+              ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
               : 'bg-[var(--grey-50)] text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
           }`}
         >

@@ -345,7 +345,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
           <button
             type="button"
             onClick={onBack}
-            className="rounded-lg bg-[var(--grey-900)] px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--grey-800)]"
+            className="rounded-lg bg-[var(--grey-900)] px-6 py-2 text-sm font-medium text-[var(--grey-50)] transition-colors hover:bg-[var(--grey-800)]"
           >
             Done
           </button>

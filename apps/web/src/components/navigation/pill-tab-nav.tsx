@@ -28,7 +28,7 @@ export function PillTabNav({ tabs, activeId, onSelect }: PillTabNavProps): React
                 onClick={() => onSelect(tab.id)}
                 className={`whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
                   isActive
-                    ? 'bg-[var(--grey-900)] text-white'
+                    ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                     : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
                 } ${isDisabled ? 'opacity-40 cursor-default' : 'cursor-pointer'}`}
               >

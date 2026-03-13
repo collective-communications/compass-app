@@ -34,7 +34,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
             Closes {formatDate(survey.closesAt)}
           </p>
         </div>
-        <span className="shrink-0 rounded-full bg-[var(--grey-700)] px-3 py-1 text-xs font-semibold uppercase text-white">
+        <span className="shrink-0 rounded-full bg-[var(--grey-700)] px-3 py-1 text-xs font-semibold uppercase text-[var(--grey-50)]">
           Active
         </span>
       </div>

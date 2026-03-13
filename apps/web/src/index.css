@@ -40,7 +40,7 @@
   --grey-50: #212121;
   --grey-100: #2E2E2E;
   --grey-300: #424242;
-  --grey-400: #616161;
+  --grey-400: #8A8A8A;
   --grey-500: #9E9E9E;
   --grey-700: #BDBDBD;
   --grey-900: #F5F5F5;
@@ -56,7 +56,6 @@
   --severity-healthy-bg: #1B3E1C;
   --severity-healthy-text: #66BB6A;
   --severity-healthy-border: #66BB6A;
-  --grey-400: #8A8A8A;
   --track-color: #787878;
   --surface-card: #2E2E2E;
 }

@@ -224,7 +224,7 @@ export function EmailTemplatesCard(): ReactElement {
                             type="button"
                             onClick={() => handleSave(template)}
                             disabled={saveMutation.isPending}
-                            className="rounded-lg bg-[var(--grey-900)] px-4 py-1.5 text-sm font-medium text-white hover:bg-[var(--grey-800)] disabled:opacity-50"
+                            className="rounded-lg bg-[var(--grey-900)] px-4 py-1.5 text-sm font-medium text-[var(--grey-50)] hover:bg-[var(--grey-800)] disabled:opacity-50"
                           >
                             {saveMutation.isPending ? 'Saving...' : 'Save'}
                           </button>
