@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RecommendationCard } from './recommendation-card';
 import type { Recommendation } from '../../types';
 

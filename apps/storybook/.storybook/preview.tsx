@@ -1,5 +1,6 @@
-import type { Preview, Decorator } from '@storybook/react';
+import type { Preview, Decorator } from '@storybook/react-vite';
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   createMemoryHistory,
   createRootRoute,
@@ -7,6 +8,12 @@ import {
   RouterProvider,
 } from '@tanstack/react-router';
 import './storybook.css';
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: { retry: false, staleTime: Infinity },
+  },
+});
 
 /**
  * Wraps any story in a real TanStack RouterProvider.
@@ -39,7 +46,9 @@ const ThemeDecorator: Decorator = (Story, context) => {
         minHeight: '100vh',
       }}
     >
-      <StoryRouter story={Story} />
+      <QueryClientProvider client={queryClient}>
+        <StoryRouter story={Story} />
+      </QueryClientProvider>
     </div>
   );
 };
@@ -60,15 +69,19 @@ const preview: Preview = {
   },
   initialGlobals: {
     theme: 'light',
+
+    viewport: {
+      value: 'mobile',
+      isRotated: false
+    }
   },
   decorators: [ThemeDecorator],
   parameters: {
     viewport: {
-      viewports: {
+      options: {
         mobile: { name: 'Mobile', styles: { width: '375px', height: '812px' } },
         desktop: { name: 'Desktop', styles: { width: '1280px', height: '800px' } },
-      },
-      defaultViewport: 'mobile',
+      }
     },
     layout: 'fullscreen',
   },

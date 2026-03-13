@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { QuestionResultCard } from './question-result-card';
 import type { QuestionScoreRow } from '../../types';
 

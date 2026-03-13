@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { CompassCore } from './CompassCore';
 
 const SVG_SIZE = 200;

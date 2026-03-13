@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SegmentCompass } from './segment-compass';
 import type { DimensionScoreRow } from '../../types';
 

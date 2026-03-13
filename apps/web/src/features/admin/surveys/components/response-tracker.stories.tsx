@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ResponseTracker } from './response-tracker';
 import type { ResponseMetrics } from '../services/deployment-service';
 

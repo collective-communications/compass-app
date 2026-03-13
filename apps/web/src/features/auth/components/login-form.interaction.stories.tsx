@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn, expect, within, userEvent } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn, expect, within, userEvent } from 'storybook/test';
 import { LoginForm } from './login-form';
 import { PublicShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 import {

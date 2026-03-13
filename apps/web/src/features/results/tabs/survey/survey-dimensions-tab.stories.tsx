@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SurveyDimensionsTab, SurveyInsightsContent } from './survey-dimensions-tab';
 import type { DimensionScoreMap } from '@compass/scoring';
 

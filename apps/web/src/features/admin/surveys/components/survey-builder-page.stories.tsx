@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { SurveyBuilderPage } from './survey-builder-page';
 import { AppShellDecorator } from '../../../../../../../apps/storybook/.storybook/decorators/shells';
 

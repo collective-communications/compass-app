@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { AppLink } from './app-link';
 
 const meta = {
@@ -19,6 +19,6 @@ export const Styled: Story = {
   args: {
     to: '/results',
     children: 'View Results',
-    className: 'text-sm font-medium text-[var(--color-core)] underline',
+    className: 'text-sm font-medium text-[var(--color-core-text)] underline',
   },
 };

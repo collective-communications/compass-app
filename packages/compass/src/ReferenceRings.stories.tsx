@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ReferenceRings } from './ReferenceRings';
 
 const SVG_SIZE = 344;

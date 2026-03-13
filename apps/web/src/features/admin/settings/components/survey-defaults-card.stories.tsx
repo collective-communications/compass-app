@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { SurveyDefaultsCard } from './survey-defaults-card';
 import type { SystemSettings } from '../hooks/use-system-settings';
 

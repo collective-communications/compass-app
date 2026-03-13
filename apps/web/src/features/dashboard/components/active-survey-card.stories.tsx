@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ActiveSurveyCard } from './active-survey-card';
 import { AppShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 import type { ActiveSurvey } from '../hooks/use-dashboard-data';

@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ArchetypeCard } from './archetype-card';
 import type { ArchetypeMatch } from '@compass/scoring';
 

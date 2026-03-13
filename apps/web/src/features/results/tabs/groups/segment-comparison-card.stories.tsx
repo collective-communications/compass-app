@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { SegmentComparisonCard } from './segment-comparison-card';
 import type { DimensionScoreRow } from '../../types';
 import type { DimensionScoreMap } from '@compass/scoring';

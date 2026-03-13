@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { KeyFindingsPanel } from './key-findings-panel';
 import type { DimensionScoreMap, RiskFlag } from '@compass/scoring';
 

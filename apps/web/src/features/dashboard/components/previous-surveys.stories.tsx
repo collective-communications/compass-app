@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { PreviousSurveys } from './previous-surveys';
 import { AppShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 import type { PreviousSurvey } from '../hooks/use-dashboard-data';

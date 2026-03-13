@@ -1,7 +1,14 @@
+// This file has been automatically migrated to valid ESM format by Storybook.
+import { fileURLToPath } from "node:url";
 import type { StorybookConfig } from '@storybook/react-vite';
 import tailwindcss from '@tailwindcss/vite';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
 import { createRequire } from 'node:module';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const _require = createRequire(import.meta.url);
 
 const config: StorybookConfig = {
   stories: [
@@ -9,11 +16,11 @@ const config: StorybookConfig = {
     '../../../packages/*/src/**/*.stories.@(ts|tsx)',
   ],
   addons: [
-    '@storybook/addon-essentials',
-    '@storybook/addon-a11y',
+    getAbsolutePath("@storybook/addon-a11y"),
+    resolve(__dirname, 'addons/a11y-report/preset.ts'),
   ],
   framework: {
-    name: '@storybook/react-vite',
+    name: getAbsolutePath("@storybook/react-vite"),
     options: {},
   },
   viteFinal: async (config) => {
@@ -30,10 +37,8 @@ const config: StorybookConfig = {
       '@compass/types': resolve(root, 'packages/types/src/index.ts'),
       '@compass/ui': resolve(root, 'packages/ui/src/index.ts'),
       '@compass/utils': resolve(root, 'packages/utils/src/index.ts'),
-      // Ensure @storybook/test resolves for stories outside the storybook workspace
-      '@storybook/test': resolve(__dirname, '../node_modules/@storybook/test'),
       // Single instance of TanStack Router so decorator context matches component context
-      '@tanstack/react-router': dirname(createRequire(resolve(root, 'apps/web/package.json')).resolve('@tanstack/react-router/package.json')),
+      '@tanstack/react-router': dirname(_require.resolve('@tanstack/react-router/package.json')),
     };
 
     config.build = config.build || {};
@@ -44,3 +49,7 @@ const config: StorybookConfig = {
 };
 
 export default config;
+
+function getAbsolutePath(value: string): any {
+  return dirname(_require.resolve(join(value, "package.json")));
+}

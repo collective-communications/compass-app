@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { fn } from '@storybook/test';
+import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { AppHeader } from './app-header';
 import type { AuthUser } from '@compass/types';
 import type { TabConfig } from '../../lib/navigation';

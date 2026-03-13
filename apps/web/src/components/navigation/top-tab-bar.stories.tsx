@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TopTabBar } from './top-tab-bar';
 import type { TabConfig } from '../../lib/navigation';
 

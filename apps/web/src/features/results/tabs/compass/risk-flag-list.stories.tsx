@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { RiskFlagList } from './risk-flag-list';
 import type { RiskFlag } from '@compass/scoring';
 

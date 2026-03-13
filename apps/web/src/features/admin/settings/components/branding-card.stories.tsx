@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { BrandingCard } from './branding-card';
 import type { SystemSettings } from '../hooks/use-system-settings';
 

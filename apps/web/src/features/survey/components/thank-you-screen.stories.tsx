@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ThankYouScreen } from './thank-you-screen';
 import { SurveyShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 

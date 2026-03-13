@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { ReportPreview } from './report-preview';
 import { AppShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 import type { ReportRow } from '../services/report-api';

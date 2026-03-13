@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { KeyMetricsCard } from './key-metrics-card';
 import type { OrganizationSummary } from '@compass/types';
 

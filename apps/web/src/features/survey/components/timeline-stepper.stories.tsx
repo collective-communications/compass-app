@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TimelineStepper } from './timeline-stepper';
 import { SurveyShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 

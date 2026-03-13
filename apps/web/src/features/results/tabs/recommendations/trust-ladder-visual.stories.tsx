@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from '@storybook/react';
+import type { Meta, StoryObj } from '@storybook/react-vite';
 import { TrustLadderVisual } from './trust-ladder-visual';
 import type { TrustLadderResult, TrustRungScore } from '@compass/types';
 
