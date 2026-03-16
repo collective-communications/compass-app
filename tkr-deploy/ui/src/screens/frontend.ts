@@ -117,10 +117,10 @@ function createDl(entries: Array<{ label: string; value: string | HTMLElement }>
 
     const dd = document.createElement('dd');
     dd.style.margin = '0';
-    if (typeof entry.value === 'string') {
-      dd.textContent = entry.value;
-    } else {
+    if (entry.value instanceof HTMLElement) {
       dd.appendChild(entry.value);
+    } else {
+      dd.textContent = String(entry.value ?? '—');
     }
     dl.appendChild(dd);
   }

@@ -30,7 +30,7 @@ export function registerFrontendRoutes(
       }
 
       return jsonSuccess({
-        name: project.name,
+        name: project.name ?? 'unknown',
         framework: project.framework ?? 'unknown',
         productionUrl: project.alias[0] ? `https://${project.alias[0]}` : '',
         dashboardUrl,
