@@ -9,7 +9,7 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
-const FROM_ADDRESS = Deno.env.get('RESEND_FROM_ADDRESS') ?? 'noreply@mail.tuckers.link';
+const FROM_ADDRESS = Deno.env.get('RESEND_FROM_ADDRESS') ?? 'noreply@mail.collectiveculturecompass.com';
 
 // ─── Resend Send ─────────────────────────────────────────────────────────────
 

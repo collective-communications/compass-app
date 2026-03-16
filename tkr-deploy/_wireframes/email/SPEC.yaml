@@ -20,7 +20,7 @@ screens:
 
     data_sources:
       - derived: domain_status
-        logic: "GET https://api.resend.com/domains — returns array of domain objects. Find entry matching mail.tuckers.link. Fields: id, name, status (verified|pending|not_started), region, created_at."
+        logic: "GET https://api.resend.com/domains — returns array of domain objects. Find entry matching mail.collectiveculturecompass.com. Fields: id, name, status (verified|pending|not_started), region, created_at."
 
       - derived: dns_records
         logic: "Extracted from the domain object returned by GET /domains/{id}. Each record has: type (TXT|CNAME), name (host), value, status (verified|not_started). SPF and DKIM records are system-generated. DMARC record requires manual DNS entry by operator."
@@ -38,7 +38,7 @@ screens:
     components:
       - element: domain_status_card
         type: card
-        content: "Domain name (mail.tuckers.link), verification status badge (Verified/Pending/Not Configured), provider name (Resend), plan details (3,000/month · 1 domain · 2 req/s), Verify Domain button (disabled when verified), Add Domain button (shown only when status is not_started)."
+        content: "Domain name (mail.collectiveculturecompass.com), verification status badge (Verified/Pending/Not Configured), provider name (Resend), plan details (3,000/month · 1 domain · 2 req/s), Verify Domain button (disabled when verified), Add Domain button (shown only when status is not_started)."
         behavior: "Verify Domain button triggers POST /domains/{id}/verify — disabled with aria-disabled when domain status is verified. Add Domain (not shown in base state) opens domain creation flow. Status badge reflects live API state, polled on mount."
         note: "Button states are mutually exclusive: if verified, Verify Domain is disabled and Add Domain is hidden. If pending, Verify Domain is active and Add Domain is hidden. If not configured, both Add Domain is shown and Verify Domain is hidden."
 
@@ -56,7 +56,7 @@ screens:
 
       - element: api_key_status_card
         type: card
-        content: "Key name (tkr-deploy-production), created date, permission badge (Sending access), domain restriction (mail.tuckers.link), vault sync status dot + label, last synced timestamp, vault key name (RESEND_API_KEY) displayed as a code badge."
+        content: "Key name (tkr-deploy-production), created date, permission badge (Sending access), domain restriction (mail.collectiveculturecompass.com), vault sync status dot + label, last synced timestamp, vault key name (RESEND_API_KEY) displayed as a code badge."
         behavior: "Key value is never displayed — only metadata. Vault sync status dot uses same greyscale fill system as top bar: #212121 = synced, #9E9E9E = unknown, #616161 = warning/stale. Clicking the vault key name badge copies the key reference (not the value) to clipboard."
         note: "API key is stored in vault as RESEND_API_KEY. The card is read-only — key rotation is handled through the vault, not this screen."
 

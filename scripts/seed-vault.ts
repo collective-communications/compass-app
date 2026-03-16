@@ -119,7 +119,7 @@ const groups: GroupDef[] = [
     secrets: [
       { name: "RESEND_CCC_SEND", value: "", source: "send-only API key" },
       { name: "RESEND_CCC_ADMIN", value: "", source: "full access API key" },
-      { name: "RESEND_FROM_ADDRESS", value: "noreply@mail.tuckers.link", source: "default" },
+      { name: "RESEND_FROM_ADDRESS", value: "noreply@mail.collectiveculturecompass.com", source: "default" },
     ],
   },
   {

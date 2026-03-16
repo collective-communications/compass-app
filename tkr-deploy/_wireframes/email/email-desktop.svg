@@ -65,7 +65,7 @@
     <text x="684" y="26" text-anchor="middle" class="text-primary" font-size="11" font-weight="600">Verified</text>
 
     <!-- Domain name -->
-    <text x="20" y="54" class="text-primary" font-size="18" font-weight="600">mail.tuckers.link</text>
+    <text x="20" y="54" class="text-primary" font-size="18" font-weight="600">mail.collectiveculturecompass.com</text>
 
     <!-- Divider -->
     <line x1="20" y1="72" x2="720" y2="72" stroke="#E0E0E0" stroke-width="1"/>
@@ -225,7 +225,7 @@
       <text x="186" y="18" class="text-secondary" font-size="11">Not verified</text>
 
       <!-- Host value + copy -->
-      <text x="280" y="12" class="text-secondary" font-size="11">_dmarc.mail.tuckers.link</text>
+      <text x="280" y="12" class="text-secondary" font-size="11">_dmarc.mail.collectiveculturecompass.com</text>
       <g transform="translate(460, 4)">
         <rect x="0" y="2" width="10" height="10" rx="2" fill="none" stroke="#9E9E9E" stroke-width="1.2"/>
         <rect x="2" y="0" width="10" height="10" rx="2" fill="#FFFFFF" stroke="#9E9E9E" stroke-width="1.2"/>
@@ -241,7 +241,7 @@
       <!-- Add record guidance -->
       <rect x="20" y="30" width="680" height="56" rx="6" fill="#F5F5F5" stroke="#E0E0E0" stroke-width="1"/>
       <text x="36" y="50" class="text-secondary" font-size="11" font-weight="600">To add this record in your DNS provider:</text>
-      <text x="36" y="68" class="text-tertiary" font-size="11">Type: TXT  ·  Host: _dmarc  ·  Value: v=DMARC1; p=none; rua=mailto:dmarc@mail.tuckers.link</text>
+      <text x="36" y="68" class="text-tertiary" font-size="11">Type: TXT  ·  Host: _dmarc  ·  Value: v=DMARC1; p=none; rua=mailto:dmarc@mail.collectiveculturecompass.com</text>
     </g>
 
     <!-- Divider before refresh note -->
@@ -276,7 +276,7 @@
     <text x="170" y="111" text-anchor="middle" class="text-primary" font-size="10" font-weight="600">Sending access</text>
 
     <text x="20" y="136" class="text-tertiary" font-size="10" letter-spacing="0.3">DOMAIN</text>
-    <text x="120" y="136" class="text-secondary" font-size="12">mail.tuckers.link</text>
+    <text x="120" y="136" class="text-secondary" font-size="12">mail.collectiveculturecompass.com</text>
 
     <!-- Divider -->
     <line x1="20" y1="150" x2="432" y2="150" stroke="#E0E0E0" stroke-width="1"/>
