@@ -23,8 +23,6 @@ export function createGitHubPlugin(): ProviderPluginFactory {
         { vaultKey: 'SUPABASE_URL' },
         { vaultKey: 'SUPABASE_SERVICE_ROLE_KEY' },
         { vaultKey: 'SUPABASE_ACCESS_TOKEN' },
-        { vaultKey: 'SUPABASE_PROJECT_REF' },
-        { vaultKey: 'SUPABASE_DB_PASSWORD' },
         { vaultKey: 'VERCEL_TOKEN' },
         { vaultKey: 'VERCEL_ORG_ID' },
         { vaultKey: 'VERCEL_PROJECT_ID' },

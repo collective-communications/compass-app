@@ -94,7 +94,6 @@ const groups: GroupDef[] = [
       { name: "VITE_SUPABASE_ANON_KEY", value: "" },
       { name: "SUPABASE_SERVICE_ROLE_KEY", value: "" },
       { name: "SUPABASE_ACCESS_TOKEN", value: "" },
-      { name: "SUPABASE_PROJECT_REF", value: "", source: "derived from SUPABASE_URL at runtime" },
       { name: "SUPABASE_URL", value: "" },
     ],
   },
@@ -132,7 +131,7 @@ const groups: GroupDef[] = [
     name: "App",
     secrets: [
       { name: "VITE_APP_URL", value: "http://localhost:5173", source: "default" },
-      { name: "APP_URL", value: "https://app.collectivecommunication.ca", source: "default" },
+      { name: "APP_URL", value: "https://app.collectiveculturecompass.com", source: "default" },
     ],
   },
   {

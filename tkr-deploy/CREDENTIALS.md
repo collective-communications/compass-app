@@ -13,12 +13,6 @@ Personal access token for the Supabase Management API (migrations, edge function
 2. Click **Generate new token**
 3. Name it `tkr-deploy` and copy the token
 
-### SUPABASE_PROJECT_REF
-Your Supabase project reference ID.
-
-1. Go to https://supabase.com/dashboard/project/_/settings/general
-2. Copy the **Reference ID** (e.g., `gscaczmrruzymzdpzohr`)
-
 ---
 
 ## Vercel
@@ -103,7 +97,7 @@ Required for each screen:
 |--------|---------------|
 | Overview | All (aggregated health) |
 | Secrets | Vault connected (already working) |
-| Database | `SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_REF` |
+| Database | `SUPABASE_ACCESS_TOKEN` |
 | Frontend | `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` |
 | Email | `RESEND_API_KEY` |
 | CI/CD | `GITHUB_CLIENT_ID` + device flow auth |

@@ -22,7 +22,7 @@ export function createSupabasePlugin(
 ): ProviderPluginFactory {
   return ({ secrets, getSecret }) => {
     const supabaseUrl = secrets.get('SUPABASE_URL') ?? '';
-    const projectRef = secrets.get('SUPABASE_PROJECT_REF') ?? extractProjectRef(supabaseUrl);
+    const projectRef = extractProjectRef(supabaseUrl);
 
     const adapter = new SupabaseAdapter({
       projectRef,
@@ -33,9 +33,6 @@ export function createSupabasePlugin(
       resolve: {
         accessToken: () => getSecret('SUPABASE_ACCESS_TOKEN'),
         projectRef: async () => {
-          // Try explicit key first, then derive from URL
-          const explicit = await getSecret('SUPABASE_PROJECT_REF').catch(() => '');
-          if (explicit) return explicit;
           const url = await getSecret('SUPABASE_URL');
           return extractProjectRef(url);
         },

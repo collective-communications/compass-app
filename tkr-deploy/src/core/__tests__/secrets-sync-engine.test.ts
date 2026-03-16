@@ -17,9 +17,7 @@ function createMockVault(overrides: Partial<VaultClient> = {}): VaultClient {
     ['SUPABASE_URL', 'https://abc.supabase.co'],
     ['SUPABASE_ANON_KEY', 'anon-key-123'],
     ['SUPABASE_SERVICE_ROLE_KEY', 'srv-key-456'],
-    ['SUPABASE_DB_PASSWORD', 'db-pass'],
     ['SUPABASE_ACCESS_TOKEN', 'sb-token'],
-    ['SUPABASE_PROJECT_ID', 'proj-id'],
     ['VERCEL_TOKEN', 'v-token'],
     ['VERCEL_ORG_ID', 'v-org'],
     ['RESEND_API_KEY', 'resend-key'],
@@ -54,9 +52,7 @@ const STANDARD_MAPPINGS: SecretTargetEntry[] = [
   { vaultKey: 'SUPABASE_URL', targetKey: 'SUPABASE_URL', targetId: 'github' },
   { vaultKey: 'SUPABASE_ANON_KEY', targetKey: 'SUPABASE_ANON_KEY', targetId: 'github' },
   { vaultKey: 'SUPABASE_SERVICE_ROLE_KEY', targetKey: 'SUPABASE_SERVICE_ROLE_KEY', targetId: 'github' },
-  { vaultKey: 'SUPABASE_DB_PASSWORD', targetKey: 'SUPABASE_DB_PASSWORD', targetId: 'github' },
   { vaultKey: 'SUPABASE_ACCESS_TOKEN', targetKey: 'SUPABASE_ACCESS_TOKEN', targetId: 'github' },
-  { vaultKey: 'SUPABASE_PROJECT_ID', targetKey: 'SUPABASE_PROJECT_ID', targetId: 'github' },
   { vaultKey: 'VERCEL_TOKEN', targetKey: 'VERCEL_TOKEN', targetId: 'github' },
   { vaultKey: 'VERCEL_ORG_ID', targetKey: 'VERCEL_ORG_ID', targetId: 'github' },
   { vaultKey: 'RESEND_API_KEY', targetKey: 'RESEND_API_KEY', targetId: 'github' },
@@ -193,7 +189,7 @@ describe('SecretsSyncEngine', () => {
         // All secrets exist by name — even if values differ, state is 'synced'
         listSecrets: mock(() => Promise.resolve([
           'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
-          'SUPABASE_DB_PASSWORD', 'SUPABASE_ACCESS_TOKEN', 'SUPABASE_PROJECT_ID',
+          'SUPABASE_ACCESS_TOKEN',
           'VERCEL_TOKEN', 'VERCEL_ORG_ID', 'RESEND_API_KEY',
         ])),
       },
@@ -334,7 +330,7 @@ describe('SecretsSyncEngine', () => {
         // All present
         listSecrets: mock(() => Promise.resolve([
           'SUPABASE_URL', 'SUPABASE_ANON_KEY', 'SUPABASE_SERVICE_ROLE_KEY',
-          'SUPABASE_DB_PASSWORD', 'SUPABASE_ACCESS_TOKEN', 'SUPABASE_PROJECT_ID',
+          'SUPABASE_ACCESS_TOKEN',
           'VERCEL_TOKEN', 'VERCEL_ORG_ID', 'RESEND_API_KEY',
         ])),
         setSecret: mock(() => Promise.resolve()),
@@ -380,7 +376,7 @@ describe('SecretsSyncEngine', () => {
 
     const report = await engine.syncAll();
 
-    expect(report.total).toBe(9); // 9 unique vault keys in the mapping
+    expect(report.total).toBe(7); // 7 unique vault keys in the mapping
     // All targets that are missing/differs should be attempted
     expect(report.synced + report.failed + report.skipped).toBeGreaterThan(0);
     expect(report.failed).toBe(0);

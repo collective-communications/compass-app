@@ -24,8 +24,6 @@ export interface RepoSecret {
 
 export const REQUIRED_SECRETS = [
   'SUPABASE_ACCESS_TOKEN',
-  'SUPABASE_DB_PASSWORD',
-  'SUPABASE_PROJECT_REF',
   'VERCEL_TOKEN',
   'VERCEL_ORG_ID',
   'VERCEL_PROJECT_ID',
