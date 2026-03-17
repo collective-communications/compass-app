@@ -129,7 +129,7 @@ Deno.serve(async (req: Request) => {
     }
 
     // Build base survey link
-    const appUrl = Deno.env.get('APP_URL') ?? 'https://app.collectivecommunication.ca';
+    const appUrl = Deno.env.get('APP_URL') ?? 'https://app.collectiveculturecompass.com';
     const baseSurveyLink = `${appUrl}/s/${deployment.token}`;
 
     const closesAt = survey.closes_at

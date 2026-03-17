@@ -8,7 +8,7 @@ const meta = {
   component: QuickActions,
   decorators: [AppShellDecorator],
   args: {
-    deploymentUrl: 'https://survey.collectivecommunication.ca/s/abc123',
+    deploymentUrl: 'https://app.collectiveculturecompass.com/s/abc123',
     surveyId: 'survey-001',
     resultsEnabled: true,
     onNavigate: fn(),

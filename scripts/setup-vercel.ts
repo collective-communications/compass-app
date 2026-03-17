@@ -167,7 +167,92 @@ async function main(): Promise<void> {
     }
   }
 
-  console.log("\nVercel setup complete!");
+  // 6. Add production domain (idempotent — no-ops if already added)
+  console.log("Adding production domain...");
+  const domainResult = run(
+    ["npx", "vercel", "domains", "add", "app.collectiveculturecompass.com", `--token=${token}`],
+    { VERCEL_ORG_ID: orgId, VERCEL_PROJECT_ID: projectId },
+  );
+  if (domainResult.ok) {
+    console.log("  Domain added (or already exists)");
+  } else {
+    console.log("  Domain add warning:", domainResult.stderr);
+  }
+
+  // 7. Configure Supabase auth + secrets
+  console.log("Configuring Supabase...");
+
+  let supabaseAccessToken: string;
+  let supabaseUrl: string;
+  try {
+    supabaseAccessToken = await getSecret("SUPABASE_ACCESS_TOKEN");
+    supabaseUrl = await getSecret("SUPABASE_URL");
+  } catch {
+    supabaseAccessToken = "";
+    supabaseUrl = "";
+  }
+
+  if (!supabaseAccessToken || !supabaseUrl) {
+    console.log("  Skipping Supabase setup (SUPABASE_ACCESS_TOKEN or SUPABASE_URL not in vault)");
+  } else {
+    // Extract project ref from URL (e.g. https://abcdef.supabase.co → abcdef)
+    const projectRef = new URL(supabaseUrl).hostname.split(".")[0];
+    const appUrl = "https://app.collectiveculturecompass.com";
+    const callbackUrl = `${appUrl}/auth/callback`;
+
+    // Set edge function secret
+    console.log("  Setting APP_URL edge function secret...");
+    const secretResult = run(
+      ["npx", "supabase", "secrets", "set", `APP_URL=${appUrl}`, "--project-ref", projectRef],
+      { SUPABASE_ACCESS_TOKEN: supabaseAccessToken },
+    );
+    if (secretResult.ok) {
+      console.log("    Set APP_URL");
+    } else {
+      console.log("    Warning:", secretResult.stderr);
+    }
+
+    // Configure auth via Management API
+    console.log("  Configuring auth redirect URLs...");
+    const MGMT_API = "https://api.supabase.com";
+    const headers = {
+      "Authorization": `Bearer ${supabaseAccessToken}`,
+      "Content-Type": "application/json",
+    };
+
+    try {
+      // Read current auth config
+      const authRes = await fetch(`${MGMT_API}/v1/projects/${projectRef}/config/auth`, { headers });
+      if (!authRes.ok) throw new Error(`GET auth config: ${authRes.status}`);
+      const auth = (await authRes.json()) as { site_url: string; uri_allow_list: string };
+
+      // Build updated allow-list (idempotent)
+      const existing = auth.uri_allow_list
+        ? auth.uri_allow_list.split(",").map((u) => u.trim()).filter(Boolean)
+        : [];
+      const allowList = existing.includes(callbackUrl) ? existing : [...existing, callbackUrl];
+
+      // Patch auth config
+      const patchRes = await fetch(`${MGMT_API}/v1/projects/${projectRef}/config/auth`, {
+        method: "PATCH",
+        headers,
+        body: JSON.stringify({
+          site_url: appUrl,
+          uri_allow_list: allowList.join(","),
+        }),
+      });
+      if (!patchRes.ok) throw new Error(`PATCH auth config: ${patchRes.status}`);
+
+      console.log(`    site_url → ${appUrl}`);
+      console.log(`    redirect allow-list: ${allowList.join(", ")}`);
+    } catch (err) {
+      console.log(`    Auth config warning: ${err instanceof Error ? err.message : err}`);
+    }
+  }
+
+  console.log("\nSetup complete!");
+  console.log("\nRemaining manual step:");
+  console.log("  DNS: CNAME app.collectiveculturecompass.com → cname.vercel-dns.com");
 }
 
 main().catch((err) => {

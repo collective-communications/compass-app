@@ -50,6 +50,7 @@ export function createSupabasePlugin(
         { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_API_KEY' },
         { vaultKey: 'RESEND_FROM_ADDRESS' },
         { vaultKey: 'OPENAI_API_KEY' },
+        { vaultKey: 'APP_URL' },
       ],
 
       syncTarget: {
@@ -85,6 +86,30 @@ export function createSupabasePlugin(
               throw new Error(msgs.join('\n'));
             }
             return `Deployed ${result.deployed.length} function(s)`;
+          },
+        },
+        {
+          id: 'configureAuth',
+          label: 'Configure auth redirect URLs',
+          provider: 'supabase',
+          order: 300,
+          execute: async () => {
+            const appUrl = await getSecret('APP_URL');
+            if (!appUrl) {
+              return 'Skipped — APP_URL not set in vault';
+            }
+
+            // Set site_url for email links
+            await adapter.updateAuthConfig({ site_url: appUrl });
+
+            // Ensure callback URL is in the allow-list
+            const callbackUrl = `${appUrl}/auth/callback`;
+            const { added, allowList } = await adapter.addRedirectUrl(callbackUrl);
+
+            if (added) {
+              return `Set site_url=${appUrl}, added ${callbackUrl} to redirect allow-list (${allowList.length} total)`;
+            }
+            return `Set site_url=${appUrl}, redirect ${callbackUrl} already in allow-list`;
           },
         },
       ],

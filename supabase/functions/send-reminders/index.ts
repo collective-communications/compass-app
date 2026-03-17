@@ -46,7 +46,7 @@ Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
   const client = createClient(supabaseUrl, serviceRoleKey);
-  const appUrl = Deno.env.get('APP_URL') ?? 'https://app.collectivecommunication.ca';
+  const appUrl = Deno.env.get('APP_URL') ?? 'https://app.collectiveculturecompass.com';
 
   try {
     // Find active surveys with non-empty reminder schedules

@@ -169,6 +169,55 @@ export class SupabaseAdapter implements ProviderAdapter {
     }
   }
 
+  // ── Auth Configuration (Management API) ──
+
+  /**
+   * Read the current auth configuration for the project.
+   * Uses: GET /v1/projects/{ref}/config/auth
+   */
+  async getAuthConfig(): Promise<{
+    site_url: string;
+    uri_allow_list: string;
+    [key: string]: unknown;
+  }> {
+    const projectRef = await this.getProjectRef();
+    return this.mgmtRequest('GET', `/v1/projects/${projectRef}/config/auth`);
+  }
+
+  /**
+   * Update auth configuration (site_url, redirect allow-list, etc.).
+   * Uses: PATCH /v1/projects/{ref}/config/auth
+   *
+   * @param config - Partial auth config to merge. Common fields:
+   *   - site_url: Base URL for email links (e.g. "https://app.collectiveculturecompass.com")
+   *   - uri_allow_list: Comma-separated redirect URLs
+   */
+  async updateAuthConfig(config: {
+    site_url?: string;
+    uri_allow_list?: string;
+  }): Promise<void> {
+    const projectRef = await this.getProjectRef();
+    await this.mgmtRequest('PATCH', `/v1/projects/${projectRef}/config/auth`, config);
+  }
+
+  /**
+   * Ensure a redirect URL is in the auth allow-list. Idempotent — skips if already present.
+   */
+  async addRedirectUrl(url: string): Promise<{ added: boolean; allowList: string[] }> {
+    const auth = await this.getAuthConfig();
+    const existing = auth.uri_allow_list
+      ? auth.uri_allow_list.split(',').map((u) => u.trim()).filter(Boolean)
+      : [];
+
+    if (existing.includes(url)) {
+      return { added: false, allowList: existing };
+    }
+
+    const updated = [...existing, url];
+    await this.updateAuthConfig({ uri_allow_list: updated.join(',') });
+    return { added: true, allowList: updated };
+  }
+
   // ── Migrations (local filesystem scan + CLI for push) ──
 
   async getMigrations(): Promise<MigrationEntry[]> {

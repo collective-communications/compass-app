@@ -31,6 +31,40 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
           SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
 
+      - name: Configure Supabase production settings
+        run: |
+          # Set edge function secrets
+          supabase secrets set \
+            APP_URL=https://app.collectiveculturecompass.com \
+            --project-ref "$SUPABASE_PROJECT_REF"
+
+          # Configure auth: site_url and redirect allow-list via Management API
+          CURRENT_AUTH=$(curl -sf \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/config/auth")
+
+          CURRENT_ALLOW_LIST=$(echo "$CURRENT_AUTH" | python3 -c "
+          import sys, json
+          auth = json.load(sys.stdin)
+          allow_list = auth.get('uri_allow_list', '')
+          urls = [u.strip() for u in allow_list.split(',') if u.strip()]
+          callback = 'https://app.collectiveculturecompass.com/auth/callback'
+          if callback not in urls:
+              urls.append(callback)
+          print(','.join(urls))
+          ")
+
+          curl -sf -X PATCH \
+            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"site_url\":\"https://app.collectiveculturecompass.com\",\"uri_allow_list\":\"$CURRENT_ALLOW_LIST\"}" \
+            "https://api.supabase.com/v1/projects/$SUPABASE_PROJECT_REF/config/auth"
+
+          echo "Auth configured: site_url and redirect allow-list updated"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
@@ -40,7 +74,8 @@ jobs:
         run: |
           npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+          DEPLOYMENT_URL=$(npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }})
+          npx vercel alias "$DEPLOYMENT_URL" app.collectiveculturecompass.com --token=${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
