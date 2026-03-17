@@ -209,6 +209,7 @@ export function createSurveyEngineAdapter(): Pick<
           recommendedAction: row.recommended_action,
           createdAt: row.created_at,
           updatedAt: row.updated_at,
+          subDimensionId: row.sub_dimension_id ?? null,
           dimension: qd
             ? {
                 id: qd.id,
@@ -217,6 +218,7 @@ export function createSurveyEngineAdapter(): Pick<
                 weight: qd.weight,
               }
             : { id: '', questionId: row.id, dimensionId: '', weight: 1 },
+          subDimension: null,
         } satisfies QuestionWithDimension;
       });
     },

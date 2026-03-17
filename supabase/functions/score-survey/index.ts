@@ -4,6 +4,7 @@ import {
   loadCompletedResponses,
   loadQuestionMetadata,
   loadArchetypes,
+  loadSurveySettings,
   checkConcurrency,
   insertRecalculation,
   completeRecalculation,
@@ -17,9 +18,6 @@ import type { ResponseRow, QuestionMeta, ArchetypeRow, ScoreInsert } from './db.
 // Replicated from @compass/scoring to avoid Deno workspace import issues.
 // These are pure math functions with no dependencies.
 
-const LIKERT_MIN = 1;
-const LIKERT_MAX = 4;
-const LIKERT_RANGE = LIKERT_MAX - LIKERT_MIN; // 3
 const SCORE_DECIMALS = 2;
 
 type DimensionCode = 'core' | 'clarity' | 'connection' | 'collaboration';
@@ -35,6 +33,7 @@ interface AnswerWithMeta {
   dimensionId: string;
   dimensionCode: DimensionCode;
   weight: number;
+  subDimensionCode?: string;
 }
 
 interface DimensionScore {
@@ -54,14 +53,22 @@ interface SegmentScoreResult {
   responseCount: number;
 }
 
+interface SubDimensionScore {
+  subDimensionCode: string;
+  dimensionCode: DimensionCode;
+  score: number;
+  rawScore: number;
+  responseCount: number;
+}
+
 function roundTo(value: number, decimals: number): number {
   const factor = Math.pow(10, decimals);
   return Math.round(value * factor) / factor;
 }
 
 /** Normalize a Likert answer, applying reverse scoring when needed. */
-function normalizeAnswer(value: number, reverseScored: boolean): number {
-  return reverseScored ? LIKERT_MAX + LIKERT_MIN - value : value;
+function normalizeAnswer(value: number, reverseScored: boolean, scaleSize: number): number {
+  return reverseScored ? scaleSize + 1 - value : value;
 }
 
 /** Calculate dimension score from a set of weighted, normalized answers. */
@@ -69,18 +76,20 @@ function calculateDimensionScore(
   dimensionId: string,
   dimensionCode: DimensionCode,
   answers: readonly AnswerWithMeta[],
+  scaleSize: number,
 ): DimensionScore {
+  const range = scaleSize - 1;
   let weightedSum = 0;
   let weightSum = 0;
 
   for (const answer of answers) {
-    const normalized = normalizeAnswer(answer.value, answer.reverseScored);
+    const normalized = normalizeAnswer(answer.value, answer.reverseScored, scaleSize);
     weightedSum += normalized * answer.weight;
     weightSum += answer.weight;
   }
 
   const rawScore = roundTo(weightedSum / weightSum, SCORE_DECIMALS);
-  const score = roundTo(((rawScore - LIKERT_MIN) / LIKERT_RANGE) * 100, SCORE_DECIMALS);
+  const score = roundTo(((rawScore - 1) / range) * 100, SCORE_DECIMALS);
 
   return { dimensionId, dimensionCode, score, rawScore, responseCount: answers.length };
 }
@@ -88,6 +97,7 @@ function calculateDimensionScore(
 /** Calculate scores for all four dimensions from grouped answers. */
 function calculateAllDimensionScores(
   groups: Map<DimensionCode, AnswerWithMeta[]>,
+  scaleSize: number,
 ): DimensionScoreMap {
   const result = {} as DimensionScoreMap;
 
@@ -96,10 +106,55 @@ function calculateAllDimensionScores(
     if (!answers || answers.length === 0) {
       throw new Error(`No answers found for dimension "${code}"`);
     }
-    result[code] = calculateDimensionScore(answers[0].dimensionId, code, answers);
+    result[code] = calculateDimensionScore(answers[0].dimensionId, code, answers, scaleSize);
   }
 
   return result;
+}
+
+/** Calculate sub-dimension scores from all answers. */
+function calculateSubDimensionScores(
+  answers: AnswerWithMeta[],
+  scaleSize: number,
+): SubDimensionScore[] {
+  const groups = new Map<string, { dimensionCode: DimensionCode; answers: AnswerWithMeta[] }>();
+
+  for (const answer of answers) {
+    if (!answer.subDimensionCode) continue;
+    let group = groups.get(answer.subDimensionCode);
+    if (!group) {
+      group = { dimensionCode: answer.dimensionCode, answers: [] };
+      groups.set(answer.subDimensionCode, group);
+    }
+    group.answers.push(answer);
+  }
+
+  const range = scaleSize - 1;
+  const results: SubDimensionScore[] = [];
+
+  for (const [code, group] of groups) {
+    let weightedSum = 0;
+    let weightSum = 0;
+
+    for (const answer of group.answers) {
+      const normalized = normalizeAnswer(answer.value, answer.reverseScored, scaleSize);
+      weightedSum += normalized * answer.weight;
+      weightSum += answer.weight;
+    }
+
+    const rawScore = roundTo(weightedSum / weightSum, SCORE_DECIMALS);
+    const score = roundTo(((rawScore - 1) / range) * 100, SCORE_DECIMALS);
+
+    results.push({
+      subDimensionCode: code,
+      dimensionCode: group.dimensionCode,
+      score,
+      rawScore,
+      responseCount: group.answers.length,
+    });
+  }
+
+  return results;
 }
 
 /** Euclidean distance between observed dimension scores and an archetype target. */
@@ -148,14 +203,15 @@ function buildQuestionLookup(
 function buildSegmentGroups(
   responses: ResponseRow[],
   questionLookup: Map<string, QuestionMeta[]>,
-): { segments: Map<string, { answers: Map<DimensionCode, AnswerWithMeta[]>; responseCount: number }>; skippedAnswers: number } {
-  const segments = new Map<string, { answers: Map<DimensionCode, AnswerWithMeta[]>; responseCount: number }>();
+  scaleSize: number,
+): { segments: Map<string, { answers: Map<DimensionCode, AnswerWithMeta[]>; allAnswers: AnswerWithMeta[]; responseCount: number }>; skippedAnswers: number } {
+  const segments = new Map<string, { answers: Map<DimensionCode, AnswerWithMeta[]>; allAnswers: AnswerWithMeta[]; responseCount: number }>();
   let skippedAnswers = 0;
 
-  function ensureSegment(key: string): { answers: Map<DimensionCode, AnswerWithMeta[]>; responseCount: number } {
+  function ensureSegment(key: string): { answers: Map<DimensionCode, AnswerWithMeta[]>; allAnswers: AnswerWithMeta[]; responseCount: number } {
     let seg = segments.get(key);
     if (!seg) {
-      seg = { answers: new Map(), responseCount: 0 };
+      seg = { answers: new Map(), allAnswers: [], responseCount: 0 };
       segments.set(key, seg);
     }
     return seg;
@@ -172,6 +228,7 @@ function buildSegmentGroups(
       seg.answers.set(answer.dimensionCode, dimAnswers);
     }
     dimAnswers.push(answer);
+    seg.allAnswers.push(answer);
   }
 
   for (const response of responses) {
@@ -197,7 +254,7 @@ function buildSegmentGroups(
 
       // A question can map to multiple dimensions (many-to-many)
       for (const meta of metas) {
-        if (typeof value !== 'number' || value < LIKERT_MIN || value > LIKERT_MAX) {
+        if (typeof value !== 'number' || value < 1 || value > scaleSize) {
           skippedAnswers++;
           continue;
         }
@@ -209,6 +266,7 @@ function buildSegmentGroups(
           dimensionId: meta.dimensionId,
           dimensionCode: meta.dimensionCode as DimensionCode,
           weight: meta.weight,
+          subDimensionCode: meta.subDimensionCode,
         };
 
         // Add to overall
@@ -323,12 +381,16 @@ Deno.serve(async (req: Request) => {
     // Start recalculation tracking
     recalcId = await insertRecalculation(client, surveyId, userId, reason);
 
-    // Load data
-    const [responses, questions, archetypes] = await Promise.all([
+    // Load data (including survey settings for likertSize)
+    const [responses, questions, archetypes, settings] = await Promise.all([
       loadCompletedResponses(client, surveyId),
       loadQuestionMetadata(client, surveyId),
       loadArchetypes(client),
+      loadSurveySettings(client, surveyId),
     ]);
+
+    // Determine Likert scale size from survey settings (default 4 for backward compat)
+    const likertSize: number = settings?.likertSize ?? 4;
 
     if (responses.length === 0) {
       await completeRecalculation(client, recalcId, 'failed');
@@ -341,18 +403,25 @@ Deno.serve(async (req: Request) => {
 
     // Build question lookup and segment groups
     const questionLookup = buildQuestionLookup(questions);
-    const { segments, skippedAnswers } = buildSegmentGroups(responses, questionLookup);
+    const { segments, skippedAnswers } = buildSegmentGroups(responses, questionLookup, likertSize);
 
     // Score each segment
     const calculatedAt = new Date().toISOString();
     const segmentResults: SegmentScoreResult[] = [];
 
+    // Collect all overall answers for sub-dimension scoring
+    let overallAllAnswers: AnswerWithMeta[] = [];
+
     for (const [key, segData] of segments) {
       const [segType, ...valueParts] = key.split(':');
       const segValue = valueParts.join(':');
 
+      if (segType === 'overall' && segValue === 'all') {
+        overallAllAnswers = segData.allAnswers;
+      }
+
       try {
-        const scores = calculateAllDimensionScores(segData.answers);
+        const scores = calculateAllDimensionScores(segData.answers, likertSize);
         segmentResults.push({
           segmentType: segType,
           segmentValue: segValue,
@@ -365,6 +434,9 @@ Deno.serve(async (req: Request) => {
         continue;
       }
     }
+
+    // Calculate sub-dimension scores from overall answers
+    const subDimensionScores = calculateSubDimensionScores(overallAllAnswers, likertSize);
 
     // Identify archetype from overall scores
     const overallResult = segmentResults.find(
@@ -421,9 +493,11 @@ Deno.serve(async (req: Request) => {
         scoreRowsInserted: scoreRows.length,
         skippedAnswers,
         calculatedAt,
+        likertSize,
       },
       coreHealth,
       archetype: archetypeMatch,
+      subDimensionScores,
     });
   } catch (err) {
     // Mark recalculation as failed if we started one

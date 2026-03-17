@@ -1,10 +1,10 @@
 /**
  * Keyboard shortcut hook for the survey question screen.
- * 1-4: select Likert option, Enter: next question, Backspace: previous question.
+ * 1–N: select Likert option (N = scaleSize), Enter: next question, Backspace: previous question.
  * Only active when the question screen container is focused.
  */
 import { useEffect } from 'react';
-import type { LikertValue } from '@compass/types';
+import { DEFAULT_LIKERT_SIZE, type LikertValue } from '@compass/types';
 
 interface UseSurveyKeyboardParams {
   /** Whether the question screen is active/focused */
@@ -19,6 +19,8 @@ interface UseSurveyKeyboardParams {
   isAnswered: boolean;
   /** Whether we're on the first question (disables Backspace) */
   isFirst: boolean;
+  /** Number of points on the Likert scale (determines valid key range) */
+  scaleSize?: number;
 }
 
 /** Attach keyboard shortcuts for the survey question flow. */
@@ -29,6 +31,7 @@ export function useSurveyKeyboard({
   onPrevious,
   isAnswered,
   isFirst,
+  scaleSize = DEFAULT_LIKERT_SIZE,
 }: UseSurveyKeyboardParams): void {
   useEffect(() => {
     if (!isActive) return;
@@ -40,19 +43,14 @@ export function useSurveyKeyboard({
         return;
       }
 
+      // Number keys 1 through scaleSize select Likert options
+      const numericValue = Number(event.key);
+      if (Number.isInteger(numericValue) && numericValue >= 1 && numericValue <= scaleSize) {
+        onSelectOption(numericValue);
+        return;
+      }
+
       switch (event.key) {
-        case '1':
-          onSelectOption(1);
-          break;
-        case '2':
-          onSelectOption(2);
-          break;
-        case '3':
-          onSelectOption(3);
-          break;
-        case '4':
-          onSelectOption(4);
-          break;
         case 'Enter':
           if (isAnswered) {
             event.preventDefault();
@@ -70,5 +68,5 @@ export function useSurveyKeyboard({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isActive, onSelectOption, onNext, onPrevious, isAnswered, isFirst]);
+  }, [isActive, onSelectOption, onNext, onPrevious, isAnswered, isFirst, scaleSize]);
 }

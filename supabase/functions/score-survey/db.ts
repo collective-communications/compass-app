@@ -24,6 +24,8 @@ export interface QuestionMeta {
   dimensionId: string;
   dimensionCode: string;
   weight: number;
+  /** Optional sub-dimension code for sub-dimension roll-up scoring. */
+  subDimensionCode?: string;
 }
 
 /** Archetype row from the database. */
@@ -81,7 +83,7 @@ export async function loadQuestionMetadata(
       weight,
       dimension_id,
       dimensions!inner ( code ),
-      questions!inner ( id, reverse_scored, survey_id )
+      questions!inner ( id, reverse_scored, survey_id, sub_dimension_id, sub_dimensions ( code ) )
     `)
     .eq('questions.survey_id', surveyId);
 
@@ -93,12 +95,14 @@ export async function loadQuestionMetadata(
   return data.map((row: Record<string, unknown>) => {
     const questions = row.questions as Record<string, unknown>;
     const dimensions = row.dimensions as Record<string, unknown>;
+    const subDimensions = questions.sub_dimensions as Record<string, unknown> | null;
     return {
       questionId: questions.id as string,
       reverseScored: questions.reverse_scored as boolean,
       dimensionId: row.dimension_id as string,
       dimensionCode: dimensions.code as string,
       weight: row.weight as number,
+      subDimensionCode: subDimensions?.code as string | undefined,
     };
   });
 }
@@ -221,6 +225,31 @@ export async function markSurveyScored(
     .eq('id', surveyId);
 
   if (error) throw new Error(`Failed to update survey: ${error.message}`);
+}
+
+/** Survey settings relevant to scoring. */
+export interface SurveySettings {
+  likertSize: number;
+}
+
+/** Load survey settings from the JSONB column. Returns null if survey not found. */
+export async function loadSurveySettings(
+  client: SupabaseClient,
+  surveyId: string,
+): Promise<SurveySettings | null> {
+  const { data, error } = await client
+    .from('surveys')
+    .select('settings')
+    .eq('id', surveyId)
+    .single();
+
+  if (error?.code === 'PGRST116') return null; // not found
+  if (error) throw new Error(`Failed to load survey settings: ${error.message}`);
+
+  const settings = (data?.settings ?? {}) as Record<string, unknown>;
+  return {
+    likertSize: typeof settings.likertSize === 'number' ? settings.likertSize : 4,
+  };
 }
 
 /** Verify a survey exists and return its ID. Returns null if not found. */

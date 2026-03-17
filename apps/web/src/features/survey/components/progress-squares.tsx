@@ -30,6 +30,13 @@ interface ProgressSquaresProps {
   questionTexts?: string[];
 }
 
+/** Compute square size class and gap based on total question count. */
+function squareLayout(total: number): { sizeClass: string; gap: string } {
+  if (total > 60) return { sizeClass: 'h-2 w-2 rounded-[1px]', gap: 'gap-[1px]' };
+  if (total > 40) return { sizeClass: 'h-2.5 w-2.5 rounded-[2px]', gap: 'gap-[2px]' };
+  return { sizeClass: 'h-3 w-3 rounded-[2px]', gap: 'gap-[2px]' };
+}
+
 /**
  * Dock-style magnification: hovered square scales up with cosine falloff
  * across neighboring squares, matching the macOS dock fisheye effect.
@@ -43,6 +50,7 @@ export function ProgressSquares({
 }: ProgressSquaresProps): React.ReactNode {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const { sizeClass, gap } = squareLayout(total);
 
   const handleClick = useCallback(
     (index: number) => {
@@ -80,7 +88,7 @@ export function ProgressSquares({
   return (
     <div
       ref={containerRef}
-      className="flex flex-wrap items-center justify-center gap-[2px]"
+      className={`flex flex-wrap items-center justify-center ${gap}`}
       role="group"
       aria-label="Survey progress"
       onMouseMove={handleMouseMove}
@@ -108,7 +116,7 @@ export function ProgressSquares({
               transform: `scale(${scale})`,
               transition: 'transform 150ms ease-out',
             }}
-            className={`h-3 w-3 rounded-[2px]
+            className={`${sizeClass}
               ${
                 isCurrent
                   ? 'bg-[var(--color-core)] ring-2 ring-[var(--color-core-text)]/30'

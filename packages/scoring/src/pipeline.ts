@@ -1,23 +1,31 @@
 import { classifyCoreHealth } from './core-health.js';
 import { calculateAllDimensionScores } from './dimension-score.js';
+import { calculateSubDimensionScores } from './sub-dimension-score.js';
 import type { AnswerWithMeta, SurveyScoreResult } from './types.js';
 
 /**
  * Full scoring pipeline: normalize, group, score, classify.
  *
  * Pure function — no side effects, no I/O.
+ *
+ * @param surveyId - UUID of the survey being scored.
+ * @param answers - Full answer set with scoring metadata.
+ * @param scaleSize - Number of points on the Likert scale (default 4 for backward compat).
  */
 export function computeSurveyScores(
   surveyId: string,
   answers: readonly AnswerWithMeta[],
+  scaleSize: number = 4,
 ): SurveyScoreResult {
-  const overallScores = calculateAllDimensionScores(answers);
+  const overallScores = calculateAllDimensionScores(answers, scaleSize);
   const coreHealth = classifyCoreHealth(overallScores.core.score);
+  const subDimensionScores = calculateSubDimensionScores(answers, scaleSize);
 
   return {
     surveyId,
     overallScores,
     coreHealth,
+    subDimensionScores,
     calculatedAt: new Date().toISOString(),
   };
 }

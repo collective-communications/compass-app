@@ -74,24 +74,40 @@ export class SurveyPage {
   }
 
   /**
-   * Answers all likert questions by clicking the first radio option
-   * and advancing with the next button until no more likert options appear.
+   * Answers all Likert questions by clicking a radio option
+   * and advancing with the next button until no more Likert options appear.
+   *
+   * Cycles through values 1-N (based on available radio count) across questions
+   * to exercise the full scale range, not just the first option.
    */
   async answerAllLikertQuestions(): Promise<void> {
     // Wait for the first question to appear
     await this.likertOptions.first().waitFor({ state: 'visible', timeout: 10000 });
 
-    // Loop through all likert questions
+    let questionIndex = 0;
     let hasRadios = true;
     while (hasRadios) {
-      await this.likertOptions.first().click();
+      const radioCount = await this.likertOptions.count();
+      // Cycle through scale values to exercise full range (1-based)
+      const optionIndex = questionIndex % radioCount;
+      await this.likertOptions.nth(optionIndex).click();
       await expect(this.nextButton).toBeEnabled({ timeout: 3000 });
       await this.nextButton.click();
+      questionIndex++;
       // Check if we transitioned to a non-likert screen (open-ended or complete)
       hasRadios = await this.likertOptions.first()
         .waitFor({ state: 'visible', timeout: 3000 })
         .then(() => true)
         .catch(() => false);
     }
+  }
+
+  /**
+   * Answers the current Likert question using a keyboard shortcut (1-N).
+   *
+   * @param value - Likert value to select (1-based).
+   */
+  async answerViaKeyboard(value: number): Promise<void> {
+    await this.page.keyboard.press(String(value));
   }
 }

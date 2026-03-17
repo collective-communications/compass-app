@@ -1,0 +1,48 @@
+-- Scoring Pipeline Update (Wave 2)
+-- 1. Update question_scores view: add distribution counts for values 5-10,
+--    include sub_dimension_id for downstream grouping.
+-- 2. Widen raw_score CHECK constraint on scores table to support scales > 4.
+
+-- 1. Widen the raw_score CHECK constraint on the scores table
+ALTER TABLE scores DROP CONSTRAINT IF EXISTS scores_raw_score_check;
+ALTER TABLE scores ADD CONSTRAINT scores_raw_score_check
+  CHECK (raw_score >= 1 AND raw_score <= 10);
+
+-- 2. Replace question_scores view with sub-dimension support and dynamic distribution
+CREATE OR REPLACE VIEW question_scores AS
+SELECT
+  q.survey_id,
+  q.id AS question_id,
+  q.text AS question_text,
+  q.order_index,
+  q.type AS question_type,
+  q.sub_dimension_id,
+  sd.code AS sub_dimension_code,
+  sd.name AS sub_dimension_name,
+  d.id AS dimension_id,
+  d.code AS dimension_code,
+  d.name AS dimension_name,
+  d.color AS dimension_color,
+  COUNT(a.id) FILTER (WHERE a.likert_value IS NOT NULL) AS response_count,
+  AVG(a.likert_value) FILTER (WHERE a.likert_value IS NOT NULL) AS mean_score,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 1) AS dist_1,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 2) AS dist_2,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 3) AS dist_3,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 4) AS dist_4,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 5) AS dist_5,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 6) AS dist_6,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 7) AS dist_7,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 8) AS dist_8,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 9) AS dist_9,
+  COUNT(a.id) FILTER (WHERE a.likert_value = 10) AS dist_10
+FROM questions q
+JOIN question_dimensions qd ON qd.question_id = q.id
+JOIN dimensions d ON d.id = qd.dimension_id
+LEFT JOIN sub_dimensions sd ON sd.id = q.sub_dimension_id
+LEFT JOIN answers a ON a.question_id = q.id
+  AND a.response_id IN (
+    SELECT r.id FROM responses r WHERE r.is_complete = true
+  )
+GROUP BY q.survey_id, q.id, q.text, q.order_index, q.type,
+         q.sub_dimension_id, sd.code, sd.name,
+         d.id, d.code, d.name, d.color;

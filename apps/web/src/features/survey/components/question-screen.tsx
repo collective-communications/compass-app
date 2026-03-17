@@ -7,7 +7,7 @@
  * to prevent bias in responses.
  */
 import { useState, useCallback, useMemo } from 'react';
-import { QuestionType, type LikertValue, type QuestionWithDimension } from '@compass/types';
+import { QuestionType, buildLikertScale, DEFAULT_LIKERT_SIZE, type LikertValue, type QuestionWithDimension } from '@compass/types';
 import { useSurveyContext } from '../context/survey-context';
 import { useQuestions } from '../hooks/use-questions';
 import { useAnswerAutosave } from '../hooks/use-answer-autosave';
@@ -32,9 +32,14 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   const setAnswer = useAnswerStore((s) => s.setAnswer);
   const lastError = useAnswerStore((s) => s.lastError);
 
+  // Build the Likert scale from survey settings (defaults to 5-point)
+  const likertSize = survey.settings?.likertSize ?? DEFAULT_LIKERT_SIZE;
+  const scale = useMemo(() => buildLikertScale(likertSize), [likertSize]);
+
   // Filter to Likert questions only (open-text handled on a separate screen)
+  // Accept both legacy LIKERT_4 and new LIKERT types for backward compat
   const likertQuestions = useMemo(
-    () => (allQuestions ?? []).filter((q) => q.type === QuestionType.LIKERT_4),
+    () => (allQuestions ?? []).filter((q) => q.type === QuestionType.LIKERT_4 || q.type === QuestionType.LIKERT),
     [allQuestions],
   );
 
@@ -99,6 +104,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
     onPrevious: goPrevious,
     isAnswered,
     isFirst,
+    scaleSize: likertSize,
   });
 
   if (isLoading) {
@@ -157,6 +163,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
         value={currentAnswer}
         onChange={handleSelectOption}
         name={currentQuestion.id}
+        scale={scale}
       />
 
       {/* Autosave error indicator */}

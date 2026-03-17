@@ -1,9 +1,9 @@
 /**
- * 4-point Likert scale component with card-style radio buttons.
- * No neutral option — forces respondents to take a position.
+ * Configurable Likert scale component with card-style radio buttons.
+ * Renders dynamically from a `scale` prop built via `buildLikertScale(size)`.
  * Supports keyboard selection via number keys (handled by parent hook).
  */
-import { LIKERT_SCALE, type LikertValue } from '@compass/types';
+import type { LikertScaleItem, LikertValue } from '@compass/types';
 
 interface LikertScaleProps {
   /** Currently selected value, or undefined if unanswered */
@@ -12,13 +12,15 @@ interface LikertScaleProps {
   onChange: (value: LikertValue) => void;
   /** Unique name for the radio group (question ID) */
   name: string;
+  /** Scale items to render (from buildLikertScale) */
+  scale: LikertScaleItem[];
 }
 
-/** 4-point Likert scale: Strongly Disagree(1), Disagree(2), Agree(3), Strongly Agree(4) */
-export function LikertScale({ value, onChange, name }: LikertScaleProps): React.ReactNode {
+/** Configurable Likert scale rendered from scale items. */
+export function LikertScale({ value, onChange, name, scale }: LikertScaleProps): React.ReactNode {
   return (
     <div role="radiogroup" aria-label="Response options" className="flex flex-col gap-3 md:flex-row">
-      {LIKERT_SCALE.map((option) => {
+      {scale.map((option) => {
         const isSelected = value === option.value;
         return (
           <button

@@ -49,4 +49,40 @@ describe('normalizeAnswer', () => {
     expect(normalizeAnswer(1, false)).toBe(1);
     expect(normalizeAnswer(4, false)).toBe(4);
   });
+
+  describe('with scaleSize=5', () => {
+    test('returns value unchanged when not reverse scored', () => {
+      expect(normalizeAnswer(3, false, 5)).toBe(3);
+      expect(normalizeAnswer(5, false, 5)).toBe(5);
+    });
+
+    test('reverses neutral value to itself on 5-point (3 → 3)', () => {
+      expect(normalizeAnswer(3, true, 5)).toBe(3);
+    });
+
+    test('reverses 1 → 5 on 5-point', () => {
+      expect(normalizeAnswer(1, true, 5)).toBe(5);
+    });
+
+    test('reverses 5 → 1 on 5-point', () => {
+      expect(normalizeAnswer(5, true, 5)).toBe(1);
+    });
+
+    test('throws on value 0 with scaleSize=5', () => {
+      expect(() => normalizeAnswer(0, false, 5)).toThrow(ScoringError);
+    });
+
+    test('throws on value 6 with scaleSize=5', () => {
+      expect(() => normalizeAnswer(6, false, 5)).toThrow(ScoringError);
+    });
+
+    test('boundary values 1 and 5 are valid on 5-point', () => {
+      expect(normalizeAnswer(1, false, 5)).toBe(1);
+      expect(normalizeAnswer(5, false, 5)).toBe(5);
+    });
+  });
+
+  test('throws on value 5 with default scaleSize=4', () => {
+    expect(() => normalizeAnswer(5, false, 4)).toThrow(ScoringError);
+  });
 });

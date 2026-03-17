@@ -43,4 +43,4 @@ export type {
   ResultsTab,
 } from './types';
 
-export { RESULTS_TABS } from './types';
+export { RESULTS_TABS, createEmptyDistribution } from './types';

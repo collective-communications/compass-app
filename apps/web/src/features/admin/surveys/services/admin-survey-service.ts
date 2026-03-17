@@ -9,6 +9,7 @@ import type {
   Question,
   QuestionWithDimension,
   Dimension,
+  SubDimension,
   SurveyTemplate,
 } from '@compass/types';
 import { supabase } from '../../../../lib/supabase';
@@ -26,6 +27,7 @@ export interface SurveyBuilderData {
   survey: Survey;
   questions: QuestionWithDimension[];
   dimensions: Dimension[];
+  subDimensions: SubDimension[];
   hasResponses: boolean;
 }
 
@@ -46,6 +48,7 @@ export interface UpdateQuestionParams {
   reverseScored?: boolean;
   diagnosticFocus?: string | null;
   recommendedAction?: string | null;
+  subDimensionId?: string | null;
 }
 
 /** Parameters for reordering questions */
@@ -95,7 +98,7 @@ export async function listSurveys(
 
 /** Fetch a single survey with questions, dimensions, and response status */
 export async function getSurveyBuilderData(surveyId: string): Promise<SurveyBuilderData> {
-  const [surveyResult, questionsResult, dimensionsResult, responsesResult] = await Promise.all([
+  const [surveyResult, questionsResult, dimensionsResult, subDimensionsResult, responsesResult] = await Promise.all([
     supabase.from('surveys').select('*').eq('id', surveyId).single(),
     supabase
       .from('questions')
@@ -103,6 +106,7 @@ export async function getSurveyBuilderData(surveyId: string): Promise<SurveyBuil
       .eq('survey_id', surveyId)
       .order('order_index', { ascending: true }),
     supabase.from('dimensions').select('*').order('display_order', { ascending: true }),
+    supabase.from('sub_dimensions').select('*').order('display_order', { ascending: true }),
     supabase
       .from('deployments')
       .select('responses(id)', { count: 'exact', head: true })
@@ -112,22 +116,28 @@ export async function getSurveyBuilderData(surveyId: string): Promise<SurveyBuil
   if (surveyResult.error) throw surveyResult.error;
   if (questionsResult.error) throw questionsResult.error;
   if (dimensionsResult.error) throw dimensionsResult.error;
+  if (subDimensionsResult.error) throw subDimensionsResult.error;
 
   const survey = mapSurveyRow(surveyResult.data as Record<string, unknown>);
   const dimensions = (dimensionsResult.data ?? []).map(mapDimensionRow);
+  const subDimensions = (subDimensionsResult.data ?? []).map(mapSubDimensionRow);
+
+  const subDimMap = new Map(subDimensions.map((sd) => [sd.id, sd]));
 
   const questions: QuestionWithDimension[] = (questionsResult.data ?? []).map((row) => {
     const raw = row as Record<string, unknown>;
     const qdArr = raw['question_dimensions'] as Array<Record<string, unknown>> | undefined;
     const qd = qdArr?.[0];
+    const mapped = mapQuestionRow(raw);
     return {
-      ...mapQuestionRow(raw),
+      ...mapped,
       dimension: {
         id: (qd?.['id'] as string) ?? '',
         questionId: (qd?.['question_id'] as string) ?? '',
         dimensionId: (qd?.['dimension_id'] as string) ?? '',
         weight: (qd?.['weight'] as number) ?? 1,
       },
+      subDimension: mapped.subDimensionId ? (subDimMap.get(mapped.subDimensionId) ?? null) : null,
     };
   });
 
@@ -135,6 +145,7 @@ export async function getSurveyBuilderData(surveyId: string): Promise<SurveyBuil
     survey,
     questions,
     dimensions,
+    subDimensions,
     hasResponses: (responsesResult.count ?? 0) > 0,
   };
 }
@@ -185,6 +196,9 @@ export async function updateQuestion(params: UpdateQuestionParams): Promise<Ques
   if (updates.diagnosticFocus !== undefined) dbUpdates['diagnostic_focus'] = updates.diagnosticFocus;
   if (updates.recommendedAction !== undefined) {
     dbUpdates['recommended_action'] = updates.recommendedAction;
+  }
+  if (updates.subDimensionId !== undefined) {
+    dbUpdates['sub_dimension_id'] = updates.subDimensionId;
   }
 
   const { data, error } = await supabase
@@ -397,6 +411,7 @@ function mapQuestionRow(raw: Record<string, unknown>): Question {
     options: raw['options'] ?? null,
     required: (raw['required'] as boolean) ?? true,
     displayOrder: raw['order_index'] as number,
+    subDimensionId: (raw['sub_dimension_id'] as string) ?? null,
     diagnosticFocus: (raw['diagnostic_focus'] as string) ?? null,
     recommendedAction: (raw['recommended_action'] as string) ?? null,
     createdAt: raw['created_at'] as string,
@@ -414,6 +429,18 @@ function mapDimensionRow(raw: Record<string, unknown>): Dimension {
     displayOrder: raw['display_order'] as number,
     segmentStartAngle: (raw['segment_start_angle'] as number) ?? null,
     segmentEndAngle: (raw['segment_end_angle'] as number) ?? null,
+    createdAt: raw['created_at'] as string,
+  };
+}
+
+function mapSubDimensionRow(raw: Record<string, unknown>): SubDimension {
+  return {
+    id: raw['id'] as string,
+    dimensionId: raw['dimension_id'] as string,
+    code: raw['code'] as string,
+    name: raw['name'] as string,
+    description: (raw['description'] as string) ?? null,
+    displayOrder: raw['display_order'] as number,
     createdAt: raw['created_at'] as string,
   };
 }

@@ -1,17 +1,19 @@
 /**
  * Survey Dimensions tab — shows per-question results grouped by dimension.
  * Renders dimension pill navigation (Core, Clarity, Connection, Collaboration),
- * a header card with aggregate scores, and a list of question result cards.
+ * a header card with aggregate scores and sub-dimension breakdown,
+ * and a list of question result cards grouped by sub-dimension.
  */
 
 import { useState, useMemo, type ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
 import { dimensions as dimTokens } from '@compass/tokens';
-import type { DimensionScoreMap } from '@compass/scoring';
+import type { DimensionScoreMap, SubDimensionScore } from '@compass/scoring';
 import { useQuestionScores } from '../../hooks/use-question-scores';
 import { useOverallScores } from '../../hooks/use-overall-scores';
 import { DimensionHeaderCard } from './dimension-header-card';
 import { QuestionResultList } from './question-result-list';
+import type { QuestionScoreRow } from '../../types';
 
 interface SurveyDimensionsTabProps {
   surveyId: string;
@@ -31,6 +33,50 @@ const DIMENSIONS: DimensionMeta[] = [
   { code: 'collaboration', label: dimTokens.collaboration.label, color: dimTokens.collaboration.color },
 ];
 
+/**
+ * Derive sub-dimension scores from question-level data.
+ * Groups questions by sub-dimension and computes average mean score,
+ * converting to a 0-100 percentage scale.
+ */
+function deriveSubDimensionScores(
+  questions: QuestionScoreRow[],
+  dimensionCode: DimensionCode,
+): SubDimensionScore[] {
+  const groups = new Map<string, { name: string; scores: number[]; counts: number[] }>();
+
+  for (const q of questions) {
+    if (!q.subDimensionCode) continue;
+    let group = groups.get(q.subDimensionCode);
+    if (!group) {
+      group = { name: q.subDimensionName ?? q.subDimensionCode, scores: [], counts: [] };
+      groups.set(q.subDimensionCode, group);
+    }
+    group.scores.push(q.meanScore);
+    group.counts.push(q.responseCount);
+  }
+
+  const results: SubDimensionScore[] = [];
+  for (const [code, group] of groups) {
+    const avgRaw = group.scores.reduce((sum, s) => sum + s, 0) / group.scores.length;
+    const totalCount = group.counts.reduce((sum, c) => sum + c, 0);
+    // meanScore from the view is already on the 1-N scale; convert to 0-100%
+    // Determine scale from distribution keys of the first question in this group
+    const sampleQ = questions.find((q) => q.subDimensionCode === code);
+    const scaleSize = sampleQ ? Math.max(...Object.keys(sampleQ.distribution).map(Number)) : 5;
+    const score = scaleSize > 1 ? ((avgRaw - 1) / (scaleSize - 1)) * 100 : 0;
+
+    results.push({
+      subDimensionCode: code,
+      dimensionCode,
+      score: Math.round(score * 100) / 100,
+      rawScore: Math.round(avgRaw * 100) / 100,
+      responseCount: totalCount,
+    });
+  }
+
+  return results.sort((a, b) => a.subDimensionCode.localeCompare(b.subDimensionCode));
+}
+
 export function SurveyDimensionsTab({
   surveyId,
 }: SurveyDimensionsTabProps): ReactElement {
@@ -49,6 +95,11 @@ export function SurveyDimensionsTab({
     if (!overallScores?.[activeDimension]) return 0;
     return overallScores[activeDimension].score;
   }, [overallScores, activeDimension]);
+
+  const subDimensionScores = useMemo(() => {
+    if (!questions || questions.length === 0) return [];
+    return deriveSubDimensionScores(questions, activeDimension);
+  }, [questions, activeDimension]);
 
   const isLoading = questionsLoading || scoresLoading;
 
@@ -85,6 +136,7 @@ export function SurveyDimensionsTab({
             score={dimensionScore}
             color={activeMeta.color}
             questions={questions ?? []}
+            subDimensionScores={subDimensionScores.length > 0 ? subDimensionScores : undefined}
           />
           <QuestionResultList
             questions={questions ?? []}

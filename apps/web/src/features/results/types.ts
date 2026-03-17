@@ -8,6 +8,7 @@ import type {
   DimensionScoreMap,
   ArchetypeMatch,
   RiskFlag,
+  SubDimensionScore,
 } from '@compass/scoring';
 
 // ─── Database Row Types ─────────────────────────────────────────────────────
@@ -33,14 +34,31 @@ export interface QuestionScoreRow {
   distribution: LikertDistribution;
   responseCount: number;
   isReverseScored: boolean;
+  /** Sub-dimension code, if the question belongs to one. */
+  subDimensionCode: string | null;
+  /** Sub-dimension display name, if the question belongs to one. */
+  subDimensionName: string | null;
 }
 
-/** Likert value distribution for a single question. */
-export interface LikertDistribution {
-  1: number;
-  2: number;
-  3: number;
-  4: number;
+/**
+ * Likert value distribution for a single question.
+ * Keys are 1-based Likert values; values are response counts.
+ * Dynamic — supports any scale size (4-point, 5-point, etc.).
+ */
+export type LikertDistribution = Record<number, number>;
+
+/**
+ * Create an empty distribution with all keys initialized to 0.
+ *
+ * @param scaleSize - Number of points on the Likert scale.
+ * @returns A distribution record with keys 1 through scaleSize, all set to 0.
+ */
+export function createEmptyDistribution(scaleSize: number): LikertDistribution {
+  const dist: LikertDistribution = {};
+  for (let i = 1; i <= scaleSize; i++) {
+    dist[i] = 0;
+  }
+  return dist;
 }
 
 /** Open-ended dialogue response. */

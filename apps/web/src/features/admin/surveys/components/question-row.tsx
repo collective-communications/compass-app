@@ -18,7 +18,8 @@ interface QuestionRowProps {
 }
 
 const TYPE_LABEL: Record<QuestionType, string> = {
-  likert_4: 'Likert',
+  likert: 'Likert',
+  likert_4: 'Likert (4-point)',
   open_text: 'Open Text',
 };
 

@@ -1,4 +1,4 @@
-import { LIKERT_MIN, LIKERT_RANGE, SCORE_DECIMALS } from './constants.js';
+import { SCORE_DECIMALS } from './constants.js';
 import { ScoringError } from './errors.js';
 import { normalizeAnswer } from './normalize.js';
 import type { AnswerWithMeta, DimensionCode, DimensionScore, DimensionScoreMap } from './types.js';
@@ -12,20 +12,26 @@ function roundTo(value: number, decimals: number): number {
 /**
  * Calculate the score for a single dimension from its answers.
  *
- * Weighted average: sum(normalizedValue * weight) / sum(weight)
- * Score formula: ((weightedAvg - 1) / 3) * 100
+ * Weighted average: `sum(normalizedValue * weight) / sum(weight)`
+ * Score formula: `((weightedAvg - 1) / (scaleSize - 1)) * 100`
  *
+ * @param dimensionId - UUID of the dimension.
+ * @param dimensionCode - Dimension code identifier.
+ * @param answers - Answer set for this dimension.
+ * @param scaleSize - Number of points on the Likert scale (default 4 for backward compat).
  * @throws ScoringError on empty answers or non-positive weights.
  */
 export function calculateDimensionScore(
   dimensionId: string,
   dimensionCode: DimensionCode,
   answers: readonly AnswerWithMeta[],
+  scaleSize: number = 4,
 ): DimensionScore {
   if (answers.length === 0) {
     throw new ScoringError('EMPTY_ANSWERS', `No answers provided for dimension "${dimensionCode}"`);
   }
 
+  const range = scaleSize - 1;
   let weightedSum = 0;
   let weightSum = 0;
 
@@ -37,13 +43,13 @@ export function calculateDimensionScore(
       );
     }
 
-    const normalized = normalizeAnswer(answer.value, answer.reverseScored);
+    const normalized = normalizeAnswer(answer.value, answer.reverseScored, scaleSize);
     weightedSum += normalized * answer.weight;
     weightSum += answer.weight;
   }
 
   const rawScore = roundTo(weightedSum / weightSum, SCORE_DECIMALS);
-  const score = roundTo(((rawScore - LIKERT_MIN) / LIKERT_RANGE) * 100, SCORE_DECIMALS);
+  const score = roundTo(((rawScore - 1) / range) * 100, SCORE_DECIMALS);
 
   return {
     dimensionId,
@@ -57,9 +63,14 @@ export function calculateDimensionScore(
 /**
  * Calculate scores for all four dimensions by grouping answers by dimensionCode.
  *
+ * @param answers - Full answer set containing answers for all dimensions.
+ * @param scaleSize - Number of points on the Likert scale (default 4 for backward compat).
  * @throws ScoringError if any dimension has no answers or contains invalid data.
  */
-export function calculateAllDimensionScores(answers: readonly AnswerWithMeta[]): DimensionScoreMap {
+export function calculateAllDimensionScores(
+  answers: readonly AnswerWithMeta[],
+  scaleSize: number = 4,
+): DimensionScoreMap {
   const groups: Record<string, AnswerWithMeta[]> = {};
 
   for (const answer of answers) {
@@ -79,7 +90,7 @@ export function calculateAllDimensionScores(answers: readonly AnswerWithMeta[]):
       throw new ScoringError('MISSING_DIMENSION', `No answers found for dimension "${code}"`);
     }
     // Use the dimensionId from the first answer in the group
-    result[code] = calculateDimensionScore(group[0]!.dimensionId, code, group);
+    result[code] = calculateDimensionScore(group[0]!.dimensionId, code, group, scaleSize);
   }
 
   return result;

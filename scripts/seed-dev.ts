@@ -63,17 +63,13 @@ const IDS = {
   template: '00000000-0000-0000-0000-000000000010',
   survey: '00000000-0000-0000-0000-000000000100',
   deployment: '00000000-0000-0000-0000-000000000200',
-  questions: {
-    c1: '00000000-0000-0000-0000-000000001001',
-    c2: '00000000-0000-0000-0000-000000001002',
-    l1: '00000000-0000-0000-0000-000000001003',
-    l2: '00000000-0000-0000-0000-000000001004',
-    n1: '00000000-0000-0000-0000-000000001005',
-    n2: '00000000-0000-0000-0000-000000001006',
-    b1: '00000000-0000-0000-0000-000000001007',
-    b2: '00000000-0000-0000-0000-000000001008',
-    oe1: '00000000-0000-0000-0000-000000001009',
-  },
+  /** Q1-Q56 Likert + Q57 open-ended. UUID format: 00000000-0000-0000-0000-1000000000NN */
+  questions: Object.fromEntries([
+    ...Array.from({ length: 57 }, (_, i) => [
+      `q${i + 1}`,
+      `00000000-0000-0000-0000-1000000000${String(i + 1).padStart(2, '0')}`,
+    ]),
+  ]) as Record<string, string>,
 } as const;
 
 // Test user passwords (all the same for dev convenience)
@@ -231,18 +227,128 @@ async function seedSurvey(): Promise<void> {
 }
 
 async function seedQuestions(): Promise<void> {
-  console.log('Creating questions...');
+  console.log('Creating questions (56 Likert + 1 open-ended)...');
 
-  const questions = [
-    { id: IDS.questions.c1, text: 'I understand why this organization exists and what it stands for.', order: 1, dim: 'core' },
-    { id: IDS.questions.c2, text: 'People feel comfortable admitting mistakes or uncertainties.', order: 2, dim: 'core' },
-    { id: IDS.questions.l1, text: "I know what's expected of me in my role.", order: 3, dim: 'clarity' },
-    { id: IDS.questions.l2, text: 'Priorities often change without clear explanation.', order: 4, dim: 'clarity', reverse: true },
-    { id: IDS.questions.n1, text: 'I feel comfortable sharing honest feedback with my team.', order: 5, dim: 'connection' },
-    { id: IDS.questions.n2, text: 'People across teams genuinely support each other.', order: 6, dim: 'connection' },
-    { id: IDS.questions.b1, text: 'Teams across the organization collaborate effectively.', order: 7, dim: 'collaboration' },
-    { id: IDS.questions.b2, text: 'When conflicts arise, they are addressed constructively.', order: 8, dim: 'collaboration' },
-    { id: IDS.questions.oe1, text: 'What is one thing you would change about how your organization communicates?', order: 9, dim: null },
+  // Sub-dimension UUIDs (from Wave 1 seed)
+  const SUB = {
+    // Core
+    psychological_safety: '00000000-0000-0000-0000-000000002001',
+    trust: '00000000-0000-0000-0000-000000002002',
+    fairness_integrity: '00000000-0000-0000-0000-000000002003',
+    purpose_meaning: '00000000-0000-0000-0000-000000002004',
+    leader_behaviour: '00000000-0000-0000-0000-000000002005',
+    // Clarity
+    decision_making: '00000000-0000-0000-0000-000000003001',
+    role_clarity: '00000000-0000-0000-0000-000000003002',
+    strategic_clarity: '00000000-0000-0000-0000-000000003003',
+    empowerment: '00000000-0000-0000-0000-000000003004',
+    goal_alignment: '00000000-0000-0000-0000-000000003005',
+    // Connection
+    belonging_inclusion: '00000000-0000-0000-0000-000000004001',
+    employee_voice: '00000000-0000-0000-0000-000000004002',
+    information_flow: '00000000-0000-0000-0000-000000004003',
+    shared_identity: '00000000-0000-0000-0000-000000004004',
+    involvement: '00000000-0000-0000-0000-000000004005',
+    recognition: '00000000-0000-0000-0000-000000004006',
+    // Collaboration
+    sustainable_pace: '00000000-0000-0000-0000-000000005001',
+    adaptability_learning: '00000000-0000-0000-0000-000000005002',
+    cross_functional: '00000000-0000-0000-0000-000000005003',
+    ways_of_working: '00000000-0000-0000-0000-000000005004',
+    ownership_accountability: '00000000-0000-0000-0000-000000005005',
+  } as const;
+
+  type QuestionDef = {
+    id: string;
+    text: string;
+    order: number;
+    dim: string | null;
+    subDim: string | null;
+    reverse?: boolean;
+    type?: 'likert' | 'open_text';
+  };
+
+  const questions: QuestionDef[] = [
+    // CORE — Psychological Safety (Q1-Q2)
+    { id: IDS.questions.q1, text: 'I feel comfortable admitting mistakes or uncertainties.', order: 1, dim: 'core', subDim: SUB.psychological_safety },
+    { id: IDS.questions.q2, text: 'It\'s safe to bring up problems or tough issues on my team.', order: 2, dim: 'core', subDim: SUB.psychological_safety },
+    // CORE — Trust (Q3-Q5)
+    { id: IDS.questions.q3, text: 'I assume my colleagues have positive intentions, even during disagreements.', order: 3, dim: 'core', subDim: SUB.trust },
+    { id: IDS.questions.q4, text: 'I trust that my leaders will follow through on their commitments.', order: 4, dim: 'core', subDim: SUB.trust },
+    { id: IDS.questions.q5, text: 'I trust the information I receive from my leaders.', order: 5, dim: 'core', subDim: SUB.trust },
+    // CORE — Fairness & Integrity (Q6-Q8)
+    { id: IDS.questions.q6, text: 'Our purpose and values are evident in everyday actions.', order: 6, dim: 'core', subDim: SUB.fairness_integrity },
+    { id: IDS.questions.q7, text: 'Decisions that affect people in our organization are made fairly and consistently.', order: 7, dim: 'core', subDim: SUB.fairness_integrity },
+    { id: IDS.questions.q8, text: 'People are held to the same standards, regardless of their position or who they are.', order: 8, dim: 'core', subDim: SUB.fairness_integrity },
+    // CORE — Purpose & Meaning (Q9-Q11)
+    { id: IDS.questions.q9, text: 'I understand why this organization exists and what it stands for.', order: 9, dim: 'core', subDim: SUB.purpose_meaning },
+    { id: IDS.questions.q10, text: 'The work I do here gives me a sense of personal meaning.', order: 10, dim: 'core', subDim: SUB.purpose_meaning },
+    { id: IDS.questions.q11, text: 'Working here feels consistent with what I stand for personally.', order: 11, dim: 'core', subDim: SUB.purpose_meaning },
+    // CORE — Leader Behaviour (Q12-Q13)
+    { id: IDS.questions.q12, text: 'Leaders\' actions align with what they say.', order: 12, dim: 'core', subDim: SUB.leader_behaviour },
+    { id: IDS.questions.q13, text: 'I often receive mixed messages from different leaders.', order: 13, dim: 'core', subDim: SUB.leader_behaviour, reverse: true },
+    // CLARITY — Decision Making (Q14-Q17)
+    { id: IDS.questions.q14, text: 'Priorities often change without clear explanation.', order: 14, dim: 'clarity', subDim: SUB.decision_making, reverse: true },
+    { id: IDS.questions.q15, text: 'The reasons behind major decisions are communicated.', order: 15, dim: 'clarity', subDim: SUB.decision_making },
+    { id: IDS.questions.q16, text: 'I don\'t know what decisions I am allowed to make.', order: 16, dim: 'clarity', subDim: SUB.decision_making, reverse: true },
+    { id: IDS.questions.q17, text: 'When expectations change, I understand why.', order: 17, dim: 'clarity', subDim: SUB.decision_making },
+    // CLARITY — Role Clarity (Q18-Q20)
+    { id: IDS.questions.q18, text: 'I know what\'s expected of me in my role.', order: 18, dim: 'clarity', subDim: SUB.role_clarity },
+    { id: IDS.questions.q19, text: 'It\'s clear who is responsible for what on my team.', order: 19, dim: 'clarity', subDim: SUB.role_clarity },
+    { id: IDS.questions.q20, text: 'I often do work that I\'m not sure if I should be doing because responsibilities aren\'t clear.', order: 20, dim: 'clarity', subDim: SUB.role_clarity, reverse: true },
+    // CLARITY — Strategic Clarity (Q21-Q22)
+    { id: IDS.questions.q21, text: 'I often feel unsure about where the organization is heading.', order: 21, dim: 'clarity', subDim: SUB.strategic_clarity, reverse: true },
+    { id: IDS.questions.q22, text: 'I understand how my team\'s work connects to organizational priorities.', order: 22, dim: 'clarity', subDim: SUB.strategic_clarity },
+    // CLARITY — Empowerment (Q23-Q24)
+    { id: IDS.questions.q23, text: 'Our tools and technology make collaboration simple and efficient.', order: 23, dim: 'clarity', subDim: SUB.empowerment },
+    { id: IDS.questions.q24, text: 'I know where to find what I need without asking multiple people.', order: 24, dim: 'clarity', subDim: SUB.empowerment },
+    // CLARITY — Goal Alignment (Q25-Q27)
+    { id: IDS.questions.q25, text: 'I can see how my work contributes to something meaningful.', order: 25, dim: 'clarity', subDim: SUB.goal_alignment },
+    { id: IDS.questions.q26, text: 'My team\'s goals clearly support the organization\'s top priorities.', order: 26, dim: 'clarity', subDim: SUB.goal_alignment },
+    { id: IDS.questions.q27, text: 'I sometimes work on things that don\'t seem connected to any larger goal.', order: 27, dim: 'clarity', subDim: SUB.goal_alignment, reverse: true },
+    // CONNECTION — Belonging & Inclusion (Q28-Q31)
+    { id: IDS.questions.q28, text: 'I feel seen and included, regardless of my role.', order: 28, dim: 'connection', subDim: SUB.belonging_inclusion },
+    { id: IDS.questions.q29, text: 'I have fun at work.', order: 29, dim: 'connection', subDim: SUB.belonging_inclusion },
+    { id: IDS.questions.q30, text: 'I feel lonely at work.', order: 30, dim: 'connection', subDim: SUB.belonging_inclusion, reverse: true },
+    { id: IDS.questions.q31, text: 'I feel a genuine sense of belonging here.', order: 31, dim: 'connection', subDim: SUB.belonging_inclusion },
+    // CONNECTION — Employee Voice (Q32-Q34)
+    { id: IDS.questions.q32, text: 'I can express a different point of view without negative consequences.', order: 32, dim: 'connection', subDim: SUB.employee_voice },
+    { id: IDS.questions.q33, text: 'When I speak up, my input genuinely influences decisions.', order: 33, dim: 'connection', subDim: SUB.employee_voice },
+    { id: IDS.questions.q34, text: 'Feedback here often goes into a black hole.', order: 34, dim: 'connection', subDim: SUB.employee_voice, reverse: true },
+    // CONNECTION — Information Flow (Q35-Q37)
+    { id: IDS.questions.q35, text: 'Communication between all levels of the organization feels open.', order: 35, dim: 'connection', subDim: SUB.information_flow },
+    { id: IDS.questions.q36, text: 'Important information reaches me in time for me to act on it.', order: 36, dim: 'connection', subDim: SUB.information_flow },
+    { id: IDS.questions.q37, text: 'Information flows well between teams, not just within them.', order: 37, dim: 'connection', subDim: SUB.information_flow },
+    // CONNECTION — Shared Identity (Q38-Q39)
+    { id: IDS.questions.q38, text: 'Team members look out for each other.', order: 38, dim: 'connection', subDim: SUB.shared_identity },
+    { id: IDS.questions.q39, text: 'There is a strong sense of \'we\'re all in this together\' across the organization.', order: 39, dim: 'connection', subDim: SUB.shared_identity },
+    // CONNECTION — Involvement (Q40-Q41)
+    { id: IDS.questions.q40, text: 'I have a say in decisions that affect my day-to-day work.', order: 40, dim: 'connection', subDim: SUB.involvement },
+    { id: IDS.questions.q41, text: 'People closest to the work are included in decisions about it.', order: 41, dim: 'connection', subDim: SUB.involvement },
+    // CONNECTION — Recognition (Q42-Q43)
+    { id: IDS.questions.q42, text: 'I feel recognized for the contributions that matter most.', order: 42, dim: 'connection', subDim: SUB.recognition },
+    { id: IDS.questions.q43, text: 'Recognition here often feels like a box-ticking exercise rather than genuine appreciation.', order: 43, dim: 'connection', subDim: SUB.recognition, reverse: true },
+    // COLLABORATION — Sustainable Pace (Q44-Q45)
+    { id: IDS.questions.q44, text: 'We have the right balance between collaboration time and focus time.', order: 44, dim: 'collaboration', subDim: SUB.sustainable_pace },
+    { id: IDS.questions.q45, text: 'The pace of work here is sustainable over the long term.', order: 45, dim: 'collaboration', subDim: SUB.sustainable_pace },
+    // COLLABORATION — Adaptability & Learning (Q46-Q47)
+    { id: IDS.questions.q46, text: 'When something goes wrong, blame is a common first reaction.', order: 46, dim: 'collaboration', subDim: SUB.adaptability_learning, reverse: true },
+    { id: IDS.questions.q47, text: 'Our team regularly reflects on what\'s working and what isn\'t, and adjusts.', order: 47, dim: 'collaboration', subDim: SUB.adaptability_learning },
+    // COLLABORATION — Cross-Functional Coordination (Q48-Q50)
+    { id: IDS.questions.q48, text: 'It\'s easy to access the people or information I need to do my job.', order: 48, dim: 'collaboration', subDim: SUB.cross_functional },
+    { id: IDS.questions.q49, text: 'There are silos in our organization.', order: 49, dim: 'collaboration', subDim: SUB.cross_functional, reverse: true },
+    { id: IDS.questions.q50, text: 'I have opportunities to co-create and problem-solve across functions.', order: 50, dim: 'collaboration', subDim: SUB.cross_functional },
+    // COLLABORATION — Ways of Working (Q51-Q52)
+    { id: IDS.questions.q51, text: 'We have the right balance between meetings and focus time.', order: 51, dim: 'collaboration', subDim: SUB.ways_of_working },
+    { id: IDS.questions.q52, text: 'We have clear processes for how we get work done.', order: 52, dim: 'collaboration', subDim: SUB.ways_of_working },
+    // COLLABORATION — Ownership & Accountability (Q53-Q55)
+    { id: IDS.questions.q53, text: 'People here follow through on their commitments.', order: 53, dim: 'collaboration', subDim: SUB.ownership_accountability },
+    { id: IDS.questions.q54, text: 'I understand what is expected of me.', order: 54, dim: 'collaboration', subDim: SUB.ownership_accountability },
+    { id: IDS.questions.q55, text: 'Things fall through the cracks because nobody clearly owns them.', order: 55, dim: 'collaboration', subDim: SUB.ownership_accountability, reverse: true },
+    // SYSTEM HEALTH — S4 (Q56, no sub-dimension, maps to all 4 dimensions)
+    { id: IDS.questions.q56, text: 'I am proud to be a team member at this organization.', order: 56, dim: null, subDim: null },
+    // Open-ended (Q57)
+    { id: IDS.questions.q57, text: 'What is one thing you would change about how your organization communicates?', order: 57, dim: null, subDim: null, type: 'open_text' },
   ];
 
   // Upsert questions
@@ -251,9 +357,10 @@ async function seedQuestions(): Promise<void> {
       id: q.id,
       survey_id: IDS.survey,
       text: q.text,
-      type: q.dim ? 'likert_4' : 'open_text',
+      type: q.type ?? 'likert',
       order_index: q.order,
       reverse_scored: q.reverse ?? false,
+      sub_dimension_id: q.subDim ?? null,
     })),
     { onConflict: 'id' },
   );
@@ -268,24 +375,39 @@ async function seedQuestions(): Promise<void> {
   if (!dims) return;
   const dimMap = Object.fromEntries(dims.map((d) => [d.code, d.id]));
 
-  // Delete existing mappings then re-insert
+  // Build dimension mappings
   const likertQuestions = questions.filter((q) => q.dim);
-  for (const q of likertQuestions) {
+  const s4Question = questions.find((q) => q.order === 56);
+
+  // Delete existing mappings then re-insert
+  for (const q of questions) {
     await supabase.from('question_dimensions').delete().eq('question_id', q.id);
   }
 
-  const { error: qdError } = await supabase.from('question_dimensions').insert(
-    likertQuestions.map((q) => ({
-      question_id: q.id,
-      dimension_id: dimMap[q.dim!],
-      weight: 1.0,
-    })),
-  );
+  // Standard 1:1 dimension mappings
+  const dimensionMappings = likertQuestions.map((q) => ({
+    question_id: q.id,
+    dimension_id: dimMap[q.dim!],
+    weight: 1.0,
+  }));
+
+  // S4 maps to all 4 dimensions with weight 0.25
+  if (s4Question) {
+    for (const code of ['core', 'clarity', 'connection', 'collaboration']) {
+      dimensionMappings.push({
+        question_id: s4Question.id,
+        dimension_id: dimMap[code],
+        weight: 0.25,
+      });
+    }
+  }
+
+  const { error: qdError } = await supabase.from('question_dimensions').insert(dimensionMappings);
 
   if (qdError) {
     console.error(`  question_dimensions FAILED: ${qdError.message}`);
   } else {
-    console.log(`  ${questions.length} questions, ${likertQuestions.length} dimension mappings`);
+    console.log(`  ${questions.length} questions, ${dimensionMappings.length} dimension mappings`);
   }
 }
 
@@ -333,7 +455,10 @@ async function seedResponses(): Promise<void> {
     'More consistency between what is said and what is done.',
   ];
 
-  const likertQuestionIds = Object.values(IDS.questions).filter((id) => id !== IDS.questions.oe1);
+  // All Likert questions: Q1-Q56 (exclude Q57 open-ended)
+  const likertQuestionIds = Object.entries(IDS.questions)
+    .filter(([key]) => key !== 'q57')
+    .map(([, id]) => id);
   const responseCount = 24; // Above anonymity threshold for all segments
 
   // Delete existing responses for this deployment first
@@ -357,27 +482,27 @@ async function seedResponses(): Promise<void> {
       continue;
     }
 
-    // Generate answers with some variance (scores cluster 2-4, skewing positive)
+    // Generate answers with some variance (scores cluster 2-5 on 1-5 scale, skewing positive)
     const answers = likertQuestionIds.map((qId) => ({
       response_id: response.id,
       question_id: qId,
-      likert_value: Math.min(4, Math.max(1, Math.floor(Math.random() * 3) + 2)),
+      likert_value: Math.min(5, Math.max(1, Math.floor(Math.random() * 4) + 2)),
     }));
 
     // Add open-ended answer
     answers.push({
       response_id: response.id,
-      question_id: IDS.questions.oe1,
+      question_id: IDS.questions.q57,
       likert_value: null as unknown as number,
     });
 
     const { error: aErr } = await supabase.from('answers').insert(
       answers.map((a) => ({
         ...a,
-        open_text_value: a.question_id === IDS.questions.oe1
+        open_text_value: a.question_id === IDS.questions.q57
           ? openEndedTexts[i % openEndedTexts.length]
           : null,
-        likert_value: a.question_id === IDS.questions.oe1 ? null : a.likert_value,
+        likert_value: a.question_id === IDS.questions.q57 ? null : a.likert_value,
       })),
     );
 
@@ -406,7 +531,8 @@ async function clean(): Promise<void> {
 
   // Delete question_dimensions + questions
   console.log('  deleting questions...');
-  for (const qId of Object.values(IDS.questions)) {
+  const allQuestionIds = Object.values(IDS.questions);
+  for (const qId of allQuestionIds) {
     await supabase.from('question_dimensions').delete().eq('question_id', qId);
   }
   await supabase.from('questions').delete().eq('survey_id', IDS.survey);

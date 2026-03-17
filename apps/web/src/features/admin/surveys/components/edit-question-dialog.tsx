@@ -4,9 +4,10 @@
  * Auto-saves changes after 500ms debounce.
  */
 
-import { useState, useEffect, useRef, useId, useCallback, type ReactElement } from 'react';
+import { useState, useEffect, useRef, useId, useMemo, useCallback, type ReactElement } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Question } from '@compass/types';
+import type { Question, SubDimension, Dimension, QuestionType } from '@compass/types';
+import { QuestionType as QT } from '@compass/types';
 import { updateQuestion, type UpdateQuestionParams } from '../services/admin-survey-service';
 import { surveyBuilderKeys } from '../hooks/use-survey-builder';
 import type { AutoSaveStatus } from './auto-save-indicator';
@@ -17,9 +18,20 @@ interface EditQuestionDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onAutoSaveStatusChange: (status: AutoSaveStatus) => void;
+  /** All available sub-dimensions for the selector */
+  subDimensions?: SubDimension[];
+  /** All dimensions for grouping sub-dimensions */
+  dimensions?: Dimension[];
+  /** The question's assigned dimension ID (from question_dimensions mapping) */
+  questionDimensionId?: string | null;
 }
 
 const DEBOUNCE_MS = 500;
+
+/** Whether a question type is Likert (new or legacy) */
+function isLikertType(type: QuestionType): boolean {
+  return type === QT.LIKERT || type === QT.LIKERT_4;
+}
 
 export function EditQuestionDialog({
   question,
@@ -27,6 +39,9 @@ export function EditQuestionDialog({
   isOpen,
   onClose,
   onAutoSaveStatusChange,
+  subDimensions = [],
+  dimensions = [],
+  questionDimensionId = null,
 }: EditQuestionDialogProps): ReactElement | null {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
@@ -37,6 +52,7 @@ export function EditQuestionDialog({
   const [description, setDescription] = useState(question.description ?? '');
   const [reverseScored, setReverseScored] = useState(question.reverseScored);
   const [diagnosticFocus, setDiagnosticFocus] = useState(question.diagnosticFocus ?? '');
+  const [subDimensionId, setSubDimensionId] = useState(question.subDimensionId ?? '');
 
   // Sync state when question prop changes
   useEffect(() => {
@@ -44,7 +60,44 @@ export function EditQuestionDialog({
     setDescription(question.description ?? '');
     setReverseScored(question.reverseScored);
     setDiagnosticFocus(question.diagnosticFocus ?? '');
+    setSubDimensionId(question.subDimensionId ?? '');
   }, [question]);
+
+  /** Sub-dimensions filtered by the question's parent dimension, grouped by dimension for display */
+  const subDimensionOptions = useMemo(() => {
+    if (!isLikertType(question.type) || subDimensions.length === 0) return [];
+
+    // If the question has an assigned dimension, filter to that dimension's sub-dimensions
+    if (questionDimensionId) {
+      return subDimensions.filter((sd) => sd.dimensionId === questionDimensionId);
+    }
+
+    // No dimension assigned yet — return all sub-dimensions grouped by dimension
+    return subDimensions;
+  }, [question.type, subDimensions, questionDimensionId]);
+
+  /** Group sub-dimensions by dimension for the <optgroup> display */
+  const subDimensionGroups = useMemo(() => {
+    if (subDimensionOptions.length === 0) return [];
+
+    const dimMap = new Map(dimensions.map((d) => [d.id, d]));
+    const groups = new Map<string, { dimension: Dimension; items: SubDimension[] }>();
+
+    for (const sd of subDimensionOptions) {
+      const dim = dimMap.get(sd.dimensionId);
+      if (!dim) continue;
+      const existing = groups.get(sd.dimensionId);
+      if (existing) {
+        existing.items.push(sd);
+      } else {
+        groups.set(sd.dimensionId, { dimension: dim, items: [sd] });
+      }
+    }
+
+    return Array.from(groups.values()).sort(
+      (a, b) => a.dimension.displayOrder - b.dimension.displayOrder,
+    );
+  }, [subDimensionOptions, dimensions]);
 
   // Open/close the dialog element
   useEffect(() => {
@@ -114,6 +167,12 @@ export function EditQuestionDialog({
     scheduleAutoSave({ diagnosticFocus: value || null });
   }
 
+  function handleSubDimensionChange(value: string): void {
+    setSubDimensionId(value);
+    // Select saves immediately like reverse-scored toggle
+    saveMutation.mutate({ id: question.id, subDimensionId: value || null });
+  }
+
   if (!isOpen) return null;
 
   return (
@@ -169,6 +228,40 @@ export function EditQuestionDialog({
               className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20"
             />
           </div>
+
+          {/* Sub-dimension selector — only shown for Likert question types */}
+          {isLikertType(question.type) && subDimensionGroups.length > 0 && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="q-subdim" className="text-sm font-medium text-[var(--grey-700)]">
+                Sub-dimension
+              </label>
+              <select
+                id="q-subdim"
+                value={subDimensionId}
+                onChange={(e) => handleSubDimensionChange(e.target.value)}
+                className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20"
+              >
+                <option value="">None</option>
+                {questionDimensionId
+                  ? /* Single dimension — flat list */
+                    subDimensionOptions.map((sd) => (
+                      <option key={sd.id} value={sd.id}>
+                        {sd.name}
+                      </option>
+                    ))
+                  : /* No dimension — group by dimension */
+                    subDimensionGroups.map((group) => (
+                      <optgroup key={group.dimension.id} label={group.dimension.name}>
+                        {group.items.map((sd) => (
+                          <option key={sd.id} value={sd.id}>
+                            {sd.name}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+              </select>
+            </div>
+          )}
 
           <div className="flex items-center gap-3">
             <input

@@ -1,9 +1,12 @@
 export { normalizeAnswer } from './normalize.js';
 export { calculateDimensionScore, calculateAllDimensionScores } from './dimension-score.js';
+export { calculateSubDimensionScores } from './sub-dimension-score.js';
 export { classifyCoreHealth } from './core-health.js';
 export { computeSurveyScores } from './pipeline.js';
 export { ScoringError } from './errors.js';
-export { LIKERT_MIN, LIKERT_MAX, LIKERT_RANGE, SCORE_DECIMALS } from './constants.js';
+export { LIKERT_MIN, LIKERT_MAX, LIKERT_RANGE, SCORE_DECIMALS, buildScoringConstants } from './constants.js';
+
+export type { ScoringConstants } from './constants.js';
 
 export type {
   DimensionCode,
@@ -12,6 +15,7 @@ export type {
   CoreHealthStatus,
   SurveyScoreResult,
   AnswerWithMeta,
+  SubDimensionScore,
 } from './types.js';
 
 export type { ScoringErrorCode } from './errors.js';

@@ -86,11 +86,15 @@ export function groupResponsesBySegment(
  * Anonymity thresholds are NOT enforced here — the `safe_segment_scores`
  * Postgres view handles that concern.
  *
+ * @param surveyId - UUID of the survey being scored.
+ * @param responses - Respondent answer sets with demographic metadata.
+ * @param scaleSize - Number of points on the Likert scale (default 4 for backward compat).
  * @throws ScoringError on empty responses, missing metadata, or scoring failures.
  */
 export function computeSegmentedScores(
   surveyId: string,
   responses: readonly ResponseWithMeta[],
+  scaleSize: number = 4,
 ): SegmentedSurveyResult {
   const groups = groupResponsesBySegment(responses);
   const overallKey = segmentKey(OVERALL_SEGMENT);
@@ -108,7 +112,7 @@ export function computeSegmentedScores(
   const overallAnswers = groups.get(overallKey)!;
   const overallResult: SegmentScoreResult = {
     segment: OVERALL_SEGMENT,
-    scores: calculateAllDimensionScores(overallAnswers),
+    scores: calculateAllDimensionScores(overallAnswers, scaleSize),
     responseCount: responses.length,
   };
 
@@ -126,7 +130,7 @@ export function computeSegmentedScores(
 
     segments.push({
       segment,
-      scores: calculateAllDimensionScores(answers),
+      scores: calculateAllDimensionScores(answers, scaleSize),
       responseCount: respondentCounts.get(key) ?? 0,
     });
   }

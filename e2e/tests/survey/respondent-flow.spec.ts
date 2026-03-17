@@ -57,7 +57,7 @@ test('keyboard shortcuts: 1-4 selects answer, Enter advances, Backspace goes bac
   // Wait for first question
   await survey.likertOptions.first().waitFor({ state: 'visible', timeout: 10000 });
 
-  // Press '3' to select "Agree" (3rd option)
+  // Press '3' to select the 3rd option
   await page.keyboard.press('3');
   const thirdOption = survey.likertOptions.nth(2);
   await expect(thirdOption).toHaveAttribute('aria-checked', 'true');
@@ -72,6 +72,30 @@ test('keyboard shortcuts: 1-4 selects answer, Enter advances, Backspace goes bac
   // Should be back on question 1 with previous answer preserved
   await expect(page.getByText(/question 1/i)).toBeVisible({ timeout: 5000 });
   await expect(thirdOption).toHaveAttribute('aria-checked', 'true');
+});
+
+test('keyboard shortcut 5 selects the 5th option on a 5-point scale', async ({ page }) => {
+  const survey = new SurveyPage(page);
+  await survey.goto(token);
+  await survey.fillMetadata();
+  await survey.startButton.click();
+
+  // Wait for first question
+  await survey.likertOptions.first().waitFor({ state: 'visible', timeout: 10000 });
+
+  // Verify 5 radio buttons are present (5-point scale)
+  const radioCount = await survey.likertOptions.count();
+  expect(radioCount).toBe(5);
+
+  // Press '5' to select the 5th option (Strongly Agree)
+  await survey.answerViaKeyboard(5);
+  const fifthOption = survey.likertOptions.nth(4);
+  await expect(fifthOption).toHaveAttribute('aria-checked', 'true');
+
+  // Verify other options are not selected
+  for (let i = 0; i < 4; i++) {
+    await expect(survey.likertOptions.nth(i)).toHaveAttribute('aria-checked', 'false');
+  }
 });
 
 test('survey header shows no user avatar, sign-out, or profile link', async ({ page }) => {

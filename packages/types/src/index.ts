@@ -7,6 +7,10 @@ export {
   QuestionType,
   DeploymentType,
   DimensionCode,
+  DEFAULT_LIKERT_SIZE,
+  buildLikertScale,
+  buildLikertLabels,
+  isValidLikertValue,
   LIKERT_SCALE,
   LIKERT_LABELS,
   reverseScore,
@@ -43,7 +47,9 @@ export type {
 
 export type {
   LikertValue,
+  LikertScaleItem,
   Dimension,
+  SubDimension,
   SurveySettings,
   Survey,
   Question,

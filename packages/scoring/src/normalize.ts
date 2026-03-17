@@ -1,19 +1,25 @@
-import { LIKERT_MAX, LIKERT_MIN } from './constants.js';
 import { ScoringError } from './errors.js';
 
 /**
  * Normalize a Likert answer, applying reverse scoring when needed.
- * Reverse formula: (LIKERT_MAX + LIKERT_MIN - value).
+ * Reverse formula: `(scaleSize + 1) - value`.
  *
- * @throws ScoringError if value is outside 1-4 range.
+ * @param value - Raw Likert response (integer 1–scaleSize).
+ * @param reverseScored - Whether this question is reverse-scored.
+ * @param scaleSize - Number of points on the Likert scale (default 4 for backward compat).
+ * @throws ScoringError if value is outside the 1–scaleSize range.
  */
-export function normalizeAnswer(value: number, reverseScored: boolean): number {
-  if (!Number.isInteger(value) || value < LIKERT_MIN || value > LIKERT_MAX) {
+export function normalizeAnswer(
+  value: number,
+  reverseScored: boolean,
+  scaleSize: number = 4,
+): number {
+  if (!Number.isInteger(value) || value < 1 || value > scaleSize) {
     throw new ScoringError(
       'INVALID_LIKERT_VALUE',
-      `Likert value must be an integer between ${LIKERT_MIN} and ${LIKERT_MAX}, got ${value}`,
+      `Likert value must be an integer between 1 and ${scaleSize}, got ${value}`,
     );
   }
 
-  return reverseScored ? LIKERT_MAX + LIKERT_MIN - value : value;
+  return reverseScored ? scaleSize + 1 - value : value;
 }

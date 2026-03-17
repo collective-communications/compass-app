@@ -24,7 +24,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { ChevronDown, ChevronRight, Info } from 'lucide-react';
-import type { QuestionWithDimension, Dimension, DimensionCode } from '@compass/types';
+import type { QuestionWithDimension, Dimension, DimensionCode, SubDimension, QuestionType } from '@compass/types';
+import { QuestionType as QT } from '@compass/types';
 import { useSurveyBuilder } from '../hooks/use-survey-builder';
 import { useReorderQuestions } from '../hooks/use-reorder-questions';
 import { DimensionNav } from './dimension-nav';
@@ -71,15 +72,27 @@ function buildQuestionCodes(
   return codes;
 }
 
+/** Sub-group of questions within a dimension, optionally grouped by sub-dimension */
+interface SubDimensionGroup {
+  subDimension: SubDimension | null;
+  questions: QuestionWithDimension[];
+}
+
+interface DimensionGroup {
+  dimension: Dimension;
+  questions: QuestionWithDimension[];
+  subGroups: SubDimensionGroup[];
+}
+
 /**
- * Group questions by dimension for collapsible sections.
+ * Group questions by dimension for collapsible sections,
+ * with optional sub-dimension grouping within each dimension.
  */
 function groupByDimension(
   questions: QuestionWithDimension[],
   dimensions: Dimension[],
-): { dimension: Dimension; questions: QuestionWithDimension[] }[] {
-  const groups: { dimension: Dimension; questions: QuestionWithDimension[] }[] = [];
-  const dimMap = new Map(dimensions.map((d) => [d.id, d]));
+): DimensionGroup[] {
+  const groups: DimensionGroup[] = [];
 
   // Build groups in dimension display order
   for (const dim of dimensions) {
@@ -87,7 +100,7 @@ function groupByDimension(
       .filter((q) => q.dimension.dimensionId === dim.id)
       .sort((a, b) => a.displayOrder - b.displayOrder);
     if (dimQuestions.length > 0) {
-      groups.push({ dimension: dim, questions: dimQuestions });
+      groups.push({ dimension: dim, questions: dimQuestions, subGroups: buildSubGroups(dimQuestions) });
     }
   }
 
@@ -106,10 +119,46 @@ function groupByDimension(
       segmentEndAngle: null,
       createdAt: '',
     };
-    groups.push({ dimension: unknownDim, questions: unassigned });
+    groups.push({ dimension: unknownDim, questions: unassigned, subGroups: buildSubGroups(unassigned) });
   }
 
   return groups;
+}
+
+/** Build sub-dimension groupings within a set of questions */
+function buildSubGroups(questions: QuestionWithDimension[]): SubDimensionGroup[] {
+  // If no questions have sub-dimensions, return a single group with no header
+  const hasSubDimensions = questions.some((q) => q.subDimension !== null);
+  if (!hasSubDimensions) {
+    return [{ subDimension: null, questions }];
+  }
+
+  const groups = new Map<string, SubDimensionGroup>();
+  const unassigned: QuestionWithDimension[] = [];
+
+  for (const q of questions) {
+    if (q.subDimension) {
+      const existing = groups.get(q.subDimension.id);
+      if (existing) {
+        existing.questions.push(q);
+      } else {
+        groups.set(q.subDimension.id, { subDimension: q.subDimension, questions: [q] });
+      }
+    } else {
+      unassigned.push(q);
+    }
+  }
+
+  const result: SubDimensionGroup[] = Array.from(groups.values()).sort(
+    (a, b) => (a.subDimension?.displayOrder ?? 0) - (b.subDimension?.displayOrder ?? 0),
+  );
+
+  // Unassigned questions go at the end
+  if (unassigned.length > 0) {
+    result.push({ subDimension: null, questions: unassigned });
+  }
+
+  return result;
 }
 
 export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps): ReactElement {
@@ -216,8 +265,10 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
     );
   }
 
-  const { survey, dimensions, hasResponses } = data;
+  const { survey, dimensions, subDimensions, hasResponses } = data;
   const allQuestionIds = filteredQuestions.map((q) => q.id);
+  const likertSize = survey.settings?.likertSize ?? 5;
+  const reverseScoredCount = data.questions.filter((q) => q.reverseScored).length;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 pb-20">
@@ -232,10 +283,15 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
         role="status"
       >
         <Info size={16} className="mt-0.5 shrink-0 text-[var(--text-secondary)]" />
-        <p>
-          This survey uses the <span className="font-medium">CC+C Culture Assessment</span> template.
-          Questions are organized by dimension. Drag to reorder within the survey.
-        </p>
+        <div>
+          <p>
+            This survey uses the <span className="font-medium">CC+C Culture Assessment</span> template.
+            Questions are organized by dimension. Drag to reorder within the survey.
+          </p>
+          <p className="mt-1 text-xs text-[var(--text-secondary)]">
+            {likertSize}-point Likert scale &middot; {reverseScoredCount} reverse-scored question{reverseScoredCount !== 1 ? 's' : ''}
+          </p>
+        </div>
       </div>
 
       {/* Locked banner */}
@@ -311,17 +367,27 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
                           </span>
                         </button>
 
-                        {/* Question rows */}
+                        {/* Question rows with optional sub-dimension grouping */}
                         {!isCollapsed && (
                           <div className="flex flex-col gap-2 pl-6">
-                            {group.questions.map((question) => (
-                              <QuestionRow
-                                key={question.id}
-                                question={question}
-                                isLocked={hasResponses}
-                                onEdit={setEditingQuestionId}
-                                questionCode={questionCodes.get(question.id) ?? '?'}
-                              />
+                            {group.subGroups.map((subGroup, sgIdx) => (
+                              <div key={subGroup.subDimension?.id ?? `ungrouped-${sgIdx}`}>
+                                {subGroup.subDimension && (
+                                  <p className="mb-1.5 mt-2 text-xs font-medium text-[var(--text-secondary)]">
+                                    {subGroup.subDimension.name}
+                                  </p>
+                                )}
+                                {subGroup.questions.map((question) => (
+                                  <div key={question.id} className="mb-2">
+                                    <QuestionRow
+                                      question={question}
+                                      isLocked={hasResponses}
+                                      onEdit={setEditingQuestionId}
+                                      questionCode={questionCodes.get(question.id) ?? '?'}
+                                    />
+                                  </div>
+                                ))}
+                              </div>
                             ))}
                           </div>
                         )}
@@ -360,6 +426,9 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
           isOpen={editingQuestionId !== null}
           onClose={handleCloseDialog}
           onAutoSaveStatusChange={setAutoSaveStatus}
+          subDimensions={subDimensions}
+          dimensions={dimensions}
+          questionDimensionId={editingQuestion.dimension.dimensionId || null}
         />
       )}
     </div>

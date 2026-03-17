@@ -22,6 +22,7 @@ export type SurveyStatus = (typeof SurveyStatus)[keyof typeof SurveyStatus];
 /** Question response type — maps to question_type Postgres enum */
 export const QuestionType = {
   LIKERT_4: 'likert_4',
+  LIKERT: 'likert',
   OPEN_TEXT: 'open_text',
 } as const;
 
@@ -49,10 +50,123 @@ export type DimensionCode = (typeof DimensionCode)[keyof typeof DimensionCode];
 
 // ─── Likert Scale ────────────────────────────────────────────────────────────
 
-/** Valid Likert scale response values (4-point, no neutral) */
-export type LikertValue = 1 | 2 | 3 | 4;
+/** Default number of points on the Likert scale for new surveys. */
+export const DEFAULT_LIKERT_SIZE = 5;
 
-/** 4-point Likert scale definition with numeric values and labels */
+/**
+ * Valid Likert scale response value.
+ * Now runtime-validated against the survey's configured scale size
+ * rather than constrained to a fixed union type.
+ */
+export type LikertValue = number;
+
+/** Likert scale item returned by {@link buildLikertScale}. */
+export interface LikertScaleItem {
+  value: number;
+  label: string;
+}
+
+/**
+ * Canonical label sets for standard Likert scale sizes.
+ * @internal
+ */
+const LIKERT_LABEL_SETS: Record<number, readonly string[]> = {
+  2: ['Disagree', 'Agree'],
+  3: ['Disagree', 'Neutral', 'Agree'],
+  4: ['Strongly Disagree', 'Disagree', 'Agree', 'Strongly Agree'],
+  5: [
+    'Strongly Disagree',
+    'Disagree',
+    'Neither Agree nor Disagree',
+    'Agree',
+    'Strongly Agree',
+  ],
+  6: [
+    'Strongly Disagree',
+    'Disagree',
+    'Somewhat Disagree',
+    'Somewhat Agree',
+    'Agree',
+    'Strongly Agree',
+  ],
+  7: [
+    'Strongly Disagree',
+    'Disagree',
+    'Somewhat Disagree',
+    'Neither Agree nor Disagree',
+    'Somewhat Agree',
+    'Agree',
+    'Strongly Agree',
+  ],
+};
+
+/**
+ * Build a Likert scale definition for the given size.
+ *
+ * Returns an array of `{ value, label }` items from 1 to `size`.
+ * Sizes 2-7 use canonical label sets. Sizes 8-10 interpolate from
+ * the 7-point labels with numbered suffixes.
+ *
+ * @param size - Number of points on the scale (2-10 inclusive).
+ * @returns Ordered array of scale items.
+ * @throws {RangeError} If size is outside 2-10.
+ */
+export function buildLikertScale(size: number): LikertScaleItem[] {
+  if (!Number.isInteger(size) || size < 2 || size > 10) {
+    throw new RangeError(`Likert scale size must be an integer between 2 and 10, got ${size}`);
+  }
+
+  const labels = LIKERT_LABEL_SETS[size];
+  if (labels) {
+    return labels.map((label, i) => ({ value: i + 1, label }));
+  }
+
+  // For sizes 8-10: anchor endpoints and midpoint, interpolate between
+  const result: LikertScaleItem[] = [];
+  const mid = Math.ceil(size / 2);
+  for (let i = 1; i <= size; i++) {
+    let label: string;
+    if (i === 1) label = 'Strongly Disagree';
+    else if (i === size) label = 'Strongly Agree';
+    else if (i === mid && size % 2 === 1) label = 'Neither Agree nor Disagree';
+    else if (i < mid) label = `Disagree (${i})`;
+    else label = `Agree (${i})`;
+    result.push({ value: i, label });
+  }
+  return result;
+}
+
+/**
+ * Build a value-to-label mapping for a Likert scale of the given size.
+ *
+ * @param size - Number of points on the scale (2-10 inclusive).
+ * @returns Record mapping each numeric value (1-size) to its label.
+ * @throws {RangeError} If size is outside 2-10.
+ */
+export function buildLikertLabels(size: number): Record<number, string> {
+  const scale = buildLikertScale(size);
+  const labels: Record<number, string> = {};
+  for (const item of scale) {
+    labels[item.value] = item.label;
+  }
+  return labels;
+}
+
+/**
+ * Check whether a value is a valid Likert response for the given scale size.
+ *
+ * @param value - The response value to validate.
+ * @param scaleSize - The number of points on the scale.
+ * @returns `true` if value is an integer in [1, scaleSize].
+ */
+export function isValidLikertValue(value: number, scaleSize: number): boolean {
+  return Number.isInteger(value) && value >= 1 && value <= scaleSize;
+}
+
+/**
+ * 4-point Likert scale definition with numeric values and labels.
+ * @deprecated Use {@link buildLikertScale}(4) instead. Will be removed in a future version.
+ */
 export const LIKERT_SCALE = [
   { value: 1 as const, label: 'Strongly Disagree' },
   { value: 2 as const, label: 'Disagree' },
@@ -60,8 +174,11 @@ export const LIKERT_SCALE = [
   { value: 4 as const, label: 'Strongly Agree' },
 ] as const;
 
-/** Likert value to label mapping */
-export const LIKERT_LABELS: Record<LikertValue, string> = {
+/**
+ * Likert value to label mapping (4-point).
+ * @deprecated Use {@link buildLikertLabels}(4) instead. Will be removed in a future version.
+ */
+export const LIKERT_LABELS: Record<number, string> = {
   1: 'Strongly Disagree',
   2: 'Disagree',
   3: 'Agree',
@@ -72,10 +189,15 @@ export const LIKERT_LABELS: Record<LikertValue, string> = {
 
 /**
  * Reverse-score a Likert value for negatively-worded questions.
- * Formula: 5 - value (maps 1↔4, 2↔3)
+ *
+ * Formula: `(scaleSize + 1) - value`
+ *
+ * @param value - The raw Likert response value.
+ * @param scaleSize - Number of points on the scale. Defaults to 4 for backward compatibility.
+ * @returns The reverse-scored value.
  */
-export function reverseScore(value: LikertValue): LikertValue {
-  return (5 - value) as LikertValue;
+export function reverseScore(value: number, scaleSize: number = 4): number {
+  return (scaleSize + 1) - value;
 }
 
 /**
@@ -101,6 +223,17 @@ export interface Dimension {
   createdAt: string;
 }
 
+/** Sub-dimension within a Culture Compass dimension */
+export interface SubDimension {
+  id: string;
+  dimensionId: string;
+  code: string;
+  name: string;
+  description: string | null;
+  displayOrder: number;
+  createdAt: string;
+}
+
 /** Survey settings stored as JSONB */
 export interface SurveySettings {
   allowAnonymous: boolean;
@@ -108,6 +241,8 @@ export interface SurveySettings {
   showProgressBar: boolean;
   welcomeMessage: string | null;
   completionMessage: string | null;
+  /** Number of points on the Likert scale. Default 5 for new surveys, 4 for legacy. */
+  likertSize: number;
 }
 
 /** Survey definition */
@@ -138,6 +273,7 @@ export interface Question {
   options: unknown | null;
   required: boolean;
   displayOrder: number;
+  subDimensionId: string | null;
   diagnosticFocus: string | null;
   recommendedAction: string | null;
   createdAt: string;
@@ -152,9 +288,10 @@ export interface QuestionDimension {
   weight: number;
 }
 
-/** Question joined with its dimension mapping */
+/** Question joined with its dimension mapping and optional sub-dimension */
 export interface QuestionWithDimension extends Question {
   dimension: QuestionDimension;
+  subDimension: SubDimension | null;
 }
 
 /** Deployment settings stored as JSONB */
@@ -186,7 +323,7 @@ export interface RespondentMetadata {
 }
 
 /** Map of question ID to Likert value or open-text response */
-export type AnswerMap = Record<string, LikertValue | string>;
+export type AnswerMap = Record<string, number | string>;
 
 /** Survey response — CRITICAL: no userId, anonymity is structural */
 export interface SurveyResponse {

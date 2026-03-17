@@ -11,6 +11,8 @@ const sampleQuestions: QuestionScoreRow[] = [
     distribution: { 1: 35, 2: 30, 3: 25, 4: 10 },
     responseCount: 100,
     isReverseScored: false,
+    subDimensionCode: null,
+    subDimensionName: null,
   },
   {
     questionId: 'q-2',
@@ -20,6 +22,8 @@ const sampleQuestions: QuestionScoreRow[] = [
     distribution: { 1: 20, 2: 40, 3: 30, 4: 10 },
     responseCount: 100,
     isReverseScored: false,
+    subDimensionCode: null,
+    subDimensionName: null,
   },
   {
     questionId: 'q-3',
@@ -29,6 +33,8 @@ const sampleQuestions: QuestionScoreRow[] = [
     distribution: { 1: 15, 2: 35, 3: 35, 4: 15 },
     responseCount: 100,
     isReverseScored: false,
+    subDimensionCode: null,
+    subDimensionName: null,
   },
   {
     questionId: 'q-4',
@@ -38,6 +44,8 @@ const sampleQuestions: QuestionScoreRow[] = [
     distribution: { 1: 10, 2: 35, 3: 40, 4: 15 },
     responseCount: 100,
     isReverseScored: false,
+    subDimensionCode: null,
+    subDimensionName: null,
   },
   {
     questionId: 'q-5',
@@ -47,6 +55,8 @@ const sampleQuestions: QuestionScoreRow[] = [
     distribution: { 1: 5, 2: 10, 3: 45, 4: 40 },
     responseCount: 100,
     isReverseScored: false,
+    subDimensionCode: null,
+    subDimensionName: null,
   },
 ];
 

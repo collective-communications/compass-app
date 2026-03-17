@@ -90,6 +90,60 @@ describe('calculateDimensionScore', () => {
   });
 });
 
+describe('calculateDimensionScore with scaleSize=5', () => {
+  test('all answers = 5 on 5-point → score = 100%', () => {
+    const answers = [
+      makeAnswer({ value: 5 }),
+      makeAnswer({ value: 5, questionId: 'q2' }),
+    ];
+    const result = calculateDimensionScore('dim-1', 'core', answers, 5);
+    expect(result.score).toBe(100);
+    expect(result.rawScore).toBe(5);
+  });
+
+  test('all answers = 1 on 5-point → score = 0%', () => {
+    const answers = [
+      makeAnswer({ value: 1 }),
+      makeAnswer({ value: 1, questionId: 'q2' }),
+    ];
+    const result = calculateDimensionScore('dim-1', 'core', answers, 5);
+    expect(result.score).toBe(0);
+    expect(result.rawScore).toBe(1);
+  });
+
+  test('all answers = 3 on 5-point → score = 50%', () => {
+    const answers = [
+      makeAnswer({ value: 3 }),
+      makeAnswer({ value: 3, questionId: 'q2' }),
+    ];
+    const result = calculateDimensionScore('dim-1', 'core', answers, 5);
+    // Formula: ((3 - 1) / (5 - 1)) * 100 = 50
+    expect(result.score).toBe(50);
+    expect(result.rawScore).toBe(3);
+  });
+
+  test('reverse scored answer on 5-point scale', () => {
+    const result = calculateDimensionScore('dim-1', 'core', [
+      makeAnswer({ value: 1, reverseScored: true }),
+    ], 5);
+    // normalized = (5+1)-1 = 5, score = ((5-1)/4)*100 = 100
+    expect(result.score).toBe(100);
+    expect(result.rawScore).toBe(5);
+  });
+
+  test('weighted average on 5-point scale', () => {
+    const answers = [
+      makeAnswer({ value: 5, weight: 2 }),
+      makeAnswer({ value: 1, weight: 1, questionId: 'q2' }),
+    ];
+    const result = calculateDimensionScore('dim-1', 'clarity', answers, 5);
+    // weightedAvg = (5*2 + 1*1) / (2+1) = 11/3 ≈ 3.67
+    expect(result.rawScore).toBeCloseTo(3.67, 1);
+    // score = ((3.67 - 1) / 4) * 100 ≈ 66.67
+    expect(result.score).toBeCloseTo(66.67, 0);
+  });
+});
+
 describe('calculateAllDimensionScores', () => {
   const dims: DimensionCode[] = ['core', 'clarity', 'connection', 'collaboration'];
 
@@ -114,6 +168,27 @@ describe('calculateAllDimensionScores', () => {
       calculateAllDimensionScores(answers);
     } catch (e) {
       expect((e as ScoringError).code).toBe('MISSING_DIMENSION');
+    }
+  });
+
+  test('calculates all dimensions with scaleSize=5', () => {
+    const answers = dims.map((code) =>
+      makeAnswer({ dimensionCode: code, dimensionId: `dim-${code}`, value: 5 }),
+    );
+    const result = calculateAllDimensionScores(answers, 5);
+    for (const code of dims) {
+      expect(result[code].score).toBe(100);
+      expect(result[code].rawScore).toBe(5);
+    }
+  });
+
+  test('midpoint value on 5-point yields 50% for all dimensions', () => {
+    const answers = dims.map((code) =>
+      makeAnswer({ dimensionCode: code, dimensionId: `dim-${code}`, value: 3 }),
+    );
+    const result = calculateAllDimensionScores(answers, 5);
+    for (const code of dims) {
+      expect(result[code].score).toBe(50);
     }
   });
 });

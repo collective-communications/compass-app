@@ -8,16 +8,18 @@ const likertQuestion: QuestionWithDimension = {
   surveyId: 'survey-1',
   text: 'I feel confident that leadership communicates a clear vision for the organization.',
   description: 'Consider how well you understand the direction the organization is heading.',
-  type: 'likert_4',
+  type: 'likert',
   reverseScored: false,
   options: null,
   required: true,
   displayOrder: 1,
+  subDimensionId: null,
   diagnosticFocus: 'Leadership alignment',
   recommendedAction: null,
   createdAt: '2026-03-01T00:00:00Z',
   updatedAt: '2026-03-01T00:00:00Z',
   dimension: { id: 'qd-1', questionId: 'q-1', dimensionId: 'dim-clarity', weight: 1 },
+  subDimension: null,
 };
 
 const meta = {

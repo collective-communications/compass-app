@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn, expect, within, userEvent } from 'storybook/test';
+import { buildLikertScale } from '@compass/types';
 import { LikertScale } from './likert-scale';
 import { SurveyShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 import {
@@ -26,6 +27,7 @@ const meta = {
     value: undefined,
     onChange: fn(),
     name: 'q-demo',
+    scale: buildLikertScale(4),
   },
   decorators: [
     /** Wrap in a question-card-style container for visual context */
@@ -144,5 +146,86 @@ export const Accessible: Story = {
     await expect(radios[1]).toHaveAttribute('aria-label', 'Disagree');
     await expect(radios[2]).toHaveAttribute('aria-label', 'Agree');
     await expect(radios[3]).toHaveAttribute('aria-label', 'Strongly Agree');
+  },
+};
+
+/* -------------------------------------------------------------------------- */
+/*  5-point scale variants                                                     */
+/* -------------------------------------------------------------------------- */
+
+export const FivePointSelectViaClick: Story = {
+  name: '5pt — select "Neither Agree nor Disagree"',
+  args: {
+    scale: buildLikertScale(5),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Step 1 — 5 radio buttons rendered
+    const radios = canvas.getAllByRole('radio');
+    await expect(radios).toHaveLength(5);
+
+    // Step 2 — Click the neutral option (3rd)
+    await selectLikertOption(canvas, 3);
+
+    // Step 3 — onChange fires with value 3
+    await expect(args.onChange).toHaveBeenCalledWith(3);
+
+    // Step 4 — Neutral label is visible
+    await expectVisible(canvas, 'Neither Agree nor Disagree');
+  },
+};
+
+export const FivePointSelectAll: Story = {
+  name: '5pt — select all five options',
+  args: {
+    scale: buildLikertScale(5),
+  },
+  play: async ({ canvasElement, args }) => {
+    const canvas = within(canvasElement);
+
+    // Step 1 — Select each option in order
+    await selectLikertOption(canvas, 1);
+    await expect(args.onChange).toHaveBeenCalledWith(1);
+
+    await selectLikertOption(canvas, 2);
+    await expect(args.onChange).toHaveBeenCalledWith(2);
+
+    await selectLikertOption(canvas, 3);
+    await expect(args.onChange).toHaveBeenCalledWith(3);
+
+    await selectLikertOption(canvas, 4);
+    await expect(args.onChange).toHaveBeenCalledWith(4);
+
+    await selectLikertOption(canvas, 5);
+    await expect(args.onChange).toHaveBeenCalledWith(5);
+
+    // Step 2 — Total calls should be 5
+    await expect(args.onChange).toHaveBeenCalledTimes(5);
+  },
+};
+
+export const FivePointAccessible: Story = {
+  name: '5pt A11y — radio group semantics',
+  args: {
+    scale: buildLikertScale(5),
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // Step 1 — Radiogroup exists
+    const group = canvas.getByRole('radiogroup', { name: 'Response options' });
+    await expect(group).toBeVisible();
+
+    // Step 2 — Exactly 5 radio buttons
+    const radios = within(group).getAllByRole('radio');
+    await expect(radios).toHaveLength(5);
+
+    // Step 3 — Each radio has correct aria-label
+    await expect(radios[0]).toHaveAttribute('aria-label', 'Strongly Disagree');
+    await expect(radios[1]).toHaveAttribute('aria-label', 'Disagree');
+    await expect(radios[2]).toHaveAttribute('aria-label', 'Neither Agree nor Disagree');
+    await expect(radios[3]).toHaveAttribute('aria-label', 'Agree');
+    await expect(radios[4]).toHaveAttribute('aria-label', 'Strongly Agree');
   },
 };
