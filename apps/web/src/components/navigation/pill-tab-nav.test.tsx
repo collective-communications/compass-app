@@ -36,7 +36,7 @@ describe('PillTabNav', () => {
     );
     const activeButton = screen.getByText('Survey');
     expect(activeButton.className).toContain('bg-[var(--grey-900)]');
-    expect(activeButton.className).toContain('text-white');
+    expect(activeButton.className).toContain('text-[var(--grey-50)]');
   });
 
   test('inactive tabs do not have dark fill styling', () => {

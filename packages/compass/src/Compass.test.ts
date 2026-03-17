@@ -19,8 +19,8 @@ function render(props: Partial<Parameters<typeof Compass>[0]> = {}): string {
 }
 
 describe('Compass component — score-driven rendering', () => {
-  test('renders SVG with role="img"', () => {
-    expect(render()).toContain('role="img"');
+  test('renders SVG with role="group"', () => {
+    expect(render()).toContain('role="group"');
   });
 
   test('aria-label includes "Culture Compass scores:" prefix', () => {
@@ -73,7 +73,7 @@ describe('Compass component — boundary scores', () => {
     const html = renderToStaticMarkup(
       createElement(Compass, { scores: zeroScores }),
     );
-    expect(html).toContain('role="img"');
+    expect(html).toContain('role="group"');
   });
 
   test('renders with maximum scores without error', () => {
@@ -81,7 +81,7 @@ describe('Compass component — boundary scores', () => {
     const html = renderToStaticMarkup(
       createElement(Compass, { scores: maxScores }),
     );
-    expect(html).toContain('role="img"');
+    expect(html).toContain('role="group"');
   });
 });
 

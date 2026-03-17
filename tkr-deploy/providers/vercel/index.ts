@@ -23,13 +23,7 @@ export function createVercelPlugin(): ProviderPluginFactory {
     const secretMappings: SecretMapping[] = [
       { vaultKey: 'VITE_SUPABASE_URL' },
       { vaultKey: 'VITE_SUPABASE_ANON_KEY' },
-      { vaultKey: 'SUPABASE_URL' },
-      { vaultKey: 'SUPABASE_SERVICE_ROLE_KEY' },
-      { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_API_KEY' },
-      { vaultKey: 'RESEND_FROM_ADDRESS' },
-      { vaultKey: 'OPENAI_API_KEY' },
       { vaultKey: 'VITE_APP_URL' },
-      { vaultKey: 'APP_URL' },
     ];
 
     return {

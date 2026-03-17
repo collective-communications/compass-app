@@ -19,7 +19,7 @@
     "build": "bun run --filter @compass/web build",
     "lint": "eslint .",
     "typecheck": "tsc -b",
-    "test": "bun test apps packages",
+    "test": "bun test apps/web packages",
     "test:e2e": "bun run --filter @compass/e2e test",
     "test:visual": "bun run --filter @compass/storybook test:visual",
     "test:storybook": "bun run --filter @compass/storybook test-storybook",
