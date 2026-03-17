@@ -52,6 +52,9 @@ interface HealthData {
 let container: HTMLElement | null = null;
 let abortController: AbortController | null = null;
 let pulseIntervals: ReturnType<typeof setInterval>[] = [];
+let pollTimer: ReturnType<typeof setInterval> | null = null;
+let repoUrl = '';
+const POLL_INTERVAL_MS = 15_000;
 
 // ── Helpers ──
 
@@ -494,6 +497,81 @@ function buildErrorState(message: string): HTMLElement {
   return el;
 }
 
+// ── Polling ──
+
+function formatTime(date: Date): string {
+  return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+let lastUpdatedEl: HTMLElement | null = null;
+let workflowsSlot: HTMLElement | null = null;
+let runsSlot: HTMLElement | null = null;
+
+function updateTimestamp(): void {
+  if (lastUpdatedEl) {
+    lastUpdatedEl.textContent = `Updated ${formatTime(new Date())}`;
+  }
+}
+
+async function refreshDynamic(signal: AbortSignal): Promise<void> {
+  if (signal.aborted || !container) return;
+
+  try {
+    const [workflows, runs] = await Promise.all([
+      apiFetch<WorkflowData[]>('/api/cicd/workflows', { signal }),
+      apiFetch<RunData[]>('/api/cicd/runs', { signal }),
+    ]);
+
+    if (signal.aborted || !container) return;
+
+    // Clear and re-render pulse intervals for old workflow cards
+    for (const id of pulseIntervals) clearInterval(id);
+    pulseIntervals = [];
+
+    if (workflowsSlot) {
+      workflowsSlot.innerHTML = '';
+      workflowsSlot.appendChild(buildWorkflowCards(workflows));
+    }
+
+    if (runsSlot) {
+      runsSlot.innerHTML = '';
+      runsSlot.appendChild(buildRecentRunsCard(runs, repoUrl));
+    }
+
+    updateTimestamp();
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') return;
+    // Silently skip failed polls — next one will retry
+  }
+}
+
+function startPolling(signal: AbortSignal): void {
+  stopPolling();
+
+  pollTimer = setInterval(() => {
+    // Skip when tab not visible
+    if (document.hidden) return;
+    refreshDynamic(signal);
+  }, POLL_INTERVAL_MS);
+
+  // Also refresh when tab becomes visible after being hidden
+  document.addEventListener('visibilitychange', onVisibilityChange);
+}
+
+function onVisibilityChange(): void {
+  if (!document.hidden && abortController && !abortController.signal.aborted) {
+    refreshDynamic(abortController.signal);
+  }
+}
+
+function stopPolling(): void {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  document.removeEventListener('visibilitychange', onVisibilityChange);
+}
+
 // ── Layout ──
 
 function buildLayout(
@@ -502,6 +580,8 @@ function buildLayout(
   secrets: SecretsData,
   runs: RunData[],
 ): HTMLElement {
+  repoUrl = repo.url;
+
   const layout = document.createElement('div');
   layout.className = 'cicd-layout';
   layout.style.display = 'flex';
@@ -518,12 +598,18 @@ function buildLayout(
   middleRow.style.gap = 'var(--space-md)';
   middleRow.style.gridTemplateColumns = '1fr';
 
-  middleRow.appendChild(buildWorkflowCards(workflows));
+  // Workflows slot — replaced on poll
+  workflowsSlot = document.createElement('div');
+  workflowsSlot.appendChild(buildWorkflowCards(workflows));
+  middleRow.appendChild(workflowsSlot);
+
   middleRow.appendChild(buildSecretsCard(secrets));
   layout.appendChild(middleRow);
 
-  // Recent runs — full width
-  layout.appendChild(buildRecentRunsCard(runs, repo.url));
+  // Runs slot — replaced on poll
+  runsSlot = document.createElement('div');
+  runsSlot.appendChild(buildRecentRunsCard(runs, repo.url));
+  layout.appendChild(runsSlot);
 
   injectCicdStyles();
   return layout;
@@ -563,10 +649,24 @@ export function render(target: HTMLElement): void {
   abortController = new AbortController();
   const signal = abortController.signal;
 
+  // Header row with title + last updated
+  const headerRow = document.createElement('div');
+  headerRow.style.display = 'flex';
+  headerRow.style.justifyContent = 'space-between';
+  headerRow.style.alignItems = 'baseline';
+
   const heading = document.createElement('h1');
   heading.className = 'screen-heading';
   heading.textContent = 'CI/CD';
-  container.appendChild(heading);
+  headerRow.appendChild(heading);
+
+  lastUpdatedEl = document.createElement('span');
+  lastUpdatedEl.style.fontSize = 'var(--font-size-sm)';
+  lastUpdatedEl.style.color = 'var(--color-text-secondary)';
+  lastUpdatedEl.textContent = `Updated ${formatTime(new Date())}`;
+  headerRow.appendChild(lastUpdatedEl);
+
+  container.appendChild(headerRow);
 
   // Skeletons
   const skeletons = document.createElement('div');
@@ -602,6 +702,7 @@ export function render(target: HTMLElement): void {
         if (!container || signal.aborted) return;
         skeletons.remove();
         container.appendChild(buildLayout(repo, workflows, secrets, runs));
+        startPolling(signal);
       });
     })
     .catch((err: unknown) => {
@@ -615,6 +716,7 @@ export function render(target: HTMLElement): void {
 }
 
 export function cleanup(): void {
+  stopPolling();
   if (abortController) {
     abortController.abort();
     abortController = null;
@@ -623,6 +725,9 @@ export function cleanup(): void {
     clearInterval(id);
   }
   pulseIntervals = [];
+  lastUpdatedEl = null;
+  workflowsSlot = null;
+  runsSlot = null;
   if (container) {
     container.innerHTML = '';
     container = null;
