@@ -8,6 +8,7 @@
     "e2e"
   ],
   "scripts": {
+    "prepare": "scripts/install-hooks.sh",
     "dev": "bun run --filter @compass/web dev",
     "db:push": "supabase db push",
     "db:migrate": "supabase migration new",
@@ -29,6 +30,8 @@
     "down": "scripts/app-manager.sh stop",
     "restart": "scripts/app-manager.sh restart",
     "status": "scripts/app-manager.sh status",
+    "ci:watch": "scripts/ci-watch.sh",
+    "push": "git push && scripts/ci-watch.sh",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
   },
   "devDependencies": {

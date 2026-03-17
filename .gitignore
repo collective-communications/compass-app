@@ -1,5 +1,5 @@
-tkr-deploy.bak
 product_overview
+
 
 # tkr kit / Claude
 tkr-kit.db.bak
@@ -9,6 +9,7 @@ tkr-kit
 .mcp.json
 claude.local.md
 .koji
+.app-manager
 
 # OS
 .DS_Store
