@@ -1,4 +1,4 @@
-import { userEvent, expect, within } from '@storybook/test';
+import { userEvent, expect, within } from 'storybook/test';
 
 type Canvas = ReturnType<typeof within>;
 
