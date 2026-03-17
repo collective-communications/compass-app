@@ -25,6 +25,10 @@
     "test:storybook": "bun run --filter @compass/storybook test-storybook",
     "storybook": "bun run --filter @compass/storybook storybook",
     "build-storybook": "bun run --filter @compass/storybook build-storybook",
+    "up": "scripts/app-manager.sh start",
+    "down": "scripts/app-manager.sh stop",
+    "restart": "scripts/app-manager.sh restart",
+    "status": "scripts/app-manager.sh status",
     "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
   },
   "devDependencies": {
