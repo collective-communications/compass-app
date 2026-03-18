@@ -25,7 +25,7 @@ export function checkTier1Access(): string | null {
 export function checkCccAdminAccess(): string | null {
   const { user } = useAuthStore.getState();
   if (user?.role !== UserRole.CCC_ADMIN) {
-    return '/admin/surveys';
+    return '/admin/clients';
   }
   return null;
 }

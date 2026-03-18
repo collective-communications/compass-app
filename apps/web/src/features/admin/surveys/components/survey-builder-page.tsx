@@ -36,7 +36,7 @@ import { DrilldownHeader } from '../../../../components/navigation/drilldown-hea
 
 interface SurveyBuilderPageProps {
   surveyId: string;
-  onBack: () => void;
+  onBack: (organizationId: string) => void;
 }
 
 /** Dimension code abbreviation map for question codes (e.g., C1, L2, N3, B4) */
@@ -279,7 +279,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 pb-20">
       {/* Header */}
-      <DrilldownHeader backTo="/admin/surveys" backLabel="Back to surveys" title={survey.title}>
+      <DrilldownHeader backTo={`/admin/clients/${survey.organizationId}`} backLabel="Back to client" title={survey.title}>
         <AutoSaveIndicator status={autoSaveStatus} />
       </DrilldownHeader>
 
@@ -416,7 +416,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
           </p>
           <button
             type="button"
-            onClick={onBack}
+            onClick={() => onBack(survey.organizationId)}
             className="rounded-lg bg-[var(--grey-900)] px-6 py-2 text-sm font-medium text-[var(--grey-50)] transition-colors hover:bg-[var(--grey-800)]"
           >
             Done

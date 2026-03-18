@@ -10,7 +10,6 @@ import { createRoute, Outlet, redirect, useNavigate } from '@tanstack/react-rout
 import type { AnyRoute } from '@tanstack/react-router';
 import { AppShell } from '../../components/shells/app-shell';
 import {
-  SurveyListPage,
   SurveyBuilderPage,
   DeploymentPanel,
   ResponseTracker,
@@ -19,7 +18,6 @@ import { useDeploymentManagement } from './surveys/hooks/use-deployment-manageme
 import { useResponseTracking } from './surveys/hooks/use-response-tracking';
 import { useRealtimeResponses } from './surveys/hooks/use-realtime-responses';
 import { useSurveyBuilder } from './surveys/hooks/use-survey-builder';
-import { useAuthStore } from '../../stores/auth-store';
 import { checkTier1Access, checkCccAdminAccess } from './route-guards';
 import { ClientListPage } from './clients';
 import { ClientDetailPage } from './clients/pages/client-detail-page';
@@ -51,36 +49,6 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
-  const adminSurveysRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
-    path: '/surveys',
-    component: function AdminSurveysPage(): ReactElement {
-      const navigate = useNavigate();
-      const user = useAuthStore((s) => s.user);
-
-      const navigateToSurvey = (surveyId: string): void => {
-        void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
-      };
-
-      return (
-        <SurveyListPage
-          organizationId={user?.tier === 'tier_1' ? '' : user?.organizationId ?? ''}
-          userId={user?.id ?? ''}
-          onSelectSurvey={navigateToSurvey}
-          onConfigure={navigateToSurvey}
-          onEditQuestions={navigateToSurvey}
-          onCopyLink={(surveyId: string) => {
-            const url = `${window.location.origin}/admin/surveys/${surveyId}/deploy`;
-            void navigator.clipboard.writeText(url);
-          }}
-          onViewResults={(surveyId: string) => {
-            void navigate({ to: '/admin/surveys/$surveyId/deploy', params: { surveyId } });
-          }}
-        />
-      );
-    },
-  });
-
   const adminSurveyBuilderRoute = createRoute({
     getParentRoute: () => adminLayoutRoute,
     path: '/surveys/$surveyId',
@@ -91,8 +59,8 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       return (
         <SurveyBuilderPage
           surveyId={surveyId}
-          onBack={() => {
-            void navigate({ to: '/admin/surveys' });
+          onBack={(organizationId: string) => {
+            void navigate({ to: '/admin/clients/$orgId', params: { orgId: organizationId } });
           }}
         />
       );
@@ -213,7 +181,6 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   });
 
   return adminLayoutRoute.addChildren([
-    adminSurveysRoute,
     adminSurveyBuilderRoute,
     adminSurveyDeployRoute,
     adminClientsRoute,

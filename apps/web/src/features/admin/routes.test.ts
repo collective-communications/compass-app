@@ -75,13 +75,13 @@ describe('checkCccAdminAccess', () => {
     expect(checkCccAdminAccess()).toBeNull();
   });
 
-  it('returns /admin/surveys for ccc_member', () => {
+  it('returns /admin/clients for ccc_member', () => {
     mockUser = makeUser({ role: UserRole.CCC_MEMBER, tier: 'tier_1' });
-    expect(checkCccAdminAccess()).toBe('/admin/surveys');
+    expect(checkCccAdminAccess()).toBe('/admin/clients');
   });
 
-  it('returns /admin/surveys for unauthenticated', () => {
+  it('returns /admin/clients for unauthenticated', () => {
     mockUser = null;
-    expect(checkCccAdminAccess()).toBe('/admin/surveys');
+    expect(checkCccAdminAccess()).toBe('/admin/clients');
   });
 });
