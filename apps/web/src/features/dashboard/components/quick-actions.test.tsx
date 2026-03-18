@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, mock } from 'bun:test';
-import { render, screen, fireEvent, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { QuickActions } from './quick-actions';
 
 describe('QuickActions', () => {
@@ -61,11 +61,11 @@ describe('QuickActions', () => {
     render(<QuickActions {...defaultProps} />);
     fireEvent.click(screen.getByLabelText('Copy survey link to clipboard'));
 
-    // Wait for async clipboard call
-    await new Promise((r) => setTimeout(r, 10));
-
-    expect(writeText).toHaveBeenCalledWith('https://example.com/s/abc123');
-    expect(screen.getByText('Copied!')).toBeTruthy();
+    // Wait for async clipboard call to resolve and UI to update
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith('https://example.com/s/abc123');
+      expect(screen.getByText('Copied!')).toBeTruthy();
+    });
 
     // Restore
     Object.defineProperty(navigator, 'clipboard', {

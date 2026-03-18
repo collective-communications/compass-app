@@ -87,7 +87,7 @@ export function useQuestionScores({
     queryFn: async () => {
       let query = supabase
         .from('question_scores')
-        .select('*')
+        .select('question_id, question_text, dimension_code, mean_score, response_count, is_reverse_scored, sub_dimension_code, sub_dimension_name, dist_1, dist_2, dist_3, dist_4, dist_5, dist_6, dist_7, dist_8, dist_9, dist_10')
         .eq('survey_id', surveyId)
         .order('mean_score', { ascending: true });
 

@@ -36,10 +36,10 @@ export function BottomTabBar({ tabs, activeTabId }: BottomTabBarProps): ReactEle
           if (isDisabled) {
             return (
               <li key={tab.id}>
-                <span className="flex flex-col items-center gap-0.5 px-3 py-1 opacity-40">
+                <button type="button" disabled aria-disabled="true" className="flex flex-col items-center gap-0.5 px-3 py-1 opacity-40 cursor-default bg-transparent border-none">
                   {Icon && <Icon size={20} />}
                   <span className="text-xs">{tab.label}</span>
-                </span>
+                </button>
               </li>
             );
           }

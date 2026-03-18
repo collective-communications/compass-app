@@ -45,7 +45,8 @@ async function sendViaResend(
 
   if (!response.ok) {
     const err = await response.text();
-    throw new Error(`Resend error ${response.status}: ${err}`);
+    console.error(`Resend API error ${response.status}:`, err);
+    throw new Error('Email delivery failed');
   }
 
   const data = await response.json() as { id: string };

@@ -226,37 +226,84 @@ async function seedSurvey(): Promise<void> {
   console.log('  done');
 }
 
+// Sub-dimension UUIDs — shared between seedSubDimensions and seedQuestions
+const SUB = {
+  // Core
+  psychological_safety: '00000000-0000-0000-0000-000000002001',
+  trust: '00000000-0000-0000-0000-000000002002',
+  fairness_integrity: '00000000-0000-0000-0000-000000002003',
+  purpose_meaning: '00000000-0000-0000-0000-000000002004',
+  leader_behaviour: '00000000-0000-0000-0000-000000002005',
+  // Clarity
+  decision_making: '00000000-0000-0000-0000-000000003001',
+  role_clarity: '00000000-0000-0000-0000-000000003002',
+  strategic_clarity: '00000000-0000-0000-0000-000000003003',
+  empowerment: '00000000-0000-0000-0000-000000003004',
+  goal_alignment: '00000000-0000-0000-0000-000000003005',
+  // Connection
+  belonging_inclusion: '00000000-0000-0000-0000-000000004001',
+  employee_voice: '00000000-0000-0000-0000-000000004002',
+  information_flow: '00000000-0000-0000-0000-000000004003',
+  shared_identity: '00000000-0000-0000-0000-000000004004',
+  involvement: '00000000-0000-0000-0000-000000004005',
+  recognition: '00000000-0000-0000-0000-000000004006',
+  // Collaboration
+  sustainable_pace: '00000000-0000-0000-0000-000000005001',
+  adaptability_learning: '00000000-0000-0000-0000-000000005002',
+  cross_functional: '00000000-0000-0000-0000-000000005003',
+  ways_of_working: '00000000-0000-0000-0000-000000005004',
+  ownership_accountability: '00000000-0000-0000-0000-000000005005',
+} as const;
+
+async function seedSubDimensions(): Promise<void> {
+  console.log('Creating sub-dimensions (21 total)...');
+
+  // Look up dimension IDs by code
+  const { data: dims } = await supabase.from('dimensions').select('id, code');
+  if (!dims || dims.length === 0) {
+    console.log('  FAILED: no dimensions found — run migrations first');
+    return;
+  }
+  const dimId = Object.fromEntries(dims.map(d => [d.code, d.id]));
+
+  const subDimensions = [
+    // Core
+    { id: SUB.psychological_safety, dimension_id: dimId.core, code: 'psychological_safety', name: 'Psychological Safety', description: 'Can people speak up, take risks, admit mistakes without fear?', display_order: 0 },
+    { id: SUB.trust, dimension_id: dimId.core, code: 'trust', name: 'Trust', description: 'Do people trust colleagues and leadership to act in good faith?', display_order: 1 },
+    { id: SUB.fairness_integrity, dimension_id: dimId.core, code: 'fairness_integrity', name: 'Fairness & Integrity', description: 'Are decisions and treatment fair? Do stated values match reality?', display_order: 2 },
+    { id: SUB.purpose_meaning, dimension_id: dimId.core, code: 'purpose_meaning', name: 'Purpose & Meaning', description: 'Is there emotional connection to the work and organization\'s mission?', display_order: 3 },
+    { id: SUB.leader_behaviour, dimension_id: dimId.core, code: 'leader_behaviour', name: 'Leader Behaviour', description: 'Do leaders\' words and actions align?', display_order: 4 },
+    // Clarity
+    { id: SUB.decision_making, dimension_id: dimId.clarity, code: 'decision_making', name: 'Decision Making', description: 'Are decision rights clear? Is the process transparent?', display_order: 0 },
+    { id: SUB.role_clarity, dimension_id: dimId.clarity, code: 'role_clarity', name: 'Role Clarity', description: 'Do people know who owns what?', display_order: 1 },
+    { id: SUB.strategic_clarity, dimension_id: dimId.clarity, code: 'strategic_clarity', name: 'Strategic Clarity', description: 'Do people know the mission, priorities, and what matters most?', display_order: 2 },
+    { id: SUB.empowerment, dimension_id: dimId.clarity, code: 'empowerment', name: 'Empowerment', description: 'Do people have resources, skills, and autonomy to be effective?', display_order: 3 },
+    { id: SUB.goal_alignment, dimension_id: dimId.clarity, code: 'goal_alignment', name: 'Goal Alignment', description: 'Can people connect their work to organizational outcomes?', display_order: 4 },
+    // Connection
+    { id: SUB.belonging_inclusion, dimension_id: dimId.connection, code: 'belonging_inclusion', name: 'Belonging & Inclusion', description: 'Do people feel truly accepted and part of something?', display_order: 0 },
+    { id: SUB.employee_voice, dimension_id: dimId.connection, code: 'employee_voice', name: 'Employee Voice', description: 'Can people share concerns, ideas, and dissent?', display_order: 1 },
+    { id: SUB.information_flow, dimension_id: dimId.connection, code: 'information_flow', name: 'Information Flow', description: 'Does information flow freely? Is communication clear and two-way?', display_order: 2 },
+    { id: SUB.shared_identity, dimension_id: dimId.connection, code: 'shared_identity', name: 'Shared Identity', description: 'Is there a sense of \'us\' across teams and levels?', display_order: 3 },
+    { id: SUB.involvement, dimension_id: dimId.connection, code: 'involvement', name: 'Involvement', description: 'Are people included in decisions that affect their work?', display_order: 4 },
+    { id: SUB.recognition, dimension_id: dimId.connection, code: 'recognition', name: 'Recognition', description: 'Do people feel seen and valued?', display_order: 5 },
+    // Collaboration
+    { id: SUB.sustainable_pace, dimension_id: dimId.collaboration, code: 'sustainable_pace', name: 'Sustainable Pace', description: 'Can people sustain their workload? Boundaries respected?', display_order: 0 },
+    { id: SUB.adaptability_learning, dimension_id: dimId.collaboration, code: 'adaptability_learning', name: 'Adaptability & Learning', description: 'Does the org learn from mistakes? Continuous improvement?', display_order: 1 },
+    { id: SUB.cross_functional, dimension_id: dimId.collaboration, code: 'cross_functional', name: 'Cross-Functional Coordination', description: 'Does work flow smoothly across teams and functions?', display_order: 2 },
+    { id: SUB.ways_of_working, dimension_id: dimId.collaboration, code: 'ways_of_working', name: 'Ways of Working', description: 'Meetings productive? Handoffs smooth?', display_order: 3 },
+    { id: SUB.ownership_accountability, dimension_id: dimId.collaboration, code: 'ownership_accountability', name: 'Ownership & Accountability', description: 'Is there clear ownership and follow-through on commitments?', display_order: 4 },
+  ];
+
+  const { error } = await supabase.from('sub_dimensions').upsert(subDimensions, { onConflict: 'id' });
+  if (error) {
+    console.log(`  sub-dimensions FAILED: ${error.message}`);
+  } else {
+    console.log(`  ${subDimensions.length} sub-dimensions`);
+  }
+}
+
 async function seedQuestions(): Promise<void> {
   console.log('Creating questions (56 Likert + 1 open-ended)...');
-
-  // Sub-dimension UUIDs (from Wave 1 seed)
-  const SUB = {
-    // Core
-    psychological_safety: '00000000-0000-0000-0000-000000002001',
-    trust: '00000000-0000-0000-0000-000000002002',
-    fairness_integrity: '00000000-0000-0000-0000-000000002003',
-    purpose_meaning: '00000000-0000-0000-0000-000000002004',
-    leader_behaviour: '00000000-0000-0000-0000-000000002005',
-    // Clarity
-    decision_making: '00000000-0000-0000-0000-000000003001',
-    role_clarity: '00000000-0000-0000-0000-000000003002',
-    strategic_clarity: '00000000-0000-0000-0000-000000003003',
-    empowerment: '00000000-0000-0000-0000-000000003004',
-    goal_alignment: '00000000-0000-0000-0000-000000003005',
-    // Connection
-    belonging_inclusion: '00000000-0000-0000-0000-000000004001',
-    employee_voice: '00000000-0000-0000-0000-000000004002',
-    information_flow: '00000000-0000-0000-0000-000000004003',
-    shared_identity: '00000000-0000-0000-0000-000000004004',
-    involvement: '00000000-0000-0000-0000-000000004005',
-    recognition: '00000000-0000-0000-0000-000000004006',
-    // Collaboration
-    sustainable_pace: '00000000-0000-0000-0000-000000005001',
-    adaptability_learning: '00000000-0000-0000-0000-000000005002',
-    cross_functional: '00000000-0000-0000-0000-000000005003',
-    ways_of_working: '00000000-0000-0000-0000-000000005004',
-    ownership_accountability: '00000000-0000-0000-0000-000000005005',
-  } as const;
 
   type QuestionDef = {
     id: string;
@@ -537,6 +584,11 @@ async function clean(): Promise<void> {
   }
   await supabase.from('questions').delete().eq('survey_id', IDS.survey);
 
+  // Delete sub-dimensions
+  console.log('  deleting sub-dimensions...');
+  const allSubDimIds = Object.values(SUB);
+  await supabase.from('sub_dimensions').delete().in('id', allSubDimIds);
+
   // Delete survey
   console.log('  deleting survey...');
   await supabase.from('surveys').delete().eq('id', IDS.survey);
@@ -586,6 +638,7 @@ async function main(): Promise<void> {
   const emailToId = await seedUsers();
   await seedOrgMembers(emailToId);
   await seedSurvey();
+  await seedSubDimensions();
   await seedQuestions();
   await seedDeployment();
   await seedResponses();

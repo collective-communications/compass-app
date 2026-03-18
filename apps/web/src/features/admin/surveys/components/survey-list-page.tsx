@@ -15,6 +15,10 @@ interface SurveyListPageProps {
   organizationId: string;
   userId: string;
   onSelectSurvey: (surveyId: string) => void;
+  onConfigure?: (surveyId: string) => void;
+  onEditQuestions?: (surveyId: string) => void;
+  onCopyLink?: (surveyId: string) => void;
+  onViewResults?: (surveyId: string) => void;
   /** When provided, renders a DrilldownHeader with back navigation to the client. */
   clientName?: string;
   /** Route to navigate back to. Defaults to /admin/clients. */
@@ -33,6 +37,10 @@ export function SurveyListPage({
   organizationId,
   userId,
   onSelectSurvey,
+  onConfigure,
+  onEditQuestions,
+  onCopyLink,
+  onViewResults,
   clientName,
   backTo,
 }: SurveyListPageProps): ReactElement {
@@ -117,6 +125,10 @@ export function SurveyListPage({
               key={survey.id}
               survey={survey}
               onClick={onSelectSurvey}
+              onConfigure={onConfigure}
+              onEditQuestions={onEditQuestions}
+              onCopyLink={onCopyLink}
+              onViewResults={onViewResults}
             />
           ))}
         </div>

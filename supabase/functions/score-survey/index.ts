@@ -1,3 +1,45 @@
+/**
+ * score-survey — Supabase Edge Function
+ *
+ * Scores all completed responses for a survey: calculates dimension scores,
+ * sub-dimension scores, archetype matching, and segmented breakdowns, then
+ * persists results to the database.
+ *
+ * HTTP Method: POST
+ *
+ * Request body:
+ *   {
+ *     "surveyId": string,         // UUID of the survey to score
+ *     "reason":   string           // Optional trigger reason (default: "manual")
+ *   }
+ *
+ * Requires: Authorization header with a valid Supabase access token.
+ *
+ * Success response (200):
+ *   {
+ *     "surveyId": string,
+ *     "status":   "completed",
+ *     "metrics": {
+ *       "responsesProcessed": number,
+ *       "segmentsScored":     number,
+ *       "scoreRowsInserted":  number,
+ *       "skippedAnswers":     number,
+ *       "calculatedAt":       string,  // ISO 8601 timestamp
+ *       "likertSize":         number
+ *     },
+ *     "coreHealth":          "healthy" | "fragile" | "broken" | undefined,
+ *     "archetype":           { code: string, name: string, distance: number, confidence: string } | undefined,
+ *     "subDimensionScores":  Array<{ subDimensionCode: string, dimensionCode: string, score: number, rawScore: number, responseCount: number }>
+ *   }
+ *
+ * Error responses:
+ *   400 — INVALID_REQUEST  (missing or invalid surveyId)
+ *   404 — NOT_FOUND        (survey does not exist)
+ *   405 — METHOD_NOT_ALLOWED
+ *   409 — CONFLICT         (another recalculation is already in progress)
+ *   422 — NO_RESPONSES     (no completed responses found)
+ *   500 — SCORING_FAILED   (recalculation marked "failed" on error)
+ */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { authorize } from './auth.ts';
 import {

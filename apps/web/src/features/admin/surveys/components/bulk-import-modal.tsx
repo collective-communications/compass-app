@@ -84,12 +84,13 @@ export function BulkImportModal({
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      aria-labelledby="bulk-import-title"
       className="w-full max-w-2xl rounded-lg border border-[var(--grey-100)] bg-white p-0 shadow-lg backdrop:bg-black/40"
     >
       <div className="flex flex-col gap-5 p-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[var(--grey-900)]">Import Recipients</h2>
+          <h2 id="bulk-import-title" className="text-lg font-semibold text-[var(--grey-900)]">Import Recipients</h2>
           <button
             type="button"
             onClick={onClose}

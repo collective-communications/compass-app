@@ -27,7 +27,7 @@ function cookiesAvailable(): boolean {
 
 /** Set a cookie with standard survey cookie options */
 function setCookie(name: string, value: string, maxAge: number): void {
-  document.cookie = `${name}=${encodeURIComponent(value)}; path=${COOKIE_PATH}; SameSite=Strict; max-age=${maxAge}`;
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=${COOKIE_PATH}; SameSite=Strict; Secure; max-age=${maxAge}`;
 }
 
 /** Read a cookie value by name */

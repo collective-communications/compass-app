@@ -49,6 +49,9 @@ const ARCHETYPES: ArchetypeVector[] = [
 // Helpers to build realistic answer sets
 // ---------------------------------------------------------------------------
 
+/** Deterministic counter for generating unique question IDs without Math.random. */
+let questionIdCounter = 0;
+
 /** Create an answer for a given dimension. */
 function answer(
   dimension: DimensionCode,
@@ -56,7 +59,7 @@ function answer(
   opts?: { reversed?: boolean; weight?: number; questionId?: string },
 ): AnswerWithMeta {
   return {
-    questionId: opts?.questionId ?? `q-${dimension}-${Math.random().toString(36).slice(2, 8)}`,
+    questionId: opts?.questionId ?? `q-${dimension}-auto-${++questionIdCounter}`,
     value,
     reverseScored: opts?.reversed ?? false,
     dimensionId: `dim-${dimension}`,

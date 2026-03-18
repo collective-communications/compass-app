@@ -10,20 +10,23 @@ interface SubTabNavProps {
   tabs: SubTab[];
   activeId: string;
   onSelect: (id: string) => void;
+  ariaLabel?: string;
 }
 
-export function SubTabNav({ tabs, activeId, onSelect }: SubTabNavProps): ReactElement {
+export function SubTabNav({ tabs, activeId, onSelect, ariaLabel }: SubTabNavProps): ReactElement {
   return (
-    <nav className="border-b border-[var(--grey-300)]">
-      <ul className="flex items-center gap-4">
+    <nav className="border-b border-[var(--grey-300)]" aria-label={ariaLabel}>
+      <ul className="flex items-center gap-4" role="tablist">
         {tabs.map((tab) => {
           const isActive = tab.id === activeId;
           const isDisabled = tab.disabled === true;
 
           return (
-            <li key={tab.id}>
+            <li key={tab.id} role="presentation">
               <button
                 type="button"
+                role="tab"
+                aria-selected={isActive}
                 disabled={isDisabled}
                 onClick={() => onSelect(tab.id)}
                 className={`relative pb-2 text-sm transition-colors ${

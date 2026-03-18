@@ -6,6 +6,7 @@
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import { useOrganization, useArchiveOrganization } from '../hooks/use-organization';
 import { OrgInfoCard } from '../components/org-info-card';
 import { KeyMetricsCard } from '../components/key-metrics-card';
@@ -19,7 +20,6 @@ import { useAuthStore } from '../../../../stores/auth-store';
 
 export interface ClientDetailPageProps {
   orgId: string;
-  onBack: () => void;
 }
 
 type DetailTab = 'overview' | 'results' | 'surveys' | 'users';
@@ -31,10 +31,11 @@ const TABS: Array<{ id: DetailTab; label: string }> = [
   { id: 'users', label: 'Users' },
 ];
 
-export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPageProps): ReactElement {
+export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement {
   const { data: organization, isLoading, error } = useOrganization(orgId);
   const archiveOrg = useArchiveOrganization(orgId);
   const user = useAuthStore((s) => s.user);
+  const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -224,8 +225,21 @@ export function ClientDetailPage({ orgId, onBack: _onBack }: ClientDetailPagePro
           <SurveyListPage
             organizationId={orgId}
             userId={user?.id ?? ''}
-            onSelectSurvey={() => {
-              // Survey detail navigation handled at route level
+            onSelectSurvey={(surveyId) => {
+              void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+            }}
+            onConfigure={(surveyId) => {
+              void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+            }}
+            onEditQuestions={(surveyId) => {
+              void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+            }}
+            onCopyLink={(surveyId) => {
+              const url = `${window.location.origin}/admin/surveys/${surveyId}/deploy`;
+              void navigator.clipboard.writeText(url);
+            }}
+            onViewResults={(surveyId) => {
+              void navigate({ to: '/admin/surveys/$surveyId/deploy', params: { surveyId } });
             }}
           />
         </div>

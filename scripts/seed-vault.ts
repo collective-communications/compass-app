@@ -130,7 +130,7 @@ const groups: GroupDef[] = [
   {
     name: "App",
     secrets: [
-      { name: "VITE_APP_URL", value: "http://localhost:5173", source: "default" },
+      { name: "VITE_APP_URL", value: "http://localhost:42333", source: "default" },
       { name: "APP_URL", value: "https://app.collectiveculturecompass.com", source: "default" },
     ],
   },

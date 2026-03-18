@@ -142,12 +142,21 @@ async function fetchMetadataUsage(orgId: string): Promise<Record<MetadataCategor
     tenureBands: new Set(),
   };
 
-  for (const [category, column] of Object.entries(METADATA_USAGE_COLUMNS) as Array<[MetadataCategory, string]>) {
-    const { data, error } = await supabase
-      .from('responses')
-      .select(`${column}, deployment:deployments!inner(survey:surveys!inner(organization_id))`)
-      .eq('deployments.surveys.organization_id', orgId)
-      .not(column, 'is', null);
+  const entries = Object.entries(METADATA_USAGE_COLUMNS) as Array<[MetadataCategory, string]>;
+
+  const queryResults = await Promise.all(
+    entries.map(([, column]) =>
+      supabase
+        .from('responses')
+        .select(`${column}, deployment:deployments!inner(survey:surveys!inner(organization_id))`)
+        .eq('deployments.surveys.organization_id', orgId)
+        .not(column, 'is', null),
+    ),
+  );
+
+  for (let i = 0; i < entries.length; i++) {
+    const [category, column] = entries[i] as [MetadataCategory, string];
+    const { data, error } = queryResults[i]!;
 
     if (error) continue;
 

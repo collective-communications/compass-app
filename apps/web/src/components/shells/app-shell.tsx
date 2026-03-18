@@ -1,6 +1,6 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useAuthStore } from '../../stores/auth-store';
-import { useRequireAuth } from '../../features/auth/hooks/use-require-auth';
+import { useRequireAuth } from '../../hooks/use-require-auth';
 import { getTabsForRole } from '../../lib/navigation';
 import { BaseLayout } from './base-layout';
 import { AppHeader } from '../app/app-header';
@@ -24,7 +24,7 @@ export function AppShell({ children }: AppShellProps): ReactElement {
   if (!user) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-[var(--text-secondary)]">Loading...</p>
+        <p className="text-[var(--text-secondary)]" role="status">Loading...</p>
       </div>
     );
   }

@@ -27,7 +27,7 @@ export default defineConfig({
   reporter: isCI ? 'html' : 'list',
 
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5173',
+    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:42333',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },
@@ -36,7 +36,7 @@ export default defineConfig({
 
   webServer: {
     command: 'bun run --filter @compass/web dev',
-    url: 'http://localhost:5173',
+    url: 'http://localhost:42333',
     reuseExistingServer: !isCI,
     timeout: 30_000,
     cwd: resolve(__dirname, '..'),

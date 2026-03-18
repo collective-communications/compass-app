@@ -88,7 +88,7 @@ export const CompassSegment = memo(function CompassSegment(
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onKeyDown={handleKeyDown}
-      style={{ cursor: onClick ? 'pointer' : 'default', outline: 'none' }}
+      style={{ cursor: onClick ? 'pointer' : 'default' }}
     >
       {/* Invisible hit area covering full segment extent */}
       <path d={hitPath} fill="transparent" />

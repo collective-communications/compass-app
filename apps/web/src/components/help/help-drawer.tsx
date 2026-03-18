@@ -7,52 +7,11 @@ import { useEffect, useRef, useCallback, type ReactElement } from 'react';
 import { X } from 'lucide-react';
 import { useRouterState } from '@tanstack/react-router';
 import { getHelpContent } from './help-content-store';
+import { useFocusTrap } from '../../hooks/use-focus-trap';
 
 interface HelpDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-}
-
-/**
- * Trap Tab focus within a container element.
- * Returns a keydown handler to attach to the container.
- */
-function useFocusTrap(containerRef: React.RefObject<HTMLElement | null>, isActive: boolean): void {
-  useEffect(() => {
-    if (!isActive) return;
-
-    const container = containerRef.current;
-    if (container === null) return;
-
-    // Focus the first focusable element on open
-    const focusableSelector =
-      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
-    const firstFocusable = container.querySelector<HTMLElement>(focusableSelector);
-    firstFocusable?.focus();
-
-    function handleKeyDown(e: KeyboardEvent): void {
-      if (e.key !== 'Tab' || container === null) return;
-
-      const focusables = container.querySelectorAll<HTMLElement>(focusableSelector);
-      if (focusables.length === 0) return;
-
-      const first = focusables[0] as HTMLElement | undefined;
-      const last = focusables[focusables.length - 1] as HTMLElement | undefined;
-
-      if (first === undefined || last === undefined) return;
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [containerRef, isActive]);
 }
 
 export function HelpDrawer({ isOpen, onClose }: HelpDrawerProps): ReactElement {

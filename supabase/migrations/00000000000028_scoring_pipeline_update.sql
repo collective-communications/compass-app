@@ -9,7 +9,9 @@ ALTER TABLE scores ADD CONSTRAINT scores_raw_score_check
   CHECK (raw_score >= 1 AND raw_score <= 10);
 
 -- 2. Replace question_scores view with sub-dimension support and dynamic distribution
-CREATE OR REPLACE VIEW question_scores AS
+-- Must DROP first because new columns change the view's column list
+DROP VIEW IF EXISTS question_scores;
+CREATE VIEW question_scores AS
 SELECT
   q.survey_id,
   q.id AS question_id,

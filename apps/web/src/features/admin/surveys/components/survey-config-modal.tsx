@@ -122,11 +122,12 @@ export function SurveyConfigModal({
     <dialog
       ref={dialogRef}
       onClose={onClose}
+      aria-labelledby="survey-config-title"
       className="w-full max-w-lg rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
     >
       <form onSubmit={handleSave} className="flex flex-col gap-6 p-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-[var(--grey-900)]">Survey Configuration</h2>
+          <h2 id="survey-config-title" className="text-lg font-semibold text-[var(--grey-900)]">Survey Configuration</h2>
           <button
             type="button"
             onClick={onClose}
@@ -154,11 +155,12 @@ export function SurveyConfigModal({
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+            className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--grey-500)]"
             required
+            aria-describedby={titleError ? 'config-title-error' : undefined}
           />
           {titleError && (
-            <p className="text-xs text-red-700">{titleError}</p>
+            <p id="config-title-error" className="text-xs text-red-700" role="alert">{titleError}</p>
           )}
         </div>
 
@@ -172,7 +174,7 @@ export function SurveyConfigModal({
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             rows={3}
-            className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)] resize-none"
+            className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--grey-500)] resize-none"
           />
         </div>
 
@@ -187,8 +189,9 @@ export function SurveyConfigModal({
               type="date"
               value={opensAt}
               onChange={(e) => setOpensAt(e.target.value)}
-              className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+              className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--grey-500)]"
               required
+              aria-describedby={dateError ? 'config-date-error' : undefined}
             />
           </div>
           <div className="flex flex-col gap-1.5">
@@ -200,13 +203,14 @@ export function SurveyConfigModal({
               type="date"
               value={closesAt}
               onChange={(e) => setClosesAt(e.target.value)}
-              className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+              className="rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--grey-500)]"
               required
+              aria-describedby={dateError ? 'config-date-error' : undefined}
             />
           </div>
         </div>
         {dateError && (
-          <p className="text-xs text-red-700">{dateError}</p>
+          <p id="config-date-error" className="text-xs text-red-700" role="alert">{dateError}</p>
         )}
 
         {/* Anonymity Threshold */}
@@ -224,7 +228,7 @@ export function SurveyConfigModal({
             max={50}
             value={anonymityThreshold}
             onChange={(e) => setAnonymityThreshold(Number(e.target.value))}
-            className="w-24 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus:border-[var(--grey-500)]"
+            className="w-24 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--grey-500)]"
           />
         </div>
 
