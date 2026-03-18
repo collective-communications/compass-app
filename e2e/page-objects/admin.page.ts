@@ -32,7 +32,7 @@ export class AdminPage {
   }
 
   async goto(): Promise<void> {
-    await this.page.goto('/admin/surveys');
+    await this.page.goto('/admin/clients');
   }
 
   async gotoClient(clientId: string): Promise<void> {

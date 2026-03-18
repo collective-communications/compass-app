@@ -95,11 +95,11 @@ jobs:
           key: storybook-${{ hashFiles('apps/web/src/**', 'packages/*/src/**', 'apps/storybook/**') }}
 
       - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
 
       - name: Run Storybook tests
         run: |
-          npx http-server apps/storybook/storybook-static --port 6006 --silent &
+          bunx http-server apps/storybook/storybook-static --port 6006 --silent &
           sleep 2
           bun run test:storybook --url http://127.0.0.1:6006
 
@@ -128,7 +128,7 @@ jobs:
         run: bun run build-storybook
 
       - name: Install Playwright
-        run: npx playwright install --with-deps chromium
+        run: bunx playwright install --with-deps chromium
 
       - name: Run visual regression tests
         run: bun run test:visual
