@@ -6,6 +6,7 @@
 import { useState, useCallback, useRef, useEffect, type ReactElement, type FormEvent } from 'react';
 import type { OrganizationSummary } from '@compass/types';
 import { useUpdateOrganization } from '../hooks/use-organization';
+import { useFocusTrap } from '../../../../hooks/use-focus-trap';
 
 export interface EditOrgModalProps {
   open: boolean;
@@ -61,6 +62,9 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
   const [submitError, setSubmitError] = useState<string | null>(null);
   const updateOrg = useUpdateOrganization(organization.id);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(containerRef, true);
 
   // Reset form when modal opens or organization changes
   useEffect(() => {
@@ -113,6 +117,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
 
   return (
     <div
+      ref={containerRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       role="dialog"
       aria-modal="true"

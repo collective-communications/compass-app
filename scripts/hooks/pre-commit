@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Pre-commit: lint staged TypeScript files
+set -euo pipefail
+
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx)$' || true)
+if [ -n "$STAGED_TS" ]; then
+  echo "Pre-commit: linting staged TypeScript files..."
+  echo "$STAGED_TS" | xargs bun run eslint --no-warn-ignored
+fi

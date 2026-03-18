@@ -6,6 +6,7 @@
 
 import { useState, useCallback, useRef, useEffect, type ReactElement, type FormEvent } from 'react';
 import { useCreateOrganization } from '../hooks/use-organizations';
+import { useFocusTrap } from '../../../../hooks/use-focus-trap';
 
 export interface AddClientModalProps {
   open: boolean;
@@ -59,6 +60,9 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
   const [submitError, setSubmitError] = useState<string | null>(null);
   const createOrg = useCreateOrganization();
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useFocusTrap(containerRef, true);
 
   // Focus name input when modal opens
   useEffect(() => {
@@ -114,6 +118,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
 
   return (
     <div
+      ref={containerRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       role="dialog"
       aria-modal="true"

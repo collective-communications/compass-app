@@ -89,17 +89,15 @@ describe('SurveyCard', () => {
   });
 
   test('renders days remaining for future close date', () => {
-    const futureDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
     render(
-      <SurveyCard survey={makeSurvey({ closesAt: futureDate })} onClick={() => {}} />,
+      <SurveyCard survey={makeSurvey({ closesAt: '2099-12-31T00:00:00.000Z' })} onClick={() => {}} />,
     );
     expect(screen.getByText(/remaining/)).toBeTruthy();
   });
 
   test('renders Expired for past close date', () => {
-    const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
     render(
-      <SurveyCard survey={makeSurvey({ closesAt: pastDate })} onClick={() => {}} />,
+      <SurveyCard survey={makeSurvey({ closesAt: '2020-01-01T00:00:00.000Z' })} onClick={() => {}} />,
     );
     expect(screen.getByText('Expired')).toBeTruthy();
   });

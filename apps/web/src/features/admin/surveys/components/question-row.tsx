@@ -92,6 +92,7 @@ export function QuestionRow({ question, isLocked, onEdit, questionCode }: Questi
           <span
             className="rounded bg-amber-50 px-1.5 py-0.5 text-xs font-medium text-amber-700"
             title="Reverse scored"
+            aria-label="Reverse scored"
           >
             R
           </span>

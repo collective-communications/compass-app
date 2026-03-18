@@ -1,3 +1,34 @@
+/**
+ * generate-report — Supabase Edge Function
+ *
+ * Assembles survey data into a branded HTML report, uploads it to storage,
+ * and returns a signed download URL.
+ *
+ * HTTP Method: POST (GET returns a health-check response)
+ *
+ * Request body:
+ *   {
+ *     "reportId": string  // UUID of a report record in "queued" status
+ *   }
+ *
+ * Requires: Authorization header with a valid Supabase access token.
+ *
+ * Success response (200):
+ *   {
+ *     "reportId":    string,  // The report UUID
+ *     "status":      "completed",
+ *     "storagePath": string,  // Path within the "reports" storage bucket
+ *     "signedUrl":   string,  // 24-hour signed download URL
+ *     "generatedBy": string   // UUID of the authenticated user
+ *   }
+ *
+ * Error responses:
+ *   400 — INVALID_REQUEST   (missing or invalid reportId)
+ *   404 — NOT_FOUND         (report does not exist)
+ *   405 — METHOD_NOT_ALLOWED
+ *   409 — INVALID_STATE     (report is not in "queued" status)
+ *   500 — GENERATION_FAILED (rendering or upload error; report marked "failed")
+ */
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { authorize } from './auth.ts';
 import { loadReport, updateReportStatus } from './db.ts';
