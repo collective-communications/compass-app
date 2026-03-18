@@ -12,6 +12,10 @@ import type { SurveyListItem } from '../services/admin-survey-service';
 interface SurveyCardProps {
   survey: SurveyListItem;
   onClick: (surveyId: string) => void;
+  onConfigure?: (surveyId: string) => void;
+  onEditQuestions?: (surveyId: string) => void;
+  onCopyLink?: (surveyId: string) => void;
+  onViewResults?: (surveyId: string) => void;
 }
 
 /** Maps survey status to left border color (severity indicator) */
@@ -50,7 +54,14 @@ function getDaysRemaining(closesAt: string | null): string | null {
   return `${days}d remaining`;
 }
 
-export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
+export function SurveyCard({
+  survey,
+  onClick,
+  onConfigure,
+  onEditQuestions,
+  onCopyLink,
+  onViewResults,
+}: SurveyCardProps): ReactElement {
   const daysRemaining = getDaysRemaining(survey.closesAt);
 
   return (
@@ -97,7 +108,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
       <div className="relative z-10 mt-4 flex items-center gap-2 border-t border-[var(--grey-100)] pt-4">
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); }}
+          onClick={(e) => { e.stopPropagation(); onConfigure?.(survey.id); }}
           className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="Configure survey"
         >
@@ -106,7 +117,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); }}
+          onClick={(e) => { e.stopPropagation(); onEditQuestions?.(survey.id); }}
           className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="Edit questions"
         >
@@ -115,7 +126,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); }}
+          onClick={(e) => { e.stopPropagation(); onCopyLink?.(survey.id); }}
           className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="Copy survey link"
         >
@@ -124,7 +135,7 @@ export function SurveyCard({ survey, onClick }: SurveyCardProps): ReactElement {
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); }}
+          onClick={(e) => { e.stopPropagation(); onViewResults?.(survey.id); }}
           className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
           aria-label="View results"
         >

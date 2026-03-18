@@ -27,6 +27,10 @@ const meta = {
   args: {
     survey: baseSurvey,
     onClick: fn(),
+    onConfigure: fn(),
+    onEditQuestions: fn(),
+    onCopyLink: fn(),
+    onViewResults: fn(),
   },
 } satisfies Meta<typeof SurveyCard>;
 
