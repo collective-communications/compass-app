@@ -16,6 +16,7 @@ import { EditOrgModal } from '../components/edit-org-modal';
 import { ClientUsersTab } from '../components/client-users-tab';
 import { DrilldownHeader } from '../../../../components/navigation/drilldown-header';
 import { SurveyListPage } from '../../surveys';
+import { useCreateSurvey } from '../../surveys/hooks/use-create-survey';
 import { useAuthStore } from '../../../../stores/auth-store';
 
 export interface ClientDetailPageProps {
@@ -41,8 +42,24 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
+  const createSurvey = useCreateSurvey();
 
   const isArchived = organization && 'archivedAt' in organization && !!(organization as Record<string, unknown>).archivedAt;
+
+  const handleCreateSurvey = useCallback((): void => {
+    createSurvey.mutate(
+      {
+        organizationId: orgId,
+        title: 'Untitled Survey',
+        createdBy: user?.id ?? '',
+      },
+      {
+        onSuccess: (survey) => {
+          void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId: survey.id } });
+        },
+      },
+    );
+  }, [orgId, user?.id, createSurvey, navigate]);
 
   const handleArchive = useCallback((): void => {
     setMenuOpen(false);
@@ -189,10 +206,11 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
               <div className="flex flex-col gap-2">
                 <button
                   type="button"
-                  disabled={!!organization.activeSurveyId}
+                  onClick={handleCreateSurvey}
+                  disabled={!!organization.activeSurveyId || createSurvey.isPending}
                   className="w-full rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  Create Survey
+                  {createSurvey.isPending ? 'Creating\u2026' : 'Create Survey'}
                 </button>
                 <button
                   type="button"
