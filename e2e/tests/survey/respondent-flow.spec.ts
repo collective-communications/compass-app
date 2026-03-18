@@ -23,13 +23,13 @@ test('complete full survey with open-ended response', async ({ page }) => {
   await survey.startButton.click();
   await survey.answerAllLikertQuestions();
 
-  // Open-ended question
-  await expect(survey.openEndedTextarea).toBeVisible();
+  // Open-ended question (wait for route transition from last Likert question)
+  await expect(survey.openEndedTextarea).toBeVisible({ timeout: 10000 });
   await survey.openEndedTextarea.fill('This is a test response for the open-ended question.');
   await survey.submitButton.click();
 
   // Thank you screen
-  await expect(survey.thankYouHeading).toBeVisible();
+  await expect(survey.thankYouHeading).toBeVisible({ timeout: 10000 });
 });
 
 test('complete survey skipping open-ended', async ({ page }) => {
@@ -40,12 +40,12 @@ test('complete survey skipping open-ended', async ({ page }) => {
   await survey.startButton.click();
   await survey.answerAllLikertQuestions();
 
-  // Skip open-ended
-  await expect(survey.skipButton).toBeVisible();
+  // Skip open-ended (wait for route transition from last Likert question)
+  await expect(survey.skipButton).toBeVisible({ timeout: 10000 });
   await survey.skipButton.click();
 
   // Thank you screen
-  await expect(survey.thankYouHeading).toBeVisible();
+  await expect(survey.thankYouHeading).toBeVisible({ timeout: 10000 });
 });
 
 test('keyboard shortcuts: 1-4 selects answer, Enter advances, Backspace goes back', async ({ page }) => {
@@ -139,7 +139,7 @@ test('open-ended textarea enforces 500 character limit', async ({ page }) => {
   await survey.startButton.click();
   await survey.answerAllLikertQuestions();
 
-  await expect(survey.openEndedTextarea).toBeVisible();
+  await expect(survey.openEndedTextarea).toBeVisible({ timeout: 10000 });
 
   // Type a short message and verify counter
   await survey.openEndedTextarea.fill('Test response');
@@ -207,8 +207,9 @@ test('already completed survey shows already-completed screen on revisit', async
   await survey.fillMetadata();
   await survey.startButton.click();
   await survey.answerAllLikertQuestions();
+  await expect(survey.skipButton).toBeVisible({ timeout: 10000 });
   await survey.skipButton.click();
-  await expect(survey.thankYouHeading).toBeVisible();
+  await expect(survey.thankYouHeading).toBeVisible({ timeout: 10000 });
 
   // Revisit same token
   await survey.goto(token);

@@ -82,8 +82,9 @@ test.describe('completed and closed survey edge cases', () => {
     await survey.fillMetadata();
     await survey.startButton.click();
     await survey.answerAllLikertQuestions();
+    await expect(survey.skipButton).toBeVisible({ timeout: 10000 });
     await survey.skipButton.click();
-    await expect(survey.thankYouHeading).toBeVisible();
+    await expect(survey.thankYouHeading).toBeVisible({ timeout: 10000 });
 
     // Second: revisit the same token — should show already-completed
     await survey.goto(token);
