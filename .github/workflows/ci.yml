@@ -101,7 +101,7 @@ jobs:
         run: |
           bunx http-server apps/storybook/storybook-static --port 6006 --silent &
           for i in $(seq 1 30); do curl -s http://127.0.0.1:6006 > /dev/null && break || sleep 1; done
-          bun run test:storybook --url http://127.0.0.1:6006 -- --passWithNoTests
+          bun run test:storybook --url http://127.0.0.1:6006
 
   visual-regression:
     name: Visual Regression

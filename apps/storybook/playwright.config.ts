@@ -6,6 +6,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   testDir: './visual-tests',
+  testMatch: '**/*.visual.ts',
   snapshotDir: './__snapshots__',
   snapshotPathTemplate: '{snapshotDir}/{arg}--{projectName}{ext}',
   fullyParallel: true,
