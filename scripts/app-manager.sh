@@ -3,10 +3,12 @@
 # Usage: app-manager.sh {start|stop|restart|status} [--only <svc>]
 #
 # Services (start order):
-#   tkr-kit       Koji + Observability + Dashboard  :42001 :42002 :42005
-#   tkr-secrets   Vault UI                          :42042
-#   tkr-deploy    Deploy dashboard                  :42043
-#   storybook     Storybook dev server              :6006
+#   tkr-secrets   Vault UI                          :$SECRETS_PORT (default 42042)
+#   tkr-deploy    Deploy dashboard                  :$DEPLOY_PORT (default 42043)
+#   storybook     Storybook dev server              :$STORYBOOK_PORT (default 6006)
+#   web           Compass web app (Vite)            :$PORT (default 42333) — last, needs secrets
+#
+# Ports are read from .env.local at the monorepo root.
 #
 # Bash 3.2 compatible (macOS default).
 
@@ -19,10 +21,29 @@ LOG_DIR="$STATE_DIR/logs"
 
 mkdir -p "$PID_DIR" "$LOG_DIR"
 
+# ── Load ports from .env.local ────────────────────────────────────────────────
+
+_env_val() {
+  # Read a key=value from .env.local; return default if not found
+  local key="$1" default="$2"
+  if [ -f "$ROOT_DIR/.env.local" ]; then
+    local val
+    val=$(grep -E "^${key}=" "$ROOT_DIR/.env.local" 2>/dev/null | head -1 | cut -d= -f2)
+    if [ -n "$val" ]; then echo "$val"; return; fi
+  fi
+  echo "$default"
+}
+
+WEB_PORT=$(_env_val PORT 42333)
+SECRETS_PORT=$(_env_val SECRETS_PORT 42032)
+DEPLOY_PORT=$(_env_val DEPLOY_PORT 42033)
+STORYBOOK_PORT=$(_env_val STORYBOOK_PORT 42031)
+
 # ── Service lookup (bash 3.2 — no associative arrays) ───────────────────────
 
 svc_dir() {
   case "$1" in
+    web)         echo "$ROOT_DIR" ;;
     tkr-kit)     echo "$ROOT_DIR/tkr-kit" ;;
     tkr-secrets) echo "$ROOT_DIR/tkr-secrets" ;;
     tkr-deploy)  echo "$ROOT_DIR/tkr-deploy" ;;
@@ -32,33 +53,37 @@ svc_dir() {
 
 svc_cmd() {
   case "$1" in
+    web)         echo "bun run dev" ;;
     tkr-kit)     echo "bun run dev:start" ;;
-    tkr-secrets) echo "bun run dev" ;;
-    tkr-deploy)  echo "bun run dev" ;;
-    storybook)   echo "bun run storybook" ;;
+    tkr-secrets) echo "env PORT=${SECRETS_PORT} bun run dev" ;;
+    tkr-deploy)  echo "env DEPLOY_PORT=${DEPLOY_PORT} VAULT_URL=http://localhost:${SECRETS_PORT} bun run dev" ;;
+    storybook)   echo "bun run storybook -- -p ${STORYBOOK_PORT} --ci" ;;
   esac
 }
 
 svc_urls() {
   case "$1" in
+    web)
+      echo "    Compass App:   http://localhost:${WEB_PORT}"
+      ;;
     tkr-kit)
       echo "    Dashboard:     http://localhost:42001"
       echo "    Koji:          http://localhost:42002"
       echo "    Observability: http://localhost:42005"
       ;;
     tkr-secrets)
-      echo "    Vault UI:      http://localhost:42042"
+      echo "    Vault UI:      http://localhost:${SECRETS_PORT}"
       ;;
     tkr-deploy)
-      echo "    Deploy:        http://localhost:42043"
+      echo "    Deploy:        http://localhost:${DEPLOY_PORT}"
       ;;
     storybook)
-      echo "    Storybook:     http://localhost:6006"
+      echo "    Storybook:     http://localhost:${STORYBOOK_PORT}"
       ;;
   esac
 }
 
-ALL_SERVICES="tkr-kit tkr-secrets tkr-deploy storybook"
+ALL_SERVICES="tkr-secrets tkr-deploy storybook web"
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -98,12 +123,45 @@ status_tkr_kit() {
   (cd "$(svc_dir tkr-kit)" && bun run dev:status) 2>&1 | sed 's/^/    /'
 }
 
+load_vault_env() {
+  local env_file="$ROOT_DIR/.env.local"
+  echo "  Loading secrets from vault → .env.local"
+  local vault_lines
+  vault_lines=$(bun run "$ROOT_DIR/scripts/vault-env.ts" \
+    --port "$SECRETS_PORT" --vault compass --prefix VITE_SUPABASE_ 2>/dev/null)
+  if [ -z "$vault_lines" ]; then
+    echo "    No secrets loaded (vault may be locked or unavailable)"
+    return
+  fi
+
+  # Merge: update existing keys in-place, append new ones
+  local count=0
+  while IFS='=' read -r key value; do
+    [ -z "$key" ] && continue
+    if grep -qE "^${key}=" "$env_file" 2>/dev/null; then
+      # Update existing line
+      sed -i '' "s|^${key}=.*|${key}=${value}|" "$env_file"
+    else
+      # Append new key
+      echo "${key}=${value}" >> "$env_file"
+    fi
+    count=$((count + 1))
+  done <<< "$vault_lines"
+  echo "    Synced $count secret(s)"
+}
+
 start_background_svc() {
   local svc="$1"
   if is_running "$svc"; then
     echo "  $svc already running (PID $(get_pid "$svc"))"
     return 0
   fi
+
+  # Web needs VITE_* secrets from the vault before starting
+  if [ "$svc" = "web" ] && is_running "tkr-secrets"; then
+    load_vault_env
+  fi
+
   echo "  Starting $svc..."
   local logfile="$LOG_DIR/${svc}.log"
   local dir
@@ -181,7 +239,7 @@ cmd_stop() {
   echo "─────────────────────────────────────────────"
 
   # Reverse order
-  for svc in storybook tkr-deploy tkr-secrets tkr-kit; do
+  for svc in web storybook tkr-deploy tkr-secrets; do
     if [ -n "$filter" ] && [ "$svc" != "$filter" ]; then continue; fi
     echo ""
     if [ "$svc" = "tkr-kit" ]; then
