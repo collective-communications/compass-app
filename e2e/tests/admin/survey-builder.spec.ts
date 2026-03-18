@@ -8,14 +8,15 @@ async function gotoClientSurveys(page: import('@playwright/test').Page): Promise
   await page.goto('/admin/clients');
   await expect(page.getByRole('heading', { name: /clients/i })).toBeVisible({ timeout: 10000 });
 
-  // Click first client
-  const firstClient = page.locator('button').filter({ hasText: /.+/ }).first();
+  // Click first client card (aria-label="View {name}")
+  const firstClient = page.getByRole('button', { name: /^View /i }).first();
+  await expect(firstClient).toBeVisible({ timeout: 10000 });
   await firstClient.click();
   await page.waitForLoadState('networkidle');
 
-  // Click Surveys tab
+  // Click Surveys tab on client detail page
   const surveysTab = page.getByRole('tab', { name: /surveys/i });
-  await expect(surveysTab).toBeVisible({ timeout: 5000 });
+  await expect(surveysTab).toBeVisible({ timeout: 10000 });
   await surveysTab.click();
   await page.waitForLoadState('networkidle');
 }

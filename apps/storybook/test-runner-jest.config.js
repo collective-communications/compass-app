@@ -1,9 +1,8 @@
-import type { TestRunnerConfig } from '@storybook/test-runner';
-
-const config: TestRunnerConfig = {
+/** @type {import('@storybook/test-runner').TestRunnerConfig} */
+const config = {
   async postVisit(page, context) {
     // Collect console errors during story render
-    const errors: string[] = [];
+    const errors = [];
     page.on('console', (msg) => {
       if (msg.type() === 'error') {
         errors.push(msg.text());
