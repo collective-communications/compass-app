@@ -1,3 +1,17 @@
+-- Configurable Likert Scale — Part 2: Widen constraints and set new default
+-- (Split from migration 026 due to PostgreSQL enum transaction restriction)
+
+-- Update default question type from 'likert_4' to 'likert'
+ALTER TABLE questions ALTER COLUMN type SET DEFAULT 'likert';
+
+-- Widen the likert_value CHECK constraint on answers to allow 1-10
+ALTER TABLE answers DROP CONSTRAINT IF EXISTS answers_likert_value_check;
+ALTER TABLE answers ADD CONSTRAINT answers_likert_value_check
+  CHECK (likert_value >= 1 AND likert_value <= 10);
+
+COMMENT ON COLUMN answers.likert_value IS
+  'Likert response value. Range 1-N where N is the survey likert_size (stored in surveys.settings JSONB). Legacy surveys use N=4, new surveys default to N=5.';
+
 -- Sub-dimensions within each Culture Compass dimension (21 total).
 -- Foundational table for the sub-dimension data model (Wave 1).
 
