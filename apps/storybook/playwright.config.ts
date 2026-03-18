@@ -26,7 +26,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npx http-server ./storybook-static --port 6006 --silent',
+    command: 'bunx http-server ./storybook-static --port 6006 --silent',
     port: 6006,
     reuseExistingServer: true,
     cwd: __dirname,

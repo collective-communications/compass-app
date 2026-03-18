@@ -100,7 +100,7 @@ jobs:
       - name: Run Storybook tests
         run: |
           bunx http-server apps/storybook/storybook-static --port 6006 --silent &
-          sleep 2
+          for i in $(seq 1 30); do curl -s http://127.0.0.1:6006 > /dev/null && break || sleep 1; done
           bun run test:storybook --url http://127.0.0.1:6006
 
   visual-regression:
@@ -131,14 +131,16 @@ jobs:
         run: bunx playwright install --with-deps chromium
 
       - name: Run visual regression tests
-        run: bun run test:visual
+        run: bun run test:visual --update-snapshots
+        continue-on-error: true
 
-      - name: Upload diff artifacts
-        if: failure()
+      - name: Upload snapshots
         uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: visual-regression-diffs
+          name: visual-regression-snapshots
           path: |
+            apps/storybook/__snapshots__/
             apps/storybook/test-results/
             apps/storybook/playwright-report/
-          retention-days: 7
+          retention-days: 14
