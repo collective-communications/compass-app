@@ -24,7 +24,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { ChevronDown, ChevronRight, Info } from 'lucide-react';
-import type { QuestionWithDimension, Dimension, DimensionCode, SubDimension, QuestionType } from '@compass/types';
+import type { QuestionWithDimension, Dimension, DimensionCode, SubDimension } from '@compass/types';
 import { QuestionType as QT } from '@compass/types';
 import { useSurveyBuilder } from '../hooks/use-survey-builder';
 import { useReorderQuestions } from '../hooks/use-reorder-questions';
@@ -58,11 +58,17 @@ function buildQuestionCodes(
   const codes = new Map<string, string>();
   const dimCounters = new Map<string, number>();
 
+  // Pre-build a lookup map to avoid O(n*m) from dimensions.find() inside the loop
+  const dimensionById = new Map<string, Dimension>();
+  for (const d of dimensions) {
+    dimensionById.set(d.id, d);
+  }
+
   // Sort questions by displayOrder to assign sequential codes
   const sorted = [...questions].sort((a, b) => a.displayOrder - b.displayOrder);
 
   for (const q of sorted) {
-    const dim = dimensions.find((d) => d.id === q.dimension.dimensionId);
+    const dim = dimensionById.get(q.dimension.dimensionId);
     const abbr = dim ? (DIMENSION_ABBREVIATION[dim.code] ?? dim.code[0]?.toUpperCase() ?? '?') : '?';
     const count = (dimCounters.get(q.dimension.dimensionId) ?? 0) + 1;
     dimCounters.set(q.dimension.dimensionId, count);

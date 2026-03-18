@@ -14,8 +14,8 @@
  *   /results/$surveyId/recommendations — RecommendationsTab
  */
 
-import { createContext, useContext, useState, useCallback, type ReactElement } from 'react';
-import { createRoute, Outlet, redirect, useNavigate, useParams, useSearch } from '@tanstack/react-router';
+import { useState, useCallback, type ReactElement } from 'react';
+import { createRoute, Outlet, redirect, useNavigate, useParams, useSearch, useRouterState } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import type { SegmentType } from '@compass/scoring';
 import { useAuthStore } from '../../stores/auth-store';
@@ -32,24 +32,11 @@ import { RecommendationsTab, RecommendationsInsightsContent } from './tabs/recom
 import { useOverallScores } from './hooks/use-overall-scores';
 import { useArchetype } from './hooks/use-archetype';
 import { useRiskFlags } from './hooks/use-risk-flags';
-import { useScoredSurveys } from './hooks/use-scored-surveys';
+import { useScoredSurveys } from '../../hooks/use-scored-surveys';
+import { DimensionContext, useActiveDimension } from './context/dimension-context';
 import type { ResultsTabId } from './types';
 
-/** Context for sharing activeDimension state between layout and compass tab route. */
-interface DimensionContextValue {
-  activeDimension: DimensionNavId;
-  setActiveDimension: (dimension: DimensionNavId) => void;
-}
-
-const DimensionContext = createContext<DimensionContextValue>({
-  activeDimension: 'overview',
-  setActiveDimension: () => {},
-});
-
-/** Hook for compass tab route to consume the lifted dimension state. */
-export function useActiveDimension(): DimensionContextValue {
-  return useContext(DimensionContext);
-}
+export { useActiveDimension } from './context/dimension-context';
 
 /** Map route path segments to tab IDs. */
 const PATH_TO_TAB: Record<string, ResultsTabId> = {
@@ -65,8 +52,8 @@ const PATH_TO_TAB: Record<string, ResultsTabId> = {
  * Falls back to 'compass' if no match found.
  */
 function useActiveTab(): ResultsTabId {
-  // TanStack Router provides the matched route path; extract the last segment
-  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const routerState = useRouterState();
+  const pathname = routerState.location.pathname;
   const segments = pathname.split('/').filter(Boolean);
   const lastSegment = segments[segments.length - 1] ?? '';
   return PATH_TO_TAB[lastSegment] ?? 'compass';
@@ -80,6 +67,7 @@ function ResultsLayoutRoute(): ReactElement {
   const { surveyId } = useParams({ strict: false }) as { surveyId: string };
   const navigate = useNavigate();
   const activeTab = useActiveTab();
+  const routerState = useRouterState();
   const [activeDimension, setActiveDimension] = useState<DimensionNavId>('overview');
 
   /** Reset dimension selection when switching tabs. */
@@ -123,10 +111,8 @@ function ResultsLayoutRoute(): ReactElement {
       case 'survey':
         return <SurveyInsightsContent scores={scores} />;
       case 'groups': {
-        const groupsSearch = (typeof window !== 'undefined'
-          ? Object.fromEntries(new URLSearchParams(window.location.search))
-          : {}) as GroupsSearch;
-        const sv = groupsSearch.segmentValue ?? '';
+        const routerSearch = routerState.location.search as Record<string, unknown>;
+        const sv = typeof routerSearch.segmentValue === 'string' ? routerSearch.segmentValue : '';
         return <GroupsInsights surveyId={surveyId} segmentValue={sv} isBelowThreshold={!sv} />;
       }
       case 'dialogue':

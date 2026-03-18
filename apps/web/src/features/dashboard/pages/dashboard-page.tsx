@@ -6,7 +6,6 @@
 
 import type { ReactElement } from 'react';
 import { useAppNavigate } from '../../../hooks/use-app-navigate';
-import { AppShell } from '../../../components/shells/app-shell';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useDashboardData } from '../hooks/use-dashboard-data';
 import { useClientAccess } from '../hooks/use-client-access';
@@ -48,98 +47,96 @@ export function DashboardPage(): ReactElement {
   };
 
   return (
-    <AppShell>
-      <div className="mx-auto max-w-[1232px] px-4 py-6">
-        {/* Welcome greeting */}
-        {firstName && (
-          <h1 className="mb-6 text-2xl font-semibold text-[var(--grey-900)]">
-            Welcome back, {firstName}
-          </h1>
-        )}
+    <div className="mx-auto max-w-[1232px] px-4 py-6">
+      {/* Welcome greeting */}
+      {firstName && (
+        <h1 className="mb-6 text-2xl font-semibold text-[var(--grey-900)]">
+          Welcome back, {firstName}
+        </h1>
+      )}
 
-        {/* Loading state */}
-        {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-sm text-[var(--text-secondary)]">Loading dashboard...</p>
-          </div>
-        )}
+      {/* Loading state */}
+      {isLoading && (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-sm text-[var(--text-secondary)]">Loading dashboard...</p>
+        </div>
+      )}
 
-        {/* Error state */}
-        {error && !isLoading && (
-          <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-            <p className="text-sm text-red-700">
-              Something went wrong loading your dashboard. Please refresh to try again.
-            </p>
-          </div>
-        )}
+      {/* Error state */}
+      {error && !isLoading && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+          <p className="text-sm text-red-700">
+            Something went wrong loading your dashboard. Please refresh to try again.
+          </p>
+        </div>
+      )}
 
-        {/* Empty state — no surveys at all */}
-        {!isLoading && !error && !hasSurveys && (
-          <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
-            <p className="text-sm text-[var(--text-tertiary)]">
-              No surveys yet. Your organization&apos;s first culture assessment is coming soon.
-            </p>
-          </div>
-        )}
+      {/* Empty state — no surveys at all */}
+      {!isLoading && !error && !hasSurveys && (
+        <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
+          <p className="text-sm text-[var(--text-tertiary)]">
+            No surveys yet. Your organization&apos;s first culture assessment is coming soon.
+          </p>
+        </div>
+      )}
 
-        {/* Dashboard content — two-column on desktop */}
-        {!isLoading && !error && hasSurveys && (
-          <div className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_432px] md:gap-10">
-            {/* Left column: active survey + quick actions */}
-            <div className="flex max-w-[760px] flex-col gap-5">
-              {activeSurvey && (
-                <>
-                  <ActiveSurveyCard data={activeSurvey} />
-                  <QuickActions
-                    deploymentUrl={deploymentUrl}
-                    surveyId={activeSurvey.survey.id}
-                    resultsEnabled={resultsEnabled}
-                    onNavigate={handleNavigate}
-                  />
-                </>
-              )}
+      {/* Dashboard content — two-column on desktop */}
+      {!isLoading && !error && hasSurveys && (
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_432px] md:gap-10">
+          {/* Left column: active survey + quick actions */}
+          <div className="flex max-w-[760px] flex-col gap-5">
+            {activeSurvey && (
+              <>
+                <ActiveSurveyCard data={activeSurvey} />
+                <QuickActions
+                  deploymentUrl={deploymentUrl}
+                  surveyId={activeSurvey.survey.id}
+                  resultsEnabled={resultsEnabled}
+                  onNavigate={handleNavigate}
+                />
+              </>
+            )}
 
-              {!activeSurvey && !resultsEnabled && (
-                <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
-                  <p className="text-sm text-[var(--text-tertiary)]">
-                    Results are being prepared. Your consultant will let you know when they&apos;re
-                    ready to review.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Right column: latest results with mini compass preview */}
-            <div className="flex flex-col gap-5">
-              <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
-                <h2 className="mb-4 text-base font-semibold text-[var(--grey-900)]">
-                  Latest Results
-                </h2>
-                {/* Mini compass preview placeholder */}
-                <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-200)] bg-white">
-                  <p className="text-xs text-[var(--text-tertiary)]">Compass Preview</p>
-                </div>
-                {resultsEnabled && activeSurvey && (
-                  <button
-                    type="button"
-                    onClick={() => handleSelectSurvey(activeSurvey.survey.id)}
-                    className="mt-4 w-full rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                  >
-                    View Full Results
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Previous surveys — full width, horizontal scroll on desktop */}
-            {previousSurveys.length > 0 && (
-              <div className="md:col-span-2">
-                <PreviousSurveys surveys={previousSurveys} onSelectSurvey={handleSelectSurvey} />
+            {!activeSurvey && !resultsEnabled && (
+              <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
+                <p className="text-sm text-[var(--text-tertiary)]">
+                  Results are being prepared. Your consultant will let you know when they&apos;re
+                  ready to review.
+                </p>
               </div>
             )}
           </div>
-        )}
-      </div>
-    </AppShell>
+
+          {/* Right column: latest results with mini compass preview */}
+          <div className="flex flex-col gap-5">
+            <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+              <h2 className="mb-4 text-base font-semibold text-[var(--grey-900)]">
+                Latest Results
+              </h2>
+              {/* Mini compass preview placeholder */}
+              <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-200)] bg-white">
+                <p className="text-xs text-[var(--text-tertiary)]">Compass Preview</p>
+              </div>
+              {resultsEnabled && activeSurvey && (
+                <button
+                  type="button"
+                  onClick={() => handleSelectSurvey(activeSurvey.survey.id)}
+                  className="mt-4 w-full rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-semibold text-white transition-opacity hover:opacity-90"
+                >
+                  View Full Results
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Previous surveys — full width, horizontal scroll on desktop */}
+          {previousSurveys.length > 0 && (
+            <div className="md:col-span-2">
+              <PreviousSurveys surveys={previousSurveys} onSelectSurvey={handleSelectSurvey} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

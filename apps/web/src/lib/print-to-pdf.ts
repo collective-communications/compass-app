@@ -30,8 +30,12 @@ export function printHtmlToPdf(html: string): void {
     }
   }
 
-  // Clean up after print dialog closes
-  iframe.contentWindow?.addEventListener('afterprint', cleanup);
+  // Clean up after print dialog closes, with a 5s fallback if afterprint never fires
+  const fallbackTimeout = setTimeout(cleanup, 5000);
+  iframe.contentWindow?.addEventListener('afterprint', () => {
+    clearTimeout(fallbackTimeout);
+    cleanup();
+  });
 
   // Give the iframe time to render, then trigger print
   setTimeout(() => {

@@ -22,7 +22,8 @@ export async function listOrganizations(): Promise<OrganizationSummary[]> {
         closes_at
       )
     `)
-    .order('name');
+    .order('name')
+    .limit(200);
 
   if (error) throw error;
 

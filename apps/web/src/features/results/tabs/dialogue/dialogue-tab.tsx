@@ -15,25 +15,26 @@ import { DimensionFilterPills, type DimensionFilter } from './dimension-filter-p
 import { TopicFilter, deriveTopics } from './topic-filter';
 import { ResponseList } from './response-list';
 
+/** Stop words excluded from keyword extraction. Hoisted to module scope to avoid re-creation per call. */
+const STOP_WORDS = new Set([
+  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
+  'of', 'with', 'by', 'from', 'is', 'it', 'as', 'be', 'was', 'are',
+  'been', 'has', 'have', 'had', 'do', 'does', 'did', 'will', 'would',
+  'could', 'should', 'may', 'might', 'can', 'that', 'this', 'these',
+  'those', 'i', 'we', 'you', 'they', 'he', 'she', 'my', 'our', 'your',
+  'their', 'its', 'not', 'no', 'so', 'if', 'all', 'more', 'some', 'any',
+  'very', 'just', 'about', 'up', 'out', 'when', 'what', 'how', 'which',
+  'who', 'there', 'than', 'also', 'into', 'only', 'other', 'then',
+  'them', 'me', 'him', 'her', 'us', 'like', 'get', 'make', 'one',
+  'much', 'many', 'well', 'being', 'don', 'really', 'think', 'know',
+]);
+
 interface DialogueTabProps {
   surveyId: string;
 }
 
 /** Extract keyword frequencies from response texts. */
 function extractKeywords(responses: DialogueResponse[]): Keyword[] {
-  const stopWords = new Set([
-    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-    'of', 'with', 'by', 'from', 'is', 'it', 'as', 'be', 'was', 'are',
-    'been', 'has', 'have', 'had', 'do', 'does', 'did', 'will', 'would',
-    'could', 'should', 'may', 'might', 'can', 'that', 'this', 'these',
-    'those', 'i', 'we', 'you', 'they', 'he', 'she', 'my', 'our', 'your',
-    'their', 'its', 'not', 'no', 'so', 'if', 'all', 'more', 'some', 'any',
-    'very', 'just', 'about', 'up', 'out', 'when', 'what', 'how', 'which',
-    'who', 'there', 'than', 'also', 'into', 'only', 'other', 'then',
-    'them', 'me', 'him', 'her', 'us', 'like', 'get', 'make', 'one',
-    'much', 'many', 'well', 'being', 'don', 'really', 'think', 'know',
-  ]);
-
   const counts = new Map<string, number>();
 
   for (const response of responses) {
@@ -41,7 +42,7 @@ function extractKeywords(responses: DialogueResponse[]): Keyword[] {
       .toLowerCase()
       .replace(/[^a-z0-9\s'-]/g, '')
       .split(/\s+/)
-      .filter((w) => w.length > 2 && !stopWords.has(w));
+      .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
 
     for (const word of words) {
       counts.set(word, (counts.get(word) ?? 0) + 1);

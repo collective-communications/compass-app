@@ -40,7 +40,7 @@ export function useDialogueResponses({
     queryFn: async () => {
       let query = supabase
         .from('dialogue_responses')
-        .select('*')
+        .select('id, question_id, question_text, response_text, created_at')
         .eq('survey_id', surveyId)
         .order('created_at', { ascending: false });
 

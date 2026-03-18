@@ -13,6 +13,7 @@ import type {
 } from '@compass/types';
 import { DEFAULT_METADATA_CONFIG } from '@compass/types';
 import { supabase } from '../../../lib/supabase';
+import { mapSurveyRow, mapDeploymentRow } from '../../../lib/mappers/survey-mappers';
 
 /**
  * Create a partial SurveyEngineService backed by Supabase.
@@ -29,7 +30,7 @@ export function createSurveyEngineAdapter(): Pick<
     async resolveDeployment(token: string): Promise<DeploymentResolution> {
       const { data: deployment, error: deploymentError } = await supabase
         .from('deployments')
-        .select('*')
+        .select('*, survey:surveys(*)')
         .eq('token', token)
         .single();
 
@@ -37,40 +38,40 @@ export function createSurveyEngineAdapter(): Pick<
         return { status: 'not_found', message: 'This survey link is not valid.' };
       }
 
-      const { data: survey, error: surveyError } = await supabase
-        .from('surveys')
-        .select('*')
-        .eq('id', deployment.survey_id)
-        .single();
+      const survey = (deployment as Record<string, unknown>)['survey'] as Record<string, unknown> | null;
 
-      if (surveyError || !survey) {
+      if (!survey) {
         return { status: 'not_found', message: 'The survey associated with this link could not be found.' };
       }
 
       // Check if deployment has expired
-      if (deployment.expires_at && new Date(deployment.expires_at) < new Date()) {
+      const expiresAt = (deployment as Record<string, unknown>)['expires_at'] as string | null;
+      if (expiresAt && new Date(expiresAt) < new Date()) {
         return { status: 'expired', message: 'This survey link has expired.' };
       }
 
       // Check survey status
-      if (survey.status === 'closed' || survey.status === 'archived') {
-        return { status: 'closed', message: `This survey closed on ${formatDate(survey.closes_at)}.`, closesAt: survey.closes_at };
+      const surveyStatus = survey['status'] as string;
+      const closesAt = survey['closes_at'] as string | null;
+      const opensAt = survey['opens_at'] as string | null;
+
+      if (surveyStatus === 'closed' || surveyStatus === 'archived') {
+        return { status: 'closed', message: `This survey closed on ${formatDate(closesAt)}.`, closesAt };
       }
 
       // Check if survey has not opened yet
-      if (survey.opens_at && new Date(survey.opens_at) > new Date()) {
+      if (opensAt && new Date(opensAt) > new Date()) {
         return {
           status: 'not_yet_open',
-          message: `This survey opens on ${formatDate(survey.opens_at)}.`,
-          opensAt: survey.opens_at,
+          message: `This survey opens on ${formatDate(opensAt)}.`,
+          opensAt,
         };
       }
 
-      // Map snake_case DB row to camelCase Deployment interface
       return {
         status: 'valid',
-        deployment: mapDeployment(deployment),
-        survey: mapSurvey(survey),
+        deployment: mapDeploymentRow(deployment as Record<string, unknown>),
+        survey: mapSurveyRow(survey),
       };
     },
 
@@ -89,7 +90,7 @@ export function createSurveyEngineAdapter(): Pick<
         return null;
       }
 
-      return mapResponseWithAnswers(data);
+      return mapResponseWithAnswers(data as Record<string, unknown>);
     },
 
     async getMetadataConfig(organizationId: string): Promise<MetadataConfig> {
@@ -190,34 +191,35 @@ export function createSurveyEngineAdapter(): Pick<
         return [];
       }
 
-      return data.map((row: any) => {
-        const qd = Array.isArray(row.question_dimensions)
-          ? row.question_dimensions[0]
-          : row.question_dimensions;
+      return data.map((row: Record<string, unknown>) => {
+        const qdRaw = row['question_dimensions'];
+        const qd = Array.isArray(qdRaw)
+          ? (qdRaw[0] as Record<string, unknown> | undefined)
+          : (qdRaw as Record<string, unknown> | undefined);
 
         return {
-          id: row.id,
-          surveyId: row.survey_id,
-          text: row.text,
-          description: row.description,
-          type: row.type,
-          reverseScored: row.reverse_scored,
-          options: row.options,
-          required: row.required,
-          displayOrder: row.order_index,
-          diagnosticFocus: row.diagnostic_focus,
-          recommendedAction: row.recommended_action,
-          createdAt: row.created_at,
-          updatedAt: row.updated_at,
-          subDimensionId: row.sub_dimension_id ?? null,
+          id: row['id'] as string,
+          surveyId: row['survey_id'] as string,
+          text: row['text'] as string,
+          description: (row['description'] as string) ?? null,
+          type: row['type'] as QuestionWithDimension['type'],
+          reverseScored: (row['reverse_scored'] as boolean) ?? false,
+          options: row['options'] ?? null,
+          required: (row['required'] as boolean) ?? true,
+          displayOrder: row['order_index'] as number,
+          diagnosticFocus: (row['diagnostic_focus'] as string) ?? null,
+          recommendedAction: (row['recommended_action'] as string) ?? null,
+          createdAt: row['created_at'] as string,
+          updatedAt: row['updated_at'] as string,
+          subDimensionId: (row['sub_dimension_id'] as string) ?? null,
           dimension: qd
             ? {
-                id: qd.id,
-                questionId: qd.question_id,
-                dimensionId: qd.dimension_id,
-                weight: qd.weight,
+                id: (qd['id'] as string) ?? '',
+                questionId: qd['question_id'] as string,
+                dimensionId: qd['dimension_id'] as string,
+                weight: (qd['weight'] as number) ?? 1,
               }
-            : { id: '', questionId: row.id, dimensionId: '', weight: 1 },
+            : { id: '', questionId: row['id'] as string, dimensionId: '', weight: 1 },
           subDimension: null,
         } satisfies QuestionWithDimension;
       });
@@ -271,82 +273,31 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-/** Map a snake_case deployment row to the camelCase Deployment interface */
-function mapDeployment(row: any): import('@compass/types').Deployment {
-  return {
-    id: row.id,
-    surveyId: row.survey_id,
-    type: row.type,
-    token: row.token,
-    settings: row.settings,
-    expiresAt: row.expires_at,
-    accessCount: row.access_count,
-    lastAccessedAt: row.last_accessed_at,
-    createdAt: row.created_at,
-  };
-}
-
-/** Map a snake_case survey row to the camelCase Survey interface */
-function mapSurvey(row: any): import('@compass/types').Survey {
-  return {
-    id: row.id,
-    organizationId: row.organization_id,
-    title: row.title,
-    description: row.description,
-    status: row.status,
-    opensAt: row.opens_at,
-    closesAt: row.closes_at,
-    settings: row.settings,
-    scoresCalculated: row.scores_calculated,
-    scoresCalculatedAt: row.scores_calculated_at,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-    createdBy: row.created_by,
-  };
-}
-
-/** Map a snake_case response row to the camelCase SurveyResponse interface */
-function mapResponse(row: any): SurveyResponse {
-  return {
-    id: row.id,
-    surveyId: row.survey_id,
-    deploymentId: row.deployment_id,
-    answers: row.answers,
-    metadata: row.metadata,
-    completedAt: row.completed_at,
-    ipHash: row.ip_hash,
-    userAgent: row.user_agent,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
-  };
-}
-
 /** Map response row with joined answers from the answers table */
-function mapResponseWithAnswers(row: any): SurveyResponse {
+function mapResponseWithAnswers(row: Record<string, unknown>): SurveyResponse {
   // Build answers map from the joined answers rows
-  const answersArray = Array.isArray(row.answers) ? row.answers : [];
+  const rawAnswers = row['answers'];
+  const answersArray = Array.isArray(rawAnswers) ? rawAnswers as Array<Record<string, unknown>> : [];
   const answers: Record<string, LikertValue | string> = {};
 
   for (const a of answersArray) {
-    if (a.likert_value != null) {
-      answers[a.question_id] = a.likert_value as LikertValue;
-    } else if (a.open_text_value != null) {
-      answers[a.question_id] = a.open_text_value;
+    if (a['likert_value'] != null) {
+      answers[a['question_id'] as string] = a['likert_value'] as LikertValue;
+    } else if (a['open_text_value'] != null) {
+      answers[a['question_id'] as string] = a['open_text_value'] as string;
     }
   }
 
   return {
-    id: row.id,
-    surveyId: row.survey_id,
-    deploymentId: row.deployment_id,
+    id: row['id'] as string,
+    surveyId: row['survey_id'] as string,
+    deploymentId: row['deployment_id'] as string,
     answers,
-    metadata: row.metadata,
-    completedAt: row.completed_at,
-    ipHash: row.ip_hash,
-    userAgent: row.user_agent,
-    createdAt: row.created_at,
-    updatedAt: row.updated_at,
+    metadata: row['metadata'] as SurveyResponse['metadata'],
+    completedAt: (row['completed_at'] as string) ?? null,
+    ipHash: (row['ip_hash'] as string) ?? null,
+    userAgent: (row['user_agent'] as string) ?? null,
+    createdAt: row['created_at'] as string,
+    updatedAt: row['updated_at'] as string,
   };
 }

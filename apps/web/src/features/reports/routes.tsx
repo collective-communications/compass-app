@@ -15,7 +15,7 @@ import { useAuthStore } from '../../stores/auth-store';
 import { supabase } from '../../lib/supabase';
 import { AppShell } from '../../components/shells/app-shell';
 import { ReportsPage } from './pages/reports-page';
-import { useScoredSurveys } from '../results/hooks/use-scored-surveys';
+import { useScoredSurveys } from '../../hooks/use-scored-surveys';
 
 /** Map internal roles to the UserRole type expected by ReportsPage. */
 function mapUserRole(role: string): 'client_exec' | 'director' | 'manager' {

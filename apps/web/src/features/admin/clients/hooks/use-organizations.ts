@@ -26,6 +26,7 @@ export function useOrganizations(): UseQueryResult<OrganizationSummary[]> {
   return useQuery({
     queryKey: organizationKeys.list(),
     queryFn: listOrganizations,
+    staleTime: 30_000,
   });
 }
 
