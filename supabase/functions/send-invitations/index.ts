@@ -192,7 +192,7 @@ Deno.serve(async (req: Request) => {
           sent++;
         } else {
           const msg = result.reason instanceof Error ? result.reason.message : 'Unknown error';
-          errors.push(`${batch[j].email}: ${msg}`);
+          errors.push(`recipient_${i + j + 1}: ${msg}`);
           failed++;
 
           // Log failed send to email_log

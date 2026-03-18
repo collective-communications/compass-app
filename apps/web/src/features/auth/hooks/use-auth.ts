@@ -57,6 +57,15 @@ function mapSupabaseError(message: string): string {
   return LOGIN_ERRORS.UNKNOWN;
 }
 
+/** Validate returnTo is a safe relative path (no protocol, no double-slash) */
+function isValidReturnTo(value: string): boolean {
+  if (!value.startsWith('/')) return false;
+  if (value.startsWith('//')) return false;
+  if (value.includes('://')) return false;
+  if (value.includes('\\')) return false;
+  return true;
+}
+
 export function useAuth(): UseAuthReturn {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +74,8 @@ export function useAuth(): UseAuthReturn {
   let returnTo: string | undefined;
   try {
     const search = useSearch({ strict: false }) as Record<string, unknown>;
-    returnTo = typeof search.returnTo === 'string' ? search.returnTo : undefined;
+    const raw = typeof search.returnTo === 'string' ? search.returnTo : undefined;
+    returnTo = raw && isValidReturnTo(raw) ? raw : undefined;
   } catch {
     returnTo = undefined;
   }

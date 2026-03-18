@@ -1,5 +1,5 @@
 product_overview
-
+*.bak
 
 # tkr kit / Claude
 tkr-kit.db.bak
@@ -10,6 +10,7 @@ tkr-kit
 claude.local.md
 .koji
 .app-manager
+
 
 # OS
 .DS_Store
@@ -22,6 +23,7 @@ dist
 *.tsbuildinfo
 
 # Environment
+.env
 .env.local
 .env.*.local
 
@@ -44,3 +46,9 @@ apps/storybook/storybook-static
 *.swp
 *.swo
 .vercel
+
+# tkr-kit (local/machine-specific)
+.koji/
+.claude/settings.local.json
+CLAUDE.local.md
+tkr-kit.yml

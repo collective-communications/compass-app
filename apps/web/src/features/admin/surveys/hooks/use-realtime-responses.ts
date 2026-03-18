@@ -13,6 +13,7 @@ export type ConnectionStatus = 'connected' | 'disconnected' | 'polling';
 
 export interface UseRealtimeResponsesOptions {
   surveyId: string;
+  deploymentId: string | null;
   enabled?: boolean;
 }
 
@@ -29,6 +30,7 @@ const POLL_INTERVAL_MS = 30_000;
  */
 export function useRealtimeResponses({
   surveyId,
+  deploymentId,
   enabled = true,
 }: UseRealtimeResponsesOptions): UseRealtimeResponsesResult {
   const queryClient = useQueryClient();
@@ -55,14 +57,14 @@ export function useRealtimeResponses({
   }, []);
 
   useEffect(() => {
-    if (!enabled || !surveyId) {
+    if (!enabled || !deploymentId) {
       setConnectionStatus('disconnected');
       return;
     }
 
     let unsubscribed = false;
 
-    const { unsubscribe } = subscribeToResponses(surveyId, () => {
+    const { unsubscribe } = subscribeToResponses(deploymentId, () => {
       if (!unsubscribed) {
         invalidateMetrics();
       }
@@ -87,7 +89,7 @@ export function useRealtimeResponses({
       stopPolling();
       unsubscribe();
     };
-  }, [surveyId, enabled, invalidateMetrics, startPolling, stopPolling]);
+  }, [deploymentId, enabled, invalidateMetrics, startPolling, stopPolling]);
 
   return { connectionStatus };
 }

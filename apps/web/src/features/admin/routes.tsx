@@ -58,12 +58,23 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       const navigate = useNavigate();
       const user = useAuthStore((s) => s.user);
 
+      const navigateToSurvey = (surveyId: string): void => {
+        void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+      };
+
       return (
         <SurveyListPage
           organizationId={user?.tier === 'tier_1' ? '' : user?.organizationId ?? ''}
           userId={user?.id ?? ''}
-          onSelectSurvey={(surveyId: string) => {
-            void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+          onSelectSurvey={navigateToSurvey}
+          onConfigure={navigateToSurvey}
+          onEditQuestions={navigateToSurvey}
+          onCopyLink={(surveyId: string) => {
+            const url = `${window.location.origin}/admin/surveys/${surveyId}/deploy`;
+            void navigator.clipboard.writeText(url);
+          }}
+          onViewResults={(surveyId: string) => {
+            void navigate({ to: '/admin/surveys/$surveyId/deploy', params: { surveyId } });
           }}
         />
       );
@@ -95,7 +106,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       const { surveyId } = adminSurveyDeployRoute.useParams() as { surveyId: string };
       const { deployment, deactivate, isPending } = useDeploymentManagement({ surveyId });
       const metricsQuery = useResponseTracking({ surveyId });
-      const { connectionStatus } = useRealtimeResponses({ surveyId });
+      const { connectionStatus } = useRealtimeResponses({ surveyId, deploymentId: deployment.data?.id ?? null });
       const builderQuery = useSurveyBuilder({ surveyId });
 
       if (deployment.isLoading || metricsQuery.isLoading || builderQuery.isLoading) {
@@ -151,14 +162,10 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     path: '/clients/$orgId',
     component: function AdminClientDetailPage(): ReactElement {
       const { orgId } = adminClientDetailRoute.useParams() as { orgId: string };
-      const navigate = useNavigate();
 
       return (
         <ClientDetailPage
           orgId={orgId}
-          onBack={() => {
-            void navigate({ to: '/admin/clients' });
-          }}
         />
       );
     },

@@ -11,6 +11,7 @@ import type {
   SurveyStatus,
 } from '@compass/types';
 import { supabase } from '../../../../lib/supabase';
+import { mapSurveyRow, mapDeploymentRow } from '../../../../lib/mappers/survey-mappers';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -147,52 +148,76 @@ export async function deactivateDeployment(
 
 // ─── Response Tracking ──────────────────────────────────────────────────────
 
-/** Fetch aggregated response metrics for a survey */
+/** Fetch aggregated response metrics for a survey (queries via deployments → responses) */
 export async function getResponseMetrics(surveyId: string): Promise<ResponseMetrics> {
+  // Responses reference deployment_id, not survey_id — resolve deployment IDs first
+  const { data: deployments, error: depError } = await supabase
+    .from('deployments')
+    .select('id')
+    .eq('survey_id', surveyId);
+
+  if (depError) throw depError;
+
+  const deploymentIds = (deployments ?? []).map((d) => d.id as string);
+  if (deploymentIds.length === 0) {
+    return {
+      totalResponses: 0,
+      completedResponses: 0,
+      completionRate: 0,
+      averageCompletionTimeMs: null,
+      departmentBreakdown: [],
+      dailyCompletions: [],
+    };
+  }
+
   const { data: responses, error } = await supabase
     .from('responses')
-    .select('id, completed_at, created_at, metadata')
-    .eq('survey_id', surveyId);
+    .select('id, submitted_at, is_complete, created_at, metadata_department')
+    .in('deployment_id', deploymentIds);
 
   if (error) throw error;
 
   const rows = responses ?? [];
   const totalResponses = rows.length;
   const completedRows = rows.filter(
-    (r) => (r as Record<string, unknown>)['completed_at'] !== null,
+    (r) => (r as Record<string, unknown>)['is_complete'] === true,
   );
   const completedResponses = completedRows.length;
   const completionRate = totalResponses > 0 ? (completedResponses / totalResponses) * 100 : 0;
 
-  // Average completion time (completed_at - created_at)
+  // Average completion time (submitted_at - created_at)
   let averageCompletionTimeMs: number | null = null;
   if (completedRows.length > 0) {
-    const durations = completedRows.map((r) => {
-      const raw = r as Record<string, unknown>;
-      const created = new Date(raw['created_at'] as string).getTime();
-      const completed = new Date(raw['completed_at'] as string).getTime();
-      return completed - created;
-    });
-    averageCompletionTimeMs = durations.reduce((a, b) => a + b, 0) / durations.length;
+    const durations = completedRows
+      .filter((r) => (r as Record<string, unknown>)['submitted_at'] != null)
+      .map((r) => {
+        const raw = r as Record<string, unknown>;
+        const created = new Date(raw['created_at'] as string).getTime();
+        const submitted = new Date(raw['submitted_at'] as string).getTime();
+        return submitted - created;
+      });
+    averageCompletionTimeMs =
+      durations.length > 0 ? durations.reduce((a, b) => a + b, 0) / durations.length : null;
   }
 
-  // Department breakdown
+  // Department breakdown (metadata_department is a flat column, not JSONB)
   const deptCounts = new Map<string, number>();
   for (const r of rows) {
     const raw = r as Record<string, unknown>;
-    const meta = raw['metadata'] as Record<string, unknown> | null;
-    const dept = (meta?.['department'] as string) ?? 'Unknown';
+    const dept = (raw['metadata_department'] as string) ?? 'Unknown';
     deptCounts.set(dept, (deptCounts.get(dept) ?? 0) + 1);
   }
   const departmentBreakdown: DepartmentBreakdown[] = Array.from(deptCounts.entries())
     .map(([department, count]) => ({ department, count }))
     .sort((a, b) => b.count - a.count);
 
-  // Daily completions
+  // Daily completions (by submitted_at date)
   const dailyCounts = new Map<string, number>();
   for (const r of completedRows) {
     const raw = r as Record<string, unknown>;
-    const date = (raw['completed_at'] as string).slice(0, 10);
+    const submittedAt = raw['submitted_at'] as string | null;
+    if (!submittedAt) continue;
+    const date = submittedAt.slice(0, 10);
     dailyCounts.set(date, (dailyCounts.get(date) ?? 0) + 1);
   }
   const dailyCompletions: DailyCompletion[] = Array.from(dailyCounts.entries())
@@ -223,22 +248,22 @@ export async function triggerScoreRecalculation(surveyId: string): Promise<void>
 // ─── Realtime ───────────────────────────────────────────────────────────────
 
 /**
- * Subscribe to new response inserts for a survey.
+ * Subscribe to new response inserts for a deployment.
  * Returns an unsubscribe function.
  */
 export function subscribeToResponses(
-  surveyId: string,
+  deploymentId: string,
   onInsert: () => void,
 ): { unsubscribe: () => void } {
   const channel = supabase
-    .channel(`responses:survey_id=eq.${surveyId}`)
+    .channel(`responses:deployment_id=eq.${deploymentId}`)
     .on(
       'postgres_changes',
       {
         event: 'INSERT',
         schema: 'public',
         table: 'responses',
-        filter: `survey_id=eq.${surveyId}`,
+        filter: `deployment_id=eq.${deploymentId}`,
       },
       () => {
         onInsert();
@@ -250,39 +275,5 @@ export function subscribeToResponses(
     unsubscribe: () => {
       supabase.removeChannel(channel);
     },
-  };
-}
-
-// ─── Row Mappers ────────────────────────────────────────────────────────────
-
-function mapSurveyRow(raw: Record<string, unknown>): Survey {
-  return {
-    id: raw['id'] as string,
-    organizationId: raw['organization_id'] as string,
-    title: raw['title'] as string,
-    description: (raw['description'] as string) ?? null,
-    status: raw['status'] as Survey['status'],
-    opensAt: (raw['opens_at'] as string) ?? null,
-    closesAt: (raw['closes_at'] as string) ?? null,
-    settings: (raw['settings'] as Survey['settings']) ?? null,
-    scoresCalculated: (raw['scores_calculated'] as boolean) ?? false,
-    scoresCalculatedAt: (raw['scores_calculated_at'] as string) ?? null,
-    createdAt: raw['created_at'] as string,
-    updatedAt: raw['updated_at'] as string,
-    createdBy: raw['created_by'] as string,
-  };
-}
-
-function mapDeploymentRow(raw: Record<string, unknown>): Deployment {
-  return {
-    id: raw['id'] as string,
-    surveyId: raw['survey_id'] as string,
-    type: raw['type'] as Deployment['type'],
-    token: raw['token'] as string,
-    settings: (raw['settings'] as Deployment['settings']) ?? null,
-    expiresAt: (raw['expires_at'] as string) ?? null,
-    accessCount: (raw['access_count'] as number) ?? 0,
-    lastAccessedAt: (raw['last_accessed_at'] as string) ?? null,
-    createdAt: raw['created_at'] as string,
   };
 }
