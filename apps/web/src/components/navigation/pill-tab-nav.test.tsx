@@ -26,12 +26,12 @@ describe('PillTabNav', () => {
 
   test('renders buttons for each tab', () => {
     render(<PillTabNav tabs={TABS} activeId="compass" onSelect={() => {}} />);
-    const buttons = screen.getAllByRole('button');
-    expect(buttons).toHaveLength(TABS.length);
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs).toHaveLength(TABS.length);
   });
 
   test('active tab has dark fill styling', () => {
-    const { container } = render(
+    render(
       <PillTabNav tabs={TABS} activeId="survey" onSelect={() => {}} />,
     );
     const activeButton = screen.getByText('Survey');
@@ -93,7 +93,7 @@ describe('PillTabNav', () => {
 
   test('renders empty list when no tabs provided', () => {
     render(<PillTabNav tabs={[]} activeId="" onSelect={() => {}} />);
-    const buttons = screen.queryAllByRole('button');
-    expect(buttons).toHaveLength(0);
+    const tabs = screen.queryAllByRole('tab');
+    expect(tabs).toHaveLength(0);
   });
 });
