@@ -173,13 +173,17 @@ export async function createSurvey(params: CreateSurveyParams): Promise<Survey> 
 
   const survey = mapSurveyRow(surveyData as Record<string, unknown>);
 
-  // Copy questions from template or existing survey
-  const sourceId = templateId ?? duplicateFromId;
-  if (sourceId) {
-    if (templateId) {
-      await copyQuestionsFromTemplate(survey.id, templateId);
-    } else if (duplicateFromId) {
-      await copyQuestionsFromSurvey(survey.id, duplicateFromId);
+  // Copy questions from template or existing survey.
+  // When neither is specified, fall back to the system template so new surveys
+  // are pre-populated with the standard ~56 question bank.
+  if (templateId) {
+    await copyQuestionsFromTemplate(survey.id, templateId);
+  } else if (duplicateFromId) {
+    await copyQuestionsFromSurvey(survey.id, duplicateFromId);
+  } else {
+    const systemTemplateId = await resolveSystemTemplateId();
+    if (systemTemplateId) {
+      await copyQuestionsFromTemplate(survey.id, systemTemplateId);
     }
   }
 
@@ -275,6 +279,25 @@ export async function listTemplates(
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
 
+/** Cached system template ID — resolved once per session */
+let _systemTemplateId: string | null | undefined;
+
+/** Look up the single active system template (is_system=true, is_active=true) */
+async function resolveSystemTemplateId(): Promise<string | null> {
+  if (_systemTemplateId !== undefined) return _systemTemplateId;
+
+  const { data, error } = await supabase
+    .from('survey_templates')
+    .select('id')
+    .eq('is_system', true)
+    .eq('is_active', true)
+    .limit(1)
+    .single();
+
+  _systemTemplateId = error || !data ? null : (data.id as string);
+  return _systemTemplateId;
+}
+
 async function copyQuestionsFromTemplate(
   targetSurveyId: string,
   templateId: string,
@@ -293,13 +316,11 @@ async function copyQuestionsFromTemplate(
   const questionInserts = templateQuestions.map((q, index) => ({
     survey_id: targetSurveyId,
     text: q['text'] as string,
-    description: (q['description'] as string) ?? null,
-    type: (q['type'] as string) ?? 'likert_4',
+    type: (q['type'] as string) ?? 'likert',
     reverse_scored: (q['reverse_scored'] as boolean) ?? false,
     required: (q['required'] as boolean) ?? true,
     order_index: index + 1,
-    diagnostic_focus: (q['diagnostic_focus'] as string) ?? null,
-    recommended_action: (q['recommended_action'] as string) ?? null,
+    sub_dimension_id: (q['sub_dimension_id'] as string) ?? null,
   }));
 
   const { data: insertedQuestions, error: insertError } = await supabase
@@ -309,19 +330,35 @@ async function copyQuestionsFromTemplate(
 
   if (insertError || !insertedQuestions) return;
 
-  // Map dimension assignments from template
-  const dimensionMappings = insertedQuestions
-    .map((inserted, index) => {
-      const templateQ = templateQuestions[index];
+  // Map dimension assignments from template.
+  // Each template question carries a `dimensions` array to support multi-dimension
+  // mappings (e.g. the S4 pride question maps to all 4 dimensions at 0.25 weight).
+  // Falls back to the legacy single `dimension_id` field for backwards compatibility.
+  const dimensionMappings: Array<{ question_id: string; dimension_id: string; weight: number }> = [];
+
+  insertedQuestions.forEach((inserted, index) => {
+    const templateQ = templateQuestions[index];
+    const dims = templateQ?.['dimensions'] as Array<Record<string, unknown>> | undefined;
+
+    if (dims?.length) {
+      for (const d of dims) {
+        dimensionMappings.push({
+          question_id: inserted.id as string,
+          dimension_id: d['dimension_id'] as string,
+          weight: (d['weight'] as number) ?? 1,
+        });
+      }
+    } else {
       const dimId = templateQ?.['dimension_id'] as string | undefined;
-      if (!dimId) return null;
-      return {
-        question_id: inserted.id as string,
-        dimension_id: dimId,
-        weight: (templateQ?.['weight'] as number) ?? 1,
-      };
-    })
-    .filter((m): m is NonNullable<typeof m> => m !== null);
+      if (dimId) {
+        dimensionMappings.push({
+          question_id: inserted.id as string,
+          dimension_id: dimId,
+          weight: (templateQ?.['weight'] as number) ?? 1,
+        });
+      }
+    }
+  });
 
   if (dimensionMappings.length > 0) {
     await supabase.from('question_dimensions').insert(dimensionMappings);
@@ -345,13 +382,11 @@ async function copyQuestionsFromSurvey(
     return {
       survey_id: targetSurveyId,
       text: raw['text'] as string,
-      description: (raw['description'] as string) ?? null,
-      type: (raw['type'] as string) ?? 'likert_4',
+      type: (raw['type'] as string) ?? 'likert',
       reverse_scored: (raw['reverse_scored'] as boolean) ?? false,
       required: (raw['required'] as boolean) ?? true,
       order_index: raw['order_index'] as number,
-      diagnostic_focus: (raw['diagnostic_focus'] as string) ?? null,
-      recommended_action: (raw['recommended_action'] as string) ?? null,
+      sub_dimension_id: (raw['sub_dimension_id'] as string) ?? null,
     };
   });
 

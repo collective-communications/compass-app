@@ -398,7 +398,46 @@ async function seedQuestions(): Promise<void> {
     { id: IDS.questions.q57, text: 'What is one thing you would change about how your organization communicates?', order: 57, dim: null, subDim: null, type: 'open_text' },
   ];
 
-  // Upsert questions
+  // Get dimension IDs (needed for both template JSONB and question_dimensions)
+  const { data: dims } = await supabase.from('dimensions').select('id, code');
+  if (!dims) return;
+  const dimMap = Object.fromEntries(dims.map((d) => [d.code, d.id]));
+
+  // Build the template JSONB so new surveys can copy from it via copyQuestionsFromTemplate.
+  // Each entry carries `dimensions` (array) and `sub_dimension_id` alongside text/type/flags.
+  const templateJsonb = questions.map((q) => {
+    const dims: Array<{ dimension_id: string; weight: number }> = [];
+
+    if (q.dim) {
+      // Standard single-dimension mapping
+      dims.push({ dimension_id: dimMap[q.dim], weight: 1.0 });
+    } else if (q.order === 56) {
+      // S4 pride question maps to all 4 dimensions at 0.25 each
+      for (const code of ['core', 'clarity', 'connection', 'collaboration']) {
+        dims.push({ dimension_id: dimMap[code], weight: 0.25 });
+      }
+    }
+
+    return {
+      text: q.text,
+      type: q.type ?? 'likert',
+      reverse_scored: q.reverse ?? false,
+      required: true,
+      sub_dimension_id: q.subDim ?? null,
+      dimensions: dims,
+    };
+  });
+
+  const { error: tplErr } = await supabase
+    .from('survey_templates')
+    .update({ questions: templateJsonb })
+    .eq('id', IDS.template);
+
+  if (tplErr) {
+    console.error(`  template questions JSONB FAILED: ${tplErr.message}`);
+  }
+
+  // Upsert questions into the seeded survey
   const { error: qError } = await supabase.from('questions').upsert(
     questions.map((q) => ({
       id: q.id,
@@ -417,12 +456,7 @@ async function seedQuestions(): Promise<void> {
     return;
   }
 
-  // Get dimension IDs
-  const { data: dims } = await supabase.from('dimensions').select('id, code');
-  if (!dims) return;
-  const dimMap = Object.fromEntries(dims.map((d) => [d.code, d.id]));
-
-  // Build dimension mappings
+  // Build dimension mappings for the seeded survey's questions
   const likertQuestions = questions.filter((q) => q.dim);
   const s4Question = questions.find((q) => q.order === 56);
 
