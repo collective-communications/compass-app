@@ -18,7 +18,7 @@
     "db:clean": "bun run scripts/seed-dev.ts --clean",
     "vault:seed": "bun run scripts/seed-vault.ts",
     "setup:vercel": "bun run scripts/setup-vercel.ts",
-    "build": "bun run --filter @compass/web build",
+    "compass:build": "bun run --filter @compass/web build",
     "lint": "eslint .",
     "typecheck": "tsc -b",
     "test": "bun test apps/web packages",
