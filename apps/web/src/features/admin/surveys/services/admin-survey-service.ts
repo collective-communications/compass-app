@@ -21,6 +21,7 @@ import { mapSurveyRow, mapQuestionRow, mapDimensionRow, mapSubDimensionRow } fro
 export interface SurveyListItem extends Survey {
   responseCount: number;
   completionPercent: number;
+  activeDeploymentToken: string | null;
 }
 
 /** Survey with full question and dimension data for the builder */
@@ -67,7 +68,7 @@ export async function listSurveys(
 ): Promise<SurveyListItem[]> {
   let query = supabase
     .from('surveys')
-    .select('*, deployments(responses(count))')
+    .select('*, deployments(token, is_active, responses(count))')
     .order('updated_at', { ascending: false });
 
   // CC+C admins pass empty org ID to see all surveys (RLS enforces access)
@@ -85,14 +86,16 @@ export async function listSurveys(
 
   return (data ?? []).map((row) => {
     const raw = row as Record<string, unknown>;
-    const deployments = raw['deployments'] as Array<{ responses: Array<{ count: number }> }> | undefined;
+    const deployments = raw['deployments'] as Array<{ token: string; is_active: boolean; responses: Array<{ count: number }> }> | undefined;
     const responseCount = deployments?.reduce(
       (sum, d) => sum + (d.responses?.[0]?.count ?? 0), 0,
     ) ?? 0;
+    const activeDeployment = deployments?.find((d) => d.is_active);
     return {
       ...mapSurveyRow(raw),
       responseCount,
       completionPercent: 0, // Calculated server-side if needed
+      activeDeploymentToken: activeDeployment?.token ?? null,
     };
   });
 }
@@ -218,23 +221,17 @@ export async function updateQuestion(params: UpdateQuestionParams): Promise<Ques
   return mapQuestionRow(data as Record<string, unknown>);
 }
 
-/** Reorder questions by updating order_index values */
+/** Reorder questions by updating order_index values via a single RPC call */
 export async function reorderQuestions(
   surveyId: string,
   reorders: ReorderQuestionParams[],
 ): Promise<void> {
-  // Update each question's order_index in a batch
-  const updates = reorders.map(({ questionId, newOrder }) =>
-    supabase
-      .from('questions')
-      .update({ order_index: newOrder })
-      .eq('id', questionId)
-      .eq('survey_id', surveyId),
-  );
-
-  const results = await Promise.all(updates);
-  const firstError = results.find((r) => r.error);
-  if (firstError?.error) throw firstError.error;
+  const { error } = await supabase.rpc('reorder_questions', {
+    p_survey_id: surveyId,
+    p_question_ids: reorders.map((r) => r.questionId),
+    p_new_orders: reorders.map((r) => r.newOrder),
+  });
+  if (error) throw error;
 }
 
 /** Update survey status */

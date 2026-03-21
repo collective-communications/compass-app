@@ -21,6 +21,7 @@ export interface AdminNote {
   authorName: string;
   content: string;
   createdAt: string;
+  archivedAt: string | null;
 }
 
 /** Parameters for updating an organization */
@@ -119,6 +120,7 @@ async function fetchNotes(orgId: string): Promise<AdminNote[]> {
     authorName: row.author_name,
     content: row.content,
     createdAt: row.created_at,
+    archivedAt: row.archived_at ?? null,
   }));
 }
 
@@ -220,6 +222,7 @@ export function useAddNote(orgId: string): UseMutationResult<AdminNote, Error, {
         authorName: data.author_name,
         content: data.content,
         createdAt: data.created_at,
+        archivedAt: data.archived_at ?? null,
       };
     },
     onSuccess: () => {
@@ -228,7 +231,7 @@ export function useAddNote(orgId: string): UseMutationResult<AdminNote, Error, {
   });
 }
 
-/** Mutation to archive an organization (soft delete via status column) */
+/** Mutation to archive an organization (soft delete) */
 export function useArchiveOrganization(orgId: string): UseMutationResult<void, Error, void> {
   const queryClient = useQueryClient();
 
@@ -243,6 +246,63 @@ export function useArchiveOrganization(orgId: string): UseMutationResult<void, E
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: organizationKeys.all });
+    },
+  });
+}
+
+/** Mutation to unarchive an organization */
+export function useUnarchiveOrganization(orgId: string): UseMutationResult<void, Error, void> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (): Promise<void> => {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ archived_at: null })
+        .eq('id', orgId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: organizationKeys.all });
+    },
+  });
+}
+
+/** Mutation to archive an admin note (soft delete) */
+export function useArchiveNote(orgId: string): UseMutationResult<void, Error, string> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (noteId: string): Promise<void> => {
+      const { error } = await supabase
+        .from('admin_notes')
+        .update({ archived_at: new Date().toISOString() })
+        .eq('id', noteId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: detailKeys.notes(orgId) });
+    },
+  });
+}
+
+/** Mutation to unarchive an admin note */
+export function useUnarchiveNote(orgId: string): UseMutationResult<void, Error, string> {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (noteId: string): Promise<void> => {
+      const { error } = await supabase
+        .from('admin_notes')
+        .update({ archived_at: null })
+        .eq('id', noteId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: detailKeys.notes(orgId) });
     },
   });
 }

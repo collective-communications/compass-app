@@ -50,16 +50,18 @@ export type { UseRealtimeResponsesOptions, UseRealtimeResponsesResult, Connectio
 
 export {
   saveSurveyConfig,
-  deploySurvey,
+  publishSurvey,
   getActiveDeployment,
-  deactivateDeployment,
+  unpublishSurvey,
+  archiveSurvey,
+  unarchiveSurvey,
   getResponseMetrics,
   triggerScoreRecalculation,
   subscribeToResponses,
 } from './services/deployment-service';
 export type {
   SaveSurveyConfigParams,
-  DeploySurveyParams,
+  PublishSurveyParams,
   DailyCompletion,
   DepartmentBreakdown,
   ResponseMetrics,

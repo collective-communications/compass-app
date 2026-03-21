@@ -1,4 +1,4 @@
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useState } from 'react';
 import type { DimensionCode } from './types';
 import { describeArc, clampScore } from './utils';
 import { SEGMENT_ANGLES, ANIMATION_DURATION } from './constants';
@@ -39,6 +39,7 @@ export const CompassSegment = memo(function CompassSegment(
 
   const angles = SEGMENT_ANGLES[dimension];
   const clamped = clampScore(score);
+  const [isFocusVisible, setIsFocusVisible] = useState(false);
 
   // Score maps to radius between coreRadius and maxRadius
   const scoreRadius = coreRadius + (clamped / 100) * (maxRadius - coreRadius);
@@ -46,6 +47,7 @@ export const CompassSegment = memo(function CompassSegment(
   // Full-extent path (for hit area) and score path (for fill)
   const scorePath = describeArc(cx, cy, scoreRadius, angles.start, angles.end);
   const hitPath = describeArc(cx, cy, maxRadius, angles.start, angles.end);
+  const focusRingPath = describeArc(cx, cy, maxRadius + 3, angles.start, angles.end);
 
   // Opacity based on selection state
   let opacity = 1.0;
@@ -75,6 +77,18 @@ export const CompassSegment = memo(function CompassSegment(
     [onClick, dimension],
   );
 
+  const handleFocus = useCallback((e: React.FocusEvent): void => {
+    // Detect keyboard focus via the :focus-visible heuristic
+    // Modern browsers apply focus-visible on keyboard navigation, not mouse clicks
+    if (e.target.matches(':focus-visible')) {
+      setIsFocusVisible(true);
+    }
+  }, []);
+
+  const handleBlur = useCallback((): void => {
+    setIsFocusVisible(false);
+  }, []);
+
   const transitionStyle: React.CSSProperties = animated
     ? { transition: `d ${ANIMATION_DURATION}ms ease-out, opacity 200ms ease` }
     : { transition: 'opacity 200ms ease' };
@@ -88,7 +102,9 @@ export const CompassSegment = memo(function CompassSegment(
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onKeyDown={handleKeyDown}
-      style={{ cursor: onClick ? 'pointer' : 'default' }}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      style={{ cursor: onClick ? 'pointer' : 'default', outline: 'none' }}
     >
       {/* Invisible hit area covering full segment extent */}
       <path d={hitPath} fill="transparent" />
@@ -99,6 +115,17 @@ export const CompassSegment = memo(function CompassSegment(
         opacity={opacity}
         style={transitionStyle}
       />
+      {/* Keyboard focus ring — visible only on :focus-visible */}
+      {isFocusVisible && (
+        <path
+          d={focusRingPath}
+          fill="none"
+          stroke="var(--grey-700, #424242)"
+          strokeWidth={2}
+          opacity={0.8}
+          pointerEvents="none"
+        />
+      )}
     </g>
   );
 });

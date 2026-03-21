@@ -1,7 +1,7 @@
 /**
  * Survey configuration modal using native <dialog>.
  * Allows editing title, description, dates, and anonymity threshold.
- * Provides "Save as Draft" and "Deploy Now" actions.
+ * Provides "Save as Draft" and "Publish Now" actions.
  */
 
 import { useRef, useEffect, useState, type ReactElement, type FormEvent } from 'react';
@@ -255,10 +255,10 @@ export function SurveyConfigModal({
             type="button"
             onClick={handleDeploy}
             disabled={!canDeploy || isPending}
-            title={!hasQuestions ? 'Add at least one question before deploying' : undefined}
+            title={!hasQuestions ? 'Add at least one question before publishing' : undefined}
             className="rounded-lg bg-[var(--grey-900)] px-4 py-2 text-sm font-medium text-[var(--grey-50)] hover:bg-[var(--grey-800)] disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {isPending ? 'Deploying...' : 'Deploy Now'}
+            {isPending ? 'Publishing\u2026' : 'Publish Now'}
           </button>
         </div>
       </form>

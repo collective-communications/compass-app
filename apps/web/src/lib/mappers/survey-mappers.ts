@@ -83,7 +83,7 @@ export function mapDeploymentRow(raw: Record<string, unknown>): Deployment {
     type: raw['type'] as Deployment['type'],
     token: raw['token'] as string,
     settings: (raw['settings'] as Deployment['settings']) ?? null,
-    expiresAt: (raw['expires_at'] as string) ?? null,
+    closesAt: (raw['closes_at'] as string) ?? null,
     accessCount: (raw['access_count'] as number) ?? 0,
     lastAccessedAt: (raw['last_accessed_at'] as string) ?? null,
     createdAt: raw['created_at'] as string,

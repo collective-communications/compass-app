@@ -44,9 +44,9 @@ const surveyManagementHelp: HelpEntry = {
         "Click '+ New Survey' to create from the Culture Compass template. The survey starts as a Draft with 32 pre-loaded questions. Configure dates, anonymity threshold, and welcome/completion messages.",
     },
     {
-      heading: 'Deploying',
+      heading: 'Publishing',
       content:
-        "Click 'Deploy Now' or generate a link from the configuration modal. Share the anonymous link with the organization. Only one survey per organization can be active at a time.",
+        "Click 'Publish Now' or generate a link from the configuration modal. Share the anonymous link with the organization. Only one survey per organization can be active at a time.",
     },
     {
       heading: 'Monitoring',

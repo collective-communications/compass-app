@@ -1,6 +1,7 @@
 /**
  * Key metrics summary card for the client detail page.
  * Displays total surveys, culture score with trend, and active survey status.
+ * Stats are clickable when navigation callbacks are provided.
  */
 
 import type { ReactElement } from 'react';
@@ -9,6 +10,8 @@ import { Card } from '../../../../components/ui/card';
 
 export interface KeyMetricsCardProps {
   organization: OrganizationSummary;
+  onTotalSurveysClick?: () => void;
+  onActiveSurveyClick?: (surveyId: string) => void;
 }
 
 /** Trend arrow with color coding */
@@ -31,7 +34,7 @@ function TrendIndicator({ trend }: { trend: 'up' | 'down' | 'stable' | null }): 
   );
 }
 
-export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElement {
+export function KeyMetricsCard({ organization, onTotalSurveysClick, onActiveSurveyClick }: KeyMetricsCardProps): ReactElement {
   const hasScore = organization.lastScore !== null;
 
   return (
@@ -43,10 +46,25 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
       <div className="grid grid-cols-3 gap-4">
         {/* Total Surveys */}
         <div>
-          <p className="text-2xl font-bold text-[var(--grey-900)]">{organization.totalSurveys}</p>
-          <p className="mt-1 text-sm text-[var(--text-secondary)]">
-            Total Survey{organization.totalSurveys !== 1 ? 's' : ''}
-          </p>
+          {onTotalSurveysClick ? (
+            <button
+              type="button"
+              onClick={onTotalSurveysClick}
+              className="text-left transition-colors hover:text-[var(--color-core)]"
+            >
+              <p className="text-2xl font-bold text-[var(--grey-900)]">{organization.totalSurveys}</p>
+              <p className="mt-1 text-sm text-[var(--text-secondary)] underline underline-offset-2">
+                Total Survey{organization.totalSurveys !== 1 ? 's' : ''}
+              </p>
+            </button>
+          ) : (
+            <>
+              <p className="text-2xl font-bold text-[var(--grey-900)]">{organization.totalSurveys}</p>
+              <p className="mt-1 text-sm text-[var(--text-secondary)]">
+                Total Survey{organization.totalSurveys !== 1 ? 's' : ''}
+              </p>
+            </>
+          )}
         </div>
 
         {/* Culture Score */}
@@ -61,12 +79,25 @@ export function KeyMetricsCard({ organization }: KeyMetricsCardProps): ReactElem
         {/* Active Survey */}
         <div>
           {organization.activeSurveyId ? (
-            <>
-              <p className="text-2xl font-bold text-[var(--severity-healthy-text)]">Active</p>
-              <p className="mt-1 truncate text-sm text-[var(--text-secondary)]">
-                {organization.activeSurveyTitle ?? 'Active Survey'}
-              </p>
-            </>
+            onActiveSurveyClick ? (
+              <button
+                type="button"
+                onClick={() => onActiveSurveyClick(organization.activeSurveyId!)}
+                className="text-left transition-colors hover:text-[var(--color-core)]"
+              >
+                <p className="text-2xl font-bold text-[var(--severity-healthy-text)]">Active</p>
+                <p className="mt-1 truncate text-sm text-[var(--text-secondary)] underline underline-offset-2">
+                  {organization.activeSurveyTitle ?? 'Active Survey'}
+                </p>
+              </button>
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-[var(--severity-healthy-text)]">Active</p>
+                <p className="mt-1 truncate text-sm text-[var(--text-secondary)]">
+                  {organization.activeSurveyTitle ?? 'Active Survey'}
+                </p>
+              </>
+            )
           ) : (
             <>
               <p className="text-2xl font-bold text-[var(--text-tertiary)]">{'\u2014'}</p>

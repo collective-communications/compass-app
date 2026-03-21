@@ -5,7 +5,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { Settings, Edit, Link, BarChart3 } from 'lucide-react';
+import { Settings, Edit, Link, BarChart3, Archive } from 'lucide-react';
 import type { SurveyStatus } from '@compass/types';
 import type { SurveyListItem } from '../services/admin-survey-service';
 
@@ -16,6 +16,7 @@ interface SurveyCardProps {
   onEditQuestions?: (surveyId: string) => void;
   onCopyLink?: (surveyId: string) => void;
   onViewResults?: (surveyId: string) => void;
+  onArchive?: (surveyId: string) => void;
 }
 
 /** Maps survey status to left border color (severity indicator) */
@@ -54,6 +55,16 @@ function getDaysRemaining(closesAt: string | null): string | null {
   return `${days}d remaining`;
 }
 
+/** Whether View Results should be enabled for this survey status */
+function canViewResults(status: SurveyStatus): boolean {
+  return status === 'closed' || status === 'archived';
+}
+
+/** Whether Archive action should be shown for this survey status */
+function canArchive(status: SurveyStatus): boolean {
+  return status === 'draft' || status === 'closed';
+}
+
 export function SurveyCard({
   survey,
   onClick,
@@ -61,8 +72,10 @@ export function SurveyCard({
   onEditQuestions,
   onCopyLink,
   onViewResults,
+  onArchive,
 }: SurveyCardProps): ReactElement {
   const daysRemaining = getDaysRemaining(survey.closesAt);
+  const resultsEnabled = canViewResults(survey.status);
 
   return (
     <div
@@ -135,13 +148,26 @@ export function SurveyCard({
         </button>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onViewResults?.(survey.id); }}
-          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
+          onClick={(e) => { e.stopPropagation(); if (resultsEnabled) onViewResults?.(survey.id); }}
+          disabled={!resultsEnabled}
+          title={!resultsEnabled ? 'Publish and close a survey to view results' : undefined}
+          className="inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-[var(--text-tertiary)]"
           aria-label="View results"
         >
           <BarChart3 size={14} />
           View Results
         </button>
+        {canArchive(survey.status) && onArchive && (
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); onArchive(survey.id); }}
+            className="ml-auto inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--text-primary)]"
+            aria-label="Archive survey"
+          >
+            <Archive size={14} />
+            Archive
+          </button>
+        )}
       </div>
     </div>
   );

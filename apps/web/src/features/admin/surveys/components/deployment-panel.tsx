@@ -56,7 +56,7 @@ export function DeploymentPanel({
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-[var(--grey-900)]">Active Deployment</h3>
+        <h3 className="text-sm font-semibold text-[var(--grey-900)]">Published Survey</h3>
         {daysRemaining !== null && (
           <span
             className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${

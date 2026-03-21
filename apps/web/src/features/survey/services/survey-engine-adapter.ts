@@ -7,7 +7,6 @@ import type {
   DeploymentResolution,
   SurveyResponse,
   MetadataConfig,
-  RespondentMetadata,
   QuestionWithDimension,
   LikertValue,
 } from '@compass/types';
@@ -45,8 +44,8 @@ export function createSurveyEngineAdapter(): Pick<
       }
 
       // Check if deployment has expired
-      const expiresAt = (deployment as Record<string, unknown>)['expires_at'] as string | null;
-      if (expiresAt && new Date(expiresAt) < new Date()) {
+      const deploymentClosesAt = (deployment as Record<string, unknown>)['closes_at'] as string | null;
+      if (deploymentClosesAt && new Date(deploymentClosesAt) < new Date()) {
         return { status: 'expired', message: 'This survey link has expired.' };
       }
 

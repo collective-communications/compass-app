@@ -308,7 +308,7 @@ export interface Deployment {
   type: DeploymentType;
   token: string;
   settings: DeploymentSettings | null;
-  expiresAt: string | null;
+  closesAt: string | null;
   accessCount: number;
   lastAccessedAt: string | null;
   createdAt: string;

@@ -1,15 +1,15 @@
 /**
- * TanStack Query hooks for deployment CRUD and activation.
- * Manages survey config saving, deployment creation, and deactivation.
+ * TanStack Query hooks for survey publishing and lifecycle management.
+ * Manages survey config saving, publishing (activation), and unpublishing.
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
 import type { Survey, Deployment, DeploymentType } from '@compass/types';
 import {
   saveSurveyConfig,
-  deploySurvey,
+  publishSurvey,
   getActiveDeployment,
-  deactivateDeployment,
+  unpublishSurvey,
   type SaveSurveyConfigParams,
 } from '../services/deployment-service';
 import { surveyBuilderKeys } from './use-survey-builder';
@@ -30,16 +30,16 @@ export interface UseDeploymentManagementResult {
   deployment: UseQueryResult<Deployment | null>;
   /** Save survey config (title, dates, settings) as draft */
   saveConfig: (params: Omit<SaveSurveyConfigParams, 'surveyId'>) => Promise<Survey>;
-  /** Deploy the survey (activate + create deployment) */
-  deploy: (deploymentType?: DeploymentType) => Promise<Deployment>;
-  /** Deactivate deployment (close survey early) */
-  deactivate: () => Promise<void>;
+  /** Publish the survey (activate + create deployment) */
+  publish: (deploymentType?: DeploymentType) => Promise<Deployment>;
+  /** Unpublish (close survey early) */
+  unpublish: () => Promise<void>;
   /** Whether any mutation is in progress */
   isPending: boolean;
 }
 
 /**
- * Manages deployment lifecycle: save config, deploy, deactivate.
+ * Manages survey publishing lifecycle: save config, publish, unpublish.
  * Invalidates relevant queries on mutation success.
  */
 export function useDeploymentManagement({
@@ -62,20 +62,20 @@ export function useDeploymentManagement({
     },
   });
 
-  const deployMutation = useMutation({
+  const publishMutation = useMutation({
     mutationFn: (deploymentType: DeploymentType) =>
-      deploySurvey({ surveyId, deploymentType }),
+      publishSurvey({ surveyId, deploymentType }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: deploymentKeys.active(surveyId) });
       void queryClient.invalidateQueries({ queryKey: surveyBuilderKeys.detail(surveyId) });
     },
   });
 
-  const deactivateMutation = useMutation({
+  const unpublishMutation = useMutation({
     mutationFn: async () => {
       const current = deployment.data;
-      if (!current) throw new Error('No active deployment to deactivate');
-      return deactivateDeployment(surveyId, current.id);
+      if (!current) throw new Error('No active deployment to close');
+      return unpublishSurvey(surveyId, current.id);
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: deploymentKeys.active(surveyId) });
@@ -86,10 +86,10 @@ export function useDeploymentManagement({
   return {
     deployment,
     saveConfig: (params) => saveConfigMutation.mutateAsync(params),
-    deploy: (deploymentType = 'anonymous_link' as DeploymentType) =>
-      deployMutation.mutateAsync(deploymentType),
-    deactivate: () => deactivateMutation.mutateAsync(),
+    publish: (deploymentType = 'anonymous_link' as DeploymentType) =>
+      publishMutation.mutateAsync(deploymentType),
+    unpublish: () => unpublishMutation.mutateAsync(),
     isPending:
-      saveConfigMutation.isPending || deployMutation.isPending || deactivateMutation.isPending,
+      saveConfigMutation.isPending || publishMutation.isPending || unpublishMutation.isPending,
   };
 }

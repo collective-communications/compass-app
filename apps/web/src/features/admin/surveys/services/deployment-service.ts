@@ -25,8 +25,8 @@ export interface SaveSurveyConfigParams {
   settings: Partial<SurveySettings>;
 }
 
-/** Parameters for deploying (activating) a survey */
-export interface DeploySurveyParams {
+/** Parameters for publishing (activating) a survey */
+export interface PublishSurveyParams {
   surveyId: string;
   deploymentType: DeploymentType;
 }
@@ -79,8 +79,8 @@ export async function saveSurveyConfig(params: SaveSurveyConfigParams): Promise<
 
 // ─── Deployment ─────────────────────────────────────────────────────────────
 
-/** Deploy a survey: set status to active and create a deployment record */
-export async function deploySurvey(params: DeploySurveyParams): Promise<Deployment> {
+/** Publish a survey: set status to active and create a deployment record */
+export async function publishSurvey(params: PublishSurveyParams): Promise<Deployment> {
   const { surveyId, deploymentType } = params;
 
   // Generate a URL-safe token
@@ -126,8 +126,8 @@ export async function getActiveDeployment(surveyId: string): Promise<Deployment 
   return mapDeploymentRow(data as Record<string, unknown>);
 }
 
-/** Deactivate a deployment (close survey early) */
-export async function deactivateDeployment(
+/** Unpublish a survey (close it early) */
+export async function unpublishSurvey(
   surveyId: string,
   deploymentId: string,
 ): Promise<void> {
@@ -140,10 +140,30 @@ export async function deactivateDeployment(
 
   const { error: deployError } = await supabase
     .from('deployments')
-    .update({ expires_at: new Date().toISOString() })
+    .update({ closes_at: new Date().toISOString() })
     .eq('id', deploymentId);
 
   if (deployError) throw deployError;
+}
+
+/** Archive a survey (soft-delete: sets status to 'archived' and records timestamp) */
+export async function archiveSurvey(surveyId: string): Promise<void> {
+  const { error } = await supabase
+    .from('surveys')
+    .update({ status: 'archived' as SurveyStatus, archived_at: new Date().toISOString() })
+    .eq('id', surveyId);
+
+  if (error) throw error;
+}
+
+/** Unarchive a survey (restore to 'closed' status) */
+export async function unarchiveSurvey(surveyId: string): Promise<void> {
+  const { error } = await supabase
+    .from('surveys')
+    .update({ status: 'closed' as SurveyStatus, archived_at: null })
+    .eq('id', surveyId);
+
+  if (error) throw error;
 }
 
 // ─── Response Tracking ──────────────────────────────────────────────────────

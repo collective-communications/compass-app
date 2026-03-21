@@ -7,7 +7,8 @@
 
 import { useState, useCallback, type ReactElement } from 'react';
 import { useNavigate } from '@tanstack/react-router';
-import { useOrganization, useArchiveOrganization } from '../hooks/use-organization';
+import { MoreVertical } from 'lucide-react';
+import { useOrganization, useArchiveOrganization, useUnarchiveOrganization } from '../hooks/use-organization';
 import { OrgInfoCard } from '../components/org-info-card';
 import { KeyMetricsCard } from '../components/key-metrics-card';
 import { AdminNotes } from '../components/admin-notes';
@@ -16,8 +17,13 @@ import { EditOrgModal } from '../components/edit-org-modal';
 import { ClientUsersTab } from '../components/client-users-tab';
 import { DrilldownHeader } from '../../../../components/navigation/drilldown-header';
 import { SurveyListPage } from '../../surveys';
+import { SurveyConfigModal } from '../../surveys/components/survey-config-modal';
 import { useCreateSurvey } from '../../surveys/hooks/use-create-survey';
+import { useArchiveSurvey } from '../../surveys/hooks/use-archive-survey';
+import { useSurveys } from '../../surveys/hooks/use-surveys';
 import { useAuthStore } from '../../../../stores/auth-store';
+import { getSurveyBuilderData } from '../../surveys/services/admin-survey-service';
+import { useQuery } from '@tanstack/react-query';
 
 export interface ClientDetailPageProps {
   orgId: string;
@@ -35,6 +41,7 @@ const TABS: Array<{ id: DetailTab; label: string }> = [
 export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement {
   const { data: organization, isLoading, error } = useOrganization(orgId);
   const archiveOrg = useArchiveOrganization(orgId);
+  const unarchiveOrg = useUnarchiveOrganization(orgId);
   const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
 
@@ -42,7 +49,19 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [configSurveyId, setConfigSurveyId] = useState<string | null>(null);
   const createSurvey = useCreateSurvey();
+  const archiveSurvey = useArchiveSurvey();
+
+  // Fetch surveys list for copy-link token lookup
+  const { data: surveys } = useSurveys({ organizationId: orgId });
+
+  // Fetch full survey data when config modal is open
+  const { data: configSurveyData } = useQuery({
+    queryKey: ['admin', 'survey-builder', configSurveyId],
+    queryFn: () => getSurveyBuilderData(configSurveyId!),
+    enabled: !!configSurveyId,
+  });
 
   const isArchived = organization && 'archivedAt' in organization && !!(organization as Record<string, unknown>).archivedAt;
 
@@ -71,6 +90,32 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
     });
   }, [archiveOrg]);
 
+  const handleUnarchive = useCallback((): void => {
+    setMenuOpen(false);
+    setArchiveError(null);
+    unarchiveOrg.mutate(undefined, {
+      onError: (err) => {
+        setArchiveError(err.message ?? 'Failed to unarchive client.');
+      },
+    });
+  }, [unarchiveOrg]);
+
+  const handleCopyLink = useCallback((surveyId: string): void => {
+    const survey = surveys?.find((s) => s.id === surveyId);
+    if (survey?.activeDeploymentToken) {
+      const url = `${window.location.origin}/s/${survey.activeDeploymentToken}`;
+      void navigator.clipboard.writeText(url);
+    }
+  }, [surveys]);
+
+  const handleConfigSave = useCallback((): void => {
+    setConfigSurveyId(null);
+  }, []);
+
+  const handleConfigPublish = useCallback((): void => {
+    setConfigSurveyId(null);
+  }, []);
+
   if (isLoading) {
     return (
       <div className="mx-auto max-w-5xl px-4 py-6">
@@ -94,8 +139,16 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
     <div className="mx-auto max-w-5xl px-4 py-6">
       {/* Archived banner */}
       {isArchived && (
-        <div className="mb-4 rounded-lg bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800" role="status">
-          This client is archived. Reactivate to manage.
+        <div className="mb-4 flex items-center justify-between rounded-lg bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800" role="status">
+          <span>This client is archived.</span>
+          <button
+            type="button"
+            onClick={handleUnarchive}
+            disabled={unarchiveOrg.isPending}
+            className="text-sm font-medium text-yellow-900 underline underline-offset-2 hover:no-underline disabled:opacity-50"
+          >
+            {unarchiveOrg.isPending ? 'Restoring\u2026' : 'Unarchive'}
+          </button>
         </div>
       )}
 
@@ -118,7 +171,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
             aria-expanded={menuOpen}
             aria-haspopup="menu"
           >
-            &ctdot;
+            <MoreVertical size={18} aria-hidden="true" />
           </button>
 
           {menuOpen && (
@@ -137,15 +190,27 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
               >
                 Edit
               </button>
-              <button
-                type="button"
-                role="menuitem"
-                onClick={handleArchive}
-                disabled={archiveOrg.isPending}
-                className="w-full px-4 py-2 text-left text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)] disabled:opacity-50"
-              >
-                {archiveOrg.isPending ? 'Archiving...' : 'Archive'}
-              </button>
+              {isArchived ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleUnarchive}
+                  disabled={unarchiveOrg.isPending}
+                  className="w-full px-4 py-2 text-left text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)] disabled:opacity-50"
+                >
+                  {unarchiveOrg.isPending ? 'Restoring\u2026' : 'Unarchive'}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={handleArchive}
+                  disabled={archiveOrg.isPending}
+                  className="w-full px-4 py-2 text-left text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)] disabled:opacity-50"
+                >
+                  {archiveOrg.isPending ? 'Archiving\u2026' : 'Archive'}
+                </button>
+              )}
               <button
                 type="button"
                 role="menuitem"
@@ -190,7 +255,13 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
           {/* Left column (65%) */}
           <div className="flex flex-col gap-6 lg:w-[65%]">
             <OrgInfoCard organization={organization} onEdit={() => setEditModalOpen(true)} />
-            <KeyMetricsCard organization={organization} />
+            <KeyMetricsCard
+              organization={organization}
+              onTotalSurveysClick={() => setActiveTab('surveys')}
+              onActiveSurveyClick={(surveyId) => {
+                void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+              }}
+            />
             <AdminNotes orgId={orgId} />
           </div>
 
@@ -246,19 +317,15 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
             onSelectSurvey={(surveyId) => {
               void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
             }}
-            onConfigure={(surveyId) => {
-              void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
-            }}
+            onConfigure={(surveyId) => setConfigSurveyId(surveyId)}
             onEditQuestions={(surveyId) => {
               void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
             }}
-            onCopyLink={(surveyId) => {
-              const url = `${window.location.origin}/admin/surveys/${surveyId}/deploy`;
-              void navigator.clipboard.writeText(url);
-            }}
+            onCopyLink={handleCopyLink}
             onViewResults={(surveyId) => {
               void navigate({ to: '/admin/surveys/$surveyId/deploy', params: { surveyId } });
             }}
+            onArchive={(surveyId) => archiveSurvey.mutate(surveyId)}
           />
         </div>
       )}
@@ -275,6 +342,19 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
         organization={organization}
         onClose={() => setEditModalOpen(false)}
       />
+
+      {/* Survey config modal */}
+      {configSurveyId && configSurveyData && (
+        <SurveyConfigModal
+          open={true}
+          onClose={() => setConfigSurveyId(null)}
+          survey={configSurveyData.survey}
+          hasQuestions={configSurveyData.questions.length > 0}
+          onSave={handleConfigSave}
+          onDeploy={handleConfigPublish}
+          isPending={false}
+        />
+      )}
     </div>
   );
 }

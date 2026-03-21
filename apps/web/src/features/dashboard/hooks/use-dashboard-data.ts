@@ -136,7 +136,7 @@ function mapDeployment(row: Record<string, unknown>): Deployment {
     type: row.type as Deployment['type'],
     token: row.token as string,
     settings: (row.settings as Deployment['settings']) ?? null,
-    expiresAt: (row.expires_at as string) ?? null,
+    closesAt: (row.closes_at as string) ?? null,
     accessCount: (row.access_count as number) ?? 0,
     lastAccessedAt: (row.last_accessed_at as string) ?? null,
     createdAt: row.created_at as string,

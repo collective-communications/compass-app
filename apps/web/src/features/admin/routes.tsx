@@ -72,7 +72,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     path: '/surveys/$surveyId/deploy',
     component: function AdminSurveyDeployPage(): ReactElement {
       const { surveyId } = adminSurveyDeployRoute.useParams() as { surveyId: string };
-      const { deployment, deactivate, isPending } = useDeploymentManagement({ surveyId });
+      const { deployment, unpublish, isPending } = useDeploymentManagement({ surveyId });
       const metricsQuery = useResponseTracking({ surveyId });
       const { connectionStatus } = useRealtimeResponses({ surveyId, deploymentId: deployment.data?.id ?? null });
       const builderQuery = useSurveyBuilder({ surveyId });
@@ -80,7 +80,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       if (deployment.isLoading || metricsQuery.isLoading || builderQuery.isLoading) {
         return (
           <div className="flex items-center justify-center py-12">
-            <p className="text-[var(--text-secondary)]">Loading deployment...</p>
+            <p className="text-[var(--text-secondary)]">Loading published survey...</p>
           </div>
         );
       }
@@ -88,7 +88,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       if (!deployment.data || !builderQuery.data) {
         return (
           <div className="flex items-center justify-center py-12">
-            <p className="text-[var(--text-secondary)]">No active deployment found.</p>
+            <p className="text-[var(--text-secondary)]">No published survey found.</p>
           </div>
         );
       }
@@ -99,7 +99,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
             deployment={deployment.data}
             survey={builderQuery.data.survey}
             onDeactivate={() => {
-              void deactivate();
+              void unpublish();
             }}
             isPending={isPending}
           />

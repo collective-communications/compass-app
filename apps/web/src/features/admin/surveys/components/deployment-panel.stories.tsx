@@ -25,7 +25,7 @@ const baseDeployment: Deployment = {
   type: 'anonymous_link',
   token: 'abc123def456',
   settings: null,
-  expiresAt: null,
+  closesAt: null,
   accessCount: 42,
   lastAccessedAt: '2026-03-11T09:30:00Z',
   createdAt: '2026-03-01T00:00:00Z',

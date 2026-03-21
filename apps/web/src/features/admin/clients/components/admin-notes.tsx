@@ -1,10 +1,12 @@
 /**
  * Admin notes panel for the client detail page.
  * Displays a reverse-chronological log of CC+C-only notes with inline add form.
+ * Supports archiving with inline undo.
  */
 
 import { useState, useCallback, type ReactElement, type FormEvent } from 'react';
-import { useAdminNotes, useAddNote, type AdminNote } from '../hooks/use-organization';
+import { Archive } from 'lucide-react';
+import { useAdminNotes, useAddNote, useArchiveNote, useUnarchiveNote, type AdminNote } from '../hooks/use-organization';
 
 export interface AdminNotesProps {
   orgId: string;
@@ -23,14 +25,32 @@ function formatNoteDate(dateStr: string): string {
   });
 }
 
-function NoteItem({ note }: { note: AdminNote }): ReactElement {
+interface NoteItemProps {
+  note: AdminNote;
+  onArchive: (noteId: string) => void;
+  isArchiving: boolean;
+}
+
+function NoteItem({ note, onArchive, isArchiving }: NoteItemProps): ReactElement {
   return (
-    <div className="border-b border-[var(--grey-100)] py-3 last:border-b-0">
+    <div className="group border-b border-[var(--grey-100)] py-3 last:border-b-0">
       <div className="flex items-baseline justify-between gap-2">
         <p className="text-sm font-medium text-[var(--grey-700)]">{note.authorName}</p>
-        <time className="shrink-0 text-xs text-[var(--text-tertiary)]" dateTime={note.createdAt}>
-          {formatNoteDate(note.createdAt)}
-        </time>
+        <div className="flex items-center gap-2">
+          <time className="shrink-0 text-xs text-[var(--text-tertiary)]" dateTime={note.createdAt}>
+            {formatNoteDate(note.createdAt)}
+          </time>
+          <button
+            type="button"
+            onClick={() => onArchive(note.id)}
+            disabled={isArchiving}
+            className="shrink-0 rounded p-0.5 text-[var(--text-tertiary)] opacity-0 transition-opacity hover:text-[var(--grey-700)] group-hover:opacity-100 disabled:opacity-50"
+            aria-label="Archive note"
+            title="Archive note"
+          >
+            <Archive size={12} />
+          </button>
+        </div>
       </div>
       <p className="mt-1 text-sm text-[var(--text-tertiary)]">{note.content}</p>
     </div>
@@ -40,8 +60,11 @@ function NoteItem({ note }: { note: AdminNote }): ReactElement {
 export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
   const { data: notes, isLoading, error } = useAdminNotes(orgId);
   const addNote = useAddNote(orgId);
+  const archiveNote = useArchiveNote(orgId);
+  const unarchiveNote = useUnarchiveNote(orgId);
   const [content, setContent] = useState('');
   const [addError, setAddError] = useState<string | null>(null);
+  const [lastArchivedId, setLastArchivedId] = useState<string | null>(null);
 
   const handleSubmit = useCallback(
     (e: FormEvent): void => {
@@ -64,6 +87,24 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
     },
     [content, addNote],
   );
+
+  const handleArchive = useCallback(
+    (noteId: string): void => {
+      setLastArchivedId(noteId);
+      archiveNote.mutate(noteId);
+    },
+    [archiveNote],
+  );
+
+  const handleUndo = useCallback((): void => {
+    if (lastArchivedId) {
+      unarchiveNote.mutate(lastArchivedId);
+      setLastArchivedId(null);
+    }
+  }, [lastArchivedId, unarchiveNote]);
+
+  // Filter out archived notes
+  const visibleNotes = notes?.filter((n) => !n.archivedAt) ?? [];
 
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
@@ -100,6 +141,21 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
         </div>
       )}
 
+      {/* Undo banner */}
+      {lastArchivedId && (
+        <div className="mb-3 flex items-center justify-between rounded-lg bg-[var(--grey-100)] p-3 text-sm text-[var(--grey-700)]">
+          <span>Note archived.</span>
+          <button
+            type="button"
+            onClick={handleUndo}
+            disabled={unarchiveNote.isPending}
+            className="font-medium text-[var(--color-core-text)] underline underline-offset-2 hover:no-underline disabled:opacity-50"
+          >
+            Undo
+          </button>
+        </div>
+      )}
+
       {isLoading && (
         <p className="py-4 text-center text-sm text-[var(--text-secondary)]">Loading notes...</p>
       )}
@@ -110,16 +166,21 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
         </div>
       )}
 
-      {!isLoading && !error && notes && notes.length === 0 && (
+      {!isLoading && !error && visibleNotes.length === 0 && (
         <p className="py-4 text-center text-sm text-[var(--text-secondary)]">
           No notes yet. Add a note about this client.
         </p>
       )}
 
-      {notes && notes.length > 0 && (
+      {visibleNotes.length > 0 && (
         <div className="max-h-80 overflow-y-auto">
-          {notes.map((note) => (
-            <NoteItem key={note.id} note={note} />
+          {visibleNotes.map((note) => (
+            <NoteItem
+              key={note.id}
+              note={note}
+              onArchive={handleArchive}
+              isArchiving={archiveNote.isPending}
+            />
           ))}
         </div>
       )}
