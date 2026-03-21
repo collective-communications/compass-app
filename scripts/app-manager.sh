@@ -61,6 +61,16 @@ svc_cmd() {
   esac
 }
 
+svc_port() {
+  case "$1" in
+    web)         echo "$WEB_PORT" ;;
+    tkr-secrets) echo "$SECRETS_PORT" ;;
+    tkr-deploy)  echo "$DEPLOY_PORT" ;;
+    storybook)   echo "$STORYBOOK_PORT" ;;
+    *)           echo "" ;;
+  esac
+}
+
 svc_urls() {
   case "$1" in
     web)
@@ -123,9 +133,31 @@ status_tkr_kit() {
   (cd "$(svc_dir tkr-kit)" && bun run dev:status) 2>&1 | sed 's/^/    /'
 }
 
+wait_for_vault() {
+  local retries=0
+  local max_retries=15
+  while [ $retries -lt $max_retries ]; do
+    # Check that the vault is both reachable AND unlocked (auto-unlock may still be running)
+    local status
+    status=$(curl -sf "http://localhost:${SECRETS_PORT}/api/vaults/compass/status" 2>/dev/null) || true
+    if echo "$status" | grep -q '"unlocked":true'; then
+      return 0
+    fi
+    retries=$((retries + 1))
+    sleep 1
+  done
+  return 1
+}
+
 load_vault_env() {
   local env_file="$ROOT_DIR/.env.local"
   echo "  Loading secrets from vault → .env.local"
+
+  if ! wait_for_vault; then
+    echo "    No secrets loaded (vault not ready after 10s)"
+    return
+  fi
+
   local vault_lines
   vault_lines=$(bun run "$ROOT_DIR/scripts/vault-env.ts" \
     --port "$SECRETS_PORT" --vault compass --prefix VITE_SUPABASE_ 2>/dev/null)
@@ -157,6 +189,12 @@ start_background_svc() {
     return 0
   fi
 
+  # tkr-deploy needs the vault to be ready before connecting
+  if [ "$svc" = "tkr-deploy" ] && is_running "tkr-secrets"; then
+    echo "    Waiting for vault..."
+    wait_for_vault || echo "    Warning: vault not ready, tkr-deploy may retry"
+  fi
+
   # Web needs VITE_* secrets from the vault before starting
   if [ "$svc" = "web" ] && is_running "tkr-secrets"; then
     load_vault_env
@@ -184,6 +222,20 @@ stop_background_svc() {
   local svc="$1"
   if ! is_running "$svc"; then
     echo "  $svc not running"
+    # Clean up orphans holding the port
+    local port
+    port="$(svc_port "$svc")"
+    if [ -n "$port" ]; then
+      local orphan
+      orphan=$(lsof -i ":${port}" -t 2>/dev/null | head -1)
+      if [ -n "$orphan" ]; then
+        echo "    Killing orphan process on port $port (PID $orphan)"
+        kill "$orphan" 2>/dev/null || true
+        sleep 1
+        kill -0 "$orphan" 2>/dev/null && kill -9 "$orphan" 2>/dev/null || true
+      fi
+    fi
+    rm -f "$PID_DIR/${svc}.pid"
     return 0
   fi
   local pid
