@@ -3,7 +3,7 @@
  * Creates the `/s/$token` route tree for survey respondents.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { createRoute, Outlet, useNavigate } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { QuestionType } from '@compass/types';
@@ -34,6 +34,7 @@ function SurveyLayoutInner(): React.ReactElement {
 
   const resumeSession = useResumeSession(deployment.id, survey.id, totalQuestions);
   const navigate = useNavigate();
+  const [resumed, setResumed] = useState(false);
 
   // If resume check is still loading, show spinner
   if (resumeSession.isLoading) {
@@ -49,8 +50,8 @@ function SurveyLayoutInner(): React.ReactElement {
     return <AlreadyCompletedScreen />;
   }
 
-  // Returning user with progress — show welcome back
-  if (resumeSession.hasSession && resumeSession.answeredCount > 0) {
+  // Returning user with progress — show welcome back (until they click Resume)
+  if (!resumed && resumeSession.hasSession && resumeSession.answeredCount > 0) {
     return (
       <WelcomeBackScreen
         answeredCount={resumeSession.answeredCount}
@@ -58,6 +59,11 @@ function SurveyLayoutInner(): React.ReactElement {
         resumeIndex={resumeSession.resumeIndex}
         isLoading={false}
         onResume={() => {
+          // Hydrate the answer store with previously saved answers
+          if (resumeSession.response?.answers) {
+            useAnswerStore.getState().hydrateFromResponse(resumeSession.response.answers);
+          }
+          setResumed(true);
           void navigate({
             to: '/s/$token/q/$index',
             params: { token: deployment.token, index: String(resumeSession.resumeIndex) },
@@ -67,7 +73,7 @@ function SurveyLayoutInner(): React.ReactElement {
     );
   }
 
-  // No prior session — render child route (index = welcome screen)
+  // No prior session, or user clicked Resume — render child route
   return <Outlet />;
 }
 

@@ -7,6 +7,7 @@
  * to prevent bias in responses.
  */
 import { useState, useCallback, useMemo } from 'react';
+import { useParams } from '@tanstack/react-router';
 import { QuestionType, buildLikertScale, DEFAULT_LIKERT_SIZE, type LikertValue, type QuestionWithDimension } from '@compass/types';
 import { useSurveyContext } from '../context/survey-context';
 import { useQuestions } from '../hooks/use-questions';
@@ -26,7 +27,9 @@ interface QuestionScreenProps {
 export function QuestionScreen({ onComplete }: QuestionScreenProps): React.ReactNode {
   const { survey, sessionToken } = useSurveyContext();
   const { data: allQuestions, isLoading, error } = useQuestions(survey.id);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const params = useParams({ strict: false }) as { index?: string };
+  const initialIndex = params.index ? Math.max(0, parseInt(params.index, 10) - 1) : 0;
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const answers = useAnswerStore((s) => s.answers);
   const setAnswer = useAnswerStore((s) => s.setAnswer);
