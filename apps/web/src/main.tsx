@@ -4,7 +4,10 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './features/auth/components';
 import { routeTree } from './routes/__root';
+import { registerTier3Content } from './components/help/content/tier-3-survey';
 import './index.css';
+
+registerTier3Content();
 
 const router = createRouter({ routeTree });
 

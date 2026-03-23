@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react';
 import { SurveyHeader } from '../../components/survey/survey-header';
 import { SurveyFooter } from '../../components/survey/survey-footer';
+import { HelpDrawer } from '../../components/help/help-drawer';
 
 interface SurveyShellProps {
   /** Organization name passed through to the header. */
@@ -20,7 +21,7 @@ interface SurveyShellProps {
  * Content is constrained to 600px max-width and centered on all viewports.
  */
 export function SurveyShell({ orgName, logoUrl, onSave, children }: SurveyShellProps): React.ReactElement {
-  const [_helpOpen, setHelpOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const handleHelpClick = useCallback((): void => {
     setHelpOpen((prev) => !prev);
@@ -35,6 +36,8 @@ export function SurveyShell({ orgName, logoUrl, onSave, children }: SurveyShellP
       </main>
 
       <SurveyFooter onHelpClick={handleHelpClick} />
+
+      <HelpDrawer isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
     </div>
   );
 }

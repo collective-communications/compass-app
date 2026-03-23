@@ -52,14 +52,14 @@ describe('ProgressSquares', () => {
     expect(onJump).toHaveBeenCalledWith(2);
   });
 
-  test('clicking any square calls onJump', () => {
+  test('clicking an unanswered square does not call onJump', () => {
     const onJump = mock(() => {});
     render(
       <ProgressSquares total={5} currentIndex={0} answeredIndices={new Set()} onJump={onJump} />,
     );
 
     fireEvent.click(screen.getByLabelText('Question 4 of 5, unanswered'));
-    expect(onJump).toHaveBeenCalledWith(3);
+    expect(onJump).not.toHaveBeenCalled();
   });
 
   test('handles fully answered survey', () => {

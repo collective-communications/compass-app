@@ -30,6 +30,8 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   const params = useParams({ strict: false }) as { index?: string };
   const initialIndex = params.index ? Math.max(0, parseInt(params.index, 10) - 1) : 0;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [direction, setDirection] = useState<1 | -1>(1);
+  const [animKey, setAnimKey] = useState(0);
 
   const answers = useAnswerStore((s) => s.answers);
   const setAnswer = useAnswerStore((s) => s.setAnswer);
@@ -79,11 +81,15 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
       onComplete();
       return;
     }
+    setDirection(1);
+    setAnimKey((k) => k + 1);
     setCurrentIndex((prev) => Math.min(prev + 1, likertQuestions.length - 1));
   }, [isAnswered, isLast, onComplete, likertQuestions.length]);
 
   const goPrevious = useCallback(() => {
     if (isFirst) return;
+    setDirection(-1);
+    setAnimKey((k) => k + 1);
     setCurrentIndex((prev) => Math.max(prev - 1, 0));
   }, [isFirst]);
 
@@ -96,8 +102,10 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   );
 
   const handleJump = useCallback((index: number) => {
+    setDirection(index > currentIndex ? 1 : -1);
+    setAnimKey((k) => k + 1);
     setCurrentIndex(index);
-  }, []);
+  }, [currentIndex]);
 
   // Keyboard shortcuts
   useSurveyKeyboard({
@@ -151,34 +159,41 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
         questionTexts={questionTexts}
       />
 
-      {/* Question counter */}
-      <div className="text-sm font-medium text-[var(--text-secondary)]">
-        Question {currentIndex + 1} of {likertQuestions.length}
-      </div>
-
-      {/* Question text — no dimension label shown */}
-      <h2 className="text-lg font-semibold leading-snug text-[var(--grey-900)]">
-        {currentQuestion.text}
-      </h2>
-
-      {/* Likert scale */}
-      <LikertScale
-        value={currentAnswer}
-        onChange={handleSelectOption}
-        name={currentQuestion.id}
-        scale={scale}
-      />
-
-      {/* Autosave error indicator */}
-      {lastError && (
-        <div className="rounded-md border border-[var(--severity-critical-border)]/20 bg-[var(--severity-critical-border)]/5 px-3 py-2 text-xs text-[var(--severity-critical-text)]">
-          {lastError}
+      {/* Animated question content — slides in from navigation direction */}
+      <div
+        key={animKey}
+        className="flex flex-col gap-8 motion-safe:animate-[survey-slide-in_250ms_ease-out]"
+        style={{ '--slide-dir': direction > 0 ? '24px' : '-24px' } as React.CSSProperties}
+      >
+        {/* Question counter */}
+        <div className="text-sm font-medium text-[var(--text-secondary)]">
+          Question {currentIndex + 1} of {likertQuestions.length}
         </div>
-      )}
+
+        {/* Question text — no dimension label shown */}
+        <h2 className="text-lg font-semibold leading-snug text-[var(--grey-900)]">
+          {currentQuestion.text}
+        </h2>
+
+        {/* Likert scale */}
+        <LikertScale
+          value={currentAnswer}
+          onChange={handleSelectOption}
+          name={currentQuestion.id}
+          scale={scale}
+        />
+
+        {/* Autosave error indicator */}
+        {lastError && (
+          <div className="rounded-md border border-[var(--severity-critical-border)]/20 bg-[var(--severity-critical-border)]/5 px-3 py-2 text-xs text-[var(--severity-critical-text)]">
+            {lastError}
+          </div>
+        )}
+      </div>
 
       {/* Navigation */}
       <QuestionNavButtons
-        showPrevious={!isFirst}
+        isFirst={isFirst}
         nextEnabled={isAnswered}
         isLastQuestion={isLast}
         onPrevious={goPrevious}

@@ -5,7 +5,7 @@ interface SurveyHeaderProps {
   orgName: string;
   /** Optional URL for the organization logo image. */
   logoUrl?: string;
-  /** Optional callback to navigate to the save-progress screen. */
+  /** Optional callback to navigate to the save-progress / continue-later screen. */
   onSave?: () => void;
 }
 
@@ -31,7 +31,7 @@ export function SurveyHeader({ orgName, logoUrl, onSave }: SurveyHeaderProps): R
             onClick={onSave}
             className="ml-auto text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--grey-700)] transition-colors"
           >
-            Save
+            Continue Later
           </button>
         )}
       </div>

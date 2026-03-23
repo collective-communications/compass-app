@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { createRoute, Outlet, useNavigate } from '@tanstack/react-router';
+import { createRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { QuestionType } from '@compass/types';
 import { SurveyShell } from '../../shells/survey';
@@ -86,6 +86,10 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
       const { data: resolution, isLoading, error } = useDeployment(token);
       const navigate = useNavigate();
 
+      const routerState = useRouterState();
+      const pathname = routerState.location.pathname;
+      const showContinueLater = pathname.includes('/q/') || pathname.endsWith('/open');
+
       const handleSave = useCallback(() => {
         navigate({ to: '/s/$token/saved', params: { token } });
       }, [navigate, token]);
@@ -160,7 +164,7 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
       const sessionToken = SessionCookieManager.getOrCreateSession(deployment.id);
 
       return (
-        <SurveyShell orgName={survey.title} onSave={handleSave}>
+        <SurveyShell orgName={survey.title} onSave={showContinueLater ? handleSave : undefined}>
           <SurveyProvider value={{ deployment, survey, sessionToken }}>
             <SurveyLayoutInner />
           </SurveyProvider>

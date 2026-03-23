@@ -2,7 +2,7 @@
  * Progress squares indicator for the survey question flow.
  * Grid of small squares showing answered/unanswered/current state.
  * Dock-style fisheye magnification on hover (cosine curve, reach=3, maxScale=2.4).
- * Clickable to jump to any question.
+ * Clickable to jump to answered questions only.
  */
 import { useCallback, useRef, useState } from 'react';
 
@@ -50,13 +50,16 @@ export function ProgressSquares({
 }: ProgressSquaresProps): React.ReactNode {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const { sizeClass, gap } = squareLayout(total);
 
   const handleClick = useCallback(
     (index: number) => {
-      onJump(index);
+      if (answeredIndices.has(index) || index === currentIndex) {
+        onJump(index);
+      }
     },
-    [onJump],
+    [onJump, answeredIndices, currentIndex],
   );
 
   const handleMouseMove = useCallback(
@@ -85,31 +88,60 @@ export function ProgressSquares({
     setHoverIndex(null);
   }, []);
 
+  // Tooltip: show for answered squares when hovered
+  const showTooltip =
+    hoverIndex !== null &&
+    answeredIndices.has(hoverIndex) &&
+    hoverIndex !== currentIndex &&
+    questionTexts?.[hoverIndex];
+
+  // Calculate tooltip position relative to the hovered button
+  const tooltipStyle = (() => {
+    if (!showTooltip || hoverIndex === null) return undefined;
+    const btn = buttonRefs.current[hoverIndex];
+    const container = containerRef.current;
+    if (!btn || !container) return undefined;
+    const btnRect = btn.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const left = btnRect.left - containerRect.left + btnRect.width / 2;
+    return { left };
+  })();
+
   return (
     <div
       ref={containerRef}
-      className={`flex flex-wrap items-center justify-center ${gap}`}
+      className={`relative flex flex-wrap items-center justify-center ${gap}`}
       role="group"
       aria-label="Survey progress"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Custom tooltip */}
+      {showTooltip && tooltipStyle && hoverIndex !== null && (
+        <div
+          className="pointer-events-none absolute bottom-full z-10 mb-2 max-w-[280px] rounded-lg bg-[var(--grey-900)] px-3 py-2 text-xs text-white shadow-lg"
+          style={{ left: tooltipStyle.left, transform: 'translateX(-50%)' }}
+        >
+          <span className="mr-1.5 text-[10px] font-bold opacity-50">{hoverIndex + 1}</span>
+          <span className="line-clamp-2">{questionTexts![hoverIndex]}</span>
+          <div
+            className="absolute left-1/2 top-full -translate-x-1/2 border-x-[5px] border-t-[5px] border-x-transparent border-t-[var(--grey-900)]"
+          />
+        </div>
+      )}
+
       {Array.from({ length: total }, (_, i) => {
         const isAnswered = answeredIndices.has(i);
         const isCurrent = i === currentIndex;
+        const isClickable = isAnswered || isCurrent;
         const scale =
           hoverIndex !== null ? dockScale(i, hoverIndex, DOCK_MAX, DOCK_REACH) : 1;
-
-        const tooltipText =
-          questionTexts && isAnswered && hoverIndex === i
-            ? questionTexts[i]
-            : undefined;
 
         return (
           <button
             key={i}
+            ref={(el) => { buttonRefs.current[i] = el; }}
             type="button"
-            title={tooltipText}
             aria-label={`Question ${i + 1} of ${total}, ${isCurrent ? 'current' : isAnswered ? 'answered' : 'unanswered'}`}
             onClick={() => handleClick(i)}
             style={{
@@ -124,7 +156,8 @@ export function ProgressSquares({
                     ? 'bg-[var(--color-core)]'
                     : 'bg-[var(--grey-100)]'
               }
-              cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-core-text)]`}
+              ${isClickable ? 'cursor-pointer' : 'cursor-default'}
+              focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-core-text)]`}
           />
         );
       })}
