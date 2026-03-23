@@ -17,6 +17,7 @@
 import { useState, useCallback, type ReactElement } from 'react';
 import { createRoute, Outlet, redirect, useNavigate, useParams, useSearch, useRouterState } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
+import { useQuery } from '@tanstack/react-query';
 import type { SegmentType } from '@compass/scoring';
 import { useAuthStore } from '../../stores/auth-store';
 import { supabase } from '../../lib/supabase';
@@ -32,7 +33,6 @@ import { RecommendationsTab, RecommendationsInsightsContent } from './tabs/recom
 import { useOverallScores } from './hooks/use-overall-scores';
 import { useArchetype } from './hooks/use-archetype';
 import { useRiskFlags } from './hooks/use-risk-flags';
-import { useScoredSurveys } from '../../hooks/use-scored-surveys';
 import { DimensionContext, useActiveDimension } from './context/dimension-context';
 import type { ResultsTabId } from './types';
 
@@ -75,8 +75,21 @@ function ResultsLayoutRoute(): ReactElement {
     setActiveDimension(dimension);
   }, []);
 
-  // Fetch scored surveys for the picker (organization ID derived server-side via RLS)
-  const { data: surveys = [], isLoading: isSurveysLoading } = useScoredSurveys('');
+  // Fetch survey metadata for the back link and title
+  const { data: surveyMeta } = useQuery({
+    queryKey: ['survey-meta', surveyId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('surveys')
+        .select('title, organization_id')
+        .eq('id', surveyId)
+        .single();
+      if (error) throw error;
+      return data as { title: string; organization_id: string };
+    },
+    staleTime: 10 * 60 * 1000,
+    enabled: !!surveyId,
+  });
 
   // Fetch shared data needed by compass tab insights
   const { data: scores, isLoading: scoresLoading } = useOverallScores(surveyId);
@@ -90,8 +103,12 @@ function ResultsLayoutRoute(): ReactElement {
     void navigate({ to: `/results/${surveyId}/${tabId}` });
   }
 
-  function handleSurveyChange(newSurveyId: string): void {
-    void navigate({ to: `/results/${newSurveyId}/${activeTab}` });
+  function handleBack(): void {
+    if (surveyMeta?.organization_id) {
+      void navigate({ to: '/admin/clients/$orgId', params: { orgId: surveyMeta.organization_id } });
+    } else {
+      void navigate({ to: '/admin/clients' });
+    }
   }
 
   /** Resolve insights panel content based on active tab. */
@@ -137,10 +154,8 @@ function ResultsLayoutRoute(): ReactElement {
       <ResultsLayout
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        surveys={surveys}
-        activeSurveyId={surveyId}
-        onSurveyChange={handleSurveyChange}
-        isSurveysLoading={isSurveysLoading}
+        onBack={handleBack}
+        surveyTitle={surveyMeta?.title}
         isContentLoading={isContentLoading}
         insightsContent={renderInsightsContent()}
       >
@@ -158,12 +173,11 @@ function CompassRoute(): ReactElement {
   const { data: scores } = useOverallScores(surveyId);
   const { data: archetype } = useArchetype(surveyId);
   const { data: riskFlags = [] } = useRiskFlags(surveyId);
+  const { activeDimension, setActiveDimension } = useActiveDimension();
 
   if (!scores || !archetype) {
     return <ResultsSkeleton />;
   }
-
-  const { activeDimension, setActiveDimension } = useActiveDimension();
   return (
     <CompassTab
       scores={scores}

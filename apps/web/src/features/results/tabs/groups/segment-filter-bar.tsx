@@ -38,28 +38,33 @@ export function SegmentFilterBar({
   onValueChange,
 }: SegmentFilterBarProps): ReactElement {
   return (
-    <div className="flex flex-col gap-3 rounded-lg bg-[var(--grey-50)] p-4">
-      {/* Segment type dropdown */}
-      <div className="flex items-center gap-3">
-        <label
-          htmlFor="segment-type-select"
-          className="text-sm font-medium text-[var(--grey-700)]"
-        >
-          Segment
-        </label>
-        <select
-          id="segment-type-select"
-          value={segmentType}
-          onChange={(e) => onTypeChange(e.target.value as SegmentType)}
-          className="rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-1.5 text-sm text-[var(--grey-700)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]"
-        >
-          {SEGMENT_TYPE_OPTIONS.map((type) => (
-            <option key={type} value={type}>
+    <div className="flex flex-col gap-3">
+      {/* Segment type pills */}
+      <nav
+        className="flex gap-1"
+        role="radiogroup"
+        aria-label="Segment type"
+      >
+        {SEGMENT_TYPE_OPTIONS.map((type) => {
+          const isActive = segmentType === type;
+          return (
+            <button
+              key={type}
+              type="button"
+              role="radio"
+              aria-checked={isActive}
+              onClick={() => onTypeChange(type)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                isActive
+                  ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
+                  : 'text-[var(--text-secondary)] hover:bg-[var(--grey-100)]'
+              }`}
+            >
               {SEGMENT_TYPE_LABELS[type]}
-            </option>
-          ))}
-        </select>
-      </div>
+            </button>
+          );
+        })}
+      </nav>
 
       {/* Segment value pills */}
       <div
