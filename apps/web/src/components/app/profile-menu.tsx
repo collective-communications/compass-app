@@ -1,18 +1,42 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import { LogOut, User, HelpCircle } from 'lucide-react';
+import { LogOut, User, HelpCircle, Settings, Sun, Moon } from 'lucide-react';
 import type { AuthUser, UserTier } from '@compass/types';
+
+type Theme = 'light' | 'dark';
+const THEME_KEY = 'compass-theme';
+
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light';
+  const stored = localStorage.getItem(THEME_KEY);
+  if (stored === 'light' || stored === 'dark') return stored;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
 
 interface ProfileMenuProps {
   user: AuthUser;
   tier: UserTier;
   onSignOut: () => void;
+  onNavigate: (path: string) => void;
 }
 
-export function ProfileMenu({ user, tier, onSignOut }: ProfileMenuProps): ReactElement {
+export function ProfileMenu({ user, tier, onSignOut, onNavigate }: ProfileMenuProps): ReactElement {
   const [open, setOpen] = useState(false);
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
   const toggle = useCallback(() => setOpen((prev) => !prev), []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme((prev) => {
+      const next: Theme = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem(THEME_KEY, next);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -84,6 +108,26 @@ export function ProfileMenu({ user, tier, onSignOut }: ProfileMenuProps): ReactE
               Help
             </button>
           )}
+
+          {tier === 'tier_1' && (
+            <button
+              type="button"
+              onClick={() => { setOpen(false); onNavigate('/admin/settings'); }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
+            >
+              <Settings size={16} />
+              Settings
+            </button>
+          )}
+
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
+          >
+            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+            {theme === 'light' ? 'Dark mode' : 'Light mode'}
+          </button>
 
           <div className="border-t border-[var(--grey-200)]">
             <button

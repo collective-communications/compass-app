@@ -2,7 +2,7 @@
  * Client detail page with tabbed layout.
  * Route: /clients/:orgId
  * Displays org info, metrics, notes, consultant, and quick actions.
- * Underline tab bar for Overview | Results | Surveys | Users (Overview default).
+ * Underline tab bar for Overview | Surveys | Users (Overview default).
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
@@ -29,11 +29,10 @@ export interface ClientDetailPageProps {
   orgId: string;
 }
 
-type DetailTab = 'overview' | 'results' | 'surveys' | 'users';
+type DetailTab = 'overview' | 'surveys' | 'users';
 
 const TABS: Array<{ id: DetailTab; label: string }> = [
   { id: 'overview', label: 'Overview' },
-  { id: 'results', label: 'Results' },
   { id: 'surveys', label: 'Surveys' },
   { id: 'users', label: 'Users' },
 ];
@@ -285,13 +284,6 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
                 </button>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('results')}
-                  className="w-full rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
-                >
-                  View Results
-                </button>
-                <button
-                  type="button"
                   onClick={() => setEditModalOpen(true)}
                   className="w-full rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
                 >
@@ -300,12 +292,6 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
               </div>
             </nav>
           </div>
-        </div>
-      )}
-
-      {activeTab === 'results' && (
-        <div role="tabpanel" aria-label="Results">
-          <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Results tab content will be added in a future wave.</p>
         </div>
       )}
 

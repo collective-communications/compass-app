@@ -8,10 +8,7 @@ export interface TabConfig {
   disabled?: boolean;
 }
 
-const ADMIN_TABS: TabConfig[] = [
-  { id: 'clients', label: 'Clients', icon: 'building', href: '/admin/clients' },
-  { id: 'settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
-];
+const ADMIN_TABS: TabConfig[] = [];
 
 const CLIENT_TABS: TabConfig[] = [
   { id: 'dashboard', label: 'Dashboard', icon: 'layout-grid', href: '/dashboard' },

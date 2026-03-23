@@ -1,27 +1,18 @@
 /**
- * Quick action buttons for the active survey: copy link and view results.
- * Copy shows inline "Copied!" feedback (no toast). View Results is conditionally rendered.
+ * Quick action button for the active survey: copy link.
+ * Shows inline "Copied!" feedback (no toast).
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
-import { Link2, BarChart3 } from 'lucide-react';
+import { Link2 } from 'lucide-react';
 
 interface QuickActionsProps {
   /** Deployment URL to copy to clipboard */
   deploymentUrl: string | null;
-  /** Survey ID for navigation */
-  surveyId: string;
-  /** Whether CC+C has enabled results access for this organization */
-  resultsEnabled: boolean;
-  /** Navigate to results page — wired by parent */
-  onNavigate: (path: string) => void;
 }
 
 export function QuickActions({
   deploymentUrl,
-  surveyId,
-  resultsEnabled,
-  onNavigate,
 }: QuickActionsProps): ReactElement {
   const [copied, setCopied] = useState(false);
 
@@ -36,34 +27,18 @@ export function QuickActions({
     }
   }, [deploymentUrl]);
 
-  const handleViewResults = useCallback((): void => {
-    onNavigate(`/results/${surveyId}/compass`);
-  }, [onNavigate, surveyId]);
-
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div>
       <button
         type="button"
         onClick={handleCopy}
         disabled={!deploymentUrl}
         aria-label="Copy survey link to clipboard"
-        className="flex items-center justify-center gap-2 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)] disabled:cursor-not-allowed disabled:opacity-50"
       >
         <Link2 className="h-4 w-4" aria-hidden="true" />
         {copied ? 'Copied!' : 'Copy Link'}
       </button>
-
-      {resultsEnabled && (
-        <button
-          type="button"
-          onClick={handleViewResults}
-          aria-label="View survey results"
-          className="flex items-center justify-center gap-2 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)]"
-        >
-          <BarChart3 className="h-4 w-4" aria-hidden="true" />
-          View Results
-        </button>
-      )}
     </div>
   );
 }

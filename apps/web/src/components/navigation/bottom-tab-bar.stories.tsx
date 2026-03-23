@@ -8,11 +8,6 @@ const clientTabs: TabConfig[] = [
   { id: 'reports', label: 'Reports', icon: 'file-down', href: '/reports' },
 ];
 
-const adminTabs: TabConfig[] = [
-  { id: 'clients', label: 'Clients', icon: 'building', href: '/admin/clients' },
-  { id: 'settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
-];
-
 const meta = {
   title: 'Components/Navigation/BottomTabBar',
   component: BottomTabBar,
@@ -33,10 +28,6 @@ export const Default: Story = {};
 
 export const ResultsActive: Story = {
   args: { activeTabId: 'results' },
-};
-
-export const AdminTabs: Story = {
-  args: { tabs: adminTabs, activeTabId: 'clients' },
 };
 
 export const WithDisabledTab: Story = {

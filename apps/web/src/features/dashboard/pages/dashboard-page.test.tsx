@@ -2,9 +2,10 @@ import { afterEach, describe, expect, test, mock, beforeEach } from 'bun:test';
 import { render, screen, cleanup } from '@testing-library/react';
 
 /**
- * Tests for DashboardPage — specifically the client access gating logic.
+ * Tests for DashboardPage — client access gating logic.
  *
- * The View Results button should only appear when BOTH:
+ * The "View Full Results" button in the Latest Results card should only
+ * appear when BOTH:
  *   1. activeSurvey.survey.scoresCalculated === true
  *   2. useClientAccess returns true (CC+C has enabled results for this org)
  */
@@ -118,7 +119,7 @@ describe('DashboardPage — client access gating', () => {
 
   afterEach(cleanup);
 
-  test('shows View Results when scores calculated AND client access enabled', () => {
+  test('shows View Full Results when scores calculated AND client access enabled', () => {
     mockDashboardData = {
       activeSurvey: makeActiveSurvey({ scoresCalculated: true }),
       previousSurveys: [],
@@ -129,10 +130,10 @@ describe('DashboardPage — client access gating', () => {
 
     render(<DashboardPage />);
 
-    expect(screen.getByLabelText('View survey results')).toBeTruthy();
+    expect(screen.getByText('View Full Results')).toBeTruthy();
   });
 
-  test('hides View Results when scores calculated but client access disabled', () => {
+  test('hides View Full Results when scores calculated but client access disabled', () => {
     mockDashboardData = {
       activeSurvey: makeActiveSurvey({ scoresCalculated: true }),
       previousSurveys: [],
@@ -143,10 +144,10 @@ describe('DashboardPage — client access gating', () => {
 
     render(<DashboardPage />);
 
-    expect(screen.queryByLabelText('View survey results')).toBeNull();
+    expect(screen.queryByText('View Full Results')).toBeNull();
   });
 
-  test('hides View Results when scores not calculated (regardless of client access)', () => {
+  test('hides View Full Results when scores not calculated (regardless of client access)', () => {
     mockDashboardData = {
       activeSurvey: makeActiveSurvey({ scoresCalculated: false }),
       previousSurveys: [],
@@ -157,21 +158,7 @@ describe('DashboardPage — client access gating', () => {
 
     render(<DashboardPage />);
 
-    expect(screen.queryByLabelText('View survey results')).toBeNull();
-  });
-
-  test('hides View Results when neither scores calculated nor client access enabled', () => {
-    mockDashboardData = {
-      activeSurvey: makeActiveSurvey({ scoresCalculated: false }),
-      previousSurveys: [],
-      isLoading: false,
-      error: null,
-    };
-    mockClientAccess = false;
-
-    render(<DashboardPage />);
-
-    expect(screen.queryByLabelText('View survey results')).toBeNull();
+    expect(screen.queryByText('View Full Results')).toBeNull();
   });
 
   test('displays welcome greeting with first name', () => {

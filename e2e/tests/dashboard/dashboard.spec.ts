@@ -58,48 +58,6 @@ test.describe('Client dashboard', () => {
     expect(hasEmptyState || hasActiveSurvey || hasError || hasLoading).toBe(true);
   });
 
-  test('quick actions navigate correctly', async ({ page }) => {
-    // Requires: active survey with deployment for the client org
-    await page.goto('/dashboard');
-    await page.waitForLoadState('networkidle');
-
-    const viewResultsButton = page.getByRole('button', { name: /view.*results/i });
-    if (await viewResultsButton.isVisible().catch(() => false)) {
-      await viewResultsButton.click();
-      await page.waitForURL(/\/results\//, { timeout: 10000 });
-      expect(page.url()).toContain('/results/');
-    }
-  });
-
-  test('View Results button respects client_access_enabled setting', async ({ page }) => {
-    // This test verifies the button visibility matches the access control state.
-    // The actual toggle behavior is tested in access-gate.spec.ts.
-    await page.goto('/dashboard');
-    await page.waitForLoadState('networkidle');
-
-    const viewResultsButton = page.getByRole('button', { name: /view.*results/i });
-    const viewResultsLink = page.getByRole('link', { name: /view.*results/i });
-
-    // Check if either button or link variant exists
-    const hasButton = await viewResultsButton.isVisible().catch(() => false);
-    const hasLink = await viewResultsLink.isVisible().catch(() => false);
-
-    // If View Results is visible, clicking it should use client-side navigation
-    // (TanStack Router), not a full page reload
-    if (hasButton || hasLink) {
-      const element = hasButton ? viewResultsButton : viewResultsLink;
-
-      // Verify it's not using window.location.href (which would cause a full reload)
-      // Story documents this as a known bug: should use TanStack Router navigation
-      const navigationPromise = page.waitForURL(/\/results\//, { timeout: 10000 });
-      await element.click();
-      await navigationPromise;
-
-      // If we get here without a full reload, navigation is working
-      expect(page.url()).toContain('/results/');
-    }
-  });
-
   test('copy link button provides feedback', async ({ page }) => {
     await page.goto('/dashboard');
     await page.waitForLoadState('networkidle');

@@ -1,5 +1,4 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { fn } from 'storybook/test';
 import { QuickActions } from './quick-actions';
 import { AppShellDecorator } from '../../../../../../apps/storybook/.storybook/decorators/shells';
 
@@ -9,24 +8,14 @@ const meta = {
   decorators: [AppShellDecorator],
   args: {
     deploymentUrl: 'https://app.collectiveculturecompass.com/s/abc123',
-    surveyId: 'survey-001',
-    resultsEnabled: true,
-    onNavigate: fn(),
   },
 } satisfies Meta<typeof QuickActions>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-/** Both copy link and view results actions available. */
+/** Copy link action available. */
 export const Default: Story = {};
-
-/** Results not yet enabled — only copy link shown. */
-export const ResultsDisabled: Story = {
-  args: {
-    resultsEnabled: false,
-  },
-};
 
 /** No deployment URL — copy link button disabled. */
 export const NoDeploymentUrl: Story = {

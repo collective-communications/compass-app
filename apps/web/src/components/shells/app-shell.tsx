@@ -1,6 +1,7 @@
 import type { ReactElement, ReactNode } from 'react';
 import { useAuthStore } from '../../stores/auth-store';
 import { useRequireAuth } from '../../hooks/use-require-auth';
+import { useAppNavigate } from '../../hooks/use-app-navigate';
 import { getTabsForRole } from '../../lib/navigation';
 import { BaseLayout } from './base-layout';
 import { AppHeader } from '../app/app-header';
@@ -20,6 +21,11 @@ function getActiveTabId(tabs: { id: string; href: string }[], pathname: string):
 export function AppShell({ children }: AppShellProps): ReactElement {
   const user = useRequireAuth();
   const signOut = useAuthStore((s) => s.signOut);
+  const navigate = useAppNavigate();
+
+  const handleNavigate = (path: string): void => {
+    void navigate({ to: path });
+  };
 
   if (!user) {
     return (
@@ -40,11 +46,12 @@ export function AppShell({ children }: AppShellProps): ReactElement {
           tabs={tabs}
           activeTabId={activeTabId}
           onSignOut={signOut}
+          onNavigate={handleNavigate}
         />
       }
-      footer={<BottomTabBar tabs={tabs} activeTabId={activeTabId} />}
+      footer={tabs.length > 0 ? <BottomTabBar tabs={tabs} activeTabId={activeTabId} /> : undefined}
     >
-      <div className="pb-16 lg:pb-0">{children}</div>
+      <div className={tabs.length > 0 ? 'pb-16 lg:pb-0' : ''}>{children}</div>
     </BaseLayout>
   );
 }

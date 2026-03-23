@@ -10,11 +10,6 @@ const clientTabs: TabConfig[] = [
   { id: 'reports', label: 'Reports', icon: 'file-down', href: '/reports' },
 ];
 
-const adminTabs: TabConfig[] = [
-  { id: 'clients', label: 'Clients', icon: 'building', href: '/admin/clients' },
-  { id: 'settings', label: 'Settings', icon: 'settings', href: '/admin/settings' },
-];
-
 const clientUser: AuthUser = {
   id: 'user-1',
   email: 'jane.doe@acme.com',
@@ -44,6 +39,7 @@ const meta = {
     tabs: clientTabs,
     activeTabId: 'dashboard',
     onSignOut: fn(),
+    onNavigate: fn(),
   },
 } satisfies Meta<typeof AppHeader>;
 
@@ -52,11 +48,12 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
+/** Admin header — no tab bar, logo links to /admin/clients */
 export const AdminView: Story = {
   args: {
     user: adminUser,
-    tabs: adminTabs,
-    activeTabId: 'clients',
+    tabs: [],
+    activeTabId: null,
   },
 };
 

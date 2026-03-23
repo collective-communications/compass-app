@@ -30,6 +30,7 @@ const meta = {
     user: clientUser,
     tier: 'tier_2',
     onSignOut: fn(),
+    onNavigate: fn(),
   },
 } satisfies Meta<typeof ProfileMenu>;
 
@@ -38,6 +39,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
+/** Admin tier — shows Help and Settings items in dropdown */
 export const AdminTier: Story = {
   args: {
     user: adminUser,

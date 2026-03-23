@@ -7,9 +7,6 @@ describe('QuickActions', () => {
 
   const defaultProps = {
     deploymentUrl: 'https://example.com/s/abc123',
-    surveyId: 'survey-1',
-    resultsEnabled: true,
-    onNavigate: mock(() => {}),
   };
 
   test('renders Copy Link button', () => {
@@ -18,20 +15,8 @@ describe('QuickActions', () => {
     expect(screen.getByText('Copy Link')).toBeTruthy();
   });
 
-  test('renders View Results button when resultsEnabled is true', () => {
-    render(<QuickActions {...defaultProps} resultsEnabled={true} />);
-    expect(screen.getByLabelText('View survey results')).toBeTruthy();
-    expect(screen.getByText('View Results')).toBeTruthy();
-  });
-
-  test('hides View Results button when resultsEnabled is false', () => {
-    render(<QuickActions {...defaultProps} resultsEnabled={false} />);
-    expect(screen.queryByLabelText('View survey results')).toBeNull();
-    expect(screen.queryByText('View Results')).toBeNull();
-  });
-
   test('disables Copy Link button when deploymentUrl is null', () => {
-    render(<QuickActions {...defaultProps} deploymentUrl={null} />);
+    render(<QuickActions deploymentUrl={null} />);
     const btn = screen.getByLabelText('Copy survey link to clipboard');
     expect(btn.hasAttribute('disabled')).toBe(true);
   });
@@ -40,13 +25,6 @@ describe('QuickActions', () => {
     render(<QuickActions {...defaultProps} />);
     const btn = screen.getByLabelText('Copy survey link to clipboard');
     expect(btn.hasAttribute('disabled')).toBe(false);
-  });
-
-  test('clicking View Results calls onNavigate with results path', () => {
-    const onNavigate = mock(() => {});
-    render(<QuickActions {...defaultProps} onNavigate={onNavigate} surveyId="s-42" />);
-    fireEvent.click(screen.getByLabelText('View survey results'));
-    expect(onNavigate).toHaveBeenCalledWith('/results/s-42/compass');
   });
 
   test('clicking Copy Link calls clipboard API and shows Copied! feedback', async () => {

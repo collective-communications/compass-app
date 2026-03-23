@@ -38,10 +38,6 @@ export function DashboardPage(): ReactElement {
   const resultsEnabled =
     (activeSurvey?.survey.scoresCalculated ?? false) && clientAccessEnabled;
 
-  const handleNavigate = (path: string): void => {
-    void navigate({ to: path });
-  };
-
   const handleSelectSurvey = (surveyId: string): void => {
     void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
   };
@@ -88,12 +84,7 @@ export function DashboardPage(): ReactElement {
             {activeSurvey && (
               <>
                 <ActiveSurveyCard data={activeSurvey} />
-                <QuickActions
-                  deploymentUrl={deploymentUrl}
-                  surveyId={activeSurvey.survey.id}
-                  resultsEnabled={resultsEnabled}
-                  onNavigate={handleNavigate}
-                />
+                <QuickActions deploymentUrl={deploymentUrl} />
               </>
             )}
 
