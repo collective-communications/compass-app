@@ -77,42 +77,48 @@ export function CompassTab({ scores, archetype, riskFlags, activeDimension: cont
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Mobile chip strip */}
+      {/* Mobile chip strip — hidden on desktop */}
       <DimensionNav
         scores={scores}
         riskFlags={riskFlags}
         activeDimension={activeDimension}
         onSelect={handleDimensionSelect}
+        variant="mobile"
       />
 
       <div className="flex gap-6">
-        {/* Desktop sidebar — hidden on mobile (DimensionNav handles responsive rendering) */}
+        {/* Desktop sidebar — hidden on mobile */}
+        <DimensionNav
+          scores={scores}
+          riskFlags={riskFlags}
+          activeDimension={activeDimension}
+          onSelect={handleDimensionSelect}
+          variant="desktop"
+        />
 
         {/* Main content */}
-        <div className="flex min-w-0 flex-1 flex-col gap-6">
-          {/* Core health + archetype row */}
-          <div className="flex flex-wrap items-center gap-4">
-            <CoreHealthIndicator coreScore={coreScore} />
-          </div>
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-6">
+          {/* Core health badge */}
+          <CoreHealthIndicator coreScore={coreScore} />
 
           {/* Compass visualization */}
-          <div className="flex justify-center">
-            <Compass
-              scores={compassScores}
-              selectedSegment={selectedSegment}
-              onSegmentClick={handleSegmentClick}
-              size={320}
-              animated
-              showLabels
-              showGapIndicator
-            />
-          </div>
+          <Compass
+            scores={compassScores}
+            selectedSegment={selectedSegment}
+            onSegmentClick={handleSegmentClick}
+            size={320}
+            animated
+            showLabels
+            showGapIndicator
+          />
 
           {/* Archetype card */}
-          <ArchetypeCard match={archetype} />
+          <div className="w-full">
+            <ArchetypeCard match={archetype} />
+          </div>
 
           {/* Risk flags */}
-          <div>
+          <div className="w-full">
             <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
               Risk Flags
             </h3>

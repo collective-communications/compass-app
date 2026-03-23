@@ -27,7 +27,7 @@ export class AdminPage {
     );
     this.dimensionNavigator = page.getByTestId('dimension-navigator');
     this.questionRows = page.getByTestId('question-row');
-    this.deployButton = page.getByRole('button', { name: /deploy/i });
+    this.deployButton = page.getByRole('button', { name: /publish/i });
     this.surveyLinkDisplay = page.getByTestId('survey-link');
   }
 

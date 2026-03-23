@@ -67,11 +67,11 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
-  const adminSurveyDeployRoute = createRoute({
+  const adminSurveyPublishRoute = createRoute({
     getParentRoute: () => adminLayoutRoute,
-    path: '/surveys/$surveyId/deploy',
-    component: function AdminSurveyDeployPage(): ReactElement {
-      const { surveyId } = adminSurveyDeployRoute.useParams() as { surveyId: string };
+    path: '/surveys/$surveyId/publish',
+    component: function AdminSurveyPublishPage(): ReactElement {
+      const { surveyId } = adminSurveyPublishRoute.useParams() as { surveyId: string };
       const { deployment, unpublish, isPending } = useDeploymentManagement({ surveyId });
       const metricsQuery = useResponseTracking({ surveyId });
       const { connectionStatus } = useRealtimeResponses({ surveyId, deploymentId: deployment.data?.id ?? null });
@@ -182,7 +182,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
 
   return adminLayoutRoute.addChildren([
     adminSurveyBuilderRoute,
-    adminSurveyDeployRoute,
+    adminSurveyPublishRoute,
     adminClientsRoute,
     adminClientDetailRoute,
     adminClientUsersRoute,

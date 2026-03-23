@@ -13,6 +13,8 @@ interface DimensionNavProps {
   riskFlags: RiskFlag[];
   activeDimension: DimensionNavId;
   onSelect: (id: DimensionNavId) => void;
+  /** Render only mobile chip strip, only desktop sidebar, or both (default). */
+  variant?: 'mobile' | 'desktop' | 'both';
 }
 
 /** Brand colors per dimension. */
@@ -51,57 +53,65 @@ export function DimensionNav({
   riskFlags,
   activeDimension,
   onSelect,
+  variant = 'both',
 }: DimensionNavProps): ReactElement {
   const getScore = (id: DimensionNavId): number => {
     if (id === 'overview') return getOverviewScore(scores);
     return scores[id]?.score ?? 0;
   };
 
+  const showMobile = variant === 'mobile' || variant === 'both';
+  const showDesktop = variant === 'desktop' || variant === 'both';
+
   return (
     <>
       {/* Mobile: horizontal chip strip */}
-      <nav
-        aria-label="Dimension navigation"
-        className="flex gap-2 overflow-x-auto pb-2 lg:hidden"
-      >
-        {NAV_ORDER.map((id) => {
-          const isActive = activeDimension === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => onSelect(id)}
-              className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
-                  : 'bg-[var(--grey-50)] text-[var(--text-secondary)] hover:bg-[var(--grey-100)]'
-              }`}
-              aria-current={isActive ? 'true' : undefined}
-            >
-              {DIMENSION_LABELS[id]}
-            </button>
-          );
-        })}
-      </nav>
+      {showMobile && (
+        <nav
+          aria-label="Dimension navigation"
+          className="flex gap-2 overflow-x-auto pb-2 lg:hidden"
+        >
+          {NAV_ORDER.map((id) => {
+            const isActive = activeDimension === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => onSelect(id)}
+                className={`shrink-0 rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
+                  isActive
+                    ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
+                    : 'bg-[var(--grey-50)] text-[var(--text-secondary)] hover:bg-[var(--grey-100)]'
+                }`}
+                aria-current={isActive ? 'true' : undefined}
+              >
+                {DIMENSION_LABELS[id]}
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       {/* Desktop: vertical sidebar */}
-      <nav
-        aria-label="Dimension navigation"
-        className="hidden w-[200px] shrink-0 flex-col gap-1 lg:flex"
-      >
-        {NAV_ORDER.map((id) => (
-          <DimensionNavItem
-            key={id}
-            id={id}
-            label={DIMENSION_LABELS[id]}
-            score={getScore(id)}
-            color={DIMENSION_COLORS[id]}
-            isActive={activeDimension === id}
-            severity={getSeverityForDimension(riskFlags, id)}
-            onClick={onSelect}
-          />
-        ))}
-      </nav>
+      {showDesktop && (
+        <nav
+          aria-label="Dimension navigation"
+          className="hidden w-[200px] shrink-0 flex-col gap-1 lg:flex"
+        >
+          {NAV_ORDER.map((id) => (
+            <DimensionNavItem
+              key={id}
+              id={id}
+              label={DIMENSION_LABELS[id]}
+              score={getScore(id)}
+              color={DIMENSION_COLORS[id]}
+              isActive={activeDimension === id}
+              severity={getSeverityForDimension(riskFlags, id)}
+              onClick={onSelect}
+            />
+          ))}
+        </nav>
+      )}
     </>
   );
 }

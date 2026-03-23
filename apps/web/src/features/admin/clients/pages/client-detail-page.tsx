@@ -309,7 +309,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
             }}
             onCopyLink={handleCopyLink}
             onViewResults={(surveyId) => {
-              void navigate({ to: '/admin/surveys/$surveyId/deploy', params: { surveyId } });
+              void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
             }}
             onArchive={(surveyId) => archiveSurvey.mutate(surveyId)}
           />
