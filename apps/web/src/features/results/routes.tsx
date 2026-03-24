@@ -11,6 +11,7 @@
  *   /results/$surveyId/survey   — SurveyDimensionsTab
  *   /results/$surveyId/groups   — GroupsTab
  *   /results/$surveyId/dialogue — DialogueTab
+ *   /results/$surveyId/reports  — ReportsTab
  *   /results/$surveyId/recommendations — RecommendationsTab
  */
 
@@ -30,10 +31,13 @@ import { SurveyDimensionsTab, SurveyInsightsContent } from './tabs/survey';
 import { GroupsTab, GroupsInsights } from './tabs/groups';
 import { DialogueTab, DialogueInsightsContent } from './tabs/dialogue';
 import { RecommendationsTab, RecommendationsInsightsContent } from './tabs/recommendations';
+import { ReportsTab, ReportsInsightsContent } from './tabs/reports';
 import { useOverallScores } from './hooks/use-overall-scores';
 import { useArchetype } from './hooks/use-archetype';
 import { useRiskFlags } from './hooks/use-risk-flags';
 import { DimensionContext, useActiveDimension } from './context/dimension-context';
+import { ReportSelectionContext } from './context/report-selection-context';
+import type { ReportRow } from '../reports/services/report-api';
 import type { ResultsTabId } from './types';
 
 export { useActiveDimension } from './context/dimension-context';
@@ -44,6 +48,7 @@ const PATH_TO_TAB: Record<string, ResultsTabId> = {
   survey: 'survey',
   groups: 'groups',
   dialogue: 'dialogue',
+  reports: 'reports',
   recommendations: 'recommendations',
 };
 
@@ -69,6 +74,7 @@ function ResultsLayoutRoute(): ReactElement {
   const activeTab = useActiveTab();
   const routerState = useRouterState();
   const [activeDimension, setActiveDimension] = useState<DimensionNavId>('overview');
+  const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
 
   /** Reset dimension selection when switching tabs. */
   const handleDimensionChange = useCallback((dimension: DimensionNavId) => {
@@ -100,6 +106,7 @@ function ResultsLayoutRoute(): ReactElement {
 
   function handleTabChange(tabId: ResultsTabId): void {
     setActiveDimension('overview');
+    setSelectedReport(null);
     void navigate({ to: `/results/${surveyId}/${tabId}` });
   }
 
@@ -113,6 +120,10 @@ function ResultsLayoutRoute(): ReactElement {
 
   /** Resolve insights panel content based on active tab. */
   function renderInsightsContent(): ReactElement | undefined {
+    if (activeTab === 'reports') {
+      return <ReportsInsightsContent />;
+    }
+
     if (isContentLoading || !scores || !archetype) return undefined;
 
     switch (activeTab) {
@@ -151,18 +162,20 @@ function ResultsLayoutRoute(): ReactElement {
 
   return (
     <AppShell>
-      <ResultsLayout
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onBack={handleBack}
-        surveyTitle={surveyMeta?.title}
-        isContentLoading={isContentLoading}
-        insightsContent={renderInsightsContent()}
-      >
-        <DimensionContext.Provider value={{ activeDimension, setActiveDimension: handleDimensionChange }}>
-          <Outlet />
-        </DimensionContext.Provider>
-      </ResultsLayout>
+      <ReportSelectionContext.Provider value={{ selectedReport, selectReport: setSelectedReport }}>
+        <ResultsLayout
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+          onBack={handleBack}
+          surveyTitle={surveyMeta?.title}
+          isContentLoading={isContentLoading}
+          insightsContent={renderInsightsContent()}
+        >
+          <DimensionContext.Provider value={{ activeDimension, setActiveDimension: handleDimensionChange }}>
+            <Outlet />
+          </DimensionContext.Provider>
+        </ResultsLayout>
+      </ReportSelectionContext.Provider>
     </AppShell>
   );
 }
@@ -217,6 +230,12 @@ function GroupsRoute(): ReactElement {
 function DialogueRoute(): ReactElement {
   const { surveyId } = useParams({ strict: false }) as { surveyId: string };
   return <DialogueTab surveyId={surveyId} />;
+}
+
+/** Reports tab route component. */
+function ReportsRoute(): ReactElement {
+  const { surveyId } = useParams({ strict: false }) as { surveyId: string };
+  return <ReportsTab surveyId={surveyId} />;
 }
 
 /** Recommendations tab route component. */
@@ -296,6 +315,12 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
     component: DialogueRoute,
   });
 
+  const reportsRoute = createRoute({
+    getParentRoute: () => resultsLayoutRoute,
+    path: '/reports',
+    component: ReportsRoute,
+  });
+
   const recommendationsRoute = createRoute({
     getParentRoute: () => resultsLayoutRoute,
     path: '/recommendations',
@@ -308,6 +333,7 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
     surveyDimensionsRoute,
     groupsRoute,
     dialogueRoute,
+    reportsRoute,
     recommendationsRoute,
   ]);
 }

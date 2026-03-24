@@ -8,7 +8,6 @@ import type {
   DimensionScoreMap,
   ArchetypeMatch,
   RiskFlag,
-  SubDimensionScore,
 } from '@compass/scoring';
 
 // ─── Database Row Types ─────────────────────────────────────────────────────
@@ -108,6 +107,7 @@ export type ResultsTabId =
   | 'survey'
   | 'groups'
   | 'dialogue'
+  | 'reports'
   | 'recommendations';
 
 export interface ResultsTab {
@@ -120,5 +120,6 @@ export const RESULTS_TABS: ResultsTab[] = [
   { id: 'survey', label: 'Survey' },
   { id: 'groups', label: 'Groups' },
   { id: 'dialogue', label: 'Dialogue' },
+  { id: 'reports', label: 'Reports' },
   { id: 'recommendations', label: 'Recommendations' },
 ] as const;

@@ -1,5 +1,5 @@
 /**
- * Results layout shell with back navigation, 5-tab pill nav, and responsive 65/35 split.
+ * Results layout shell with back navigation, 6-tab pill nav, and responsive 65/35 split.
  * Desktop (>=1024px): main content (65%) + insights panel (35%) side-by-side.
  * Mobile: single column with insights stacked below.
  */
