@@ -72,7 +72,7 @@ interface SendEmailRequest {
   to: string;
   subject: string;
   html: string;
-  templateType: 'survey_invitation' | 'reminder' | 'report_ready';
+  templateType: 'survey_invitation' | 'reminder' | 'report_ready' | 'team_invitation';
   replyTo?: string;
 }
 

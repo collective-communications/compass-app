@@ -123,8 +123,8 @@ export async function listInvitations(organizationId?: string): Promise<Invitati
 }
 
 /**
- * Creates an invitation with a 7-day expiry.
- * The backend trigger sends the invitation email.
+ * Creates an invitation with a 7-day expiry and sends the invitation email
+ * via the send-team-invitation edge function.
  */
 export async function createInvitation(params: InviteParams): Promise<Invitation> {
   const expiresAt = new Date();
@@ -143,6 +143,11 @@ export async function createInvitation(params: InviteParams): Promise<Invitation
 
   if (error) throw error;
 
+  // Send the invitation email (fire-and-forget — invitation is created regardless)
+  await supabase.functions.invoke('send-team-invitation', {
+    body: { invitationId: data.id },
+  });
+
   return {
     id: data.id,
     email: data.email,
@@ -156,7 +161,8 @@ export async function createInvitation(params: InviteParams): Promise<Invitation
 
 /**
  * Resends an expired invitation by creating a new one with fresh expiry
- * and revoking the old one.
+ * and revoking the old one. The new invitation email is sent automatically
+ * via createInvitation.
  */
 export async function resendInvitation(invitationId: string): Promise<Invitation> {
   // Fetch original invitation
@@ -176,7 +182,7 @@ export async function resendInvitation(invitationId: string): Promise<Invitation
 
   if (revokeError) throw revokeError;
 
-  // Create new invitation with fresh expiry
+  // Create new invitation with fresh expiry (also sends the email)
   return createInvitation({
     email: original.email,
     role: original.role as CccRole | ClientRole,
