@@ -54,7 +54,7 @@ export async function assembleReportPayload(
     await Promise.all([
       client
         .from('surveys')
-        .select('*, organizations(name, logo_url, settings)')
+        .select('*, organizations(name, branding, settings)')
         .eq('id', surveyId)
         .single(),
       client
@@ -68,9 +68,9 @@ export async function assembleReportPayload(
         .eq('survey_id', surveyId),
       client
         .from('recommendations')
-        .select('*')
+        .select('*, dimensions!inner(code)')
         .eq('survey_id', surveyId)
-        .order('severity_rank', { ascending: true }),
+        .order('priority', { ascending: true }),
     ]);
 
   if (surveyResult.error) throw new Error(`Failed to load survey: ${surveyResult.error.message}`);
@@ -137,11 +137,12 @@ export async function assembleReportPayload(
   // Map recommendations
   const recommendations = (recommendationsResult.data ?? []).map((row) => {
     const raw = row as Record<string, unknown>;
+    const dim = raw['dimensions'] as Record<string, unknown> | null;
     return {
-      dimension: raw['dimension_code'] as string,
+      dimension: (dim?.['code'] as string) ?? '',
       severity: raw['severity'] as string,
       title: raw['title'] as string,
-      description: raw['description'] as string,
+      description: (raw['body'] as string) ?? '',
       actions: (raw['actions'] as string[]) ?? [],
     };
   });
@@ -166,7 +167,7 @@ export async function assembleReportPayload(
     },
     recommendations,
     branding: {
-      orgLogoUrl: (org?.['logo_url'] as string) ?? null,
+      orgLogoUrl: ((org?.['branding'] as Record<string, unknown>)?.['logo_url'] as string) ?? null,
       cccLogoUrl: null,
       colors: brandColors,
     },

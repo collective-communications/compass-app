@@ -35,7 +35,7 @@ export async function updateReportStatus(
   client: SupabaseClient,
   reportId: string,
   status: 'queued' | 'generating' | 'ready' | 'completed' | 'failed',
-  extra?: { storage_path?: string; file_url?: string; file_size?: number },
+  extra?: { storage_path?: string; file_size?: number; error?: string },
 ): Promise<void> {
   const update: Record<string, unknown> = {
     status,
@@ -44,11 +44,11 @@ export async function updateReportStatus(
   if (extra?.storage_path) {
     update.storage_path = extra.storage_path;
   }
-  if (extra?.file_url) {
-    update.file_url = extra.file_url;
-  }
   if (extra?.file_size !== undefined) {
     update.file_size = extra.file_size;
+  }
+  if (extra?.error) {
+    update.error = extra.error;
   }
 
   const { error } = await client

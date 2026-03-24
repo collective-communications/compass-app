@@ -30,6 +30,7 @@
  *   500 — GENERATION_FAILED (rendering or upload error; report marked "failed")
  */
 import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { corsHeaders } from '../_shared/cors.ts';
 import { authorize } from './auth.ts';
 import { loadReport, updateReportStatus } from './db.ts';
 import { assembleReportPayload } from './assemble.ts';
@@ -71,7 +72,7 @@ async function uploadReportPdf(
 function jsonResponse(body: Record<string, unknown>, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   });
 }
 
@@ -82,6 +83,11 @@ function errorResponse(error: string, message: string, status: number): Response
 // ─── Main Handler ──────────────────────────────────────────────────────────
 
 Deno.serve(async (req: Request) => {
+  // CORS preflight
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
+
   // GET = health check
   if (req.method === 'GET') {
     return jsonResponse({ status: 'ok', function: 'generate-report' });
@@ -152,7 +158,6 @@ Deno.serve(async (req: Request) => {
     // Mark complete
     await updateReportStatus(client, reportId, 'completed', {
       storage_path: storagePath,
-      file_url: signedUrl,
       file_size: fileSize,
     });
 
@@ -164,14 +169,15 @@ Deno.serve(async (req: Request) => {
       generatedBy: userId,
     });
   } catch (err) {
-    // Best-effort: mark report as failed
+    const message = err instanceof Error ? err.message : 'Unknown error';
+
+    // Best-effort: mark report as failed with error message
     try {
-      await updateReportStatus(client, reportId, 'failed');
+      await updateReportStatus(client, reportId, 'failed', { error: message });
     } catch {
       // Swallow cleanup errors
     }
 
-    const message = err instanceof Error ? err.message : 'Unknown error';
     return errorResponse('GENERATION_FAILED', message, 500);
   }
 });

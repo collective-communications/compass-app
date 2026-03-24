@@ -1,4 +1,5 @@
 import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { corsHeaders } from '../_shared/cors.ts';
 
 /** Result of authorization check. */
 export interface AuthResult {
@@ -7,12 +8,19 @@ export interface AuthResult {
   role: string;
 }
 
+function errorResponse(error: string, message: string, status: number): Response {
+  return new Response(
+    JSON.stringify({ error, message }),
+    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+  );
+}
+
 /**
  * Authorize a request to generate a report.
  *
  * Accepts either:
  * - Service role key in the Authorization header (Bearer <service_role_key>)
- * - A valid JWT belonging to a user with ccc_admin or client_admin role
+ * - A valid JWT belonging to a user with ccc_admin, ccc_member, or client_exec role
  *
  * Returns 401 for missing/invalid credentials, 403 for insufficient role.
  */
@@ -22,12 +30,7 @@ export async function authorize(
 ): Promise<{ result: AuthResult } | { error: Response }> {
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return {
-      error: new Response(
-        JSON.stringify({ error: 'UNAUTHORIZED', message: 'Missing Authorization header' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } },
-      ),
-    };
+    return { error: errorResponse('UNAUTHORIZED', 'Missing Authorization header', 401) };
   }
 
   const token = authHeader.slice(7);
@@ -44,41 +47,33 @@ export async function authorize(
   const { data: { user }, error: authError } = await client.auth.getUser(token);
 
   if (authError || !user) {
-    return {
-      error: new Response(
-        JSON.stringify({ error: 'UNAUTHORIZED', message: 'Invalid or expired token' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } },
-      ),
-    };
+    return { error: errorResponse('UNAUTHORIZED', 'Invalid or expired token', 401) };
   }
 
-  // Look up the user's role from the users table
-  const { data: profile, error: profileError } = await client
-    .from('users')
+  // Look up the user's role from org_members
+  const { data: membership, error: memberError } = await client
+    .from('org_members')
     .select('role')
-    .eq('id', user.id)
+    .eq('user_id', user.id)
+    .limit(1)
     .single();
 
-  if (profileError || !profile) {
-    return {
-      error: new Response(
-        JSON.stringify({ error: 'UNAUTHORIZED', message: 'User profile not found' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } },
-      ),
-    };
+  if (memberError || !membership) {
+    return { error: errorResponse('UNAUTHORIZED', 'User org membership not found', 401) };
   }
 
-  const allowedRoles = ['ccc_admin', 'client_admin'];
-  if (!allowedRoles.includes(profile.role)) {
+  const allowedRoles = ['ccc_admin', 'ccc_member', 'client_exec'];
+  if (!allowedRoles.includes(membership.role)) {
     return {
-      error: new Response(
-        JSON.stringify({ error: 'FORBIDDEN', message: 'Only ccc_admin or client_admin users can generate reports' }),
-        { status: 403, headers: { 'Content-Type': 'application/json' } },
+      error: errorResponse(
+        'FORBIDDEN',
+        'Only ccc_admin, ccc_member, or client_exec users can generate reports',
+        403,
       ),
     };
   }
 
   return {
-    result: { authorized: true, userId: user.id, role: profile.role },
+    result: { authorized: true, userId: user.id, role: membership.role },
   };
 }
