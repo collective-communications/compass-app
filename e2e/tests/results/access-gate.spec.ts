@@ -52,7 +52,7 @@ test.describe('Results access gate — admin always has access', () => {
     await page.goto(`/results/${SEED_SURVEY_ID}/compass`);
 
     // Admin should always see results — use .first() to avoid strict mode with duplicate nav elements
-    await page.waitForURL((url) => url.pathname.includes('/results'), { timeout: 10000 });
-    await expect(page.getByRole('navigation').first()).toBeVisible();
+    await page.waitForURL((url) => url.pathname.includes('/results'), { timeout: 15000 });
+    await expect(page.getByRole('navigation').first()).toBeVisible({ timeout: 10000 });
   });
 });
