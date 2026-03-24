@@ -61,7 +61,7 @@ export async function assembleReportPayload(
         .from('scores')
         .select('*, dimensions!inner(code, name)')
         .eq('survey_id', surveyId)
-        .is('segment_type', null),
+        .eq('segment_type', 'overall'),
       client
         .from('safe_segment_scores')
         .select('*')
