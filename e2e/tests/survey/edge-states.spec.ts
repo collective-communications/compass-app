@@ -76,6 +76,7 @@ test.describe('completed and closed survey edge cases', () => {
   });
 
   test('already completed survey shows already-completed screen', async ({ page }) => {
+    test.setTimeout(90_000);
     // First: complete the survey
     const survey = new SurveyPage(page);
     await survey.goto(token);

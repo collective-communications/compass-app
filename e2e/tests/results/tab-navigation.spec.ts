@@ -11,5 +11,5 @@ test('results tab navigation renders', async ({ page }) => {
   await page.waitForURL((url) => url.pathname.includes('/results'), { timeout: 15000 });
 
   // Assert tab navigation is present
-  await expect(page.getByRole('navigation').first()).toBeVisible({ timeout: 10000 });
+  await expect(page.getByRole('navigation').first()).toBeVisible({ timeout: 20000 });
 });

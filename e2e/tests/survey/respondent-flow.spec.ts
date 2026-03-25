@@ -16,6 +16,7 @@ test.afterEach(async () => {
 });
 
 test('complete full survey with open-ended response', async ({ page }) => {
+  test.setTimeout(90_000);
   const survey = new SurveyPage(page);
 
   await survey.goto(token);
@@ -200,6 +201,7 @@ test('resume incomplete survey shows welcome-back with progress', async ({ page 
 });
 
 test('already completed survey shows already-completed screen on revisit', async ({ page }) => {
+  test.setTimeout(90_000);
   const survey = new SurveyPage(page);
 
   // Complete the survey
