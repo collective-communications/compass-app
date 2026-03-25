@@ -15,7 +15,7 @@ export function useFocusTrap(containerRef: React.RefObject<HTMLElement | null>, 
 
     // Focus the first focusable element on open
     const focusableSelector =
-      'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
+      'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
     const firstFocusable = container.querySelector<HTMLElement>(focusableSelector);
     firstFocusable?.focus();
 
