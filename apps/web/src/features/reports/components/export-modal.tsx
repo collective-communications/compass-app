@@ -157,17 +157,19 @@ export function ExportModal({
         role="dialog"
         aria-modal="true"
         aria-label="Export report"
+        aria-hidden={!isOpen}
+        inert={!isOpen ? true : undefined}
         onKeyDown={handleKeyDown}
         className={[
-          'fixed z-50 flex flex-col bg-[var(--grey-50)] shadow-lg transition-transform duration-300 ease-in-out',
+          'fixed z-50 flex flex-col bg-[var(--grey-50)] shadow-lg transition-[transform,visibility] duration-300 ease-in-out',
           // Mobile: bottom sheet
           'inset-x-0 bottom-0 max-h-[85vh] rounded-t-2xl lg:inset-x-auto',
           // Desktop: side sheet
           'lg:inset-y-0 lg:right-0 lg:w-[420px] lg:max-h-none lg:rounded-none',
-          // Transform
+          // Transform + visibility
           isOpen
-            ? 'translate-y-0 lg:translate-x-0'
-            : 'translate-y-full lg:translate-y-0 lg:translate-x-full',
+            ? 'visible translate-y-0 lg:translate-x-0'
+            : 'invisible translate-y-full lg:translate-y-0 lg:translate-x-full',
         ].join(' ')}
       >
         {/* Drag handle (mobile) */}
