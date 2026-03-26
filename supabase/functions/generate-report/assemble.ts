@@ -38,6 +38,12 @@ export interface ReportPayload {
     cccLogoUrl: string | null;
     colors: Record<string, string>;
   };
+  sections?: Array<{
+    id: string;
+    label: string;
+    included: boolean;
+    locked?: boolean;
+  }>;
 }
 
 // ─── Main ────────────────────────────────────────────────────────────────────

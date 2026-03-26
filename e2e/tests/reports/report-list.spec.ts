@@ -66,7 +66,7 @@ test.describe('Report list page — client_exec', () => {
       const firstItem = listItems.first();
       await expect(firstItem).toBeVisible();
 
-      const formatBadge = firstItem.locator('span').filter({ hasText: /pdf|pptx/i }).first();
+      const formatBadge = firstItem.locator('span').filter({ hasText: /pdf|docx|pptx/i }).first();
       await expect(formatBadge).toBeVisible();
     }
   });

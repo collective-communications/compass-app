@@ -8,6 +8,7 @@
 
 import type { ReportPayload } from './assemble.ts';
 import type { ReportRow } from './db.ts';
+import type { Renderer, RendererOutput } from './renderer.ts';
 import { escapeHtml } from './_lib.ts';
 import { getStyles } from './styles.ts';
 import {
@@ -51,4 +52,17 @@ export function renderReportHtml(payload: ReportPayload, report: ReportRow): str
   ${renderFooter(generatedDate)}
 </body>
 </html>`;
+}
+
+/** HTML renderer implementing the Renderer interface. */
+export class HtmlRenderer implements Renderer {
+  async render(payload: ReportPayload, report: ReportRow): Promise<RendererOutput> {
+    const html = renderReportHtml(payload, report);
+    const encoder = new TextEncoder();
+    return {
+      buffer: encoder.encode(html),
+      contentType: 'text/html',
+      extension: '.html',
+    };
+  }
 }

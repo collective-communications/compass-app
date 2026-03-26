@@ -27,6 +27,7 @@ export function getCurrentStep(progress: number): number {
 
 export const FORMAT_DESCRIPTIONS: Record<string, string> = {
   [ReportFormat.PDF]: 'Best for printing and sharing',
+  [ReportFormat.DOCX]: 'Best for editing and collaboration',
   [ReportFormat.PPTX]: 'Best for presentations',
 };
 

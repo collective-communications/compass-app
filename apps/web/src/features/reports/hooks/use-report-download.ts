@@ -18,6 +18,8 @@ export interface UseReportDownloadReturn {
   fetchUrl: (storagePath: string) => Promise<string | null>;
   /** Fetch the report HTML and open the browser print/save-as-PDF dialog */
   printPdf: (storagePath: string) => Promise<void>;
+  /** Download a binary file (DOCX, PPTX) via signed URL */
+  downloadFile: (storagePath: string, filename?: string) => Promise<void>;
 }
 
 /** Provides on-demand signed URL generation and print-to-PDF for report downloads */
@@ -61,5 +63,26 @@ export function useReportDownload(): UseReportDownloadReturn {
     }
   }, []);
 
-  return { downloadUrl, isLoading, error, fetchUrl, printPdf };
+  const downloadFile = useCallback(async (storagePath: string, filename?: string): Promise<void> => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const url = await getReportDownloadUrl(storagePath);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename ?? '';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch (dlError) {
+      const message =
+        dlError instanceof Error ? dlError.message : 'Failed to download report.';
+      setError(message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return { downloadUrl, isLoading, error, fetchUrl, printPdf, downloadFile };
 }

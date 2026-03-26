@@ -8,6 +8,12 @@ import { AlertCircle } from 'lucide-react';
 import { ReportFormat, type ReportSection } from '@compass/types';
 import { FORMAT_DESCRIPTIONS } from './export-modal-utils';
 
+const FORMAT_OPTIONS: Array<{ value: ReportFormat; label: string }> = [
+  { value: ReportFormat.PDF, label: 'PDF' },
+  { value: ReportFormat.DOCX, label: 'DOCX' },
+  { value: ReportFormat.PPTX, label: 'PPTX' },
+];
+
 interface ExportConfigurePanelProps {
   format: ReportFormat;
   onFormatChange: (format: ReportFormat) => void;
@@ -36,42 +42,27 @@ export function ExportConfigurePanel({
           Choose how your report will be delivered
         </p>
         <div className="flex flex-col gap-2">
-          <label className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors hover:bg-[var(--grey-50)]">
-            <input
-              type="radio"
-              name="report-format"
-              value={ReportFormat.PDF}
-              checked={format === ReportFormat.PDF}
-              onChange={() => onFormatChange(ReportFormat.PDF)}
-              className="h-4 w-4 text-[var(--color-core-text)] focus:ring-[var(--color-core-text)]"
-            />
-            <div className="flex flex-col">
-              <span className="text-sm text-[var(--grey-700)]">PDF</span>
-              <span className="text-xs text-[var(--text-tertiary)]">
-                {FORMAT_DESCRIPTIONS[ReportFormat.PDF]}
-              </span>
-            </div>
-          </label>
-          <label className="flex cursor-not-allowed items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 opacity-50">
-            <input
-              type="radio"
-              name="report-format"
-              value={ReportFormat.PPTX}
-              disabled
-              className="h-4 w-4"
-            />
-            <div className="flex flex-col">
-              <span className="text-sm text-[var(--text-tertiary)]">
-                PPTX
-                <span className="ml-2 rounded bg-[var(--grey-50)] px-1.5 py-0.5 text-xs text-[var(--text-tertiary)]">
-                  Coming soon
+          {FORMAT_OPTIONS.map((option) => (
+            <label
+              key={option.value}
+              className="flex cursor-pointer items-center gap-3 rounded-md border border-[var(--grey-100)] px-4 py-3 transition-colors hover:bg-[var(--grey-50)]"
+            >
+              <input
+                type="radio"
+                name="report-format"
+                value={option.value}
+                checked={format === option.value}
+                onChange={() => onFormatChange(option.value)}
+                className="h-4 w-4 text-[var(--color-core-text)] focus:ring-[var(--color-core-text)]"
+              />
+              <div className="flex flex-col">
+                <span className="text-sm text-[var(--grey-700)]">{option.label}</span>
+                <span className="text-xs text-[var(--text-tertiary)]">
+                  {FORMAT_DESCRIPTIONS[option.value]}
                 </span>
-              </span>
-              <span className="text-xs text-[var(--text-tertiary)]">
-                {FORMAT_DESCRIPTIONS[ReportFormat.PPTX]}
-              </span>
-            </div>
-          </label>
+              </div>
+            </label>
+          ))}
         </div>
       </fieldset>
 

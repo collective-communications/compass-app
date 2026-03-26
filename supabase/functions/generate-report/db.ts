@@ -6,6 +6,7 @@ export interface ReportRow {
   survey_id: string;
   organization_id: string;
   title: string;
+  format: string;
   status: string;
   storage_path: string | null;
   client_visible: boolean;

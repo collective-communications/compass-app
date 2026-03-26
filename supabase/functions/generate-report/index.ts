@@ -1,8 +1,8 @@
 /**
  * generate-report — Supabase Edge Function
  *
- * Assembles survey data into a branded HTML report, uploads it to storage,
- * and returns a signed download URL.
+ * Assembles survey data into a report (format determined by the report
+ * record), uploads it to storage, and returns a signed download URL.
  *
  * HTTP Method: POST (GET returns a health-check response)
  *
@@ -34,23 +34,25 @@ import { corsHeaders } from '../_shared/cors.ts';
 import { authorize } from './auth.ts';
 import { loadReport, updateReportStatus } from './db.ts';
 import { assembleReportPayload } from './assemble.ts';
-import { renderReportHtml } from './render-html.ts';
+import { getRenderer } from './renderer.ts';
 
 // ─── Storage Helpers ──────────────────────────────────────────────────────
 
-/** Upload a PDF to the reports storage bucket and return a signed URL. */
-async function uploadReportPdf(
+/** Upload a rendered report to the reports storage bucket and return a signed URL. */
+async function uploadReport(
   client: SupabaseClient,
   reportId: string,
   orgId: string,
-  pdfBuffer: Uint8Array,
+  buffer: Uint8Array,
+  contentType: string,
+  extension: string,
 ): Promise<{ storagePath: string; signedUrl: string; fileSize: number }> {
-  const storagePath = `${orgId}/${reportId}.html`;
+  const storagePath = `${orgId}/${reportId}${extension}`;
 
   const { error: uploadError } = await client.storage
     .from('reports')
-    .upload(storagePath, pdfBuffer, {
-      contentType: 'text/html',
+    .upload(storagePath, buffer, {
+      contentType,
       upsert: true,
     });
   if (uploadError) throw new Error(`Storage upload failed: ${uploadError.message}`);
@@ -63,7 +65,7 @@ async function uploadReportPdf(
   return {
     storagePath,
     signedUrl: signedData.signedUrl,
-    fileSize: pdfBuffer.byteLength,
+    fileSize: buffer.byteLength,
   };
 }
 
@@ -143,16 +145,13 @@ Deno.serve(async (req: Request) => {
     // Assemble report data from survey scores, segments, recommendations
     const payload = await assembleReportPayload(client, report.survey_id);
 
-    // Render to self-contained HTML (PDF conversion is a future infra task)
-    const html = renderReportHtml(payload, report);
+    // Resolve renderer for the requested format and render to bytes
+    const renderer = getRenderer(report.format);
+    const { buffer, contentType, extension } = await renderer.render(payload, report);
 
-    // Convert HTML string to bytes for upload
-    const encoder = new TextEncoder();
-    const htmlBuffer = encoder.encode(html);
-
-    // Upload to storage (.html until real PDF conversion is wired)
-    const { storagePath, signedUrl, fileSize } = await uploadReportPdf(
-      client, reportId, report.organization_id, htmlBuffer,
+    // Upload to storage
+    const { storagePath, signedUrl, fileSize } = await uploadReport(
+      client, reportId, report.organization_id, buffer, contentType, extension,
     );
 
     // Mark complete

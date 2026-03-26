@@ -9,6 +9,7 @@
 /** Supported report output formats */
 export const ReportFormat = {
   PDF: 'pdf',
+  DOCX: 'docx',
   PPTX: 'pptx',
 } as const;
 

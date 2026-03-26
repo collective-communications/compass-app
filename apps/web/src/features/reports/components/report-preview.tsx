@@ -43,7 +43,7 @@ const SECTION_LABELS: Record<string, string> = {
 };
 
 export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
-  const { isLoading: isDownloading, error: downloadError, printPdf } = useReportDownload();
+  const { isLoading: isDownloading, error: downloadError, printPdf, downloadFile } = useReportDownload();
 
   if (report === null) {
     return (
@@ -63,7 +63,12 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
 
   async function handleDownload(): Promise<void> {
     if (report?.storagePath === null || report?.storagePath === undefined) return;
-    await printPdf(report.storagePath);
+
+    if (report.format === 'pdf') {
+      await printPdf(report.storagePath);
+    } else {
+      await downloadFile(report.storagePath, `report.${report.format}`);
+    }
   }
 
   return (
