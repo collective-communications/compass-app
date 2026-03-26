@@ -10,6 +10,6 @@ test('results tab navigation renders', async ({ page }) => {
   // Wait for the results page to fully load (may redirect through auth)
   await page.waitForURL((url) => url.pathname.includes('/results'), { timeout: 15000 });
 
-  // Assert tab navigation is present
-  await expect(page.getByRole('navigation').first()).toBeVisible({ timeout: 20000 });
+  // Assert the Results tabs pill navigation is present
+  await expect(page.getByRole('navigation', { name: 'Results tabs' })).toBeVisible({ timeout: 20000 });
 });

@@ -163,6 +163,7 @@ async function seedOrganizations(): Promise<void> {
       id: IDS.org.client,
       name: 'River Valley Health',
       slug: 'river-valley-health',
+      client_access_enabled: true,
       settings: {
         timezone: 'America/Toronto',
         anonymityThreshold: 5,
@@ -595,12 +596,122 @@ async function seedResponses(): Promise<void> {
   console.log(`  ${responseCount} responses with answers`);
 }
 
+async function seedOrgSettings(): Promise<void> {
+  console.log('Creating organization settings...');
+
+  const { error } = await supabase.from('organization_settings').upsert([
+    {
+      organization_id: IDS.org.client,
+      metadata_departments: JSON.stringify(['Nursing', 'Administration', 'Emergency', 'Surgery', 'Outpatient']),
+      metadata_roles: JSON.stringify(['Director', 'Manager', 'Supervisor', 'Staff']),
+      metadata_locations: JSON.stringify(['Main Campus', 'West Wing', 'East Annex']),
+      metadata_tenure_bands: JSON.stringify(['< 1 year', '1-3 years', '3-5 years', '5-10 years', '10+ years']),
+      display_name: 'River Valley Health',
+      client_access_enabled: true,
+    },
+  ], { onConflict: 'organization_id' });
+
+  if (error) {
+    console.error(`  FAILED: ${error.message}`);
+  } else {
+    console.log('  done');
+  }
+}
+
+async function seedScores(): Promise<void> {
+  console.log('Computing and inserting scores...');
+
+  const { data: dims } = await supabase.from('dimensions').select('id, code');
+  if (!dims || dims.length === 0) {
+    console.log('  FAILED: no dimensions found');
+    return;
+  }
+  const dimMap = Object.fromEntries(dims.map((d: { id: string; code: string }) => [d.code, d.id]));
+
+  // Delete existing scores for this survey
+  await supabase.from('scores').delete().eq('survey_id', IDS.survey);
+
+  // Realistic overall scores for Likert 2-5 distribution (skewing positive)
+  // Expected raw mean ~3.5 on 5-point → score ~62.5%
+  const overallScores: Record<string, { score: number; rawScore: number }> = {
+    core: { score: 64.50, rawScore: 3.58 },
+    clarity: { score: 61.20, rawScore: 3.45 },
+    connection: { score: 59.80, rawScore: 3.39 },
+    collaboration: { score: 63.10, rawScore: 3.52 },
+  };
+
+  const scoreRows: Array<{
+    survey_id: string;
+    dimension_id: string;
+    segment_type: string;
+    segment_value: string;
+    score: number;
+    raw_score: number;
+    response_count: number;
+  }> = [];
+
+  // Overall scores (all respondents)
+  for (const [code, s] of Object.entries(overallScores)) {
+    scoreRows.push({
+      survey_id: IDS.survey,
+      dimension_id: dimMap[code],
+      segment_type: 'overall',
+      segment_value: 'all',
+      score: s.score,
+      raw_score: s.rawScore,
+      response_count: 24,
+    });
+  }
+
+  // Per-department scores (24 responses distributed across 5 depts: ~4-5 each)
+  const departments = ['Nursing', 'Administration', 'Emergency', 'Surgery', 'Outpatient'];
+  const deptCounts = [5, 5, 5, 5, 4]; // 24 total
+  const deptOffsets: Record<string, Record<string, number>> = {
+    Nursing:         { core: 3.2, clarity: -1.5, connection: 2.1, collaboration: -0.8 },
+    Administration:  { core: -2.1, clarity: 4.0, connection: -3.2, collaboration: 1.5 },
+    Emergency:       { core: 1.8, clarity: -0.5, connection: -1.2, collaboration: 3.8 },
+    Surgery:         { core: -1.0, clarity: 2.5, connection: 1.0, collaboration: -2.5 },
+    Outpatient:      { core: 0.5, clarity: -1.8, connection: 2.8, collaboration: -0.3 },
+  };
+
+  departments.forEach((dept, idx) => {
+    for (const [code, base] of Object.entries(overallScores)) {
+      const offset = deptOffsets[dept][code];
+      const score = Math.max(0, Math.min(100, base.score + offset));
+      const rawScore = Math.max(1, Math.min(10, base.rawScore + (offset / 25)));
+      scoreRows.push({
+        survey_id: IDS.survey,
+        dimension_id: dimMap[code],
+        segment_type: 'department',
+        segment_value: dept,
+        score: parseFloat(score.toFixed(2)),
+        raw_score: parseFloat(rawScore.toFixed(2)),
+        response_count: deptCounts[idx],
+      });
+    }
+  });
+
+  const { error } = await supabase.from('scores').upsert(scoreRows, {
+    onConflict: 'survey_id,dimension_id,segment_type,segment_value',
+  });
+
+  if (error) {
+    console.error(`  scores FAILED: ${error.message}`);
+  } else {
+    console.log(`  ${scoreRows.length} score rows (4 overall + ${scoreRows.length - 4} per-department)`);
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Clean
 // ---------------------------------------------------------------------------
 
 async function clean(): Promise<void> {
   console.log('Tearing down seed data...');
+
+  // Delete scores
+  console.log('  deleting scores...');
+  await supabase.from('scores').delete().eq('survey_id', IDS.survey);
 
   // Delete responses/answers (cascade from deployment)
   console.log('  deleting responses...');
@@ -632,6 +743,10 @@ async function clean(): Promise<void> {
   await supabase.from('survey_templates').delete().eq('id', IDS.template);
 
   // Delete org members + orgs
+  // Delete org settings
+  console.log('  deleting org settings...');
+  await supabase.from('organization_settings').delete().eq('organization_id', IDS.org.client);
+
   console.log('  deleting org memberships...');
   await supabase.from('org_members').delete().eq('organization_id', IDS.org.ccc);
   await supabase.from('org_members').delete().eq('organization_id', IDS.org.client);
@@ -669,6 +784,7 @@ async function main(): Promise<void> {
   console.log(`\nSeeding ${SUPABASE_URL}\n`);
 
   await seedOrganizations();
+  await seedOrgSettings();
   const emailToId = await seedUsers();
   await seedOrgMembers(emailToId);
   await seedSurvey();
@@ -676,6 +792,7 @@ async function main(): Promise<void> {
   await seedQuestions();
   await seedDeployment();
   await seedResponses();
+  await seedScores();
 
   console.log('\n--- Seed complete ---');
   console.log('\nTest accounts (all use password: TestPass123!):');

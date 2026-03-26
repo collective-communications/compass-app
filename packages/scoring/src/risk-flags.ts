@@ -30,36 +30,44 @@ export function evaluateRiskFlags(
   scores: DimensionScoreMap,
   thresholds?: RiskThresholds,
 ): RiskFlag[] {
+  if (Object.keys(scores).length === 0) {
+    return [];
+  }
+
   const t = thresholds ?? DEFAULT_RISK_THRESHOLDS;
   const flags: RiskFlag[] = [];
 
-  const coreScore = scores.core.score;
+  const coreEntry = scores.core;
 
-  // Core critical check
-  if (coreScore < t.coreCritical) {
-    flags.push({
-      dimensionCode: 'core',
-      dimensionName: DIMENSION_NAMES['core'] ?? 'Core',
-      severity: 'critical',
-      score: coreScore,
-      message: 'Core foundation is broken — address before other dimensions',
-    });
-  } else if (coreScore <= t.coreMedium) {
-    // Core medium check (between coreCritical and coreMedium inclusive)
-    flags.push({
-      dimensionCode: 'core',
-      dimensionName: DIMENSION_NAMES['core'] ?? 'Core',
-      severity: 'medium',
-      score: coreScore,
-      message: 'Core foundation is fragile — monitor closely',
-    });
+  if (coreEntry) {
+    const coreScore = coreEntry.score;
+
+    // Core critical check
+    if (coreScore < t.coreCritical) {
+      flags.push({
+        dimensionCode: 'core',
+        dimensionName: DIMENSION_NAMES['core'] ?? 'Core',
+        severity: 'critical',
+        score: coreScore,
+        message: 'Core foundation is broken — address before other dimensions',
+      });
+    } else if (coreScore <= t.coreMedium) {
+      // Core medium check (between coreCritical and coreMedium inclusive)
+      flags.push({
+        dimensionCode: 'core',
+        dimensionName: DIMENSION_NAMES['core'] ?? 'Core',
+        severity: 'medium',
+        score: coreScore,
+        message: 'Core foundation is fragile — monitor closely',
+      });
+    }
   }
 
   // High risk check for all dimensions (including core)
   for (const [code, dim] of Object.entries(scores)) {
     if (dim.score < t.dimensionHigh) {
       // Avoid duplicating core if already flagged as critical
-      if (code === 'core' && coreScore < t.coreCritical) continue;
+      if (code === 'core' && coreEntry && coreEntry.score < t.coreCritical) continue;
 
       flags.push({
         dimensionCode: code,

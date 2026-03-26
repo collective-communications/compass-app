@@ -37,7 +37,7 @@ export class SurveyPage {
     this.tenureSelect = page.locator('#metadata-tenure');
     this.startButton = page.getByRole('button', { name: /start survey/i });
     this.likertOptions = page.getByRole('radio');
-    this.nextButton = page.getByRole('button', { name: /^(next|continue)$/i });
+    this.nextButton = page.locator('main').getByRole('button', { name: /^(next|continue)$/i });
     this.openEndedTextarea = page.getByRole('textbox');
     this.submitButton = page.getByRole('button', { name: /submit/i });
     this.skipButton = page.getByRole('button', { name: /skip/i });

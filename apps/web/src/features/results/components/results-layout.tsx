@@ -63,6 +63,7 @@ export function ResultsLayout({
         tabs={RESULTS_TABS}
         activeId={activeTab}
         onSelect={(id) => onTabChange(id as ResultsTabId)}
+        ariaLabel="Results tabs"
       />
 
       {/* Content: responsive 65/35 split */}

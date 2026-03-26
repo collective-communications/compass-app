@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'bun:test';
 import { evaluateRiskFlags, DEFAULT_RISK_THRESHOLDS } from './risk-flags.js';
-import type { DimensionScoreMap, DimensionScore } from './types.js';
+import type { DimensionCode, DimensionScoreMap, DimensionScore } from './types.js';
 
 function makeDimScore(code: string, score: number): DimensionScore {
-  return { dimensionId: `dim-${code}`, dimensionCode: code as any, score, rawScore: 1, responseCount: 1 };
+  return { dimensionId: `dim-${code}`, dimensionCode: code as DimensionCode, score, rawScore: 1, responseCount: 1 };
 }
 
 function makeScores(values: Partial<Record<string, number>> = {}): DimensionScoreMap {
@@ -79,5 +79,19 @@ describe('evaluateRiskFlags', () => {
       dimensionHigh: 40,
       coreMedium: 70,
     });
+  });
+
+  test('empty score map returns empty array', () => {
+    expect(evaluateRiskFlags({} as DimensionScoreMap)).toEqual([]);
+  });
+
+  test('partial score map without core evaluates present dimensions', () => {
+    const partial = {
+      clarity: makeDimScore('clarity', 30),
+    } as unknown as DimensionScoreMap;
+    const flags = evaluateRiskFlags(partial);
+    expect(flags).toHaveLength(1);
+    expect(flags[0].severity).toBe('high');
+    expect(flags[0].dimensionCode).toBe('clarity');
   });
 });
