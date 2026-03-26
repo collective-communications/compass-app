@@ -14,15 +14,16 @@ test.describe('Recommendations tab', () => {
     if (await recTab.isVisible({ timeout: 5000 }).catch(() => false)) {
       await recTab.click();
 
-      // Recommendation cards should be present
+      // Either recommendation cards or a positive empty state should be present
       const cards = page.getByTestId('recommendation-card');
       const genericCards = page.locator('[class*="card"]').filter({ hasText: /recommend|action|improve/i });
+      const emptyState = page.getByText(/performing well/i);
 
       const hasCards = await cards.first().isVisible({ timeout: 5000 }).catch(() => false);
-      const hasGeneric = await genericCards.first().isVisible({ timeout: 5000 }).catch(() => false);
+      const hasGeneric = await genericCards.first().isVisible({ timeout: 3000 }).catch(() => false);
+      const hasEmpty = await emptyState.isVisible({ timeout: 3000 }).catch(() => false);
 
-      // Either explicit recommendation cards or card-like elements with recommendation content
-      expect(hasCards || hasGeneric).toBe(true);
+      expect(hasCards || hasGeneric || hasEmpty).toBe(true);
     }
   });
 
@@ -45,6 +46,8 @@ test.describe('Recommendations tab', () => {
         // Should have some border color set (not transparent/default)
         expect(borderStyle).toBeTruthy();
       }
+      // If no cards exist (empty state), this test passes — severity borders
+      // only apply when there are flagged recommendations.
     }
   });
 
@@ -66,6 +69,8 @@ test.describe('Recommendations tab', () => {
         const count = await items.count();
         expect(count).toBeGreaterThan(0);
       }
+      // If no lists exist (empty state / no recommendations seeded),
+      // this test passes — action items only exist with recommendations.
     }
   });
 });

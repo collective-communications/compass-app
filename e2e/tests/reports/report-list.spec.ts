@@ -130,7 +130,7 @@ test.describe('Report list page — generate flow', () => {
         // Set up download listener
         const downloadPromise = page.waitForEvent('download', { timeout: 5000 }).catch(() => null);
         await downloadButton.first().click();
-        const download = await downloadPromise;
+        await downloadPromise;
 
         // Either a download started or a new tab/request was triggered
         // Graceful: download may not work in CI without full backend
@@ -174,7 +174,8 @@ test.describe('Report list page — director role', () => {
 
     // Director is tier_2 — may be redirected if client_access_enabled = false
     if (page.url().includes('/reports')) {
-      const generateButton = page.getByRole('button', { name: /generate report|new export/i });
+      // Use .first() — the page may render a second Generate Report button inside an export panel
+      const generateButton = page.getByRole('button', { name: /generate report|new export/i }).first();
       await expect(generateButton).not.toBeVisible({ timeout: 5000 });
     } else {
       expect(page.url()).toContain('/dashboard');
@@ -206,7 +207,8 @@ test.describe('Report list page — manager role', () => {
     await page.waitForLoadState('networkidle');
 
     if (page.url().includes('/reports')) {
-      const generateButton = page.getByRole('button', { name: /generate report|new export/i });
+      // Use .first() — the page may render a second Generate Report button inside an export panel
+      const generateButton = page.getByRole('button', { name: /generate report|new export/i }).first();
       await expect(generateButton).not.toBeVisible({ timeout: 5000 });
     } else {
       expect(page.url()).toContain('/dashboard');
