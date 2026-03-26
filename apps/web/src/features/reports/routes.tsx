@@ -19,8 +19,8 @@ import { useScoredSurveys } from '../../hooks/use-scored-surveys';
 
 /** Map internal roles to the UserRole type expected by ReportsPage. */
 function mapUserRole(role: string): 'client_exec' | 'director' | 'manager' {
-  if (role === 'director') return 'director';
-  if (role === 'manager') return 'manager';
+  if (role === 'client_director') return 'director';
+  if (role === 'client_manager') return 'manager';
   return 'client_exec';
 }
 

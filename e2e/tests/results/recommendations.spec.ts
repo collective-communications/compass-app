@@ -5,26 +5,21 @@ test.use({ storageState: 'e2e/.auth/client.json' });
 const SEED_SURVEY_ID = '00000000-0000-0000-0000-000000000100';
 
 test.describe('Recommendations tab', () => {
-  test('recommendations cards render with severity ordering', async ({ page }) => {
+  test('recommendations tab renders content', async ({ page }) => {
     await page.goto(`/results/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
     // Navigate to Recommendations tab
     const recTab = page.getByRole('tab', { name: /recommendations/i });
-    if (await recTab.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await recTab.click();
+    if (!(await recTab.isVisible().catch(() => false))) return;
+    await recTab.click();
 
-      // Either recommendation cards or a positive empty state should be present
-      const cards = page.getByTestId('recommendation-card');
-      const genericCards = page.locator('[class*="card"]').filter({ hasText: /recommend|action|improve/i });
-      const emptyState = page.getByText(/performing well/i);
-
-      const hasCards = await cards.first().isVisible({ timeout: 5000 }).catch(() => false);
-      const hasGeneric = await genericCards.first().isVisible({ timeout: 3000 }).catch(() => false);
-      const hasEmpty = await emptyState.isVisible({ timeout: 3000 }).catch(() => false);
-
-      expect(hasCards || hasGeneric || hasEmpty).toBe(true);
-    }
+    // Wait for the recommendations content to load (either cards or empty state).
+    // The empty state shows "performing well" when no recommendations exist.
+    // Use auto-retrying expect() instead of one-shot isVisible().
+    const content = page.getByTestId('recommendation-card').first()
+      .or(page.getByText(/performing well/i));
+    await expect(content).toBeVisible({ timeout: 10000 });
   });
 
   test('recommendation cards have colored left borders for severity', async ({ page }) => {
@@ -32,22 +27,21 @@ test.describe('Recommendations tab', () => {
     await page.waitForLoadState('networkidle');
 
     const recTab = page.getByRole('tab', { name: /recommendations/i });
-    if (await recTab.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await recTab.click();
+    if (!(await recTab.isVisible().catch(() => false))) return;
+    await recTab.click();
 
-      const cards = page.getByTestId('recommendation-card');
-      if (await cards.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-        // Check that at least one card has a left border color style
-        const firstCard = cards.first();
-        const borderStyle = await firstCard.evaluate((el) => {
-          const style = window.getComputedStyle(el);
-          return style.borderLeftColor || style.borderColor;
-        });
-        // Should have some border color set (not transparent/default)
-        expect(borderStyle).toBeTruthy();
-      }
-      // If no cards exist (empty state), this test passes — severity borders
-      // only apply when there are flagged recommendations.
+    const cards = page.getByTestId('recommendation-card');
+    // Wait for content to load before checking cards
+    const content = cards.first().or(page.getByText(/performing well/i));
+    await expect(content).toBeVisible({ timeout: 10000 });
+
+    if (await cards.first().isVisible().catch(() => false)) {
+      const firstCard = cards.first();
+      const borderStyle = await firstCard.evaluate((el) => {
+        const style = window.getComputedStyle(el);
+        return style.borderLeftColor || style.borderColor;
+      });
+      expect(borderStyle).toBeTruthy();
     }
   });
 
@@ -56,21 +50,22 @@ test.describe('Recommendations tab', () => {
     await page.waitForLoadState('networkidle');
 
     const recTab = page.getByRole('tab', { name: /recommendations/i });
-    if (await recTab.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await recTab.click();
+    if (!(await recTab.isVisible().catch(() => false))) return;
+    await recTab.click();
 
-      // Look for ordered lists or numbered items within cards
+    // Wait for content to load
+    const cards = page.getByTestId('recommendation-card');
+    const content = cards.first().or(page.getByText(/performing well/i));
+    await expect(content).toBeVisible({ timeout: 10000 });
+
+    // Only check action items if recommendation cards exist
+    if (await cards.first().isVisible().catch(() => false)) {
       const actionLists = page.locator('ol, [role="list"]');
-      const hasLists = await actionLists.first().isVisible({ timeout: 5000 }).catch(() => false);
-
-      // Action items should be present if recommendations exist
-      if (hasLists) {
+      if (await actionLists.first().isVisible().catch(() => false)) {
         const items = actionLists.first().locator('li, [role="listitem"]');
         const count = await items.count();
         expect(count).toBeGreaterThan(0);
       }
-      // If no lists exist (empty state / no recommendations seeded),
-      // this test passes — action items only exist with recommendations.
     }
   });
 });
