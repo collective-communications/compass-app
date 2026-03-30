@@ -140,8 +140,22 @@ function ResultsLayoutRoute(): ReactElement {
         return <SurveyInsightsContent scores={scores} />;
       case 'groups': {
         const routerSearch = routerState.location.search as Record<string, unknown>;
+        const st = typeof routerSearch.segmentType === 'string' ? routerSearch.segmentType : 'department';
         const sv = typeof routerSearch.segmentValue === 'string' ? routerSearch.segmentValue : '';
-        return <GroupsInsights surveyId={surveyId} segmentValue={sv} isBelowThreshold={!sv} />;
+        return (
+          <GroupsInsights
+            surveyId={surveyId}
+            segmentType={st as SegmentType}
+            segmentValue={sv}
+            isBelowThreshold={!sv}
+            onSegmentChange={(value: string) => {
+              void navigate({
+                to: `/results/${surveyId}/groups`,
+                search: { segmentType: st, segmentValue: value },
+              });
+            }}
+          />
+        );
       }
       case 'dialogue':
         return <DialogueInsightsContent />;

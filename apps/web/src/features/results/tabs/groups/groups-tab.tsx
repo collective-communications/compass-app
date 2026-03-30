@@ -5,7 +5,9 @@
  * chart across all segments for the selected type.
  *
  * When a specific segment is selected and above threshold: shows segment
- * compass, comparison card (segment vs overall), and top issues in insights.
+ * header, side-by-side compass + top issues, delta chips, subculture alert,
+ * and quick actions. Insights panel shows observations, compare grid, and
+ * recommended action.
  *
  * When below threshold: hides data, shows anonymity warning.
  *
@@ -17,15 +19,28 @@ import type { DimensionCode } from '@compass/types';
 import type { SegmentType } from '@compass/scoring';
 import { useOverallScores } from '../../hooks/use-overall-scores';
 import { useSegmentScores } from '../../hooks/use-segment-scores';
-import { useQuestionScores } from '../../hooks/use-question-scores';
+import { useSegmentQuestionScores } from '../../hooks/use-segment-question-scores';
+import { useRecommendations } from '../../hooks/use-recommendations';
 import { ResultsSkeleton } from '../../components/results-skeleton';
 import type { DimensionScoreRow } from '../../types';
 import { SegmentFilterBar } from './segment-filter-bar';
 import { SegmentCompass } from './segment-compass';
-import { SegmentComparisonCard } from './segment-comparison-card';
 import { StackedComparisonChart } from './stacked-comparison-chart';
 import { AnonymityWarning } from './anonymity-warning';
+import { SegmentHeader } from './segment-header';
+import { DimensionDeltaChips } from './dimension-delta-chips';
+import { SubcultureAlert } from './subculture-alert';
+import { QuickActions } from './quick-actions';
 import { TopIssuesCard } from './top-issues-card';
+import { ObservationsPanel } from './observations-panel';
+import { CompareWithGrid } from './compare-with-grid';
+import { RecommendedActionCard } from './recommended-action-card';
+import {
+  computeDimensionDeltas,
+  hasSubcultureDeviation,
+  deriveSegmentObservations,
+  findWeakestDimension,
+} from './lib/compute-deltas';
 
 const ALL_VALUE = 'all';
 const DEFAULT_SEGMENT_TYPE: SegmentType = 'department';
@@ -62,8 +77,12 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
     segmentValue: isAllSelected ? undefined : segmentValue,
   });
 
-  /** Question scores for identifying top issues. */
-  const { data: questionScores } = useQuestionScores({ surveyId });
+  /** Per-question scores for the selected segment (anonymity-aware). */
+  const { data: segmentQuestionScores } = useSegmentQuestionScores({
+    surveyId,
+    segmentType,
+    segmentValue,
+  });
 
   /** Transform overall DimensionScoreMap into DimensionScoreRow[] for compass rendering. */
   const overallRows = useMemo<DimensionScoreRow[]>(() => {
@@ -133,6 +152,21 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
   /** Whether the currently selected segment is below anonymity threshold. */
   const isSelectedBelowThreshold = !isAllSelected && belowThresholdValues.has(segmentValue);
 
+  /** Dimension deltas for the selected segment vs. organization average. */
+  const deltas = useMemo(() => {
+    if (!selectedSegmentRows || !overallScores || isAllSelected) return [];
+    return computeDimensionDeltas(selectedSegmentRows, overallScores);
+  }, [selectedSegmentRows, overallScores, isAllSelected]);
+
+  /** Dimensions that deviate significantly from organization average. */
+  const deviatingDimensions = useMemo(() => hasSubcultureDeviation(deltas), [deltas]);
+
+  /** Response count from first non-masked row. */
+  const responseCount = useMemo(() => {
+    if (!selectedSegmentRows) return 0;
+    return selectedSegmentRows.find((r) => !r.isMasked)?.responseCount ?? 0;
+  }, [selectedSegmentRows]);
+
   // ── URL sync ────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -155,6 +189,12 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
 
   const handleValueChange = useCallback((value: string) => {
     setSegmentValue(value);
+  }, []);
+
+  const handleExportReport = useCallback(() => {
+    const url = new URL(window.location.href);
+    url.pathname = url.pathname.replace(/\/groups$/, '/reports');
+    window.location.href = url.toString();
   }, []);
 
   // ── Loading state ─────────────────────────────────────────────────────────
@@ -206,14 +246,37 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
             <ResultsSkeleton />
           ) : selectedSegmentRows && selectedSegmentRows.length > 0 ? (
             <>
-              <SegmentCompass
-                rows={selectedSegmentRows}
-                className="mx-auto"
+              <SegmentHeader
+                segmentValue={segmentValue}
+                segmentType={segmentType}
+                responseCount={responseCount}
               />
-              <SegmentComparisonCard
-                segmentLabel={segmentValue}
-                segmentRows={selectedSegmentRows}
-                overallScores={overallScores}
+
+              {/* Side-by-side: compass + top issues */}
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <SegmentCompass rows={selectedSegmentRows} size={240} />
+                <TopIssuesCard
+                  questions={segmentQuestionScores?.questions ?? []}
+                  segmentLabel={segmentValue}
+                />
+              </div>
+
+              <DimensionDeltaChips deltas={deltas} />
+
+              {deviatingDimensions.length > 0 && (
+                <SubcultureAlert
+                  segmentLabel={segmentValue}
+                  deviatingDimensions={deviatingDimensions}
+                />
+              )}
+
+              <QuickActions
+                segmentValue={segmentValue}
+                segmentType={segmentType}
+                segmentValues={segmentValues}
+                onCompare={handleValueChange}
+                onViewByType={handleTypeChange}
+                onExportReport={handleExportReport}
               />
             </>
           ) : (
@@ -227,24 +290,104 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
   );
 }
 
+// ── GroupsInsights ──────────────────────────────────────────────────────────
+
+interface GroupsInsightsProps {
+  surveyId: string;
+  segmentType: SegmentType;
+  segmentValue: string;
+  isBelowThreshold: boolean;
+  onSegmentChange: (value: string) => void;
+}
+
 /**
  * Insights panel content for the Groups tab.
- * Shows top issues when a specific above-threshold segment is selected.
+ * Shows observations, compare-with grid, and recommended action
+ * when a specific above-threshold segment is selected.
  */
 export function GroupsInsights({
   surveyId,
+  segmentType,
   segmentValue,
   isBelowThreshold,
-}: {
-  surveyId: string;
-  segmentValue: string;
-  isBelowThreshold: boolean;
-}): ReactElement | null {
-  const { data: questionScores } = useQuestionScores({ surveyId });
+  onSegmentChange,
+}: GroupsInsightsProps): ReactElement | null {
+  // Fetch data — TanStack Query deduplicates with GroupsTab's calls
+  const { data: overallScores } = useOverallScores(surveyId);
+  const { data: segmentRows } = useSegmentScores({
+    surveyId,
+    segmentType,
+    segmentValue: segmentValue || undefined,
+  });
+  const { data: allSegmentRows } = useSegmentScores({
+    surveyId,
+    segmentType,
+  });
+  const { data: recommendations } = useRecommendations(surveyId);
 
-  if (segmentValue === ALL_VALUE || isBelowThreshold || !questionScores) {
-    return null;
-  }
+  const isAllSelected = !segmentValue || segmentValue === ALL_VALUE;
 
-  return <TopIssuesCard questions={questionScores} />;
+  // Derive segment values and below-threshold set from all-segments data
+  const segmentValues = useMemo<string[]>(() => {
+    if (!allSegmentRows) return [];
+    const unique = new Set<string>();
+    for (const row of allSegmentRows) {
+      unique.add(row.segmentValue);
+    }
+    return [...unique].sort();
+  }, [allSegmentRows]);
+
+  const belowThresholdValues = useMemo<Set<string>>(() => {
+    if (!allSegmentRows) return new Set();
+    const belowSet = new Set<string>();
+    const byValue = new Map<string, DimensionScoreRow[]>();
+    for (const row of allSegmentRows) {
+      let group = byValue.get(row.segmentValue);
+      if (!group) {
+        group = [];
+        byValue.set(row.segmentValue, group);
+      }
+      group.push(row);
+    }
+    for (const value of segmentValues) {
+      const rows = byValue.get(value);
+      if (!rows || rows.length === 0 || rows.every((r) => r.isMasked)) {
+        belowSet.add(value);
+      }
+    }
+    return belowSet;
+  }, [allSegmentRows, segmentValues]);
+
+  if (isAllSelected || isBelowThreshold) return null;
+
+  // Compute observations and recommended action
+  const deltas =
+    segmentRows && overallScores
+      ? computeDimensionDeltas(segmentRows, overallScores)
+      : [];
+  const observations = deriveSegmentObservations(deltas);
+  const weakestDim = findWeakestDimension(deltas);
+  const recommendedAction =
+    weakestDim && recommendations
+      ? recommendations.find((r) => r.dimensionCode === weakestDim) ?? null
+      : null;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <h2 className="text-base font-semibold text-[var(--text-primary)]">
+        {segmentValue} Insights
+      </h2>
+
+      <ObservationsPanel observations={observations} />
+
+      <CompareWithGrid
+        segmentValues={segmentValues}
+        currentValue={segmentValue}
+        belowThresholdValues={belowThresholdValues}
+        onSelect={onSegmentChange}
+      />
+
+      <RecommendedActionCard recommendation={recommendedAction} />
+    </div>
+  );
 }
