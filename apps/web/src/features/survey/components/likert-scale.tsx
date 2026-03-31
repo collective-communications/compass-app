@@ -17,6 +17,7 @@ interface LikertScaleProps {
 }
 
 /** Configurable Likert scale rendered from scale items. */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function LikertScale({ value, onChange, name, scale }: LikertScaleProps): React.ReactNode {
   return (
     <div role="radiogroup" aria-label="Response options" className="flex flex-col gap-3 md:flex-row">
@@ -34,7 +35,7 @@ export function LikertScale({ value, onChange, name, scale }: LikertScaleProps):
               flex items-center gap-3 px-4 py-3 md:flex-col md:items-stretch md:gap-0 md:px-3 md:py-4
               ${
                 isSelected
-                  ? 'border-[var(--color-core)] bg-[var(--color-core)] text-white'
+                  ? 'border-[var(--grey-700)] bg-[var(--grey-700)] text-white'
                   : 'border-[var(--grey-100)] bg-[var(--grey-50)] text-[var(--grey-700)] hover:border-[var(--grey-400)] hover:bg-[var(--grey-50)]'
               }
               cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-core-text)]`}

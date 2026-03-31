@@ -37,7 +37,7 @@ export function ExportGeneratingPanel({
               cy="40"
               r="34"
               fill="none"
-              stroke="var(--color-core-text)"
+              stroke="var(--grey-700)"
               strokeWidth="6"
               strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 34}`}
@@ -69,7 +69,7 @@ export function ExportGeneratingPanel({
                   isDone
                     ? 'bg-[var(--severity-healthy-text)] text-white'
                     : isActive
-                      ? 'bg-[var(--color-core)] text-white'
+                      ? 'bg-[var(--grey-700)] text-white'
                       : 'bg-[var(--grey-50)] text-[var(--text-tertiary)]',
                 ].join(' ')}
               >

@@ -16,7 +16,7 @@ export function SystemSettingsPage(): ReactElement {
 
   if (query.isLoading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
           Loading settings...
         </div>
@@ -26,7 +26,7 @@ export function SystemSettingsPage(): ReactElement {
 
   if (query.error) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <div
           className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
           role="alert"
@@ -39,7 +39,7 @@ export function SystemSettingsPage(): ReactElement {
 
   if (!settings) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
           No settings found.
         </div>
@@ -48,7 +48,7 @@ export function SystemSettingsPage(): ReactElement {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <div className="px-4 py-6 lg:px-8">
       <h1 className="mb-6 text-2xl font-bold text-[var(--grey-900)]">Settings</h1>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

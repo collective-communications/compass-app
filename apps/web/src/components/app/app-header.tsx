@@ -23,22 +23,32 @@ export function AppHeader({ user, tabs, activeTabId, onSignOut, onNavigate }: Ap
       {tier === 'tier_1' ? (
         <AppLink to="/admin/clients" className="flex items-center gap-3">
           <CompassLogo size="sm" />
-          <span
-            className="hidden text-sm font-semibold text-[var(--grey-900)] sm:inline"
-            style={{ fontFamily: 'var(--font-headings)' }}
-          >
-            Culture Compass
-          </span>
+          <div className="hidden flex-col sm:flex">
+            <span
+              className="text-sm font-semibold text-[var(--grey-900)]"
+              style={{ fontFamily: 'var(--font-headings)' }}
+            >
+              COLLECTIVE Compass
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              culture + communication
+            </span>
+          </div>
         </AppLink>
       ) : (
         <div className="flex items-center gap-3">
           <CompassLogo size="sm" />
-          <span
-            className="hidden text-sm font-semibold text-[var(--grey-900)] sm:inline"
-            style={{ fontFamily: 'var(--font-headings)' }}
-          >
-            Culture Compass
-          </span>
+          <div className="hidden flex-col sm:flex">
+            <span
+              className="text-sm font-semibold text-[var(--grey-900)]"
+              style={{ fontFamily: 'var(--font-headings)' }}
+            >
+              COLLECTIVE Compass
+            </span>
+            <span className="text-xs text-[var(--text-secondary)]">
+              culture + communication
+            </span>
+          </div>
         </div>
       )}
 

@@ -100,7 +100,7 @@ export function UsersPage(): ReactElement {
 
   if (membersLoading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Loading team...</p>
       </div>
     );
@@ -108,7 +108,7 @@ export function UsersPage(): ReactElement {
 
   if (membersError) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
           Failed to load team members. Please try again.
         </div>
@@ -117,7 +117,7 @@ export function UsersPage(): ReactElement {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <div className="px-4 py-6 lg:px-8">
       <h1 className="mb-6 text-2xl font-bold text-[var(--grey-900)]">Team Members</h1>
 
       {/* Invite toggle + form */}
@@ -154,7 +154,7 @@ export function UsersPage(): ReactElement {
           </h2>
 
           {members.length === 0 ? (
-            <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+            <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
               <p className="text-sm text-[var(--text-secondary)]">No team members yet. Send an invite above.</p>
             </div>
           ) : (
