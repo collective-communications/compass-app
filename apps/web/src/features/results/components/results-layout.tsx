@@ -1,13 +1,15 @@
 /**
- * Results layout shell with back navigation, 6-tab pill nav, and responsive 65/35 split.
- * Desktop (>=1024px): main content (65%) + insights panel (35%) side-by-side.
- * Mobile: single column with insights stacked below.
+ * Results layout shell with back navigation, 6-tab pill nav, and responsive grid.
+ * Desktop (>=1024px): optional sidebar + main content + insights panel (CSS Grid).
+ * Mobile: single column with mobile sidebar strip above main, insights stacked below.
  */
 
-import type { ReactElement, ReactNode } from 'react';
+import type { CSSProperties, ReactElement, ReactNode } from 'react';
+import { useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { PillTabNav } from '../../../components/navigation/pill-tab-nav';
 import { InsightsPanel } from './insights-panel';
+import { SidebarColumn } from './sidebar-column';
 import { ResultsSkeleton } from './results-skeleton';
 import { RESULTS_TABS, type ResultsTabId } from '../types';
 
@@ -26,6 +28,12 @@ interface ResultsLayoutProps {
   children: ReactNode;
   /** Content for the insights side panel */
   insightsContent?: ReactNode;
+  /** Desktop left sidebar content (vertical nav). Hidden on mobile. */
+  sidebarContent?: ReactNode;
+  /** Mobile sidebar content (horizontal strip). Shown above main on mobile, hidden on desktop. */
+  mobileSidebarContent?: ReactNode;
+  /** Fixed sidebar width in pixels. Defaults to 200. */
+  sidebarWidth?: number;
 }
 
 export function ResultsLayout({
@@ -36,7 +44,20 @@ export function ResultsLayout({
   isContentLoading = false,
   children,
   insightsContent,
+  sidebarContent,
+  mobileSidebarContent,
+  sidebarWidth = 200,
 }: ResultsLayoutProps): ReactElement {
+  const hasSidebar = sidebarContent !== undefined;
+  const hasInsights = insightsContent !== undefined;
+
+  const gridColumns = useMemo(() => {
+    if (hasSidebar && hasInsights) return `${sidebarWidth}px 1fr 396px`;
+    if (hasSidebar) return `${sidebarWidth}px 1fr`;
+    if (hasInsights) return '1fr 396px';
+    return '1fr';
+  }, [hasSidebar, hasInsights, sidebarWidth]);
+
   if (isContentLoading) {
     return <ResultsSkeleton />;
   }
@@ -66,17 +87,29 @@ export function ResultsLayout({
         ariaLabel="Results tabs"
       />
 
-      {/* Content: responsive 65/35 split */}
-      <div className="flex flex-col gap-6 lg:flex-row">
+      {/* Mobile sidebar strip — shown above main content on mobile only */}
+      {mobileSidebarContent && (
+        <div className="lg:hidden">{mobileSidebarContent}</div>
+      )}
+
+      {/* Content grid: responsive 3-column (or 2-column / 1-column fallback) */}
+      <div
+        className="flex flex-col gap-6 lg:grid lg:items-start lg:gap-6"
+        style={{ gridTemplateColumns: gridColumns } as CSSProperties}
+      >
+        {hasSidebar && (
+          <SidebarColumn>{sidebarContent}</SidebarColumn>
+        )}
+
         <div
           role="tabpanel"
           aria-label={`${activeTab} results`}
-          className="min-w-0 lg:w-[65%]"
+          className="min-w-0"
         >
           {children}
         </div>
 
-        {insightsContent !== undefined && (
+        {hasInsights && (
           <InsightsPanel>{insightsContent}</InsightsPanel>
         )}
       </div>
