@@ -1,3 +1,5 @@
+/* eslint-disable react-refresh/only-export-components */
+
 /**
  * Results feature route definitions.
  *
@@ -15,7 +17,7 @@
  *   /results/$surveyId/recommendations — RecommendationsTab
  */
 
-import { useState, useCallback, type ReactElement } from 'react';
+import { useState, useMemo, useCallback, type ReactElement } from 'react';
 import { createRoute, Outlet, redirect, useNavigate, useParams, useSearch, useRouterState } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
@@ -25,18 +27,24 @@ import { supabase } from '../../lib/supabase';
 import { AppShell } from '../../components/shells/app-shell';
 import { ResultsLayout } from './components/results-layout';
 import { ResultsSkeleton } from './components/results-skeleton';
-import { CompassTab, CompassInsightsContent } from './tabs/compass';
+import { CompassTab, CompassInsightsContent, DimensionNav } from './tabs/compass';
 import type { DimensionNavId } from './tabs/compass';
 import { SurveyDimensionsTab, SurveyInsightsContent } from './tabs/survey';
 import { GroupsTab, GroupsInsights } from './tabs/groups';
-import { DialogueTab, DialogueInsightsContent } from './tabs/dialogue';
-import { RecommendationsTab, RecommendationsInsightsContent } from './tabs/recommendations';
+import { DialogueTab, DialogueInsightsContent, DialogueTopicSidebar, TopicFilter, deriveTopics } from './tabs/dialogue';
+import { DialogueFilterContext } from './context/dialogue-filter-context';
+import type { DialogueTopicItem } from './context/dialogue-filter-context';
+import { useDialogueResponses } from './hooks/use-dialogue-responses';
+import { RecommendationsTab, RecommendationsInsightsContent, RecommendationNav, RecommendationsSidebar } from './tabs/recommendations';
 import { ReportsTab, ReportsInsightsContent } from './tabs/reports';
 import { useOverallScores } from './hooks/use-overall-scores';
 import { useArchetype } from './hooks/use-archetype';
 import { useRiskFlags } from './hooks/use-risk-flags';
+import { useRecommendations } from './hooks/use-recommendations';
+import { severitySortKey } from './lib/severity-mapping';
 import { DimensionContext, useActiveDimension } from './context/dimension-context';
 import { ReportSelectionContext } from './context/report-selection-context';
+import { RecommendationsNavContext } from './context/recommendations-nav-context';
 import type { ReportRow } from '../reports/services/report-api';
 import type { ResultsTabId } from './types';
 
@@ -75,6 +83,38 @@ function ResultsLayoutRoute(): ReactElement {
   const routerState = useRouterState();
   const [activeDimension, setActiveDimension] = useState<DimensionNavId>('overview');
   const [selectedReport, setSelectedReport] = useState<ReportRow | null>(null);
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
+  const [activeRecIndex, setActiveRecIndex] = useState(0);
+
+  // Fetch dialogue responses to derive topics for the sidebar.
+  // TanStack Query deduplicates this with the same call inside DialogueTab.
+  const { data: dialogueResponses } = useDialogueResponses({ surveyId });
+
+  const dialogueTopics: DialogueTopicItem[] = useMemo(() => {
+    const derived = deriveTopics(dialogueResponses ?? []);
+    return derived.map((t) => ({ id: t.questionId, label: t.label, count: t.count }));
+  }, [dialogueResponses]);
+
+  const dialogueFilterValue = useMemo(
+    () => ({ activeTopicId, setActiveTopicId, topics: dialogueTopics }),
+    [activeTopicId, dialogueTopics],
+  );
+
+  // Fetch recommendations to derive sorted list for sidebar/mobile strip.
+  // TanStack Query deduplicates this with the same call inside RecommendationsTab.
+  const { data: recommendations } = useRecommendations(surveyId);
+
+  const sortedRecommendations = useMemo(() => {
+    if (!recommendations) return [];
+    return [...recommendations].sort(
+      (a, b) => severitySortKey(a.severity) - severitySortKey(b.severity) || a.priority - b.priority,
+    );
+  }, [recommendations]);
+
+  const recommendationsNavValue = useMemo(
+    () => ({ activeIndex: activeRecIndex, setActiveIndex: setActiveRecIndex, sortedRecommendations }),
+    [activeRecIndex, sortedRecommendations],
+  );
 
   /** Reset dimension selection when switching tabs. */
   const handleDimensionChange = useCallback((dimension: DimensionNavId) => {
@@ -105,8 +145,11 @@ function ResultsLayoutRoute(): ReactElement {
   const isContentLoading = scoresLoading || archetypeLoading || riskFlagsLoading;
 
   function handleTabChange(tabId: ResultsTabId): void {
-    setActiveDimension('overview');
+    // Survey tab has no 'overview' — default to 'core'
+    setActiveDimension(tabId === 'survey' ? 'core' : 'overview');
     setSelectedReport(null);
+    setActiveTopicId(null);
+    setActiveRecIndex(0);
     void navigate({ to: `/results/${surveyId}/${tabId}` });
   }
 
@@ -115,6 +158,122 @@ function ResultsLayoutRoute(): ReactElement {
       void navigate({ to: '/admin/clients/$orgId', params: { orgId: surveyMeta.organization_id } });
     } else {
       void navigate({ to: '/admin/clients' });
+    }
+  }
+
+  /** Resolve desktop sidebar content based on active tab. */
+  function renderSidebarContent(): ReactElement | undefined {
+    if (isContentLoading || !scores) return undefined;
+
+    switch (activeTab) {
+      case 'compass':
+        return (
+          <DimensionNav
+            scores={scores}
+            riskFlags={riskFlags}
+            activeDimension={activeDimension}
+            onSelect={handleDimensionChange}
+            variant="desktop"
+          />
+        );
+      case 'survey':
+        return (
+          <DimensionNav
+            scores={scores}
+            riskFlags={riskFlags}
+            activeDimension={activeDimension}
+            onSelect={handleDimensionChange}
+            variant="desktop"
+            includeOverview={false}
+          />
+        );
+      case 'dialogue':
+        return (
+          <DialogueTopicSidebar
+            topics={dialogueTopics}
+            activeTopicId={activeTopicId}
+            onSelect={setActiveTopicId}
+          />
+        );
+      case 'recommendations':
+        if (sortedRecommendations.length === 0) return undefined;
+        return (
+          <RecommendationsSidebar
+            recommendations={sortedRecommendations}
+            activeIndex={activeRecIndex}
+            onSelect={setActiveRecIndex}
+          />
+        );
+      default:
+        return undefined;
+    }
+  }
+
+  /** Resolve mobile sidebar strip content based on active tab. */
+  function renderMobileSidebarContent(): ReactElement | undefined {
+    if (isContentLoading || !scores) return undefined;
+
+    switch (activeTab) {
+      case 'compass':
+        return (
+          <DimensionNav
+            scores={scores}
+            riskFlags={riskFlags}
+            activeDimension={activeDimension}
+            onSelect={handleDimensionChange}
+            variant="mobile"
+          />
+        );
+      case 'survey':
+        return (
+          <DimensionNav
+            scores={scores}
+            riskFlags={riskFlags}
+            activeDimension={activeDimension}
+            onSelect={handleDimensionChange}
+            variant="mobile"
+            includeOverview={false}
+          />
+        );
+      case 'dialogue':
+        return (
+          <TopicFilter
+            topics={dialogueTopics.map((t) => ({
+              questionId: t.id,
+              label: t.label,
+              fullText: t.label,
+              count: t.count,
+            }))}
+            activeTopicId={activeTopicId}
+            onTopicChange={setActiveTopicId}
+          />
+        );
+      case 'recommendations':
+        if (sortedRecommendations.length === 0) return undefined;
+        return (
+          <RecommendationNav
+            recommendations={sortedRecommendations}
+            activeIndex={activeRecIndex}
+            onSelect={setActiveRecIndex}
+          />
+        );
+      default:
+        return undefined;
+    }
+  }
+
+  /** Resolve sidebar width based on active tab. */
+  function getSidebarWidth(): number {
+    switch (activeTab) {
+      case 'compass':
+      case 'survey':
+        return 200;
+      case 'dialogue':
+        return 240;
+      case 'recommendations':
+        return 280;
+      default:
+        return 200;
     }
   }
 
@@ -140,8 +299,22 @@ function ResultsLayoutRoute(): ReactElement {
         return <SurveyInsightsContent scores={scores} />;
       case 'groups': {
         const routerSearch = routerState.location.search as Record<string, unknown>;
+        const st = typeof routerSearch.segmentType === 'string' ? routerSearch.segmentType : 'department';
         const sv = typeof routerSearch.segmentValue === 'string' ? routerSearch.segmentValue : '';
-        return <GroupsInsights surveyId={surveyId} segmentValue={sv} isBelowThreshold={!sv} />;
+        return (
+          <GroupsInsights
+            surveyId={surveyId}
+            segmentType={st as SegmentType}
+            segmentValue={sv}
+            isBelowThreshold={!sv}
+            onSegmentChange={(value: string) => {
+              void navigate({
+                to: `/results/${surveyId}/groups`,
+                search: { segmentType: st, segmentValue: value },
+              });
+            }}
+          />
+        );
       }
       case 'dialogue':
         return <DialogueInsightsContent />;
@@ -163,18 +336,25 @@ function ResultsLayoutRoute(): ReactElement {
   return (
     <AppShell>
       <ReportSelectionContext.Provider value={{ selectedReport, selectReport: setSelectedReport }}>
-        <ResultsLayout
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          onBack={handleBack}
-          surveyTitle={surveyMeta?.title}
-          isContentLoading={isContentLoading}
-          insightsContent={renderInsightsContent()}
-        >
-          <DimensionContext.Provider value={{ activeDimension, setActiveDimension: handleDimensionChange }}>
-            <Outlet />
-          </DimensionContext.Provider>
-        </ResultsLayout>
+        <DialogueFilterContext.Provider value={dialogueFilterValue}>
+          <RecommendationsNavContext.Provider value={recommendationsNavValue}>
+            <ResultsLayout
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              onBack={handleBack}
+              surveyTitle={surveyMeta?.title}
+              isContentLoading={isContentLoading}
+              insightsContent={renderInsightsContent()}
+              sidebarContent={renderSidebarContent()}
+              mobileSidebarContent={renderMobileSidebarContent()}
+              sidebarWidth={getSidebarWidth()}
+            >
+              <DimensionContext.Provider value={{ activeDimension, setActiveDimension: handleDimensionChange }}>
+                <Outlet />
+              </DimensionContext.Provider>
+            </ResultsLayout>
+          </RecommendationsNavContext.Provider>
+        </DialogueFilterContext.Provider>
       </ReportSelectionContext.Provider>
     </AppShell>
   );
@@ -251,6 +431,7 @@ function RecommendationsRoute(): ReactElement {
  * @param parentRoute - The route under which `/results` should be nested (typically rootRoute).
  * @returns The results layout route with all child tab routes attached.
  */
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TParent) {
   const resultsLayoutRoute = createRoute({
     getParentRoute: () => parentRoute,

@@ -5,12 +5,13 @@
  * and a list of question result cards grouped by sub-dimension.
  */
 
-import { useState, useMemo, type ReactElement } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
 import { dimensions as dimTokens } from '@compass/tokens';
 import type { DimensionScoreMap, SubDimensionScore } from '@compass/scoring';
 import { useQuestionScores } from '../../hooks/use-question-scores';
 import { useOverallScores } from '../../hooks/use-overall-scores';
+import { useActiveDimension } from '../../context/dimension-context';
 import { DimensionHeaderCard } from './dimension-header-card';
 import { QuestionResultList } from './question-result-list';
 import type { QuestionScoreRow } from '../../types';
@@ -80,7 +81,10 @@ function deriveSubDimensionScores(
 export function SurveyDimensionsTab({
   surveyId,
 }: SurveyDimensionsTabProps): ReactElement {
-  const [activeDimension, setActiveDimension] = useState<DimensionCode>('core');
+  const { activeDimension: navDimension } = useActiveDimension();
+  // Map DimensionNavId → DimensionCode (default to 'core' when 'overview' is selected)
+  const activeDimension: DimensionCode =
+    navDimension !== 'overview' ? navDimension : 'core';
 
   const activeMeta = DIMENSIONS.find((d) => d.code === activeDimension) ?? DIMENSIONS[0]!;
 
@@ -105,28 +109,6 @@ export function SurveyDimensionsTab({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Dimension pill navigation */}
-      <nav className="overflow-x-auto scrollbar-hide" aria-label="Dimension navigation">
-        <ul className="flex items-center gap-1">
-          {DIMENSIONS.map((dim) => (
-            <li key={dim.code}>
-              <button
-                type="button"
-                onClick={() => setActiveDimension(dim.code)}
-                className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
-                  activeDimension === dim.code
-                    ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
-                    : 'text-[var(--text-secondary)] hover:bg-[var(--grey-50)]'
-                }`}
-                aria-current={activeDimension === dim.code ? 'true' : undefined}
-              >
-                {dim.label}
-              </button>
-            </li>
-          ))}
-        </ul>
-      </nav>
-
       {isLoading ? (
         <LoadingSkeleton />
       ) : (
@@ -209,11 +191,11 @@ export function SurveyInsightsContent({
 function LoadingSkeleton(): ReactElement {
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-32 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
+      <div className="h-32 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)]" />
       {Array.from({ length: 3 }, (_, i) => (
         <div
           key={i}
-          className="h-24 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]"
+          className="h-24 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)]"
         />
       ))}
     </div>

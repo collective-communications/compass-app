@@ -117,7 +117,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Loading client...</p>
       </div>
     );
@@ -125,7 +125,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
 
   if (error || !organization) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <DrilldownHeader backTo="/admin/clients" backLabel="Back to clients" title="Client not found" />
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
           Failed to load client. Please try again.
@@ -135,7 +135,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6">
+    <div className="px-4 py-6 lg:px-8">
       {/* Archived banner */}
       {isArchived && (
         <div className="mb-4 flex items-center justify-between rounded-lg bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800" role="status">
@@ -269,7 +269,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
             <ConsultantCard orgId={orgId} />
 
             {/* Quick Actions */}
-            <nav aria-label="Quick actions" className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+            <nav aria-label="Quick actions" className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
               <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
                 Quick Actions
               </h3>

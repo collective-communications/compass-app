@@ -69,7 +69,7 @@ export function DashboardPage(): ReactElement {
 
       {/* Empty state — no surveys at all */}
       {!isLoading && !error && !hasSurveys && (
-        <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
+        <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6 text-center">
           <p className="text-sm text-[var(--text-tertiary)]">
             No surveys yet. Your organization&apos;s first culture assessment is coming soon.
           </p>
@@ -89,7 +89,7 @@ export function DashboardPage(): ReactElement {
             )}
 
             {!activeSurvey && !resultsEnabled && (
-              <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-center">
+              <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6 text-center">
                 <p className="text-sm text-[var(--text-tertiary)]">
                   Results are being prepared. Your consultant will let you know when they&apos;re
                   ready to review.
@@ -100,7 +100,7 @@ export function DashboardPage(): ReactElement {
 
           {/* Right column: latest results with mini compass preview */}
           <div className="flex flex-col gap-5">
-            <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+            <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
               <h2 className="mb-4 text-base font-semibold text-[var(--grey-900)]">
                 Latest Results
               </h2>

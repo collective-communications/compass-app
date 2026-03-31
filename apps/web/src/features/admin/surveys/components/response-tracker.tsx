@@ -44,7 +44,7 @@ export function ResponseTracker({
   const maxDeptCount = Math.max(...departmentBreakdown.map((d) => d.count), 1);
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       {/* Header with connection status */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-[var(--grey-900)]">Responses</h3>

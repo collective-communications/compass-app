@@ -33,7 +33,7 @@ export function PreviousSurveys({ surveys, onSelectSurvey }: PreviousSurveysProp
             key={item.survey.id}
             type="button"
             onClick={() => onSelectSurvey(item.survey.id)}
-            className="flex w-full items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-4 text-left transition-shadow hover:shadow-md md:w-[300px] md:shrink-0"
+            className="flex w-full items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-4 text-left transition-shadow hover:shadow-md md:w-[300px] md:shrink-0"
           >
             <span className="shrink-0 rounded-full bg-[var(--grey-500)] px-3 py-1 text-xs font-semibold uppercase text-[var(--grey-50)]">
               Complete

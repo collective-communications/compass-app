@@ -125,6 +125,7 @@ export function ProgressSquares({
           style={{ gap: `${gap}px` }}
         >
           {/* Tooltip — clamped to stay within row bounds */}
+          {/* eslint-disable-next-line @typescript-eslint/explicit-function-return-type */}
           {showTooltip && hoverRowIdx === rowIdx && hoverIndex !== null && (() => {
             const btn = buttonRefs.current[hoverIndex];
             const rowEl = btn?.parentElement;
@@ -179,9 +180,9 @@ export function ProgressSquares({
                 className={`shrink-0
                   ${
                     isCurrent
-                      ? 'bg-[var(--color-core)] ring-2 ring-[var(--color-core-text)]/30'
+                      ? 'bg-[var(--grey-700)] ring-2 ring-[var(--grey-700)]/30'
                       : isAnswered
-                        ? 'bg-[var(--color-core)]'
+                        ? 'bg-[var(--grey-700)]'
                         : 'bg-[var(--grey-100)]'
                   }
                   ${isClickable ? 'cursor-pointer' : 'cursor-default'}

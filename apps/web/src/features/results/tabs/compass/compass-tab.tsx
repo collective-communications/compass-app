@@ -13,7 +13,6 @@ import { Compass } from '@compass/compass';
 import type { DimensionCode } from '@compass/types';
 import { dimensions } from '@compass/tokens';
 import type { DimensionScoreMap, RiskFlag, ArchetypeMatch } from '@compass/scoring';
-import { DimensionNav } from './dimension-nav';
 import { ArchetypeCard } from './archetype-card';
 import { RiskFlagList } from './risk-flag-list';
 import { CoreHealthIndicator } from './core-health-indicator';
@@ -68,63 +67,36 @@ export function CompassTab({ scores, archetype, riskFlags, activeDimension: cont
     setActiveDimension(activeDimension === dimension ? 'overview' : dimension);
   }, [activeDimension, setActiveDimension]);
 
-  const handleDimensionSelect = useCallback((id: DimensionNavId) => {
-    setActiveDimension(id);
-  }, [setActiveDimension]);
-
   const compassScores = toCompassScores(scores);
   const coreScore = scores.core?.score ?? 0;
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Mobile chip strip — hidden on desktop */}
-      <DimensionNav
-        scores={scores}
-        riskFlags={riskFlags}
-        activeDimension={activeDimension}
-        onSelect={handleDimensionSelect}
-        variant="mobile"
+    <div className="flex flex-col items-center gap-6">
+      {/* Core health badge */}
+      <CoreHealthIndicator coreScore={coreScore} />
+
+      {/* Compass visualization */}
+      <Compass
+        scores={compassScores}
+        selectedSegment={selectedSegment}
+        onSegmentClick={handleSegmentClick}
+        size={320}
+        animated
+        showLabels
+        showGapIndicator
       />
 
-      <div className="flex gap-6">
-        {/* Desktop sidebar — hidden on mobile */}
-        <DimensionNav
-          scores={scores}
-          riskFlags={riskFlags}
-          activeDimension={activeDimension}
-          onSelect={handleDimensionSelect}
-          variant="desktop"
-        />
+      {/* Archetype card */}
+      <div className="w-full">
+        <ArchetypeCard match={archetype} />
+      </div>
 
-        {/* Main content */}
-        <div className="flex min-w-0 flex-1 flex-col items-center gap-6">
-          {/* Core health badge */}
-          <CoreHealthIndicator coreScore={coreScore} />
-
-          {/* Compass visualization */}
-          <Compass
-            scores={compassScores}
-            selectedSegment={selectedSegment}
-            onSegmentClick={handleSegmentClick}
-            size={320}
-            animated
-            showLabels
-            showGapIndicator
-          />
-
-          {/* Archetype card */}
-          <div className="w-full">
-            <ArchetypeCard match={archetype} />
-          </div>
-
-          {/* Risk flags */}
-          <div className="w-full">
-            <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
-              Risk Flags
-            </h3>
-            <RiskFlagList flags={riskFlags} />
-          </div>
-        </div>
+      {/* Risk flags */}
+      <div className="w-full">
+        <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
+          Risk Flags
+        </h3>
+        <RiskFlagList flags={riskFlags} />
       </div>
 
       {/* Mobile: dimension detail below compass content */}

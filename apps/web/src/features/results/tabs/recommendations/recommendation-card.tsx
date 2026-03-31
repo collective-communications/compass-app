@@ -34,7 +34,7 @@ export function RecommendationCard({
 
   return (
     <article
-      className="relative rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6"
+      className="relative rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6"
       style={{ borderLeftWidth: '4px', borderLeftColor: borderColor }}
       aria-label={`${severityLabel} severity: ${title}`}
     >

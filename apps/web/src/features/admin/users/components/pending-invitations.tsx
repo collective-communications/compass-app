@@ -65,7 +65,7 @@ export function PendingInvitations({
 
   if (invitations.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+      <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
         <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
           Pending Invitations
         </h3>
@@ -75,7 +75,7 @@ export function PendingInvitations({
   }
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         Pending Invitations ({invitations.length})
       </h3>

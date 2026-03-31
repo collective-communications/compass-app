@@ -38,37 +38,50 @@ export function SegmentFilterBar({
   onValueChange,
 }: SegmentFilterBarProps): ReactElement {
   return (
-    <div className="flex flex-col gap-3">
-      {/* Segment type pills */}
-      <nav
-        className="flex gap-1"
-        role="radiogroup"
-        aria-label="Segment type"
-      >
-        {SEGMENT_TYPE_OPTIONS.map((type) => {
-          const isActive = segmentType === type;
-          return (
-            <button
-              key={type}
-              type="button"
-              role="radio"
-              aria-checked={isActive}
-              onClick={() => onTypeChange(type)}
-              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
-                  : 'text-[var(--text-secondary)] hover:bg-[var(--grey-100)]'
-              }`}
+    <div className="flex flex-col gap-0">
+      {/* Segment type dropdown bar */}
+      <div className="flex items-center justify-between border-b border-[var(--grey-200)] bg-[#FAFAFA] px-6 py-3">
+        <div className="flex items-center gap-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
+            Filter by:
+          </span>
+          <div className="relative">
+            <select
+              value={segmentType}
+              onChange={(e) => onTypeChange(e.target.value as SegmentType)}
+              className="appearance-none rounded-md border border-[var(--grey-200)] bg-white py-2 pl-3 pr-8 text-sm text-[var(--text-secondary)] focus:border-[var(--brand-core)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-core)]"
+              aria-label="Segment type"
             >
-              {SEGMENT_TYPE_LABELS[type]}
-            </button>
-          );
-        })}
-      </nav>
+              {SEGMENT_TYPE_OPTIONS.map((type) => (
+                <option key={type} value={type}>
+                  {SEGMENT_TYPE_LABELS[type]}
+                </option>
+              ))}
+            </select>
+            <svg
+              className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)]"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </div>
+        </div>
+        <span className="text-xs text-[var(--text-tertiary)]">
+          Groups &lt;7 members combined for confidentiality
+        </span>
+      </div>
 
       {/* Segment value pills */}
       <div
-        className="flex flex-wrap gap-2"
+        className="flex flex-wrap gap-2 px-6 py-3"
         role="radiogroup"
         aria-label={`${SEGMENT_TYPE_LABELS[segmentType]} segment values`}
       >

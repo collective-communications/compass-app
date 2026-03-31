@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 /**
  * Development seed script for Supabase Cloud.
  *
@@ -691,6 +693,87 @@ async function seedScores(): Promise<void> {
     }
   });
 
+  // Per-role scores — Director below anonymity threshold (count=3)
+  const roles = ['Director', 'Manager', 'Supervisor', 'Staff'];
+  const roleCounts = [3, 7, 7, 7]; // Director below threshold
+  const roleOffsets: Record<string, Record<string, number>> = {
+    Director:   { core: 4.5, clarity: 3.8, connection: -1.2, collaboration: 2.0 },
+    Manager:    { core: 1.2, clarity: 2.5, connection: -0.5, collaboration: -1.8 },
+    Supervisor: { core: -2.0, clarity: -1.0, connection: 3.5, collaboration: 1.5 },
+    Staff:      { core: -1.5, clarity: -3.2, connection: 0.8, collaboration: -0.5 },
+  };
+
+  roles.forEach((role, idx) => {
+    for (const [code, base] of Object.entries(overallScores)) {
+      const offset = roleOffsets[role][code];
+      const score = Math.max(0, Math.min(100, base.score + offset));
+      const rawScore = Math.max(1, Math.min(10, base.rawScore + (offset / 25)));
+      scoreRows.push({
+        survey_id: IDS.survey,
+        dimension_id: dimMap[code],
+        segment_type: 'role',
+        segment_value: role,
+        score: parseFloat(score.toFixed(2)),
+        raw_score: parseFloat(rawScore.toFixed(2)),
+        response_count: roleCounts[idx],
+      });
+    }
+  });
+
+  // Per-location scores — East Annex below anonymity threshold (count=4)
+  const locations = ['Main Campus', 'West Wing', 'East Annex'];
+  const locationCounts = [10, 10, 4]; // East Annex below threshold
+  const locationOffsets: Record<string, Record<string, number>> = {
+    'Main Campus': { core: 1.0, clarity: -0.8, connection: 2.5, collaboration: -1.0 },
+    'West Wing':   { core: -1.5, clarity: 2.0, connection: -2.0, collaboration: 3.2 },
+    'East Annex':  { core: 2.8, clarity: -3.5, connection: -0.5, collaboration: -1.5 },
+  };
+
+  locations.forEach((loc, idx) => {
+    for (const [code, base] of Object.entries(overallScores)) {
+      const offset = locationOffsets[loc][code];
+      const score = Math.max(0, Math.min(100, base.score + offset));
+      const rawScore = Math.max(1, Math.min(10, base.rawScore + (offset / 25)));
+      scoreRows.push({
+        survey_id: IDS.survey,
+        dimension_id: dimMap[code],
+        segment_type: 'location',
+        segment_value: loc,
+        score: parseFloat(score.toFixed(2)),
+        raw_score: parseFloat(rawScore.toFixed(2)),
+        response_count: locationCounts[idx],
+      });
+    }
+  });
+
+  // Per-tenure scores — "< 1 year" below anonymity threshold (count=3)
+  const tenures = ['< 1 year', '1-3 years', '3-5 years', '5-10 years', '10+ years'];
+  const tenureCounts = [3, 6, 6, 5, 4]; // "< 1 year" and "10+ years" below threshold
+  const tenureOffsets: Record<string, Record<string, number>> = {
+    '< 1 year':   { core: -3.0, clarity: -4.5, connection: -2.0, collaboration: -3.5 },
+    '1-3 years':  { core: -0.8, clarity: -1.2, connection: 1.5, collaboration: 0.5 },
+    '3-5 years':  { core: 1.5, clarity: 0.8, connection: -0.3, collaboration: 2.0 },
+    '5-10 years': { core: 2.2, clarity: 2.0, connection: 1.0, collaboration: -0.8 },
+    '10+ years':  { core: 3.5, clarity: 4.0, connection: -1.5, collaboration: 1.2 },
+  };
+
+  tenures.forEach((tenure, idx) => {
+    for (const [code, base] of Object.entries(overallScores)) {
+      const offset = tenureOffsets[tenure][code];
+      const score = Math.max(0, Math.min(100, base.score + offset));
+      const rawScore = Math.max(1, Math.min(10, base.rawScore + (offset / 25)));
+      scoreRows.push({
+        survey_id: IDS.survey,
+        dimension_id: dimMap[code],
+        segment_type: 'tenure',
+        segment_value: tenure,
+        score: parseFloat(score.toFixed(2)),
+        raw_score: parseFloat(rawScore.toFixed(2)),
+        response_count: tenureCounts[idx],
+      });
+    }
+  });
+
   const { error } = await supabase.from('scores').upsert(scoreRows, {
     onConflict: 'survey_id,dimension_id,segment_type,segment_value',
   });
@@ -698,7 +781,8 @@ async function seedScores(): Promise<void> {
   if (error) {
     console.error(`  scores FAILED: ${error.message}`);
   } else {
-    console.log(`  ${scoreRows.length} score rows (4 overall + ${scoreRows.length - 4} per-department)`);
+    const segmentCount = scoreRows.length - 4;
+    console.log(`  ${scoreRows.length} score rows (4 overall + ${segmentCount} per-segment: ${departments.length * 4} dept, ${roles.length * 4} role, ${locations.length * 4} location, ${tenures.length * 4} tenure)`);
   }
 }
 

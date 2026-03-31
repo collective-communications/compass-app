@@ -18,7 +18,7 @@ export function TrustLadderCard({ surveyId }: TrustLadderCardProps): ReactElemen
 
   if (isLoading) {
     return (
-      <section className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+      <section className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
         <div className="h-4 w-24 animate-pulse rounded bg-[var(--grey-100)]" />
         <div className="mt-3 flex flex-col gap-1.5">
           {Array.from({ length: 9 }, (_, i) => (
@@ -31,7 +31,7 @@ export function TrustLadderCard({ surveyId }: TrustLadderCardProps): ReactElemen
 
   if (error || !data) {
     return (
-      <section className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+      <section className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
         <p className="text-xs text-[var(--text-tertiary)]">Unable to load Trust Ladder.</p>
       </section>
     );
@@ -39,7 +39,7 @@ export function TrustLadderCard({ surveyId }: TrustLadderCardProps): ReactElemen
 
   return (
     <section
-      className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6"
+      className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6"
       aria-labelledby="trust-ladder-heading"
     >
       <TrustLadderVisual result={data} />

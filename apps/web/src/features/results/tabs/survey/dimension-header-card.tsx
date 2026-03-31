@@ -53,7 +53,7 @@ export function DimensionHeaderCard({
   const hasSubDimensions = subDimensionScores && subDimensionScores.length > 0;
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <div className="flex items-center gap-4">
         <ScoreRing score={score} color={color} size={64} strokeWidth={5} />
         <div className="flex-1">

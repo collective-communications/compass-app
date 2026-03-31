@@ -29,6 +29,8 @@ const DIMENSION_LABELS: Record<DimensionCode, string> = {
 interface SegmentCompassProps {
   rows: DimensionScoreRow[];
   className?: string;
+  /** Size in pixels passed to the Compass component. */
+  size?: number;
 }
 
 function toCompassScores(rows: DimensionScoreRow[]): CompassDimensionScore[] {
@@ -40,14 +42,14 @@ function toCompassScores(rows: DimensionScoreRow[]): CompassDimensionScore[] {
   }));
 }
 
-export function SegmentCompass({ rows, className }: SegmentCompassProps): ReactElement {
+export function SegmentCompass({ rows, className, size = 320 }: SegmentCompassProps): ReactElement {
   const scores = toCompassScores(rows);
 
   return (
-    <div className={className}>
+    <div className={className} data-testid="segment-compass">
       <Compass
         scores={scores}
-        size={320}
+        size={size}
         showLabels
         showGapIndicator
         animated

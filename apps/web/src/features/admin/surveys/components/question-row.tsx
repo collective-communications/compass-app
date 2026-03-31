@@ -47,7 +47,7 @@ export function QuestionRow({ question, isLocked, onEdit, questionCode }: Questi
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex w-full items-start gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-left transition-shadow ${
+      className={`flex w-full items-start gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] px-4 py-3 text-left transition-shadow ${
         isDragging ? 'z-50 shadow-lg opacity-90' : ''
       } ${isLocked ? 'opacity-70' : ''}`}
     >

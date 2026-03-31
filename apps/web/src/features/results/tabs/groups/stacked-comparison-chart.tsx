@@ -40,6 +40,7 @@ interface StackedComparisonChartProps {
   belowThresholdValues: Set<string>;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface SegmentDimensionEntry {
   value: string;
   score: number | null;
@@ -78,7 +79,7 @@ export function StackedComparisonChart({
   });
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <h3 className="mb-4 text-sm font-semibold text-[var(--grey-700)]">
         All Segments Comparison
       </h3>

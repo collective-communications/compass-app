@@ -1,13 +1,14 @@
 /**
  * RecommendationsTab — single-card focus navigation through recommendations.
- * Pill buttons at the top select which recommendation is displayed.
+ * Navigation is handled externally via RecommendationsNavContext (sidebar on
+ * desktop, mobile strip on small viewports). This component renders only the
+ * active recommendation card.
+ *
  * Also exports RecommendationsInsightsContent for the insights panel.
  */
 
-import { useState, useMemo, type ReactElement } from 'react';
-import { useRecommendations } from '../../hooks/use-recommendations';
-import { severitySortKey } from '../../lib/severity-mapping';
-import { RecommendationNav } from './severity-filter';
+import { type ReactElement } from 'react';
+import { useRecommendationsNav } from '../../context/recommendations-nav-context';
 import { RecommendationCard } from './recommendation-card';
 import { TrustLadderCard } from './trust-ladder-card';
 import { ServiceLinksCard } from './service-links-card';
@@ -17,35 +18,19 @@ interface RecommendationsTabProps {
 }
 
 /** Main Recommendations tab content. */
-export function RecommendationsTab({ surveyId }: RecommendationsTabProps): ReactElement {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const { data: recommendations, isLoading } = useRecommendations(surveyId);
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function RecommendationsTab(_props: RecommendationsTabProps): ReactElement {
+  const { sortedRecommendations, activeIndex } = useRecommendationsNav();
 
-  const sorted = useMemo(() => {
-    if (!recommendations) return [];
-    return [...recommendations].sort(
-      (a, b) => severitySortKey(a.severity) - severitySortKey(b.severity) || a.priority - b.priority,
-    );
-  }, [recommendations]);
-
-  if (isLoading) {
-    return <LoadingSkeleton />;
-  }
-
-  if (sorted.length === 0) {
+  if (sortedRecommendations.length === 0) {
     return <EmptyState />;
   }
 
-  const clampedIndex = Math.min(activeIndex, sorted.length - 1);
-  const activeRec = sorted[clampedIndex]!;
+  const clampedIndex = Math.min(activeIndex, sortedRecommendations.length - 1);
+  const activeRec = sortedRecommendations[clampedIndex]!;
 
   return (
     <div className="flex flex-col gap-4">
-      <RecommendationNav
-        recommendations={sorted}
-        activeIndex={clampedIndex}
-        onSelect={setActiveIndex}
-      />
       <RecommendationCard recommendation={activeRec} />
     </div>
   );
@@ -69,7 +54,7 @@ export function RecommendationsInsightsContent({ surveyId }: RecommendationsInsi
 function EmptyState(): ReactElement {
   return (
     <div
-      className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6"
+      className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6"
       style={{ borderLeftWidth: '4px', borderLeftColor: 'var(--severity-healthy-border)' }}
     >
       <p className="text-sm font-medium text-[var(--severity-healthy-text)]">
@@ -79,12 +64,3 @@ function EmptyState(): ReactElement {
   );
 }
 
-/** Loading skeleton matching the tab layout. */
-function LoadingSkeleton(): ReactElement {
-  return (
-    <div className="flex flex-col gap-4">
-      <div className="h-10 animate-pulse rounded-lg bg-[var(--grey-50)]" />
-      <div className="h-28 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
-    </div>
-  );
-}

@@ -25,7 +25,6 @@ import {
 } from '@dnd-kit/sortable';
 import { ChevronDown, ChevronRight, Info } from 'lucide-react';
 import type { QuestionWithDimension, Dimension, DimensionCode, SubDimension } from '@compass/types';
-import { QuestionType as QT } from '@compass/types';
 import { useSurveyBuilder } from '../hooks/use-survey-builder';
 import { useReorderQuestions } from '../hooks/use-reorder-questions';
 import { DimensionNav } from './dimension-nav';
@@ -232,6 +231,11 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
       const { active, over } = event;
       if (!over || active.id === over.id || !data?.questions) return;
 
+      // Prevent cross-dimension reordering — preserves framework integrity
+      const activeQ = data.questions.find((q) => q.id === active.id);
+      const overQ = data.questions.find((q) => q.id === over.id);
+      if (!activeQ || !overQ || activeQ.dimension.dimensionId !== overQ.dimension.dimensionId) return;
+
       const questions = [...filteredQuestions].sort((a, b) => a.displayOrder - b.displayOrder);
       const oldIndex = questions.findIndex((q) => q.id === active.id);
       const newIndex = questions.findIndex((q) => q.id === over.id);
@@ -263,7 +267,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
 
   if (error || !data) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-6">
+      <div className="px-4 py-6 lg:px-8">
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
           Failed to load survey. Please try again.
         </div>
@@ -277,7 +281,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
   const reverseScoredCount = data.questions.filter((q) => q.reverseScored).length;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-6 pb-20">
+    <div className="px-4 py-6 pb-20 lg:px-8">
       {/* Header */}
       <DrilldownHeader backTo={`/admin/clients/${survey.organizationId}`} backLabel="Back to client" title={survey.title}>
         <AutoSaveIndicator status={autoSaveStatus} />
@@ -409,7 +413,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
 
       {/* Sticky footer with Done button */}
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--grey-100)] bg-white px-4 py-3">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
+        <div className="flex items-center justify-between lg:px-4">
           <p className="text-sm text-[var(--text-secondary)]">
             {data.questions.length} question{data.questions.length !== 1 ? 's' : ''} across{' '}
             {dimensions.length} dimension{dimensions.length !== 1 ? 's' : ''}

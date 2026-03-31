@@ -15,6 +15,8 @@ interface DimensionNavProps {
   onSelect: (id: DimensionNavId) => void;
   /** Render only mobile chip strip, only desktop sidebar, or both (default). */
   variant?: 'mobile' | 'desktop' | 'both';
+  /** Whether to include the 'Overview' item. Default true. Set false for Survey tab. */
+  includeOverview?: boolean;
 }
 
 /** Brand colors per dimension. */
@@ -54,7 +56,10 @@ export function DimensionNav({
   activeDimension,
   onSelect,
   variant = 'both',
+  includeOverview = true,
 }: DimensionNavProps): ReactElement {
+  const navItems = includeOverview ? NAV_ORDER : NAV_ORDER.filter((id) => id !== 'overview');
+
   const getScore = (id: DimensionNavId): number => {
     if (id === 'overview') return getOverviewScore(scores);
     return scores[id]?.score ?? 0;
@@ -71,7 +76,7 @@ export function DimensionNav({
           aria-label="Dimension navigation"
           className="flex gap-2 overflow-x-auto pb-2 lg:hidden"
         >
-          {NAV_ORDER.map((id) => {
+          {navItems.map((id) => {
             const isActive = activeDimension === id;
             return (
               <button
@@ -98,7 +103,7 @@ export function DimensionNav({
           aria-label="Dimension navigation"
           className="hidden w-[200px] shrink-0 flex-col gap-1 lg:flex"
         >
-          {NAV_ORDER.map((id) => (
+          {navItems.map((id) => (
             <DimensionNavItem
               key={id}
               id={id}

@@ -81,7 +81,7 @@ export function SurveyCard({
     <div
       role="group"
       aria-label={survey.title}
-      className={`relative w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-6 text-left transition-shadow hover:shadow-md ${STATUS_BORDER_COLOR[survey.status]}`}
+      className={`relative w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--surface-card)] p-6 text-left transition-shadow hover:shadow-md ${STATUS_BORDER_COLOR[survey.status]}`}
     >
       {/* Stretched overlay for primary click target */}
       <button
