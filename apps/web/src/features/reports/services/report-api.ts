@@ -27,6 +27,7 @@ export async function listReports(surveyId: string): Promise<ReportRow[]> {
     .from('reports')
     .select('*')
     .eq('survey_id', surveyId)
+    .eq('client_visible', true)
     .order('created_at', { ascending: false });
 
   if (error) throw error;
