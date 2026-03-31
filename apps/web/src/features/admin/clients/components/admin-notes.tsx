@@ -107,7 +107,7 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
   const visibleNotes = notes?.filter((n) => !n.archivedAt) ?? [];
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <h3 className="mb-1 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         Notes
       </h3>

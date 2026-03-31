@@ -38,7 +38,7 @@ const SERVICES: ServiceLink[] = [
 export function ServiceLinksCard(): ReactElement {
   return (
     <section
-      className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6"
+      className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6"
       aria-labelledby="service-links-heading"
     >
       <h3 id="service-links-heading" className="mb-4 text-sm font-semibold text-[var(--grey-900)]">

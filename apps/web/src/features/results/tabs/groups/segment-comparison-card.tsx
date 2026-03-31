@@ -55,7 +55,7 @@ export function SegmentComparisonCard({
   }
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <h3 className="mb-4 text-sm font-semibold text-[var(--grey-700)]">
         {segmentLabel} vs Overall
       </h3>

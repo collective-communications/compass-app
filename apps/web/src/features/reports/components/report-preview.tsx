@@ -49,7 +49,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
     return (
       <aside
         aria-label="Report preview"
-        className="flex flex-col items-center justify-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-8 text-center lg:sticky lg:top-6"
+        className="flex flex-col items-center justify-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-8 text-center lg:sticky lg:top-6"
       >
         <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
         <p className="text-sm text-[var(--text-tertiary)]">
@@ -74,7 +74,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
   return (
     <aside
       aria-label="Report preview"
-      className="flex flex-col gap-4 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 lg:sticky lg:top-6"
+      className="flex flex-col gap-4 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6 lg:sticky lg:top-6"
     >
       {/* Header */}
       <div className="flex items-center gap-2">

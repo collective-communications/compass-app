@@ -75,7 +75,7 @@ export function InviteForm({
   const displayError = validationError ?? error;
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <form onSubmit={handleSubmit} className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
           Invite Team Member

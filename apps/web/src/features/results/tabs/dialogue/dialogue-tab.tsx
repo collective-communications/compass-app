@@ -8,11 +8,11 @@ import { useState, useMemo, useCallback, type ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
 import { useDialogueResponses } from '../../hooks/use-dialogue-responses';
 import { useQuestionScores } from '../../hooks/use-question-scores';
+import { useDialogueFilter } from '../../context/dialogue-filter-context';
 import type { DialogueResponse } from '../../types';
 import { KeywordBubbles, type Keyword } from './keyword-bubbles';
 import { DialogueSearch } from './dialogue-search';
 import { DimensionFilterPills, type DimensionFilter } from './dimension-filter-pills';
-import { TopicFilter, deriveTopics } from './topic-filter';
 import { ResponseList } from './response-list';
 
 /** Stop words excluded from keyword extraction. Hoisted to module scope to avoid re-creation per call. */
@@ -57,7 +57,7 @@ function extractKeywords(responses: DialogueResponse[]): Keyword[] {
 
 /** Dialogue tab — open-ended response explorer. */
 export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
-  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
+  const { activeTopicId, setActiveTopicId } = useDialogueFilter();
   const [activeKeyword, setActiveKeyword] = useState<string | null>(null);
   const [dimensionFilter, setDimensionFilter] = useState<DimensionFilter>(null);
   const [searchText, setSearchText] = useState('');
@@ -76,7 +76,6 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
     return map;
   }, [questionScores]);
 
-  const topics = useMemo(() => deriveTopics(allResponses ?? []), [allResponses]);
   const keywords = useMemo(() => extractKeywords(allResponses ?? []), [allResponses]);
 
   const filteredResponses = useMemo(() => {
@@ -117,18 +116,12 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
     setActiveKeyword(null);
     setDimensionFilter(null);
     setSearchText('');
-  }, []);
+  }, [setActiveTopicId]);
 
   if (responsesLoading) return <LoadingSkeleton />;
 
   return (
     <div className="flex flex-col gap-4">
-      <TopicFilter
-        topics={topics}
-        activeTopicId={activeTopicId}
-        onTopicChange={setActiveTopicId}
-      />
-
       <KeywordBubbles
         keywords={keywords}
         activeKeyword={activeKeyword}
@@ -166,13 +159,13 @@ export function DialogueInsightsContent(): ReactElement {
 function LoadingSkeleton(): ReactElement {
   return (
     <div className="flex flex-col gap-4">
-      <div className="h-16 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
-      <div className="h-10 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
-      <div className="h-10 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]" />
+      <div className="h-16 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)]" />
+      <div className="h-10 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)]" />
+      <div className="h-10 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)]" />
       {Array.from({ length: 3 }, (_, i) => (
         <div
           key={i}
-          className="h-24 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]"
+          className="h-24 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)]"
         />
       ))}
     </div>

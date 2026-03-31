@@ -52,7 +52,7 @@ export function ClientCard({ organization, onClick }: ClientCardProps): ReactEle
     <button
       type="button"
       onClick={() => onClick(organization.id)}
-      className={`w-full cursor-pointer rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6 text-left transition-shadow hover:shadow-md ${borderClass}`}
+      className={`w-full cursor-pointer rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6 text-left transition-shadow hover:shadow-md ${borderClass}`}
       aria-label={`View ${organization.name}`}
     >
       <div className="flex items-start gap-4">

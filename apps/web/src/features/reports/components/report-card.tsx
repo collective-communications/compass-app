@@ -65,7 +65,7 @@ export function ReportCard({
       aria-label={`Report generated ${formatDate(report.createdAt)}, format ${report.format.toUpperCase()}, ${report.status}`}
       aria-current={isSelected ? 'true' : undefined}
       className={[
-        'relative w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--grey-50)] p-4 text-left transition-colors',
+        'relative w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--surface-card)] p-4 text-left transition-colors',
         leftBorderColor,
         isSelected ? 'ring-2 ring-[var(--color-core-text)]' : 'hover:bg-[var(--grey-50)]',
       ].join(' ')}

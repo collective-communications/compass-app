@@ -35,7 +35,7 @@ export function TopIssuesCard({ questions, segmentLabel, limit = 3 }: TopIssuesC
 
   if (sorted.length === 0) {
     return (
-      <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+      <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
           {heading}
         </h3>
@@ -45,7 +45,7 @@ export function TopIssuesCard({ questions, segmentLabel, limit = 3 }: TopIssuesC
   }
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <h3 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         {heading}
       </h3>

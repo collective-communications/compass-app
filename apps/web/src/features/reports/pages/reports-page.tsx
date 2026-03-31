@@ -75,6 +75,7 @@ export function ReportsPage({
 
   const canGenerate = userRole === 'client_exec';
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { active, previous } = useMemo(() => groupSurveys(surveys), [surveys]);
 
   const handleSurveyChange = useCallback((surveyId: string): void => {
@@ -127,7 +128,7 @@ export function ReportsPage({
           {[1, 2, 3].map((i) => (
             <div
               key={i}
-              className="h-20 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)]"
+              className="h-20 animate-pulse rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)]"
             />
           ))}
         </div>
@@ -135,7 +136,7 @@ export function ReportsPage({
 
       {/* Empty state */}
       {!isLoading && reports.length === 0 && activeSurveyId !== null && (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-12 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] px-6 py-12 text-center">
           <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
           <p className="text-sm text-[var(--text-secondary)]">
             No reports yet. Reports will appear here once your consultant generates them.
@@ -145,7 +146,7 @@ export function ReportsPage({
 
       {/* No survey selected */}
       {!isLoading && activeSurveyId === null && (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-12 text-center">
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] px-6 py-12 text-center">
           <FileText size={40} className="text-[var(--grey-100)]" aria-hidden="true" />
           <p className="text-sm text-[var(--text-secondary)]">
             Select a survey above to view its reports.

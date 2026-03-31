@@ -98,7 +98,7 @@ export function UserCard({
   }, []);
 
   return (
-    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-6">
+    <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <div className="flex items-start gap-4">
         {/* Avatar */}
         {member.avatarUrl ? (
