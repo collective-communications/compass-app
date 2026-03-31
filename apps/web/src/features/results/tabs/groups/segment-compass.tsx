@@ -46,7 +46,7 @@ export function SegmentCompass({ rows, className, size = 320 }: SegmentCompassPr
   const scores = toCompassScores(rows);
 
   return (
-    <div className={className}>
+    <div className={className} data-testid="segment-compass">
       <Compass
         scores={scores}
         size={size}

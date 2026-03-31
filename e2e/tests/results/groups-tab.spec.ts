@@ -40,7 +40,7 @@ test.describe('Groups tab', () => {
     const hasHeader = await header.isVisible({ timeout: 5000 }).catch(() => false);
 
     // Compass SVG should render
-    const compass = page.locator('svg[role="img"]').or(page.getByTestId('compass-svg'));
+    const compass = page.getByTestId('segment-compass');
     const hasCompass = await compass.first().isVisible({ timeout: 5000 }).catch(() => false);
 
     // Response count text should appear (e.g. "X responses · Subculture analysis")
@@ -113,7 +113,7 @@ test.describe('Groups tab', () => {
 
     // Should NOT show compass or segment header
     if (hasWarningText) {
-      const compass = page.locator('svg[role="img"]');
+      const compass = page.getByTestId('segment-compass');
       const hasCompass = await compass.isVisible({ timeout: 2000 }).catch(() => false);
       expect(hasCompass).toBe(false);
 
@@ -247,7 +247,7 @@ test.describe('Groups tab', () => {
     }
 
     // Overall compass SVG should render
-    const compass = page.locator('svg[role="img"]').or(page.getByTestId('compass-svg'));
+    const compass = page.getByTestId('segment-compass');
     const hasCompass = await compass.first().isVisible({ timeout: 10000 }).catch(() => false);
 
     // StackedComparisonChart should render (canvas or SVG-based chart)
