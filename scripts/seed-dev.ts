@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 /**
  * Development seed script for Supabase Cloud.
  *
