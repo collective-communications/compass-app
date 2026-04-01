@@ -14,9 +14,11 @@ interface SegmentScore {
 interface SegmentComparisonProps {
   segments: SegmentScore[];
   anonymityMessage?: string;
+  /** Likert scale size (e.g. 5 for a 1-5 scale). Defaults to 5. */
+  scaleSize?: number;
 }
 
-export function SegmentComparison({ segments, anonymityMessage = 'Not enough responses to display this segment.' }: SegmentComparisonProps): React.ReactNode {
+export function SegmentComparison({ segments, anonymityMessage = 'Not enough responses to display this segment.', scaleSize = 5 }: SegmentComparisonProps): React.ReactNode {
   return (
     <div data-testid="segment-comparison" role="region" aria-label="Segment comparison">
       {segments.map((seg, i) => {
@@ -36,7 +38,8 @@ export function SegmentComparison({ segments, anonymityMessage = 'Not enough res
 
         const delta = seg.score - seg.overallScore;
         const deltaSign = delta >= 0 ? '+' : '';
-        const deltaPercent = Math.round((delta / 4) * 100);
+        const range = scaleSize - 1;
+        const deltaPercent = range > 0 ? Math.round((delta / range) * 100) : 0;
 
         return (
           <div

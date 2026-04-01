@@ -19,7 +19,12 @@ export function QuestionResultCard({
   question,
   dimensionColor,
 }: QuestionResultCardProps): ReactElement {
-  const scorePercent = Math.round(question.meanScore * 100);
+  // Normalize raw Likert average (1-N) to 0-100% scale
+  const scaleSize = Math.max(...Object.keys(question.distribution).map(Number));
+  const scorePercent =
+    scaleSize > 1
+      ? Math.round(((question.meanScore - 1) / (scaleSize - 1)) * 100)
+      : 0;
 
   return (
     <Card>
