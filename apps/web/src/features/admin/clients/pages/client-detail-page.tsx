@@ -1,37 +1,24 @@
 /**
- * Client detail page with tabbed layout.
- * Route: /clients/:orgId
- * Displays org info, metrics, notes, consultant, and quick actions.
- * Underline tab bar for Overview | Surveys | Users (Overview default).
+ * Client detail layout component with tabbed navigation.
+ * Route: /clients/:orgId (layout route)
+ * Renders the shared chrome: header, archived banner, action menu, sub-tab nav, and outlet for child tabs.
+ * Child routes: /overview, /surveys, /users.
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate, useLocation, Outlet } from '@tanstack/react-router';
 import { MoreVertical } from 'lucide-react';
+import type { SubTab } from '../../../../components/navigation/sub-tab-nav';
+import { SubTabNav } from '../../../../components/navigation/sub-tab-nav';
 import { useOrganization, useArchiveOrganization, useUnarchiveOrganization } from '../hooks/use-organization';
-import { OrgInfoCard } from '../components/org-info-card';
-import { KeyMetricsCard } from '../components/key-metrics-card';
-import { AdminNotes } from '../components/admin-notes';
-import { ConsultantCard } from '../components/consultant-card';
 import { EditOrgModal } from '../components/edit-org-modal';
-import { ClientUsersTab } from '../components/client-users-tab';
 import { DrilldownHeader } from '../../../../components/navigation/drilldown-header';
-import { SurveyListPage } from '../../surveys';
-import { SurveyConfigModal } from '../../surveys/components/survey-config-modal';
-import { useCreateSurvey } from '../../surveys/hooks/use-create-survey';
-import { useArchiveSurvey } from '../../surveys/hooks/use-archive-survey';
-import { useSurveys } from '../../surveys/hooks/use-surveys';
-import { useAuthStore } from '../../../../stores/auth-store';
-import { getSurveyBuilderData } from '../../surveys/services/admin-survey-service';
-import { useQuery } from '@tanstack/react-query';
 
 export interface ClientDetailPageProps {
   orgId: string;
 }
 
-type DetailTab = 'overview' | 'surveys' | 'users';
-
-const TABS: Array<{ id: DetailTab; label: string }> = [
+const CLIENT_DETAIL_TABS: SubTab[] = [
   { id: 'overview', label: 'Overview' },
   { id: 'surveys', label: 'Surveys' },
   { id: 'users', label: 'Users' },
@@ -41,43 +28,31 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
   const { data: organization, isLoading, error } = useOrganization(orgId);
   const archiveOrg = useArchiveOrganization(orgId);
   const unarchiveOrg = useUnarchiveOrganization(orgId);
-  const user = useAuthStore((s) => s.user);
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
-  const [configSurveyId, setConfigSurveyId] = useState<string | null>(null);
-  const createSurvey = useCreateSurvey();
-  const archiveSurvey = useArchiveSurvey();
-
-  // Fetch surveys list for copy-link token lookup
-  const { data: surveys } = useSurveys({ organizationId: orgId });
-
-  // Fetch full survey data when config modal is open
-  const { data: configSurveyData } = useQuery({
-    queryKey: ['admin', 'survey-builder', configSurveyId],
-    queryFn: () => getSurveyBuilderData(configSurveyId!),
-    enabled: !!configSurveyId,
-  });
 
   const isArchived = organization && 'archivedAt' in organization && !!(organization as Record<string, unknown>).archivedAt;
 
-  const handleCreateSurvey = useCallback((): void => {
-    createSurvey.mutate(
-      {
-        organizationId: orgId,
-        title: 'Untitled Survey',
-        createdBy: user?.id ?? '',
-      },
-      {
-        onSuccess: (survey) => {
-          void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId: survey.id } });
-        },
-      },
-    );
-  }, [orgId, user?.id, createSurvey, navigate]);
+  // Derive active tab from URL pathname (last segment)
+  const activeTabId = (() => {
+    const segments = location.pathname.split('/').filter(Boolean);
+    const lastSegment = segments[segments.length - 1];
+    if (lastSegment === 'overview' || lastSegment === 'surveys' || lastSegment === 'users') {
+      return lastSegment;
+    }
+    return 'overview';
+  })();
+
+  const handleTabSelect = useCallback(
+    (tabId: string): void => {
+      void navigate({ to: `/admin/clients/$orgId/${tabId}`, params: { orgId } });
+    },
+    [orgId, navigate],
+  );
 
   const handleArchive = useCallback((): void => {
     setMenuOpen(false);
@@ -98,22 +73,6 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
       },
     });
   }, [unarchiveOrg]);
-
-  const handleCopyLink = useCallback((surveyId: string): void => {
-    const survey = surveys?.find((s) => s.id === surveyId);
-    if (survey?.activeDeploymentToken) {
-      const url = `${window.location.origin}/s/${survey.activeDeploymentToken}`;
-      void navigator.clipboard.writeText(url);
-    }
-  }, [surveys]);
-
-  const handleConfigSave = useCallback((): void => {
-    setConfigSurveyId(null);
-  }, []);
-
-  const handleConfigPublish = useCallback((): void => {
-    setConfigSurveyId(null);
-  }, []);
 
   if (isLoading) {
     return (
@@ -223,104 +182,20 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
         </div>
       </DrilldownHeader>
 
-      {/* Underline tab bar */}
-      <div className="mb-6 border-b border-[var(--grey-100)]" role="tablist" aria-label="Client detail tabs">
-        <div className="flex gap-6">
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              role="tab"
-              aria-selected={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative pb-3 text-sm transition-colors ${
-                activeTab === tab.id
-                  ? 'font-semibold text-[var(--grey-900)]'
-                  : 'font-medium text-[var(--text-secondary)] hover:text-[var(--grey-700)]'
-              }`}
-            >
-              {tab.label}
-              {activeTab === tab.id && (
-                <span className="absolute inset-x-0 bottom-0 h-0.5 bg-[var(--grey-700)]" />
-              )}
-            </button>
-          ))}
-        </div>
+      {/* Sub-tab navigation */}
+      <div className="mb-6">
+        <SubTabNav
+          tabs={CLIENT_DETAIL_TABS}
+          activeId={activeTabId}
+          onSelect={handleTabSelect}
+          ariaLabel="Client detail tabs"
+        />
       </div>
 
-      {/* Tab content */}
-      {activeTab === 'overview' && (
-        <div className="flex flex-col gap-6 lg:flex-row">
-          {/* Left column (65%) */}
-          <div className="flex flex-col gap-6 lg:w-[65%]">
-            <OrgInfoCard organization={organization} onEdit={() => setEditModalOpen(true)} />
-            <KeyMetricsCard
-              organization={organization}
-              onTotalSurveysClick={() => setActiveTab('surveys')}
-              onActiveSurveyClick={(surveyId) => {
-                void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
-              }}
-            />
-            <AdminNotes orgId={orgId} />
-          </div>
-
-          {/* Right column (35%) */}
-          <div className="flex flex-col gap-6 lg:w-[35%]">
-            <ConsultantCard orgId={orgId} />
-
-            {/* Quick Actions */}
-            <nav aria-label="Quick actions" className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
-              <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
-                Quick Actions
-              </h3>
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={handleCreateSurvey}
-                  disabled={!!organization.activeSurveyId || createSurvey.isPending}
-                  className="w-full rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {createSurvey.isPending ? 'Creating\u2026' : 'Create Survey'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setEditModalOpen(true)}
-                  className="w-full rounded-lg border border-[var(--grey-100)] px-4 py-2 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-100)]"
-                >
-                  Edit Client Info
-                </button>
-              </div>
-            </nav>
-          </div>
-        </div>
-      )}
-
-      {activeTab === 'surveys' && (
-        <div role="tabpanel" aria-label="Surveys">
-          <SurveyListPage
-            organizationId={orgId}
-            userId={user?.id ?? ''}
-            onSelectSurvey={(surveyId) => {
-              void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
-            }}
-            onConfigure={(surveyId) => setConfigSurveyId(surveyId)}
-            onEditQuestions={(surveyId) => {
-              void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
-            }}
-            onCopyLink={handleCopyLink}
-            onViewResults={(surveyId) => {
-              void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
-            }}
-            onArchive={(surveyId) => archiveSurvey.mutate(surveyId)}
-          />
-        </div>
-      )}
-
-      {activeTab === 'users' && (
-        <div role="tabpanel" aria-label="Users">
-          <ClientUsersTab organizationId={orgId} />
-        </div>
-      )}
+      {/* Child route outlet */}
+      <div className="mt-6">
+        <Outlet />
+      </div>
 
       {/* Edit modal */}
       <EditOrgModal
@@ -329,18 +204,6 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
         onClose={() => setEditModalOpen(false)}
       />
 
-      {/* Survey config modal */}
-      {configSurveyId && configSurveyData && (
-        <SurveyConfigModal
-          open={true}
-          onClose={() => setConfigSurveyId(null)}
-          survey={configSurveyData.survey}
-          hasQuestions={configSurveyData.questions.length > 0}
-          onSave={handleConfigSave}
-          onDeploy={handleConfigPublish}
-          isPending={false}
-        />
-      )}
     </div>
   );
 }

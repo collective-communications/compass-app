@@ -35,8 +35,9 @@ test.describe('Admin client management', () => {
       await clientCards.first().click();
       await page.waitForLoadState('networkidle');
 
-      // Should navigate to a client detail URL
+      // Should navigate to a client detail URL with /overview redirect
       expect(page.url()).toContain('/admin/clients/');
+      expect(page.url()).toContain('/overview');
 
       // Org info should be visible on detail page
       const orgHeading = page.getByRole('heading').first();
@@ -72,6 +73,15 @@ test.describe('Admin client management', () => {
         const hasOverview = await overviewTab.isVisible().catch(() => false);
         const hasSurveys = await surveysTab.isVisible().catch(() => false);
         expect(hasOverview || hasSurveys).toBe(true);
+
+        // Verify tab navigation changes the URL
+        if (hasSurveys) {
+          const currentUrl = page.url();
+          await surveysTab.click();
+          await page.waitForLoadState('networkidle');
+          expect(page.url()).not.toEqual(currentUrl);
+          expect(page.url()).toContain('/surveys');
+        }
       } else {
         // Client detail is still loading — page navigated correctly
         expect(hasLoading || page.url().includes('/admin/clients/')).toBe(true);
@@ -148,6 +158,9 @@ test.describe('Admin client management', () => {
         await settingsTab.click();
         await page.waitForLoadState('networkidle');
 
+        // URL should change to include /settings
+        expect(page.url()).toContain('/settings');
+
         // Metadata dropdowns for departments, roles, etc.
         const dropdowns = page.getByRole('combobox').or(page.locator('select'));
         const metadataLabel = page.getByText(/department|role|location|metadata/i);
@@ -156,6 +169,48 @@ test.describe('Admin client management', () => {
         const hasLabels = await metadataLabel.first().isVisible({ timeout: 5000 }).catch(() => false);
 
         expect(hasDropdowns || hasLabels).toBe(true);
+      }
+    }
+  });
+
+  test('direct navigation to client tab URLs works', async ({ page }) => {
+    // First, get a valid client ID by navigating to the list
+    await page.goto('/admin/clients');
+    await page.waitForLoadState('networkidle');
+
+    const clientCards = page.getByTestId('client-card').or(
+      page.locator('button[aria-label^="View"]'),
+    );
+
+    if (await clientCards.first().isVisible({ timeout: 5000 }).catch(() => false)) {
+      // Navigate to first client to extract ID from URL
+      await clientCards.first().click();
+      await page.waitForLoadState('networkidle');
+
+      const detailUrl = page.url();
+      const clientIdMatch = detailUrl.match(/\/admin\/clients\/([^/]+)/);
+
+      if (clientIdMatch) {
+        const clientId = clientIdMatch[1];
+
+        // Test direct navigation to /surveys tab
+        await page.goto(`/admin/clients/${clientId}/surveys`);
+        await page.waitForLoadState('networkidle');
+        expect(page.url()).toContain(`/admin/clients/${clientId}/surveys`);
+        const surveysTab = page.getByRole('tab', { name: /surveys/i });
+        await expect(surveysTab).toBeVisible({ timeout: 10000 });
+
+        // Test direct navigation to /users tab
+        await page.goto(`/admin/clients/${clientId}/users`);
+        await page.waitForLoadState('networkidle');
+        expect(page.url()).toContain(`/admin/clients/${clientId}/users`);
+        const usersTab = page.getByRole('tab', { name: /users/i });
+        await expect(usersTab).toBeVisible({ timeout: 10000 });
+
+        // Test redirect from base /admin/clients/{id} to /overview
+        await page.goto(`/admin/clients/${clientId}`);
+        await page.waitForLoadState('networkidle');
+        expect(page.url()).toContain(`/admin/clients/${clientId}/overview`);
       }
     }
   });

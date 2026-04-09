@@ -38,3 +38,27 @@ export const WithDisabledTab: Story = {
     activeId: 'overview',
   },
 };
+
+export const ClientDetailTabs: Story = {
+  args: {
+    tabs: [
+      { id: 'overview', label: 'Overview' },
+      { id: 'surveys', label: 'Surveys' },
+      { id: 'users', label: 'Users' },
+    ],
+    activeId: 'overview',
+    ariaLabel: 'Client detail tabs',
+  },
+};
+
+export const ClientDetailSurveysActive: Story = {
+  args: {
+    tabs: [
+      { id: 'overview', label: 'Overview' },
+      { id: 'surveys', label: 'Surveys' },
+      { id: 'users', label: 'Users' },
+    ],
+    activeId: 'surveys',
+    ariaLabel: 'Client detail tabs',
+  },
+};

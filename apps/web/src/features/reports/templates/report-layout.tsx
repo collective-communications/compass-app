@@ -20,7 +20,7 @@ interface ReportLayoutProps {
  * a repeating branded header, and a page-numbered footer.
  */
 export function ReportLayout({ payload, children }: ReportLayoutProps): ReactElement {
-  const { branding, survey } = payload;
+  const { survey } = payload;
 
   return (
     <html lang="en">
@@ -43,7 +43,7 @@ export function ReportLayout({ payload, children }: ReportLayoutProps): ReactEle
               }
 
               html, body {
-                font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-family: 'DM Sans', 'Calibri', Arial, sans-serif;
                 font-size: 10pt;
                 line-height: 1.5;
                 color: #424242;
