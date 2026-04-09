@@ -242,7 +242,7 @@ export function ExportModal({
               <button
                 type="button"
                 onClick={generation.reset}
-                className="text-sm font-medium text-[var(--color-core-text)] underline hover:no-underline"
+                className="text-sm font-medium text-[var(--color-interactive)] underline hover:no-underline"
               >
                 Try again
               </button>
@@ -265,7 +265,7 @@ export function ExportModal({
                 type="button"
                 onClick={() => void handleGenerate()}
                 disabled={sections.filter((s) => s.included).length === 0}
-                className="flex-1 rounded-md bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)] focus:ring-offset-2 disabled:opacity-50"
+                className="flex-1 rounded-md bg-[var(--color-interactive)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)] focus:ring-offset-2 disabled:opacity-50"
               >
                 Generate Report
               </button>

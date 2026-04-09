@@ -28,7 +28,7 @@ export function AppHeader({ user, tabs, activeTabId, onSignOut, onNavigate }: Ap
               className="text-sm font-semibold text-[var(--grey-900)]"
               style={{ fontFamily: 'var(--font-headings)' }}
             >
-              COLLECTIVE Compass
+              Collective Culture Compass
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
               culture + communication
@@ -43,7 +43,7 @@ export function AppHeader({ user, tabs, activeTabId, onSignOut, onNavigate }: Ap
               className="text-sm font-semibold text-[var(--grey-900)]"
               style={{ fontFamily: 'var(--font-headings)' }}
             >
-              COLLECTIVE Compass
+              Collective Culture Compass
             </span>
             <span className="text-xs text-[var(--text-secondary)]">
               culture + communication

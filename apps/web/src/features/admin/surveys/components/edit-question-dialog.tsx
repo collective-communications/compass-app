@@ -197,7 +197,7 @@ export function EditQuestionDialog({
               value={text}
               onChange={(e) => handleTextChange(e.target.value)}
               rows={3}
-              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20"
+              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20"
             />
           </div>
 
@@ -211,7 +211,7 @@ export function EditQuestionDialog({
               onChange={(e) => handleDescriptionChange(e.target.value)}
               rows={2}
               placeholder="Optional context shown to respondents"
-              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20"
+              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20"
             />
           </div>
 
@@ -225,7 +225,7 @@ export function EditQuestionDialog({
               value={diagnosticFocus}
               onChange={(e) => handleDiagnosticFocusChange(e.target.value)}
               placeholder="e.g., Leadership alignment"
-              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20"
+              className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20"
             />
           </div>
 
@@ -239,7 +239,7 @@ export function EditQuestionDialog({
                 id="q-subdim"
                 value={subDimensionId}
                 onChange={(e) => handleSubDimensionChange(e.target.value)}
-                className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20"
+                className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20"
               >
                 <option value="">None</option>
                 {questionDimensionId
@@ -269,7 +269,7 @@ export function EditQuestionDialog({
               type="checkbox"
               checked={reverseScored}
               onChange={(e) => handleReverseScoredChange(e.target.checked)}
-              className="h-4 w-4 rounded border-[var(--grey-300)] text-[var(--color-core-text)] focus:ring-[var(--color-core-text)]/20"
+              className="h-4 w-4 rounded border-[var(--grey-300)] text-[var(--color-core-text)] focus:ring-[var(--color-interactive)]/20"
             />
             <label htmlFor="q-reverse" className="text-sm text-[var(--grey-700)]">
               Reverse scored

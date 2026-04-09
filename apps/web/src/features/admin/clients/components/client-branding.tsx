@@ -57,7 +57,7 @@ export function ClientBranding({
             value={branding.displayName}
             onChange={handleDisplayNameChange}
             aria-label="Organization display name"
-            className="w-full max-w-md rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
+            className="w-full max-w-md rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
           />
           <p className="mt-1 text-xs text-[var(--text-secondary)]">
             Shown in survey headers and reports. Leave blank to use the organization name.

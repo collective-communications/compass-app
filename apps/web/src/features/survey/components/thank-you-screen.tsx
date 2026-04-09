@@ -34,7 +34,7 @@ export function ThankYouScreen({
             viewBox="0 0 48 48"
             fill="none"
             aria-hidden="true"
-            className="text-[var(--color-core-text)]"
+            className="text-[var(--color-interactive)]"
           >
             <circle cx="24" cy="24" r="24" fill="currentColor" opacity="0.1" />
             <path

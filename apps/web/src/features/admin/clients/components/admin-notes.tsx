@@ -123,13 +123,13 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
             setAddError(null);
           }}
           placeholder="Add a note..."
-          className="min-w-0 flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
+          className="min-w-0 flex-1 rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
           disabled={addNote.isPending}
         />
         <button
           type="submit"
           disabled={addNote.isPending || !content.trim()}
-          className="shrink-0 rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="shrink-0 rounded-lg bg-[var(--color-interactive)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {addNote.isPending ? 'Adding...' : '+ Add Note'}
         </button>
@@ -149,7 +149,7 @@ export function AdminNotes({ orgId }: AdminNotesProps): ReactElement {
             type="button"
             onClick={handleUndo}
             disabled={unarchiveNote.isPending}
-            className="font-medium text-[var(--color-core-text)] underline underline-offset-2 hover:no-underline disabled:opacity-50"
+            className="font-medium text-[var(--color-interactive)] underline underline-offset-2 hover:no-underline disabled:opacity-50"
           >
             Undo
           </button>

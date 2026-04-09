@@ -150,7 +150,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.name
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
-                    : 'border-[var(--grey-100)] focus:border-[var(--color-core-text)] focus:ring-[var(--color-core-text)]'
+                    : 'border-[var(--grey-100)] focus:border-[var(--color-interactive)] focus:ring-[var(--color-interactive)]'
                 }`}
                 aria-invalid={!!errors.name}
                 aria-describedby={errors.name ? 'edit-org-name-error' : undefined}
@@ -173,7 +173,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 type="text"
                 value={form.industry}
                 onChange={(e) => updateField('industry', e.target.value)}
-                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
+                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
               />
             </div>
 
@@ -191,7 +191,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.employeeCount
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
-                    : 'border-[var(--grey-100)] focus:border-[var(--color-core-text)] focus:ring-[var(--color-core-text)]'
+                    : 'border-[var(--grey-100)] focus:border-[var(--color-interactive)] focus:ring-[var(--color-interactive)]'
                 }`}
                 aria-invalid={!!errors.employeeCount}
                 aria-describedby={errors.employeeCount ? 'edit-org-employee-error' : undefined}
@@ -213,7 +213,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 type="text"
                 value={form.primaryContactName}
                 onChange={(e) => updateField('primaryContactName', e.target.value)}
-                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)]"
+                className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
               />
             </div>
 
@@ -230,7 +230,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.primaryContactEmail
                     ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
-                    : 'border-[var(--grey-100)] focus:border-[var(--color-core-text)] focus:ring-[var(--color-core-text)]'
+                    : 'border-[var(--grey-100)] focus:border-[var(--color-interactive)] focus:ring-[var(--color-interactive)]'
                 }`}
                 aria-invalid={!!errors.primaryContactEmail}
                 aria-describedby={errors.primaryContactEmail ? 'edit-org-email-error' : undefined}
@@ -263,7 +263,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
             <button
               type="submit"
               disabled={updateOrg.isPending}
-              className="rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-[var(--color-interactive)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {updateOrg.isPending ? 'Saving...' : 'Save Changes'}
             </button>

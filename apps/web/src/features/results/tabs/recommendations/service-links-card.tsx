@@ -53,7 +53,7 @@ export function ServiceLinksCard(): ReactElement {
               rel="noopener noreferrer"
               className="group block"
             >
-              <span className="text-sm font-medium text-[var(--color-core-text)] underline-offset-2 group-hover:underline">
+              <span className="text-sm font-medium text-[var(--color-interactive)] underline-offset-2 group-hover:underline">
                 {service.label}
               </span>
               <p className="mt-0.5 text-xs leading-relaxed text-[var(--text-secondary)]">

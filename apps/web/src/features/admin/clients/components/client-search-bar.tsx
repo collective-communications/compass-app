@@ -30,7 +30,7 @@ export function ClientSearchBar({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Search clients..."
-          className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-1 focus:ring-[var(--color-core-text)] sm:w-64"
+          className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)] sm:w-64"
         />
       </div>
 

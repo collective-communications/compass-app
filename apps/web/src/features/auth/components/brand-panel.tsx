@@ -2,33 +2,54 @@ import { CompassLogo } from '../../../components/brand/compass-logo';
 
 /**
  * Desktop-only brand panel shown on the left half of the login screen.
- * Displays the compass logo, product title, and COLLECTIVE wordmark.
+ * Displays the compass logo with gradient headline, COLLECTIVE wordmark,
+ * and secondary tagline on a navy-teal background.
  */
 export function BrandPanel(): React.ReactElement {
   return (
-    <div className="hidden lg:flex lg:w-1/2 lg:flex-col lg:items-center lg:justify-center bg-[var(--color-core)]">
-      <div className="flex flex-col items-center text-center text-white">
-        <CompassLogo size="lg" className="mb-6 [--color-core:white] [--color-clarity:rgba(255,255,255,0.6)]" />
+    <div className="hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between bg-[var(--color-interactive)]">
+      <div className="flex flex-1 flex-col items-center justify-center text-center">
+        <CompassLogo size="lg" variant="on-dark" className="mb-6" />
 
         <h1
-          className="text-3xl font-bold tracking-wide"
-          style={{ fontFamily: 'var(--font-headings)' }}
+          className="text-[26px] font-[800] tracking-wide"
+          style={{
+            fontFamily: 'var(--font-display)',
+            backgroundImage: 'var(--gradient-display)',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: 'transparent',
+          }}
         >
-          Culture Compass
+          Collective Culture Compass
         </h1>
 
         <p
-          className="mt-2 text-sm font-light tracking-wide opacity-80"
-          style={{ fontFamily: 'var(--font-body)' }}
+          className="mt-2 text-sm font-light tracking-wide"
+          style={{ fontFamily: 'var(--font-body)', color: '#C2C1C2' }}
         >
           by COLLECTIVE culture + communication
         </p>
 
         <p
-          className="mt-6 max-w-xs text-sm font-light leading-relaxed opacity-60"
+          className="mt-6 max-w-xs text-base font-light leading-relaxed text-[var(--grey-100)]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
-          Understand your organization's culture. Align your teams. Drive meaningful change.
+          Understand your organization&apos;s culture.
+          <br />
+          Make communication that lands.
+        </p>
+      </div>
+
+      <div className="px-10 pb-8">
+        <p className="text-[10px] font-semibold tracking-[3px] text-[#8AC3A9]">
+          COLLECTIVE
+        </p>
+        <p className="mt-1 text-[9px] text-[#323130]">
+          culture + communication
+        </p>
+        <p className="mt-3 text-[8px] font-semibold tracking-[1.5px] text-white/25">
+          YOUR PEOPLE. YOUR STORY.
         </p>
       </div>
     </div>

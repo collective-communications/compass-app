@@ -126,7 +126,7 @@ export function PendingInvitations({
                     type="button"
                     onClick={() => onResend(inv.id)}
                     disabled={isResending}
-                    className="text-xs font-medium text-[var(--color-core-text)] hover:underline disabled:opacity-50"
+                    className="text-xs font-medium text-[var(--color-interactive)] hover:underline disabled:opacity-50"
                   >
                     Resend
                   </button>

@@ -53,7 +53,7 @@ export function AccessControlToggle({
             aria-label={`Client access is ${enabled ? 'enabled' : 'disabled'}`}
             onClick={handleToggle}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-              enabled ? 'bg-[var(--color-core,#0A3B4F)]' : 'bg-[var(--grey-300,#D4D4D4)]'
+              enabled ? 'bg-[var(--color-interactive,#00385C)]' : 'bg-[var(--grey-300,#D4D4D4)]'
             }`}
           >
             <span

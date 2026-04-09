@@ -138,7 +138,7 @@ export function UsersPage(): ReactElement {
           <button
             type="button"
             onClick={() => setShowInviteForm(true)}
-            className="rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90"
+            className="rounded-lg bg-[var(--color-interactive)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90"
           >
             + Invite
           </button>

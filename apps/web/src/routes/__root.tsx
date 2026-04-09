@@ -24,7 +24,7 @@ const indexRoute = createRoute({
           <p style={{ color: 'var(--grey-500)', marginBottom: '1.5rem' }}>COLLECTIVE culture + communication</p>
           <Link
             to="/auth/login"
-            className="inline-block rounded-lg bg-[var(--color-core,#0A3B4F)] px-6 py-2.5 text-sm font-medium text-white hover:opacity-90"
+            className="inline-block rounded-lg bg-[var(--color-interactive,#00385C)] px-6 py-2.5 text-sm font-medium text-white hover:opacity-90"
           >
             Sign in
           </Link>

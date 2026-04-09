@@ -186,7 +186,7 @@ export function ProgressSquares({
                         : 'bg-[var(--grey-100)]'
                   }
                   ${isClickable ? 'cursor-pointer' : 'cursor-default'}
-                  focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-core-text)]`}
+                  focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-interactive)]`}
               />
             );
           })}

@@ -53,7 +53,7 @@ export function ExportConfigurePanel({
                 value={option.value}
                 checked={format === option.value}
                 onChange={() => onFormatChange(option.value)}
-                className="h-4 w-4 text-[var(--color-core-text)] focus:ring-[var(--color-core-text)]"
+                className="h-4 w-4 text-[var(--color-interactive)] focus:ring-[var(--color-interactive)]"
               />
               <div className="flex flex-col">
                 <span className="text-sm text-[var(--grey-700)]">{option.label}</span>
@@ -90,7 +90,7 @@ export function ExportConfigurePanel({
                 checked={section.included}
                 disabled={section.locked}
                 onChange={() => onToggleSection(section.id)}
-                className="h-4 w-4 rounded text-[var(--color-core-text)] focus:ring-[var(--color-core-text)]"
+                className="h-4 w-4 rounded text-[var(--color-interactive)] focus:ring-[var(--color-interactive)]"
               />
               <span
                 className={`text-sm ${section.locked ? 'text-[var(--text-tertiary)]' : 'text-[var(--grey-700)]'}`}

@@ -64,7 +64,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
               </p>
               <Link
                 to="/auth/login"
-                className="text-sm text-[var(--color-core-text)] hover:underline"
+                className="text-sm text-[var(--color-interactive)] hover:underline"
               >
                 Go to sign in
               </Link>
@@ -94,7 +94,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
               </p>
               <Link
                 to="/auth/login"
-                className="text-sm text-[var(--color-core-text)] hover:underline"
+                className="text-sm text-[var(--color-interactive)] hover:underline"
               >
                 Go to sign in
               </Link>
@@ -129,7 +129,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
               </p>
               <Link
                 to="/auth/login"
-                className="inline-block rounded-lg bg-[var(--color-core)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90"
+                className="inline-block rounded-lg bg-[var(--color-interactive)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90"
               >
                 Sign in
               </Link>
@@ -149,7 +149,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
         <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
           <div className="w-full max-w-sm">
             <div className="mb-2 flex justify-center">
-              <UserPlus size={32} className="text-[var(--color-core-text)]" />
+              <UserPlus size={32} className="text-[var(--color-interactive)]" />
             </div>
 
             <h1
@@ -196,7 +196,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   disabled={status === 'submitting'}
-                  className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Enter your full name"
                 />
               </div>
@@ -216,7 +216,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={status === 'submitting'}
-                    className="w-full rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 pr-10 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="w-full rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 pr-10 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 disabled:cursor-not-allowed disabled:opacity-50"
                     placeholder="At least 8 characters"
                   />
                   <button
@@ -244,7 +244,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={status === 'submitting'}
-                  className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 disabled:cursor-not-allowed disabled:opacity-50"
                   placeholder="Re-enter your password"
                 />
                 {confirmPassword !== '' && password !== confirmPassword && (
@@ -256,7 +256,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
                 type="submit"
                 disabled={!canSubmit}
                 aria-describedby={formError ? errorId : undefined}
-                className="mt-2 rounded-lg bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                className="mt-2 rounded-lg bg-[var(--color-interactive)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {status === 'submitting' ? 'Creating account\u2026' : 'Create Account'}
               </button>
@@ -272,7 +272,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
               Already have an account?{' '}
               <Link
                 to="/auth/login"
-                className="text-[var(--color-core-text)] hover:underline"
+                className="text-[var(--color-interactive)] hover:underline"
               >
                 Sign in
               </Link>

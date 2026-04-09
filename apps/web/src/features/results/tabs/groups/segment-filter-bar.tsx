@@ -49,7 +49,7 @@ export function SegmentFilterBar({
             <select
               value={segmentType}
               onChange={(e) => onTypeChange(e.target.value as SegmentType)}
-              className="appearance-none rounded-md border border-[var(--grey-200)] bg-white py-2 pl-3 pr-8 text-sm text-[var(--text-secondary)] focus:border-[var(--brand-core)] focus:outline-none focus:ring-1 focus:ring-[var(--brand-core)]"
+              className="appearance-none rounded-md border border-[var(--grey-200)] bg-white py-2 pl-3 pr-8 text-sm text-[var(--text-secondary)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
               aria-label="Segment type"
             >
               {SEGMENT_TYPE_OPTIONS.map((type) => (

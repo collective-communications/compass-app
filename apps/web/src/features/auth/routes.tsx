@@ -66,7 +66,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
                 <p className="mt-4 text-center">
                   <Link
                     to="/auth/forgot-password"
-                    className="text-sm text-[var(--color-core-text)] hover:underline"
+                    className="text-sm text-[var(--color-interactive)] hover:underline"
                   >
                     Forgot password?
                   </Link>
@@ -158,7 +158,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
                 <div className="mb-6">
                   <Link
                     to="/auth/login"
-                    className="inline-flex items-center gap-1 text-sm text-[var(--color-core-text)] hover:underline"
+                    className="inline-flex items-center gap-1 text-sm text-[var(--color-interactive)] hover:underline"
                   >
                     <ArrowLeft size={16} />
                     Back to sign in
@@ -166,7 +166,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
                 </div>
 
                 <div className="mb-2 flex justify-center">
-                  <Lock size={32} className="text-[var(--color-core-text)]" />
+                  <Lock size={32} className="text-[var(--color-interactive)]" />
                 </div>
 
                 <h1
@@ -196,7 +196,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
                   Remember your password?{' '}
                   <Link
                     to="/auth/login"
-                    className="text-[var(--color-core-text)] hover:underline"
+                    className="text-[var(--color-interactive)] hover:underline"
                   >
                     Sign in
                   </Link>
@@ -259,7 +259,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
 
                 <Link
                   to="/auth/login"
-                  className="inline-block text-sm text-[var(--color-core-text)] hover:underline"
+                  className="inline-block text-sm text-[var(--color-interactive)] hover:underline"
                 >
                   Return to sign in
                 </Link>

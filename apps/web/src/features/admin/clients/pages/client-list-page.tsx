@@ -45,7 +45,7 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90"
+          className="rounded-lg bg-[var(--color-interactive)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90"
         >
           + Add Client
         </button>
@@ -83,7 +83,7 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
             <button
               type="button"
               onClick={() => setModalOpen(true)}
-              className="mt-4 rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90"
+              className="mt-4 rounded-lg bg-[var(--color-interactive)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90"
             >
               + Add Client
             </button>

@@ -1,6 +1,7 @@
 /** Brand color tokens for the four compass dimensions. */
 export const colors = {
   core: '#0A3B4F',
+  interactive: '#00385C',
   clarity: '#FF7F50',
   connection: '#9FD7C3',
   collaboration: '#E8B4A8',
@@ -144,6 +145,9 @@ export function injectTokens(): void {
   root.style.setProperty('--font-headings', typography.headings);
   root.style.setProperty('--font-body', typography.body);
 
-  root.style.setProperty('--color-gold', extendedColors.gold);
+  for (const [key, value] of Object.entries(extendedColors)) {
+    root.style.setProperty(`--color-${key}`, value);
+  }
+
   root.style.setProperty('--gradient-display', gradient['display-text'].css);
 }

@@ -32,7 +32,7 @@ export function QuestionNavButtons({
         type="button"
         onClick={onPrevious}
         disabled={isFirst}
-        className="rounded-lg border-2 border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-2.5 text-sm font-medium text-[var(--grey-700)] transition-colors hover:border-[var(--grey-400)] hover:bg-[var(--grey-50)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-core-text)] disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-lg border-2 border-[var(--grey-100)] bg-[var(--grey-50)] px-6 py-2.5 text-sm font-medium text-[var(--grey-700)] transition-colors hover:border-[var(--grey-400)] hover:bg-[var(--grey-50)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] disabled:cursor-not-allowed disabled:opacity-40"
       >
         Previous
       </button>
@@ -40,7 +40,7 @@ export function QuestionNavButtons({
         type="button"
         onClick={onNext}
         disabled={!nextEnabled}
-        className="rounded-lg bg-[var(--color-core)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-core-text)] disabled:cursor-not-allowed disabled:opacity-40"
+        className="rounded-lg bg-[var(--color-interactive)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] disabled:cursor-not-allowed disabled:opacity-40"
       >
         {isLastQuestion ? 'Continue' : 'Next'}
       </button>

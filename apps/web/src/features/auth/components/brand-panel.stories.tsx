@@ -27,7 +27,7 @@ export const AlwaysVisible: Story = {
   decorators: [
     (Story) => (
       <div style={{ display: 'flex', minHeight: '100vh', width: '100%' }}>
-        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--color-core)' }}>
+        <div style={{ width: '50%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--color-interactive)' }}>
           <Story />
         </div>
       </div>

@@ -78,7 +78,7 @@ export function SaveProgressScreen({
           <button
             type="button"
             onClick={onContinue}
-            className="w-full rounded-lg bg-[var(--color-core)] px-6 py-3 text-base font-medium text-white transition-colors hover:opacity-90"
+            className="w-full rounded-lg bg-[var(--color-interactive)] px-6 py-3 text-base font-medium text-white transition-colors hover:opacity-90"
           >
             Continue Survey
           </button>

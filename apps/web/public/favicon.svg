@@ -1,9 +1,5 @@
 <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="coreGrad" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#0D385C"/>
-      <stop offset="100%" stop-color="#0A3B4F"/>
-    </radialGradient>
     <clipPath id="circleClip">
       <circle cx="256" cy="256" r="256"/>
     </clipPath>
@@ -23,15 +19,15 @@
 
       <!-- CLARITY (Top) - Coral #FF7F50 -->
       <path d="M 0 0 L -173 -100 A 200 200 0 0 1 173 -100 L 0 0 Z"
-            fill="#FF7F50" opacity="0.92"/>
+            fill="#FF7F50"/>
 
       <!-- CONNECTION (Bottom-left) - Seafoam #9FD7C3 -->
       <path d="M 0 0 L 0 200 A 200 200 0 0 1 -173 -100 L 0 0 Z"
-            fill="#9FD7C3" opacity="0.92"/>
+            fill="#9FD7C3"/>
 
       <!-- COLLABORATION (Bottom-right) - Salmon #E8B4A8 -->
       <path d="M 0 0 L 173 -100 A 200 200 0 0 1 0 200 L 0 0 Z"
-            fill="#E8B4A8" opacity="0.92"/>
+            fill="#E8B4A8"/>
 
       <!-- Segment dividers -->
       <line x1="0" y1="0" x2="196" y2="-113" stroke="#FAFAFA" stroke-width="8"/>
@@ -42,7 +38,7 @@
       <circle cx="0" cy="0" r="68" fill="#FAFAFA"/>
 
       <!-- Core circle -->
-      <circle cx="0" cy="0" r="60" fill="url(#coreGrad)"/>
+      <circle cx="0" cy="0" r="60" fill="#0A3B4F"/>
 
     </g>
   </g>

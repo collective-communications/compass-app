@@ -44,7 +44,7 @@ export function SurveyPicker({
       value={activeSurveyId ?? ''}
       onChange={(e) => onSelect(e.target.value)}
       aria-label="Select a survey to view reports"
-      className="h-10 w-64 rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 text-sm text-[var(--grey-700)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]"
+      className="h-10 w-64 rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 text-sm text-[var(--grey-700)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]"
     >
       {surveys.map((survey) => (
         <option key={survey.id} value={survey.id}>

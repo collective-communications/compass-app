@@ -6,6 +6,7 @@ const meta = {
   component: CompassLogo,
   argTypes: {
     size: { control: 'select', options: ['sm', 'md', 'lg'] },
+    variant: { control: 'select', options: ['default', 'on-dark'] },
   },
 } satisfies Meta<typeof CompassLogo>;
 
@@ -34,4 +35,15 @@ export const AllSizes: Story = {
       <CompassLogo size="lg" />
     </div>
   ),
+};
+
+export const OnDark: Story = {
+  args: { variant: 'on-dark', size: 'lg' },
+  decorators: [
+    (Story) => (
+      <div style={{ background: 'var(--color-interactive)', padding: '2rem', borderRadius: '8px' }}>
+        <Story />
+      </div>
+    ),
+  ],
 };

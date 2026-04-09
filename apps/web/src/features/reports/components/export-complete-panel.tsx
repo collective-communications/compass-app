@@ -69,7 +69,7 @@ export function ExportCompletePanel({
             <a
               href={fileUrl}
               download={filename}
-              className="flex items-center justify-center gap-2 rounded-md bg-[var(--color-core)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)] focus:ring-offset-2"
+              className="flex items-center justify-center gap-2 rounded-md bg-[var(--color-interactive)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)] focus:ring-offset-2"
             >
               <Download size={16} aria-hidden="true" />
               Download {format.toUpperCase()}
@@ -106,7 +106,7 @@ export function ExportCompletePanel({
           <button
             type="button"
             onClick={onReset}
-            className="text-sm font-medium text-[var(--color-core-text)] underline hover:no-underline"
+            className="text-sm font-medium text-[var(--color-interactive)] underline hover:no-underline"
           >
             Try again
           </button>

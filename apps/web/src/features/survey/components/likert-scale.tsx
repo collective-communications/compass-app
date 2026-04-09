@@ -38,7 +38,7 @@ export function LikertScale({ value, onChange, name, scale }: LikertScaleProps):
                   ? 'border-[var(--grey-700)] bg-[var(--grey-700)] text-white'
                   : 'border-[var(--grey-100)] bg-[var(--grey-50)] text-[var(--grey-700)] hover:border-[var(--grey-400)] hover:bg-[var(--grey-50)]'
               }
-              cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-core-text)]`}
+              cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)]`}
           >
             {/* Radio circle indicator — visible on mobile, hidden on desktop */}
             <span

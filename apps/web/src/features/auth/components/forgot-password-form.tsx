@@ -44,7 +44,7 @@ export function ForgotPasswordForm({ onSubmit, isLoading, error }: ForgotPasswor
           disabled={isLoading}
           aria-invalid={emailTouched && !emailValid ? true : undefined}
           aria-describedby={error ? errorId : undefined}
-          className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-core-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-3 py-2.5 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 disabled:cursor-not-allowed disabled:opacity-50"
           placeholder="you@example.com"
         />
         {emailTouched && !emailValid && (
@@ -56,7 +56,7 @@ export function ForgotPasswordForm({ onSubmit, isLoading, error }: ForgotPasswor
         type="submit"
         disabled={!canSubmit}
         aria-describedby={error ? errorId : undefined}
-        className="mt-2 rounded-lg bg-[var(--color-core)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-core)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--color-core-text)]/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-2 rounded-lg bg-[var(--color-interactive)] px-4 py-2.5 text-sm font-medium text-white transition-colors hover:bg-[var(--color-interactive)]/90 focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {isLoading ? 'Sending\u2026' : 'Send Reset Link'}
       </button>

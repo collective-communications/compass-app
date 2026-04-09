@@ -40,7 +40,7 @@ function SurveyLayoutInner(): React.ReactElement {
   if (resumeSession.isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core-text)]" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-interactive)]" />
       </div>
     );
   }
@@ -99,7 +99,7 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
         return (
           <SurveyShell orgName="">
             <div className="flex items-center justify-center py-24">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-core-text)]" />
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-interactive)]" />
             </div>
           </SurveyShell>
         );

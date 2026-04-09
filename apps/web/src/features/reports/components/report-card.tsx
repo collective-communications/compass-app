@@ -67,7 +67,7 @@ export function ReportCard({
       className={[
         'relative w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--surface-card)] p-4 text-left transition-colors',
         leftBorderColor,
-        isSelected ? 'ring-2 ring-[var(--color-core-text)]' : 'hover:bg-[var(--grey-50)]',
+        isSelected ? 'ring-2 ring-[var(--color-interactive)]' : 'hover:bg-[var(--grey-50)]',
       ].join(' ')}
     >
       {/* Stretched overlay for primary click target */}
@@ -91,7 +91,7 @@ export function ReportCard({
             download
             onClick={(e) => e.stopPropagation()}
             aria-label={`Download ${report.format.toUpperCase()} report`}
-            className="relative z-10 rounded-md p-1.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--color-core-text)]"
+            className="relative z-10 rounded-md p-1.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--color-interactive)]"
           >
             <Download size={16} aria-hidden="true" />
           </a>

@@ -163,7 +163,7 @@ function EmailInviteSection({
         type="button"
         onClick={handleSend}
         disabled={sendMutation.isPending}
-        className="mt-3 rounded-lg bg-[var(--color-core)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+        className="mt-3 rounded-lg bg-[var(--color-interactive)] px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
         {sendMutation.isPending ? 'Sending...' : `Send Invitations (${stats.pending})`}
       </button>

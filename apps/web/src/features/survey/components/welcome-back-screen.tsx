@@ -54,7 +54,7 @@ export function WelcomeBackScreen({
           type="button"
           onClick={onResume}
           disabled={isLoading}
-          className="w-full rounded-lg bg-[var(--color-core)] px-6 py-3 text-base font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
+          className="w-full rounded-lg bg-[var(--color-interactive)] px-6 py-3 text-base font-medium text-white transition-colors hover:opacity-90 disabled:opacity-50"
         >
           {isLoading ? (
             <span className="flex items-center justify-center gap-2">

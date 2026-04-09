@@ -5,6 +5,7 @@
   --color-clarity: #FF7F50;
   --color-connection: #9FD7C3;
   --color-collaboration: #E8B4A8;
+  --color-interactive: #00385C;
   --grey-50: #F5F5F5;
   --grey-100: #E5E4E0;
   --grey-200: #E5E4E0;
@@ -38,6 +39,13 @@
   --font-body: 'DM Sans', 'Calibri', Arial, sans-serif;
   --color-gold: #E8C845;
   --gradient-display: linear-gradient(to right, #5BBFB5, #A4D4B4, #E8C845);
+  --color-navy-teal: #00385C;
+  --color-mint: #A1D7BE;
+  --color-sage: #8AC3A9;
+  --color-pale-mint: #EBF7F2;
+  --color-blush: #F5C4B8;
+  --color-rose: #D4A094;
+  --color-highlight: #FFF5F0;
 }
 
 /*
@@ -46,6 +54,7 @@
  * designed to work on both light and dark backgrounds.
  */
 .dark {
+  --color-interactive: #5BA3B8;
   --grey-50: #212121;
   --grey-100: #2E2E2E;
   --grey-200: #2E2E2E;
