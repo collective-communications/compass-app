@@ -33,8 +33,11 @@
   --text-tertiary: #616161;
   --text-placeholder: #757575;
   --text-disabled: var(--grey-400);
-  --font-headings: 'DM Serif Display', serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'DM Sans', 'Calibri', Arial, sans-serif;
+  --font-headings: 'DM Sans', 'Calibri', Arial, sans-serif;
+  --font-body: 'DM Sans', 'Calibri', Arial, sans-serif;
+  --color-gold: #E8C845;
+  --gradient-display: linear-gradient(to right, #5BBFB5, #A4D4B4, #E8C845);
 }
 
 /*
