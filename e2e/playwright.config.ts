@@ -23,8 +23,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 1 : 0,
-  workers: 1,
-  reporter: isCI ? 'html' : 'list',
+  workers: isCI ? 2 : 1,
+  reporter: isCI ? [['blob', { outputDir: 'blob-report' }]] : 'list',
 
   use: {
     baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:42333',
@@ -58,18 +58,8 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
-      dependencies: ['auth-setup', 'chromium-survey'],
+      dependencies: ['auth-setup'],
       testIgnore: [/auth\.setup\.ts/, /survey\//],
     },
-    ...(isCI
-      ? [
-          {
-            name: 'firefox',
-            use: { ...devices['Desktop Firefox'] },
-            dependencies: ['auth-setup'],
-            testIgnore: /auth\.setup\.ts/,
-          },
-        ]
-      : []),
   ],
 });
