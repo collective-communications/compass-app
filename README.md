@@ -1,8 +1,8 @@
-# Culture Compass
+# Collective Culture Compass
 
 Culture assessment platform for **COLLECTIVE culture + communication** (CC+C).
 
-Digitizes CC+C's proprietary Culture Compass framework: survey administration, interactive compass visualization, and branded diagnostic reporting.
+Digitizes CC+C's proprietary Collective Culture Compass framework: survey administration, interactive compass visualization, and branded diagnostic reporting.
 
 ## Stack
 
