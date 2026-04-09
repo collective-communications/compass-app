@@ -131,12 +131,16 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   const adminClientDetailRoute = createRoute({
     getParentRoute: () => adminLayoutRoute,
     path: '/clients/$orgId',
-    beforeLoad: async ({ params: { orgId } }) => {
-      throw redirect({
-        to: '/admin/clients/$orgId/overview',
-        params: { orgId },
-        replace: true,
-      });
+    beforeLoad: async ({ params: { orgId }, location }) => {
+      // Only redirect when landing on the exact parent path, not when a child route is matched
+      const basePath = `/admin/clients/${orgId}`;
+      if (location.pathname === basePath || location.pathname === `${basePath}/`) {
+        throw redirect({
+          to: '/admin/clients/$orgId/overview',
+          params: { orgId },
+          replace: true,
+        });
+      }
     },
     component: function AdminClientDetailLayout(): ReactElement {
       const { orgId } = adminClientDetailRoute.useParams() as { orgId: string };
