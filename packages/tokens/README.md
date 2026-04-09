@@ -1,16 +1,17 @@
 # @compass/tokens
 
-Design tokens for the Culture Compass brand: colors, typography, spacing, radii, shadows, and severity levels.
+Design tokens for the Collective Culture Compass brand: colors, typography, spacing, radii, shadows, and severity levels.
 
 ## Public API
 
 ### Token Objects
 
 - `colors` — Brand color tokens for the four compass dimensions (core, clarity, connection, collaboration)
-- `extendedColors` — Extended compass color palette (navy-teal, mint, sage, blush, rose, etc.)
+- `extendedColors` — Extended compass color palette (navy-teal, gold, mint, sage, blush, rose, etc.)
+- `gradient` — Display gradient definition (teal → seafoam → gold) for headlines on dark backgrounds
 - `greyscale` — 7-value greyscale palette (50 through 900)
 - `textColors` — Semantic text color tokens with light/dark mode variants (AA-compliant)
-- `typography` — Font family tokens (headings: DM Serif Display, body: DM Sans)
+- `typography` — Font family tokens (display, headings, body — all DM Sans, sans-serif unified)
 - `spacing` — Spacing scale based on 8px unit (xs through 4xl)
 - `radius` — Border radius tokens (sm through full)
 - `shadow` — Box shadow tokens (sm through xl)

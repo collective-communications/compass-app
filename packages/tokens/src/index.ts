@@ -10,12 +10,23 @@ export const colors = {
 export const extendedColors = {
   'navy-teal': '#00385C',
   'dark-teal': '#0D385C',
+  gold: '#E8C845',
   mint: '#A1D7BE',
   sage: '#8AC3A9',
   'pale-mint': '#EBF7F2',
   blush: '#F5C4B8',
   rose: '#D4A094',
   highlight: '#FFF5F0',
+} as const;
+
+/** Display gradient — teal → seafoam → gold, for large headlines on dark backgrounds. */
+export const gradient = {
+  'display-text': {
+    type: 'linear' as const,
+    direction: 'to right',
+    stops: ['#5BBFB5', '#A4D4B4', '#E8C845'],
+    css: 'linear-gradient(to right, #5BBFB5, #A4D4B4, #E8C845)',
+  },
 } as const;
 
 /** 7-value greyscale palette. */
@@ -42,10 +53,11 @@ export const textColors = {
   disabled: { light: greyscale[400], dark: '#8A8A8A' },
 } as const;
 
-/** Typography tokens. */
+/** Typography tokens — DM Sans only (sans-serif unified). */
 export const typography = {
-  headings: "'DM Serif Display', serif",
-  body: "'DM Sans', sans-serif",
+  display: "'DM Sans', 'Calibri', Arial, sans-serif",
+  headings: "'DM Sans', 'Calibri', Arial, sans-serif",
+  body: "'DM Sans', 'Calibri', Arial, sans-serif",
 } as const;
 
 /** Spacing scale based on 8px unit. */
@@ -128,6 +140,10 @@ export function injectTokens(): void {
   root.style.setProperty('--track-color', greyscale[100]);
   root.style.setProperty('--surface-card', '#FFFFFF');
 
+  root.style.setProperty('--font-display', typography.display);
   root.style.setProperty('--font-headings', typography.headings);
   root.style.setProperty('--font-body', typography.body);
+
+  root.style.setProperty('--color-gold', extendedColors.gold);
+  root.style.setProperty('--gradient-display', gradient['display-text'].css);
 }

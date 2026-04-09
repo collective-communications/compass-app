@@ -11,7 +11,6 @@ import {
   useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query';
-import { organizationKeys } from './use-organizations';
 import { supabase } from '../../../../lib/supabase';
 
 export type SaveStatus = 'saved' | 'saving' | 'error';

@@ -18,6 +18,10 @@ test('admin can see surveys list via client detail', async ({ page }) => {
     const surveysTab = page.getByRole('tab', { name: /surveys/i });
     if (await surveysTab.isVisible({ timeout: 5000 }).catch(() => false)) {
       await surveysTab.click();
+      await page.waitForLoadState('networkidle');
+
+      // URL should now contain /surveys
+      expect(page.url()).toContain('/surveys');
       await expect(page.getByText(/new survey|no surveys/i)).toBeVisible({ timeout: 10000 });
     }
   }

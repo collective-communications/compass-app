@@ -19,6 +19,9 @@ async function gotoClientSurveys(page: import('@playwright/test').Page): Promise
   await expect(surveysTab).toBeVisible({ timeout: 10000 });
   await surveysTab.click();
   await page.waitForLoadState('networkidle');
+
+  // Verify URL changed to surveys route
+  expect(page.url()).toContain('/surveys');
 }
 
 test.describe('Admin survey builder', () => {

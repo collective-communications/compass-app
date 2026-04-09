@@ -25,7 +25,7 @@ const clientDetailHelp: HelpEntry = {
     {
       heading: 'Tabs',
       content:
-        "Overview: Organization info, metrics, consultant assignment, and notes. Results: Same results view the client sees, embedded here for CC+C review. Surveys: All surveys for this organization — create, configure, deploy, monitor. Users: Client team members who have access to the platform.",
+        "Overview: Organization info, metrics, consultant assignment, and notes. Surveys: All surveys for this organization — create, configure, deploy, monitor. Access results via the survey card actions. Users: Client team members who have access to the platform.",
     },
     {
       heading: 'Notes',
