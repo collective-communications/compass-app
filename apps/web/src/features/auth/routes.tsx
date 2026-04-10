@@ -51,7 +51,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
           <div className="flex flex-1">
             <BrandPanel />
 
-            <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
+            <div className="flex w-full items-center justify-center bg-[var(--surface-card)] px-6 lg:w-1/2">
               <div className="w-full max-w-sm">
                 <h1
                   className="mb-8 text-center text-2xl font-bold text-[var(--grey-900)]"
@@ -153,7 +153,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
           <div className="flex flex-1">
             <BrandPanel />
 
-            <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
+            <div className="flex w-full items-center justify-center bg-[var(--surface-card)] px-6 lg:w-1/2">
               <div className="w-full max-w-sm">
                 <div className="mb-6">
                   <Link
@@ -223,7 +223,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
           <div className="flex flex-1">
             <BrandPanel />
 
-            <div className="flex w-full items-center justify-center px-6 lg:w-1/2">
+            <div className="flex w-full items-center justify-center bg-[var(--surface-card)] px-6 lg:w-1/2">
               <div className="w-full max-w-sm text-center">
                 <div className="mb-4 flex justify-center">
                   <CheckCircle size={40} className="text-[var(--color-connection)]" />

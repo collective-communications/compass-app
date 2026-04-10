@@ -42,7 +42,7 @@ function MicrosoftIcon(): React.ReactElement {
  */
 export function SocialSignOnButtons({ onSignIn, isLoading }: SocialSignOnButtonsProps): React.ReactElement {
   const buttonClasses =
-    'flex w-full items-center justify-center gap-3 rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] px-4 py-2.5 text-sm font-medium text-[var(--grey-700)] transition-colors hover:bg-[var(--grey-50)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
+    'flex w-full items-center justify-center gap-3 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--color-core-text)] transition-colors hover:bg-[var(--grey-50)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50';
 
   return (
     <div className="flex flex-col gap-3">
