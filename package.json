@@ -28,6 +28,7 @@
     "test:storybook": "bun run --filter @compass/storybook test-storybook",
     "storybook": "bun run --filter @compass/storybook storybook",
     "build-storybook": "bun run --filter @compass/storybook build-storybook",
+    "deploy-storybook": "scripts/deploy-storybook.sh",
     "compass:start": "scripts/app-manager.sh start",
     "compass:stop": "scripts/app-manager.sh stop",
     "compass:restart": "scripts/app-manager.sh restart",
