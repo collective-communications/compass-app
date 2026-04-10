@@ -55,6 +55,6 @@ describe('RecommendedActionCard', () => {
     const { container } = render(
       <RecommendedActionCard recommendation={mockRecommendation} />,
     );
-    expect(container.innerHTML).toContain('#2E7D32');
+    expect(container.innerHTML).toContain('--severity-healthy-border');
   });
 });
