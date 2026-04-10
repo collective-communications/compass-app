@@ -51,7 +51,7 @@ export function AppShell({ children }: AppShellProps): ReactElement {
       }
       footer={tabs.length > 0 ? <BottomTabBar tabs={tabs} activeTabId={activeTabId} /> : undefined}
     >
-      <div className={tabs.length > 0 ? 'pb-16 lg:pb-0' : ''}>{children}</div>
+      <div className={`px-4 py-6 lg:px-8 ${tabs.length > 0 ? 'pb-16 lg:pb-0' : ''}`}>{children}</div>
     </BaseLayout>
   );
 }

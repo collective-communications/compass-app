@@ -52,9 +52,9 @@ export function ResultsLayout({
   const hasInsights = insightsContent !== undefined;
 
   const gridColumns = useMemo(() => {
-    if (hasSidebar && hasInsights) return `${sidebarWidth}px 1fr 396px`;
+    if (hasSidebar && hasInsights) return `${sidebarWidth}px 1fr minmax(0, 35%)`;
     if (hasSidebar) return `${sidebarWidth}px 1fr`;
-    if (hasInsights) return '1fr 396px';
+    if (hasInsights) return '1fr minmax(0, 35%)';
     return '1fr';
   }, [hasSidebar, hasInsights, sidebarWidth]);
 

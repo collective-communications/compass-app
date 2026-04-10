@@ -53,7 +53,7 @@ export function OrgSettingsPage(): ReactElement {
 
   if (!orgId) {
     return (
-      <div className="p-6 text-sm text-[var(--text-secondary)]">
+      <div className="text-sm text-[var(--text-secondary)]">
         No organization selected.
       </div>
     );
@@ -61,14 +61,14 @@ export function OrgSettingsPage(): ReactElement {
 
   if (!settings) {
     return (
-      <div className="p-6 text-sm text-[var(--text-secondary)]">
+      <div className="text-sm text-[var(--text-secondary)]">
         Loading organization settings...
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 p-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <header className="mb-2">
         <h1 className="text-2xl font-semibold text-[var(--grey-900)]">
           {org.data?.name ?? 'Organization'} Settings

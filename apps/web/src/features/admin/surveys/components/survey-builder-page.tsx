@@ -267,7 +267,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
 
   if (error || !data) {
     return (
-      <div className="px-4 py-6 lg:px-8">
+      <div>
         <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
           Failed to load survey. Please try again.
         </div>
@@ -281,7 +281,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
   const reverseScoredCount = data.questions.filter((q) => q.reverseScored).length;
 
   return (
-    <div className="px-4 py-6 pb-20 lg:px-8">
+    <div className="pb-20">
       {/* Header */}
       <DrilldownHeader backTo={`/admin/clients/${survey.organizationId}`} backLabel="Back to client" title={survey.title}>
         <AutoSaveIndicator status={autoSaveStatus} />

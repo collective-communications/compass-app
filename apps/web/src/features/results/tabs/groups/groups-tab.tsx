@@ -245,7 +245,7 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
           {isSelectedLoading ? (
             <ResultsSkeleton />
           ) : selectedSegmentRows && selectedSegmentRows.length > 0 ? (
-            <>
+            <div className="flex flex-col gap-6 rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
               <SegmentHeader
                 segmentValue={segmentValue}
                 segmentType={segmentType}
@@ -253,8 +253,8 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
               />
 
               {/* Side-by-side: compass + top issues */}
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <SegmentCompass rows={selectedSegmentRows} size={240} />
+              <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-[auto_1fr]">
+                <SegmentCompass rows={selectedSegmentRows} size={240} className="ml-8 lg:ml-12" />
                 <TopIssuesCard
                   questions={segmentQuestionScores?.questions ?? []}
                   segmentLabel={segmentValue}
@@ -278,7 +278,7 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
                 onViewByType={handleTypeChange}
                 onExportReport={handleExportReport}
               />
-            </>
+            </div>
           ) : (
             <p className="py-8 text-center text-sm text-[var(--text-secondary)]">
               No data available for this segment.

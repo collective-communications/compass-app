@@ -39,7 +39,7 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
   );
 
   return (
-    <div className="px-4 py-6 lg:px-8">
+    <div>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold text-[var(--grey-900)]">Clients</h1>
         <button

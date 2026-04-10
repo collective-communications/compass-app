@@ -34,7 +34,7 @@ export function ResultsSkeleton(): ReactElement {
       {/* Content grid skeleton — matches 2-column default (no sidebar) */}
       <div
         className="flex flex-col gap-6 lg:grid lg:items-start lg:gap-6"
-        style={{ gridTemplateColumns: '1fr 396px' }}
+        style={{ gridTemplateColumns: '1fr minmax(0, 35%)' }}
       >
         {/* Main content area */}
         <div className="flex flex-col gap-4">

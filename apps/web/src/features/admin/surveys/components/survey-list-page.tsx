@@ -72,7 +72,7 @@ export function SurveyListPage({
   }, [organizationId, userId, createSurvey, onSelectSurvey]);
 
   return (
-    <div className="px-4 py-6 lg:px-8">
+    <div>
       {clientName && (
         <DrilldownHeader
           backTo={backTo ?? '/admin/clients'}
