@@ -268,7 +268,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
   if (error || !data) {
     return (
       <div>
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+        <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]" role="alert">
           Failed to load survey. Please try again.
         </div>
       </div>
@@ -412,7 +412,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
       </div>
 
       {/* Sticky footer with Done button */}
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--grey-100)] bg-white px-4 py-3">
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-[var(--grey-100)] bg-[var(--surface-card)] px-4 py-3">
         <div className="flex items-center justify-between lg:px-4">
           <p className="text-sm text-[var(--text-secondary)]">
             {data.questions.length} question{data.questions.length !== 1 ? 's' : ''} across{' '}

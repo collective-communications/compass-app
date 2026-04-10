@@ -168,12 +168,12 @@ export function UserCard({
 
           {/* Inline errors */}
           {roleChangeError && (
-            <p className="mt-2 text-xs text-red-700" role="alert">
+            <p className="mt-2 text-xs text-[var(--feedback-error-text)]" role="alert">
               {roleChangeError}
             </p>
           )}
           {removeError && (
-            <p className="mt-2 text-xs text-red-700" role="alert">
+            <p className="mt-2 text-xs text-[var(--feedback-error-text)]" role="alert">
               {removeError}
             </p>
           )}
@@ -188,7 +188,7 @@ export function UserCard({
                     type="button"
                     onClick={handleRemoveClick}
                     disabled={isLastAdmin || isUpdating}
-                    className="text-xs font-medium text-red-700 hover:text-red-700 disabled:opacity-50"
+                    className="text-xs font-medium text-[var(--feedback-error-text)] hover:text-[var(--feedback-error-text)] disabled:opacity-50"
                   >
                     Confirm
                   </button>
@@ -205,7 +205,7 @@ export function UserCard({
                   type="button"
                   onClick={handleRemoveClick}
                   disabled={isLastAdmin || isUpdating}
-                  className="text-xs font-medium text-[var(--text-secondary)] hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--feedback-error-text)] disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label={
                     isLastAdmin
                       ? 'Cannot remove the last admin'

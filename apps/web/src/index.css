@@ -13,6 +13,7 @@
   --grey-400: #9E9E9E;
   --grey-500: #757575;
   --grey-700: #424242;
+  --grey-800: #303030;
   --grey-900: #212121;
   --severity-critical-border: #B71C1C;
   --severity-critical-bg: #FFEBEE;
@@ -46,6 +47,52 @@
   --color-blush: #F5C4B8;
   --color-rose: #D4A094;
   --color-highlight: #FFF5F0;
+
+  /* Surface variants */
+  --surface-subtle: #F0EEEB;
+
+  /* Feedback — form validation & alert boxes */
+  --feedback-error-bg: #FEF2F2;
+  --feedback-error-border: #FECACA;
+  --feedback-error-text: #B91C1C;
+  --feedback-success-text: #15803D;
+  --feedback-warning-bg: #FEFCE8;
+  --feedback-warning-border: #FDE68A;
+  --feedback-warning-text: #92400E;
+
+  /* Status badges */
+  --status-active-bg: #F0FDF4;
+  --status-active-text: #15803D;
+  --status-active-border: #22C55E;
+  --status-paused-bg: #FEFCE8;
+  --status-paused-text: #A16207;
+  --status-paused-border: #EAB308;
+  --status-closed-bg: #FFF7ED;
+  --status-closed-text: #C2410C;
+  --status-closed-border: #F97316;
+  --status-invited-bg: #EFF6FF;
+  --status-invited-text: #1D4ED8;
+  --status-bounced-bg: #FEF2F2;
+  --status-bounced-text: #B91C1C;
+
+  /* Delta indicators */
+  --delta-positive-text: #15803D;
+  --delta-negative-text: #B91C1C;
+  --delta-positive-bg: #F0EEEB;
+  --delta-negative-bg: #FFF5F0;
+
+  /* Trust ladder */
+  --trust-achieved-bg: #DCFCE7;
+  --trust-achieved-text: #166534;
+  --trust-achieved-border: #86EFAC;
+  --trust-in-progress-bg: #FEF9C3;
+  --trust-in-progress-text: #854D0E;
+  --trust-in-progress-border: #FDE047;
+  --trust-current-bg: #15803D;
+
+  /* Connection indicators */
+  --indicator-live: #22C55E;
+  --indicator-polling: #EAB308;
 }
 
 /*
@@ -62,6 +109,7 @@
   --grey-400: #8A8A8A;
   --grey-500: #9E9E9E;
   --grey-700: #BDBDBD;
+  --grey-800: #E0E0E0;
   --grey-900: #F5F5F5;
   --color-core-text: #5BA3B8;
   --severity-critical-bg: #3E1111;
@@ -82,6 +130,52 @@
   --text-disabled: var(--grey-400);
   --track-color: #787878;
   --surface-card: #2E2E2E;
+
+  /* Surface variants */
+  --surface-subtle: #363636;
+
+  /* Feedback */
+  --feedback-error-bg: #3E1111;
+  --feedback-error-border: #7F1D1D;
+  --feedback-error-text: #FCA5A5;
+  --feedback-success-text: #86EFAC;
+  --feedback-warning-bg: #3E3500;
+  --feedback-warning-border: #713F12;
+  --feedback-warning-text: #FDE68A;
+
+  /* Status badges */
+  --status-active-bg: #1B3E1C;
+  --status-active-text: #86EFAC;
+  --status-active-border: #22C55E;
+  --status-paused-bg: #3E3500;
+  --status-paused-text: #FDE68A;
+  --status-paused-border: #EAB308;
+  --status-closed-bg: #3E2200;
+  --status-closed-text: #FDBA74;
+  --status-closed-border: #F97316;
+  --status-invited-bg: #1E2A4A;
+  --status-invited-text: #93C5FD;
+  --status-bounced-bg: #3E1111;
+  --status-bounced-text: #FCA5A5;
+
+  /* Delta indicators */
+  --delta-positive-text: #86EFAC;
+  --delta-negative-text: #FCA5A5;
+  --delta-positive-bg: #2E2E2E;
+  --delta-negative-bg: #3E1111;
+
+  /* Trust ladder */
+  --trust-achieved-bg: #1B3E1C;
+  --trust-achieved-text: #86EFAC;
+  --trust-achieved-border: #22C55E;
+  --trust-in-progress-bg: #3E3500;
+  --trust-in-progress-text: #FDE68A;
+  --trust-in-progress-border: #EAB308;
+  --trust-current-bg: #22C55E;
+
+  /* Connection indicators */
+  --indicator-live: #22C55E;
+  --indicator-polling: #EAB308;
 }
 
 body {

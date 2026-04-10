@@ -184,13 +184,13 @@ export function MetadataConfig({
 
               {pendingRemoval === item.id ? (
                 <span className="flex items-center gap-2">
-                  <span className="text-xs text-red-700">
+                  <span className="text-xs text-[var(--feedback-error-text)]">
                     This value is referenced by active responses. Remove anyway?
                   </span>
                   <button
                     type="button"
                     onClick={() => handleRemove(item.id)}
-                    className="text-xs font-medium text-red-700 hover:underline"
+                    className="text-xs font-medium text-[var(--feedback-error-text)] hover:underline"
                     aria-label={`Confirm remove ${item.label}`}
                   >
                     Remove
@@ -209,7 +209,7 @@ export function MetadataConfig({
                   type="button"
                   onClick={() => handleRemove(item.id)}
                   aria-label={`Remove ${item.label}`}
-                  className="text-[var(--text-tertiary)] hover:text-red-700"
+                  className="text-[var(--text-tertiary)] hover:text-[var(--feedback-error-text)]"
                 >
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                     <path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />

@@ -50,7 +50,7 @@ export function SaveProgressScreen({
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] bg-white p-6 sm:p-8">
+      <div className="w-full max-w-[600px] bg-[var(--surface-card)] p-6 sm:p-8">
         <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Progress saved</h1>
 
         <p className="mb-6 text-[var(--text-secondary)]">

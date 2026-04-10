@@ -160,7 +160,7 @@ export function SurveyConfigModal({
             aria-describedby={titleError ? 'config-title-error' : undefined}
           />
           {titleError && (
-            <p id="config-title-error" className="text-xs text-red-700" role="alert">{titleError}</p>
+            <p id="config-title-error" className="text-xs text-[var(--feedback-error-text)]" role="alert">{titleError}</p>
           )}
         </div>
 
@@ -210,7 +210,7 @@ export function SurveyConfigModal({
           </div>
         </div>
         {dateError && (
-          <p id="config-date-error" className="text-xs text-red-700" role="alert">{dateError}</p>
+          <p id="config-date-error" className="text-xs text-[var(--feedback-error-text)]" role="alert">{dateError}</p>
         )}
 
         {/* Anonymity Threshold */}

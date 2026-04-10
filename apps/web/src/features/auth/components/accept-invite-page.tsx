@@ -248,7 +248,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
                   placeholder="Re-enter your password"
                 />
                 {confirmPassword !== '' && password !== confirmPassword && (
-                  <p className="text-xs text-red-700">Passwords do not match.</p>
+                  <p className="text-xs text-[var(--feedback-error-text)]">Passwords do not match.</p>
                 )}
               </div>
 
@@ -262,7 +262,7 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
               </button>
 
               {formError && (
-                <p id={errorId} role="alert" className="text-center text-sm text-red-700">
+                <p id={errorId} role="alert" className="text-center text-sm text-[var(--feedback-error-text)]">
                   {formError}
                 </p>
               )}

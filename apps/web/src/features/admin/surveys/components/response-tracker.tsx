@@ -23,8 +23,8 @@ function formatDuration(ms: number): string {
 }
 
 const CONNECTION_INDICATOR: Record<ConnectionStatus, { label: string; className: string }> = {
-  connected: { label: 'Live', className: 'bg-green-500' },
-  polling: { label: 'Polling', className: 'bg-yellow-500' },
+  connected: { label: 'Live', className: 'bg-[var(--indicator-live)]' },
+  polling: { label: 'Polling', className: 'bg-[var(--indicator-polling)]' },
   disconnected: { label: 'Offline', className: 'bg-[var(--grey-400)]' },
 };
 

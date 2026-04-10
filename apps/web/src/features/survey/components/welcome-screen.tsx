@@ -52,7 +52,7 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
 
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] bg-white p-6 sm:p-8">
+      <div className="w-full max-w-[600px] bg-[var(--surface-card)] p-6 sm:p-8">
         {/* Greeting and survey info */}
         <h1 className="mb-2 text-2xl font-semibold text-[var(--grey-900)]">Hello.</h1>
 
@@ -94,7 +94,7 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
 
         {/* Submission error */}
         {createResponse.isError && (
-          <p className="mt-4 text-center text-sm text-red-700" role="alert">
+          <p className="mt-4 text-center text-sm text-[var(--feedback-error-text)]" role="alert">
             Something went wrong. Please try again.
           </p>
         )}

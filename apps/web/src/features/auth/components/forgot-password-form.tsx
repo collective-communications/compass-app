@@ -48,7 +48,7 @@ export function ForgotPasswordForm({ onSubmit, isLoading, error }: ForgotPasswor
           placeholder="you@example.com"
         />
         {emailTouched && !emailValid && (
-          <p className="text-xs text-red-700">Enter a valid email address.</p>
+          <p className="text-xs text-[var(--feedback-error-text)]">Enter a valid email address.</p>
         )}
       </div>
 
@@ -62,7 +62,7 @@ export function ForgotPasswordForm({ onSubmit, isLoading, error }: ForgotPasswor
       </button>
 
       {error && (
-        <p id={errorId} role="alert" className="text-center text-sm text-red-700">
+        <p id={errorId} role="alert" className="text-center text-sm text-[var(--feedback-error-text)]">
           {error}
         </p>
       )}

@@ -2,7 +2,7 @@
 export function InvalidTokenScreen(): React.ReactNode {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4" data-testid="invalid-token">
-      <div className="w-full max-w-[600px] bg-white p-8 text-center">
+      <div className="w-full max-w-[600px] bg-[var(--surface-card)] p-8 text-center">
         <h1 className="mb-3 text-xl font-semibold text-[var(--grey-900)]">
           Invalid Survey Link
         </h1>

@@ -146,14 +146,14 @@ export function InviteForm({
 
       {/* Inline error */}
       {displayError && (
-        <p id="invite-error" className="mt-2 text-xs text-red-700" role="alert">
+        <p id="invite-error" className="mt-2 text-xs text-[var(--feedback-error-text)]" role="alert">
           {displayError}
         </p>
       )}
 
       {/* Success feedback */}
       {lastCreated && !displayError && (
-        <p className="mt-2 text-xs text-green-700" role="status">
+        <p className="mt-2 text-xs text-[var(--feedback-success-text)]" role="status">
           Invitation sent to {lastCreated.email}. Expires in 7 days.
         </p>
       )}

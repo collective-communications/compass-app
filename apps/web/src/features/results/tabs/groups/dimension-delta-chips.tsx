@@ -17,9 +17,9 @@ interface DimensionDeltaChipsProps {
 
 function chipClasses(delta: number): string {
   if (delta >= 0) {
-    return 'bg-[#F0EEEB] text-[#2E7D32]';
+    return 'bg-[var(--delta-positive-bg)] text-[var(--delta-positive-text)]';
   }
-  return 'bg-[#FFF5F0] text-[#B71C1C]';
+  return 'bg-[var(--delta-negative-bg)] text-[var(--delta-negative-text)]';
 }
 
 function formatChipText(label: string, delta: number): string {

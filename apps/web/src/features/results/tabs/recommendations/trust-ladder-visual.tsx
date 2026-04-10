@@ -12,8 +12,8 @@ export interface TrustLadderVisualProps {
 }
 
 const STATUS_STYLES: Record<TrustRungStatus, string> = {
-  achieved: 'bg-green-100 text-green-800 border-green-300',
-  in_progress: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+  achieved: 'bg-[var(--trust-achieved-bg)] text-[var(--trust-achieved-text)] border-[var(--trust-achieved-border)]',
+  in_progress: 'bg-[var(--trust-in-progress-bg)] text-[var(--trust-in-progress-text)] border-[var(--trust-in-progress-border)]',
   not_started: 'bg-[var(--grey-50)] text-[var(--text-secondary)] border-[var(--grey-100)]',
 };
 
@@ -43,7 +43,7 @@ function RungRow({ rung, isCurrentLevel }: { rung: TrustRungScore; isCurrentLeve
         <span className="shrink-0 text-xs font-bold opacity-60">{rung.rung}</span>
         <span className="flex-1 font-medium">{rung.name}</span>
         {isCurrentLevel && (
-          <span className="shrink-0 rounded-full bg-green-700 px-2 py-0.5 text-[10px] font-semibold text-white">
+          <span className="shrink-0 rounded-full bg-[var(--trust-current-bg)] px-2 py-0.5 text-[10px] font-semibold text-white">
             Current
           </span>
         )}
@@ -53,7 +53,7 @@ function RungRow({ rung, isCurrentLevel }: { rung: TrustRungScore; isCurrentLeve
       </button>
 
       {expanded && (
-        <div className="mt-1 ml-6 rounded-md border border-[var(--grey-100)] bg-white px-3 py-2 text-xs text-[var(--text-tertiary)]">
+        <div className="mt-1 ml-6 rounded-md border border-[var(--grey-100)] bg-[var(--surface-card)] px-3 py-2 text-xs text-[var(--text-tertiary)]">
           <div className="flex items-center justify-between">
             <span>Dimension: <strong>{dimensionLabel(rung.dimensionCode)}</strong></span>
             <span className="font-medium">{STATUS_LABELS[rung.status]}</span>
@@ -96,7 +96,7 @@ export function TrustLadderVisual({ result }: TrustLadderVisualProps): ReactElem
       </ol>
 
       {result.nextActions.length > 0 && (
-        <div className="mt-1 rounded-md border border-yellow-200 bg-yellow-50 px-3 py-2 text-xs text-yellow-800">
+        <div className="mt-1 rounded-md border border-[var(--feedback-warning-border)] bg-[var(--feedback-warning-bg)] px-3 py-2 text-xs text-[var(--feedback-warning-text)]">
           <span className="font-semibold">Next focus: </span>
           {result.nextActions.join(', ')}
         </div>

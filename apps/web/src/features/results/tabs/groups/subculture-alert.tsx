@@ -33,9 +33,9 @@ export function SubcultureAlert({
   return (
     <div
       role="alert"
-      className="rounded-lg border-l-4 border-l-[#B71C1C] bg-[#FFF5F0] p-6"
+      className="rounded-lg border-l-4 border-l-[var(--severity-critical-border)] bg-[var(--severity-critical-bg)] p-6"
     >
-      <p className="text-xs font-semibold uppercase text-[#B71C1C]">
+      <p className="text-xs font-semibold uppercase text-[var(--severity-critical-text)]">
         SUBCULTURE ALERT
       </p>
       <p className="mt-2 text-sm text-[var(--grey-700)]">

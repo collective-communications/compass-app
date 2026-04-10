@@ -22,18 +22,18 @@ interface SurveyCardProps {
 /** Maps survey status to left border color (severity indicator) */
 const STATUS_BORDER_COLOR: Record<SurveyStatus, string> = {
   draft: 'border-l-[var(--grey-400)]',
-  active: 'border-l-green-500',
-  paused: 'border-l-yellow-500',
-  closed: 'border-l-orange-500',
+  active: 'border-l-[var(--status-active-border)]',
+  paused: 'border-l-[var(--status-paused-border)]',
+  closed: 'border-l-[var(--status-closed-border)]',
   archived: 'border-l-[var(--grey-300)]',
 };
 
 /** Maps survey status to badge styling */
 const STATUS_BADGE_CLASS: Record<SurveyStatus, string> = {
   draft: 'bg-[var(--grey-100)] text-[var(--grey-700)]',
-  active: 'bg-green-50 text-green-700',
-  paused: 'bg-yellow-50 text-yellow-700',
-  closed: 'bg-orange-50 text-orange-700',
+  active: 'bg-[var(--status-active-bg)] text-[var(--status-active-text)]',
+  paused: 'bg-[var(--status-paused-bg)] text-[var(--status-paused-text)]',
+  closed: 'bg-[var(--status-closed-bg)] text-[var(--status-closed-text)]',
   archived: 'bg-[var(--grey-100)] text-[var(--text-secondary)]',
 };
 

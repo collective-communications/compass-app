@@ -85,7 +85,7 @@ export function BulkImportModal({
       ref={dialogRef}
       onClose={onClose}
       aria-labelledby="bulk-import-title"
-      className="w-full max-w-2xl rounded-lg border border-[var(--grey-100)] bg-white p-0 shadow-lg backdrop:bg-black/40"
+      className="w-full max-w-2xl rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-0 shadow-lg backdrop:bg-black/40"
     >
       <div className="flex flex-col gap-5 p-6">
         {/* Header */}
@@ -173,11 +173,11 @@ export function BulkImportModal({
 
         {/* Error summary */}
         {invalidRows.length > 0 && (
-          <div className="rounded-lg bg-red-50 p-3">
-            <p className="text-sm font-medium text-red-700">
+          <div className="rounded-lg bg-[var(--feedback-error-bg)] p-3">
+            <p className="text-sm font-medium text-[var(--feedback-error-text)]">
               {invalidRows.length} invalid row{invalidRows.length !== 1 ? 's' : ''}
             </p>
-            <ul className="mt-1 space-y-0.5 text-xs text-red-700">
+            <ul className="mt-1 space-y-0.5 text-xs text-[var(--feedback-error-text)]">
               {invalidRows.slice(0, 5).map((r, i) => (
                 <li key={i}>
                   {r.email || '(empty)'}: {r.error}
@@ -203,14 +203,14 @@ export function BulkImportModal({
               </thead>
               <tbody className="divide-y divide-[var(--grey-100)]">
                 {parsedRows.slice(0, 50).map((r, i) => (
-                  <tr key={i} className={r.valid ? '' : 'bg-red-50/50'}>
+                  <tr key={i} className={r.valid ? '' : 'bg-[var(--feedback-error-bg)]/50'}>
                     <td className="px-3 py-1.5 text-[var(--grey-900)]">{r.email || '--'}</td>
                     <td className="px-3 py-1.5 text-[var(--grey-700)]">{r.name || '--'}</td>
                     <td className="px-3 py-1.5">
                       {r.valid ? (
-                        <span className="text-green-700">Valid</span>
+                        <span className="text-[var(--feedback-success-text)]">Valid</span>
                       ) : (
-                        <span className="text-red-700">{r.error}</span>
+                        <span className="text-[var(--feedback-error-text)]">{r.error}</span>
                       )}
                     </td>
                   </tr>

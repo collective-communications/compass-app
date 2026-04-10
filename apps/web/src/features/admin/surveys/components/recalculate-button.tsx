@@ -52,12 +52,12 @@ export function RecalculateButton({
         </button>
 
         {state === 'success' && (
-          <span className="text-xs text-green-700">Scores updated</span>
+          <span className="text-xs text-[var(--feedback-success-text)]">Scores updated</span>
         )}
       </div>
 
       {state === 'error' && errorMessage && (
-        <p className="text-xs text-red-700">{errorMessage}</p>
+        <p className="text-xs text-[var(--feedback-error-text)]">{errorMessage}</p>
       )}
 
       {scoresCalculated && scoresCalculatedAt && state === 'idle' && (

@@ -44,7 +44,7 @@ export function ExportCompletePanel({
         <h3 className="text-lg font-semibold text-[var(--grey-900)]">Report Ready</h3>
 
         {/* File card */}
-        <div className="w-full rounded-lg border border-[var(--grey-100)] bg-white px-4 py-3">
+        <div className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] px-4 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-[var(--grey-50)]">
               <FileText size={20} className="text-[var(--text-secondary)]" aria-hidden="true" />

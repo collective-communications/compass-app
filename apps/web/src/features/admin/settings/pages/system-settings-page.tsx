@@ -28,7 +28,7 @@ export function SystemSettingsPage(): ReactElement {
     return (
       <div>
         <div
-          className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700"
+          className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]"
           role="alert"
         >
           Failed to load settings. Please try again.

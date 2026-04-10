@@ -1,5 +1,5 @@
 import { afterEach, describe, test, expect } from 'bun:test';
-import { render, screen, fireEvent, cleanup, within } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { TrustLadderVisual } from './trust-ladder-visual';
 import type { TrustLadderResult, TrustRungScore, TrustRungStatus } from '@compass/types';
 
@@ -70,7 +70,7 @@ describe('TrustLadderVisual', () => {
     // Rung 1 is achieved — last button in DOM
     const buttons = screen.getAllByRole('button');
     const achievedButton = buttons[8]; // rung 1
-    expect(achievedButton.className).toContain('bg-green-100');
+    expect(achievedButton.className).toContain('bg-[var(--trust-achieved-bg)]');
   });
 
   test('in-progress rungs have correct visual indicator', () => {
@@ -78,7 +78,7 @@ describe('TrustLadderVisual', () => {
     // Rung 5 is in_progress — index 4 reversed = index 4
     const buttons = screen.getAllByRole('button');
     const inProgressButton = buttons[4]; // rung 5
-    expect(inProgressButton.className).toContain('bg-yellow-100');
+    expect(inProgressButton.className).toContain('bg-[var(--trust-in-progress-bg)]');
   });
 
   test('"Current" badge appears only on the rung matching currentLevel', () => {

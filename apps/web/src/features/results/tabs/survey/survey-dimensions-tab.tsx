@@ -132,10 +132,10 @@ export function SurveyDimensionsTab({
 
 /** Severity label styling for dimension score ranges. */
 const SCORE_LABELS: Array<{ min: number; label: string; className: string }> = [
-  { min: 3.5, label: 'Healthy', className: 'bg-green-50 text-green-700' },
-  { min: 2.5, label: 'Moderate', className: 'bg-yellow-50 text-yellow-700' },
-  { min: 1.5, label: 'Needs attention', className: 'bg-orange-50 text-orange-700' },
-  { min: 0, label: 'Critical', className: 'bg-red-50 text-red-700' },
+  { min: 3.5, label: 'Healthy', className: 'bg-[var(--severity-healthy-bg)] text-[var(--severity-healthy-text)]' },
+  { min: 2.5, label: 'Moderate', className: 'bg-[var(--severity-medium-bg)] text-[var(--severity-medium-text)]' },
+  { min: 1.5, label: 'Needs attention', className: 'bg-[var(--severity-high-bg)] text-[var(--severity-high-text)]' },
+  { min: 0, label: 'Critical', className: 'bg-[var(--severity-critical-bg)] text-[var(--severity-critical-text)]' },
 ];
 
 function getScoreLabel(score: number): { label: string; className: string } {

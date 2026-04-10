@@ -139,7 +139,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
             {/* Name (required) */}
             <div>
               <label htmlFor="edit-org-name" className="mb-1 block text-sm font-medium text-[var(--grey-700)]">
-                Organization Name <span className="text-red-700" aria-label="required">*</span>
+                Organization Name <span className="text-[var(--feedback-error-text)]" aria-label="required">*</span>
               </label>
               <input
                 ref={nameInputRef}
@@ -149,7 +149,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 onChange={(e) => updateField('name', e.target.value)}
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.name
-                    ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
+                    ? 'border-[var(--feedback-error-text)] focus:border-[var(--feedback-error-text)] focus:ring-[var(--feedback-error-text)]'
                     : 'border-[var(--grey-100)] focus:border-[var(--color-interactive)] focus:ring-[var(--color-interactive)]'
                 }`}
                 aria-invalid={!!errors.name}
@@ -157,7 +157,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 required
               />
               {errors.name && (
-                <p id="edit-org-name-error" className="mt-1 text-xs text-red-700" role="alert">
+                <p id="edit-org-name-error" className="mt-1 text-xs text-[var(--feedback-error-text)]" role="alert">
                   {errors.name}
                 </p>
               )}
@@ -190,14 +190,14 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 onChange={(e) => updateField('employeeCount', e.target.value)}
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.employeeCount
-                    ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
+                    ? 'border-[var(--feedback-error-text)] focus:border-[var(--feedback-error-text)] focus:ring-[var(--feedback-error-text)]'
                     : 'border-[var(--grey-100)] focus:border-[var(--color-interactive)] focus:ring-[var(--color-interactive)]'
                 }`}
                 aria-invalid={!!errors.employeeCount}
                 aria-describedby={errors.employeeCount ? 'edit-org-employee-error' : undefined}
               />
               {errors.employeeCount && (
-                <p id="edit-org-employee-error" className="mt-1 text-xs text-red-700" role="alert">
+                <p id="edit-org-employee-error" className="mt-1 text-xs text-[var(--feedback-error-text)]" role="alert">
                   {errors.employeeCount}
                 </p>
               )}
@@ -229,14 +229,14 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
                 onChange={(e) => updateField('primaryContactEmail', e.target.value)}
                 className={`w-full rounded-lg border px-3 py-2 text-sm text-[var(--grey-900)] focus:outline-none focus:ring-1 ${
                   errors.primaryContactEmail
-                    ? 'border-red-400 focus:border-red-400 focus:ring-red-400'
+                    ? 'border-[var(--feedback-error-text)] focus:border-[var(--feedback-error-text)] focus:ring-[var(--feedback-error-text)]'
                     : 'border-[var(--grey-100)] focus:border-[var(--color-interactive)] focus:ring-[var(--color-interactive)]'
                 }`}
                 aria-invalid={!!errors.primaryContactEmail}
                 aria-describedby={errors.primaryContactEmail ? 'edit-org-email-error' : undefined}
               />
               {errors.primaryContactEmail && (
-                <p id="edit-org-email-error" className="mt-1 text-xs text-red-700" role="alert">
+                <p id="edit-org-email-error" className="mt-1 text-xs text-[var(--feedback-error-text)]" role="alert">
                   {errors.primaryContactEmail}
                 </p>
               )}
@@ -245,7 +245,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
 
           {/* Submit error */}
           {submitError && (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+            <div className="mt-4 rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-3 text-sm text-[var(--feedback-error-text)]" role="alert">
               {submitError}
             </div>
           )}

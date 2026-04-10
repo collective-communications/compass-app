@@ -22,7 +22,7 @@ const STATUS_CLASS: Record<AutoSaveStatus, string> = {
   idle: 'text-transparent',
   saving: 'text-[var(--text-secondary)]',
   saved: 'text-[var(--text-secondary)]',
-  error: 'text-red-700',
+  error: 'text-[var(--feedback-error-text)]',
 };
 
 export function AutoSaveIndicator({ status }: AutoSaveIndicatorProps): ReactElement {

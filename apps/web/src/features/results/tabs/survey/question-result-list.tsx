@@ -137,7 +137,7 @@ function SubDimensionSection({
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center justify-between rounded-lg border border-[var(--grey-100)] bg-[var(--grey-25,#FAFAFA)] px-4 py-3 text-left transition-colors hover:bg-[var(--grey-50)]"
+        className="flex w-full items-center justify-between rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] px-4 py-3 text-left transition-colors hover:bg-[var(--grey-50)]"
         aria-expanded={isOpen}
       >
         <div className="flex items-center gap-2">
@@ -149,7 +149,7 @@ function SubDimensionSection({
           >
             <path d="M6 3l5 5-5 5V3z" />
           </svg>
-          <span className="text-sm font-semibold text-[var(--grey-800)]">
+          <span className="text-sm font-semibold text-[var(--grey-900)]">
             {group.name}
           </span>
           <span className="text-xs text-[var(--text-secondary)]">

@@ -82,12 +82,12 @@ export function PendingInvitations({
 
       {/* Inline errors */}
       {resendError && (
-        <p className="mb-3 text-xs text-red-700" role="alert">
+        <p className="mb-3 text-xs text-[var(--feedback-error-text)]" role="alert">
           {resendError}
         </p>
       )}
       {revokeError && (
-        <p className="mb-3 text-xs text-red-700" role="alert">
+        <p className="mb-3 text-xs text-[var(--feedback-error-text)]" role="alert">
           {revokeError}
         </p>
       )}
@@ -110,7 +110,7 @@ export function PendingInvitations({
                     {ROLE_LABELS[inv.role] ?? inv.role}
                   </span>
                   {expired && (
-                    <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">
+                    <span className="shrink-0 rounded-full bg-[var(--feedback-error-bg)] px-2 py-0.5 text-xs font-medium text-[var(--feedback-error-text)]">
                       Expired
                     </span>
                   )}
@@ -138,7 +138,7 @@ export function PendingInvitations({
                       type="button"
                       onClick={() => handleRevoke(inv.id)}
                       disabled={isRevoking}
-                      className="text-xs font-medium text-red-700 hover:text-red-700 disabled:opacity-50"
+                      className="text-xs font-medium text-[var(--feedback-error-text)] hover:text-[var(--feedback-error-text)] disabled:opacity-50"
                     >
                       Confirm
                     </button>
@@ -155,7 +155,7 @@ export function PendingInvitations({
                     type="button"
                     onClick={() => handleRevoke(inv.id)}
                     disabled={isRevoking}
-                    className="text-xs font-medium text-[var(--text-secondary)] hover:text-red-700 disabled:opacity-50"
+                    className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--feedback-error-text)] disabled:opacity-50"
                   >
                     Revoke
                   </button>

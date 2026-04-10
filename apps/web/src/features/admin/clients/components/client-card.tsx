@@ -78,7 +78,7 @@ export function ClientCard({ organization, onClick }: ClientCardProps): ReactEle
               {organization.name}
             </h3>
             {organization.activeSurveyId && (
-              <span className="shrink-0 rounded-full bg-green-50 px-2.5 py-0.5 text-xs font-medium text-green-700">
+              <span className="shrink-0 rounded-full bg-[var(--status-active-bg)] px-2.5 py-0.5 text-xs font-medium text-[var(--status-active-text)]">
                 Active Survey
               </span>
             )}

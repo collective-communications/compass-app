@@ -22,7 +22,7 @@ export function ObservationsPanel({ observations }: ObservationsPanelProps): Rea
         {observations.map((obs) => (
           <div
             key={obs.dimensionCode}
-            className="flex items-start gap-2.5 rounded-md bg-[#F0EEEB] p-3"
+            className="flex items-start gap-2.5 rounded-md bg-[var(--surface-subtle)] p-3"
           >
             <span
               className="mt-1.5 inline-block size-2 shrink-0 rounded-full"

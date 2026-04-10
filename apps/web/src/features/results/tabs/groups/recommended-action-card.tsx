@@ -19,8 +19,8 @@ export function RecommendedActionCard({ recommendation }: RecommendedActionCardP
       <h4 className="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--text-secondary)]">
         Recommended Action
       </h4>
-      <div className="rounded-md border border-[#2E7D32] bg-[#EBF7F2] p-4">
-        <p className="text-xs font-semibold uppercase text-[#2E7D32]">
+      <div className="rounded-md border border-[var(--severity-healthy-border)] bg-[var(--severity-healthy-bg)] p-4">
+        <p className="text-xs font-semibold uppercase text-[var(--severity-healthy-text)]">
           Targeted Intervention
         </p>
         <p className="mt-2 text-sm font-medium text-[var(--text-primary)]">

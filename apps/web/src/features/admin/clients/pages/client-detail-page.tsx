@@ -86,7 +86,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
     return (
       <div>
         <DrilldownHeader backTo="/admin/clients" backLabel="Back to clients" title="Client not found" />
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+        <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]" role="alert">
           Failed to load client. Please try again.
         </div>
       </div>
@@ -97,13 +97,13 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
     <div>
       {/* Archived banner */}
       {isArchived && (
-        <div className="mb-4 flex items-center justify-between rounded-lg bg-yellow-50 border border-yellow-200 p-3 text-sm text-yellow-800" role="status">
+        <div className="mb-4 flex items-center justify-between rounded-lg bg-[var(--feedback-warning-bg)] border border-[var(--feedback-warning-border)] p-3 text-sm text-[var(--feedback-warning-text)]" role="status">
           <span>This client is archived.</span>
           <button
             type="button"
             onClick={handleUnarchive}
             disabled={unarchiveOrg.isPending}
-            className="text-sm font-medium text-yellow-900 underline underline-offset-2 hover:no-underline disabled:opacity-50"
+            className="text-sm font-medium text-[var(--feedback-warning-text)] underline underline-offset-2 hover:no-underline disabled:opacity-50"
           >
             {unarchiveOrg.isPending ? 'Restoring\u2026' : 'Unarchive'}
           </button>
@@ -112,7 +112,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
 
       {/* Archive error */}
       {archiveError && (
-        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700" role="alert">
+        <div className="mb-4 rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-3 text-sm text-[var(--feedback-error-text)]" role="alert">
           {archiveError}
         </div>
       )}

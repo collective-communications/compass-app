@@ -15,9 +15,9 @@ export interface RecipientListProps {
 
 const STATUS_STYLES: Record<SurveyRecipient['status'], { bg: string; text: string; label: string }> = {
   pending: { bg: 'bg-[var(--grey-100)]', text: 'text-[var(--text-tertiary)]', label: 'Pending' },
-  invited: { bg: 'bg-blue-50', text: 'text-blue-700', label: 'Invited' },
-  completed: { bg: 'bg-green-50', text: 'text-green-700', label: 'Completed' },
-  bounced: { bg: 'bg-red-50', text: 'text-red-700', label: 'Bounced' },
+  invited: { bg: 'bg-[var(--status-invited-bg)]', text: 'text-[var(--status-invited-text)]', label: 'Invited' },
+  completed: { bg: 'bg-[var(--status-active-bg)]', text: 'text-[var(--status-active-text)]', label: 'Completed' },
+  bounced: { bg: 'bg-[var(--status-bounced-bg)]', text: 'text-[var(--status-bounced-text)]', label: 'Bounced' },
 };
 
 function StatusBadge({ status }: { status: SurveyRecipient['status'] }): ReactElement {
@@ -112,7 +112,7 @@ export function RecipientList({
                     type="button"
                     onClick={() => handleRemove(r.id)}
                     disabled={isRemoving && removingId === r.id}
-                    className="text-xs font-medium text-red-700 hover:underline disabled:opacity-50"
+                    className="text-xs font-medium text-[var(--feedback-error-text)] hover:underline disabled:opacity-50"
                   >
                     Remove
                   </button>

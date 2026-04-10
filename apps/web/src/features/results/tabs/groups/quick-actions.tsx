@@ -44,7 +44,7 @@ function getNextSegmentType(current: SegmentType): SegmentType {
 }
 
 const BUTTON_CLASS =
-  'rounded-lg bg-[#F0EEEB] px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--grey-200)] transition-colors';
+  'rounded-lg bg-[var(--surface-subtle)] px-4 py-2.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--grey-200)] transition-colors';
 
 export function QuickActions({
   segmentValue,

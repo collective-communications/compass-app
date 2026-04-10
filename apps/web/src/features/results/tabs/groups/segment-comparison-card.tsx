@@ -39,8 +39,8 @@ function formatDelta(delta: number): string {
 }
 
 function deltaColor(delta: number): string {
-  if (delta >= 0) return 'text-green-700';
-  return 'text-red-700';
+  if (delta >= 0) return 'text-[var(--delta-positive-text)]';
+  return 'text-[var(--delta-negative-text)]';
 }
 
 export function SegmentComparisonCard({

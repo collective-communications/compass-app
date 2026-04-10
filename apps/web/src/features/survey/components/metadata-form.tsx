@@ -35,7 +35,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
     <div className="flex flex-col gap-1.5">
       <label htmlFor={fieldId} className="text-sm font-medium text-[var(--grey-700)]">
         {label}
-        <span className="text-red-700"> *</span>
+        <span className="text-[var(--feedback-error-text)]"> *</span>
       </label>
       <div className="relative">
         <select
@@ -44,7 +44,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
           className={`h-10 w-full appearance-none rounded-lg border bg-[var(--grey-50)] px-3 pr-8 text-sm text-[var(--grey-900)] transition-colors focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/30 ${
-            showError ? 'border-red-500' : 'border-[var(--grey-100)]'
+            showError ? 'border-[var(--feedback-error-text)]' : 'border-[var(--grey-100)]'
           } ${!field.value ? 'text-[var(--text-tertiary)]' : ''}`}
           aria-invalid={showError}
           aria-describedby={showError ? `${fieldId}-error` : undefined}
@@ -74,7 +74,7 @@ function SelectField({ label, options, field, onChange, onBlur }: SelectFieldPro
         </svg>
       </div>
       {showError && (
-        <p id={`${fieldId}-error`} className="text-xs text-red-700" role="alert">
+        <p id={`${fieldId}-error`} className="text-xs text-[var(--feedback-error-text)]" role="alert">
           Required
         </p>
       )}

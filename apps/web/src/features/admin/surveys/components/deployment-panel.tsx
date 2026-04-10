@@ -61,10 +61,10 @@ export function DeploymentPanel({
           <span
             className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${
               daysRemaining <= 3
-                ? 'bg-red-50 text-red-700'
+                ? 'bg-[var(--feedback-error-bg)] text-[var(--feedback-error-text)]'
                 : daysRemaining <= 7
-                  ? 'bg-yellow-50 text-yellow-700'
-                  : 'bg-green-50 text-green-700'
+                  ? 'bg-[var(--feedback-warning-bg)] text-[var(--feedback-warning-text)]'
+                  : 'bg-[var(--status-active-bg)] text-[var(--status-active-text)]'
             }`}
           >
             {daysRemaining === 0 ? 'Expired' : `${daysRemaining}d remaining`}
@@ -117,7 +117,7 @@ export function DeploymentPanel({
           type="button"
           onClick={onDeactivate}
           disabled={isPending}
-          className="rounded-lg border border-red-300 bg-[var(--grey-50)] px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--grey-50)] px-4 py-2 text-sm font-medium text-[var(--feedback-error-text)] hover:bg-[var(--feedback-error-bg)] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isPending ? 'Closing...' : 'Close Early'}
         </button>

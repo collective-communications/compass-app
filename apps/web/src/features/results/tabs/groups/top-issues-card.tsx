@@ -52,7 +52,7 @@ export function TopIssuesCard({ questions, segmentLabel, limit = 3 }: TopIssuesC
       <ol className="flex flex-col gap-3">
         {sorted.map((q, idx) => {
           const scaleMax = inferScaleMax(q.distribution);
-          const severityColor = idx === 0 ? 'bg-[#B71C1C]' : 'bg-[#E65100]';
+          const severityColor = idx === 0 ? 'bg-[var(--severity-critical-text)]' : 'bg-[var(--severity-high-text)]';
 
           return (
             <li key={q.questionId} className="flex items-start gap-2">

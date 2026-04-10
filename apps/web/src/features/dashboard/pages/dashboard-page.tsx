@@ -60,8 +60,8 @@ export function DashboardPage(): ReactElement {
 
       {/* Error state */}
       {error && !isLoading && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-4">
-          <p className="text-sm text-red-700">
+        <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4">
+          <p className="text-sm text-[var(--feedback-error-text)]">
             Something went wrong loading your dashboard. Please refresh to try again.
           </p>
         </div>
@@ -105,7 +105,7 @@ export function DashboardPage(): ReactElement {
                 Latest Results
               </h2>
               {/* Mini compass preview placeholder */}
-              <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-200)] bg-white">
+              <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-200)] bg-[var(--surface-card)]">
                 <p className="text-xs text-[var(--text-tertiary)]">Compass Preview</p>
               </div>
               {resultsEnabled && activeSurvey && (

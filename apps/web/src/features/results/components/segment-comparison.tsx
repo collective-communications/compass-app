@@ -45,7 +45,7 @@ export function SegmentComparison({ segments, anonymityMessage = 'Not enough res
           <div
             key={i}
             data-testid="segment-row"
-            className="flex items-center justify-between rounded-lg border border-[var(--grey-100)] bg-white p-4"
+            className="flex items-center justify-between rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-4"
           >
             <span className="font-medium text-[var(--grey-900)]">{seg.segmentLabel}</span>
             <div className="flex items-center gap-3">
