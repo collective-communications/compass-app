@@ -43,8 +43,11 @@ export function getTierFromRole(role: UserRole): UserTier {
 }
 
 /**
- * Get the home route for a tier.
+ * Get the home route for a tier. Used as the landing path after sign-in and
+ * as the redirect target when a user hits a forbidden route.
+ *
+ * Paths are top-level — role/tier is not encoded in the URL.
  */
 export function getTierHomeRoute(tier: UserTier): string {
-  return tier === 'tier_1' ? '/admin/clients' : '/dashboard';
+  return tier === 'tier_1' ? '/clients' : '/dashboard';
 }

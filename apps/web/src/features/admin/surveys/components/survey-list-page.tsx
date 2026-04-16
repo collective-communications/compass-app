@@ -22,7 +22,7 @@ interface SurveyListPageProps {
   onArchive?: (surveyId: string) => void;
   /** When provided, renders a DrilldownHeader with back navigation to the client. */
   clientName?: string;
-  /** Route to navigate back to. Defaults to /admin/clients. */
+  /** Route to navigate back to. Defaults to /clients. */
   backTo?: string;
 }
 
@@ -75,7 +75,7 @@ export function SurveyListPage({
     <div>
       {clientName && (
         <DrilldownHeader
-          backTo={backTo ?? '/admin/clients'}
+          backTo={backTo ?? '/clients'}
           backLabel="Back to client"
           title={`${clientName} — Surveys`}
         />

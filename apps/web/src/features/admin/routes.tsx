@@ -1,15 +1,22 @@
 /**
- * Admin route definitions for TanStack Router.
- * Creates the `/admin` route subtree with survey management pages.
+ * Admin-owned route definitions for TanStack Router.
  *
- * Usage: call `createAdminRoutes(rootRoute)` and add the result to the route tree.
+ * These routes cover the CC+C team's surface: client management, survey
+ * authoring/publishing, and user administration. They are registered as
+ * top-level paths (no `/admin` prefix) so URLs don't leak role/tier. Access
+ * is enforced per-path by `guardRoute(path)` against the central
+ * `ROUTE_ACCESS` matrix.
+ *
+ * The unified `/settings` route (tier-aware content) lives in
+ * `features/settings` — it is not declared here. Likewise `/help`, `/profile`.
  */
 
 import type { ReactElement } from 'react';
-import { createRoute, Outlet, redirect, useNavigate } from '@tanstack/react-router';
+import { createRoute, redirect, useNavigate } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { useAuthStore } from '../../stores/auth-store';
 import { AppShell } from '../../components/shells/app-shell';
+import { guardRoute } from '../../lib/route-guards';
 import {
   SurveyBuilderPage,
   DeploymentPanel,
@@ -19,150 +26,78 @@ import { useDeploymentManagement } from './surveys/hooks/use-deployment-manageme
 import { useResponseTracking } from './surveys/hooks/use-response-tracking';
 import { useRealtimeResponses } from './surveys/hooks/use-realtime-responses';
 import { useSurveyBuilder } from './surveys/hooks/use-survey-builder';
-import { checkTier1Access, checkCccAdminAccess } from './route-guards';
 import { ClientListPage } from './clients';
 import { ClientDetailPage } from './clients/pages/client-detail-page';
 import { ClientDetailOverviewTab } from './clients/components/client-detail-overview-tab';
 import { ClientDetailSurveysTab } from './clients/components/client-detail-surveys-tab';
 import { ClientUsersTab } from './clients/components/client-users-tab';
 import { OrgSettingsPage } from './clients/pages/org-settings-page';
-import { SystemSettingsPage } from './settings';
 import { UsersPage } from './users';
 
 /**
- * Creates the admin route subtree.
- *
- * @param parentRoute - The root (or parent) route to attach `/admin` under.
- * @returns The admin layout route with all children attached, ready for `addChildren`.
+ * Creates the flat set of admin-owned routes. Each is a top-level child of
+ * `rootRoute`, not nested under an `/admin` layout. The caller spreads the
+ * returned array into `rootRoute.addChildren(...)`.
  */
 export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent) {
-  const adminLayoutRoute = createRoute({
+  // ── /clients (list) ──────────────────────────────────────────────────────
+  const clientsListRoute = createRoute({
     getParentRoute: () => parentRoute,
-    path: '/admin',
-    beforeLoad: () => {
-      const redirectTo = checkTier1Access();
-      if (redirectTo) throw redirect({ to: redirectTo });
-    },
-    component: function AdminLayout(): ReactElement {
+    path: '/clients',
+    beforeLoad: () => guardRoute('/clients'),
+    component: function ClientsListLayout(): ReactElement {
+      const navigate = useNavigate();
       return (
         <AppShell>
-          <Outlet />
+          <ClientListPage
+            onSelectClient={(orgId) => {
+              void navigate({ to: '/clients/$orgId/overview', params: { orgId } });
+            }}
+          />
         </AppShell>
       );
     },
   });
 
-  const adminSurveyBuilderRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
-    path: '/surveys/$surveyId',
-    component: function AdminSurveyBuilderPage(): ReactElement {
-      const { surveyId } = adminSurveyBuilderRoute.useParams() as { surveyId: string };
-      const navigate = useNavigate();
-
-      return (
-        <SurveyBuilderPage
-          surveyId={surveyId}
-          onBack={(organizationId: string) => {
-            void navigate({ to: '/admin/clients/$orgId/overview', params: { orgId: organizationId } });
-          }}
-        />
-      );
-    },
-  });
-
-  const adminSurveyPublishRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
-    path: '/surveys/$surveyId/publish',
-    component: function AdminSurveyPublishPage(): ReactElement {
-      const { surveyId } = adminSurveyPublishRoute.useParams() as { surveyId: string };
-      const { deployment, unpublish, isPending } = useDeploymentManagement({ surveyId });
-      const metricsQuery = useResponseTracking({ surveyId });
-      const { connectionStatus } = useRealtimeResponses({ surveyId, deploymentId: deployment.data?.id ?? null });
-      const builderQuery = useSurveyBuilder({ surveyId });
-
-      if (deployment.isLoading || metricsQuery.isLoading || builderQuery.isLoading) {
-        return (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-[var(--text-secondary)]">Loading published survey...</p>
-          </div>
-        );
-      }
-
-      if (!deployment.data || !builderQuery.data) {
-        return (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-[var(--text-secondary)]">No published survey found.</p>
-          </div>
-        );
-      }
-
-      return (
-        <div className="space-y-6">
-          <DeploymentPanel
-            deployment={deployment.data}
-            survey={builderQuery.data.survey}
-            onDeactivate={() => {
-              void unpublish();
-            }}
-            isPending={isPending}
-          />
-          {metricsQuery.data && (
-            <ResponseTracker
-              metrics={metricsQuery.data}
-              connectionStatus={connectionStatus}
-            />
-          )}
-        </div>
-      );
-    },
-  });
-
-  const adminClientsRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
-    path: '/clients',
-    component: function AdminClientsPage(): ReactElement {
-      const navigate = useNavigate();
-      return <ClientListPage onSelectClient={(orgId) => {
-        void navigate({ to: '/admin/clients/$orgId/overview', params: { orgId } });
-      }} />;
-    },
-  });
-
-  const adminClientDetailRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
+  // ── /clients/$orgId (layout — redirects to /overview when hit directly) ──
+  const clientDetailRoute = createRoute({
+    getParentRoute: () => parentRoute,
     path: '/clients/$orgId',
     beforeLoad: async ({ params: { orgId }, location }) => {
-      // Only redirect when landing on the exact parent path, not when a child route is matched
-      const basePath = `/admin/clients/${orgId}`;
+      guardRoute('/clients');
+      const basePath = `/clients/${orgId}`;
       if (location.pathname === basePath || location.pathname === `${basePath}/`) {
         throw redirect({
-          to: '/admin/clients/$orgId/overview',
+          to: '/clients/$orgId/overview',
           params: { orgId },
           replace: true,
         });
       }
     },
-    component: function AdminClientDetailLayout(): ReactElement {
-      const { orgId } = adminClientDetailRoute.useParams() as { orgId: string };
-
-      return <ClientDetailPage orgId={orgId} />;
+    component: function ClientDetailLayout(): ReactElement {
+      const { orgId } = clientDetailRoute.useParams() as { orgId: string };
+      return (
+        <AppShell>
+          <ClientDetailPage orgId={orgId} />
+        </AppShell>
+      );
     },
   });
 
-  const adminClientOverviewRoute = createRoute({
-    getParentRoute: () => adminClientDetailRoute,
+  const clientOverviewRoute = createRoute({
+    getParentRoute: () => clientDetailRoute,
     path: '/overview',
-    component: function AdminClientOverviewPage(): ReactElement {
-      const { orgId } = adminClientDetailRoute.useParams() as { orgId: string };
+    component: function ClientOverviewPage(): ReactElement {
+      const { orgId } = clientDetailRoute.useParams() as { orgId: string };
       return <ClientDetailOverviewTab orgId={orgId} />;
     },
   });
 
-  const adminClientSurveysRoute = createRoute({
-    getParentRoute: () => adminClientDetailRoute,
+  const clientSurveysRoute = createRoute({
+    getParentRoute: () => clientDetailRoute,
     path: '/surveys',
-    component: function AdminClientSurveysPage(): ReactElement {
-      const { orgId } = adminClientDetailRoute.useParams() as { orgId: string };
+    component: function ClientSurveysPage(): ReactElement {
+      const { orgId } = clientDetailRoute.useParams() as { orgId: string };
       const user = useAuthStore((s) => s.user);
       const navigate = useNavigate();
       return (
@@ -170,10 +105,10 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
           organizationId={orgId}
           userId={user?.id ?? ''}
           onSelectSurvey={(surveyId) => {
-            void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+            void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
           }}
           onEditQuestions={(surveyId) => {
-            void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+            void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
           }}
           onViewResults={(surveyId) => {
             void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
@@ -183,58 +118,135 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
-  const adminClientUsersRoute = createRoute({
-    getParentRoute: () => adminClientDetailRoute,
+  const clientUsersRoute = createRoute({
+    getParentRoute: () => clientDetailRoute,
     path: '/users',
-    component: function AdminClientUsersPage(): ReactElement {
-      const { orgId } = adminClientDetailRoute.useParams() as { orgId: string };
+    component: function ClientUsersPage(): ReactElement {
+      const { orgId } = clientDetailRoute.useParams() as { orgId: string };
       return <ClientUsersTab organizationId={orgId} />;
     },
   });
 
-  const adminClientSettingsRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
+  // ── /clients/$orgId/settings (standalone — not under detail layout) ──────
+  const clientSettingsRoute = createRoute({
+    getParentRoute: () => parentRoute,
     path: '/clients/$orgId/settings',
-    component: function AdminClientSettingsPage(): ReactElement {
-      return <OrgSettingsPage />;
+    beforeLoad: () => guardRoute('/clients'),
+    component: function ClientSettingsLayout(): ReactElement {
+      return (
+        <AppShell>
+          <OrgSettingsPage />
+        </AppShell>
+      );
     },
   });
 
-  const adminSettingsRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
-    path: '/settings',
-    beforeLoad: () => {
-      const redirectTo = checkCccAdminAccess();
-      if (redirectTo) throw redirect({ to: redirectTo });
-    },
-    component: function AdminSettingsPage(): ReactElement {
-      return <SystemSettingsPage />;
+  // ── /surveys/$surveyId (builder) ─────────────────────────────────────────
+  const surveyBuilderRoute = createRoute({
+    getParentRoute: () => parentRoute,
+    path: '/surveys/$surveyId',
+    beforeLoad: () => guardRoute('/surveys'),
+    component: function SurveyBuilderLayout(): ReactElement {
+      const { surveyId } = surveyBuilderRoute.useParams() as { surveyId: string };
+      const navigate = useNavigate();
+      return (
+        <AppShell>
+          <SurveyBuilderPage
+            surveyId={surveyId}
+            onBack={(organizationId: string) => {
+              void navigate({
+                to: '/clients/$orgId/overview',
+                params: { orgId: organizationId },
+              });
+            }}
+          />
+        </AppShell>
+      );
     },
   });
 
-  const adminUsersRoute = createRoute({
-    getParentRoute: () => adminLayoutRoute,
-    path: '/settings/users',
-    beforeLoad: () => {
-      const redirectTo = checkCccAdminAccess();
-      if (redirectTo) throw redirect({ to: redirectTo });
-    },
-    component: function AdminUsersPage(): ReactElement {
-      return <UsersPage />;
+  // ── /surveys/$surveyId/publish ───────────────────────────────────────────
+  const surveyPublishRoute = createRoute({
+    getParentRoute: () => parentRoute,
+    path: '/surveys/$surveyId/publish',
+    beforeLoad: () => guardRoute('/surveys'),
+    component: function SurveyPublishLayout(): ReactElement {
+      const { surveyId } = surveyPublishRoute.useParams() as { surveyId: string };
+      const { deployment, unpublish, isPending } = useDeploymentManagement({ surveyId });
+      const metricsQuery = useResponseTracking({ surveyId });
+      const { connectionStatus } = useRealtimeResponses({
+        surveyId,
+        deploymentId: deployment.data?.id ?? null,
+      });
+      const builderQuery = useSurveyBuilder({ surveyId });
+
+      if (deployment.isLoading || metricsQuery.isLoading || builderQuery.isLoading) {
+        return (
+          <AppShell>
+            <div className="flex items-center justify-center py-12">
+              <p className="text-[var(--text-secondary)]">Loading published survey...</p>
+            </div>
+          </AppShell>
+        );
+      }
+
+      if (!deployment.data || !builderQuery.data) {
+        return (
+          <AppShell>
+            <div className="flex items-center justify-center py-12">
+              <p className="text-[var(--text-secondary)]">No published survey found.</p>
+            </div>
+          </AppShell>
+        );
+      }
+
+      return (
+        <AppShell>
+          <div className="space-y-6">
+            <DeploymentPanel
+              deployment={deployment.data}
+              survey={builderQuery.data.survey}
+              onDeactivate={() => {
+                void unpublish();
+              }}
+              isPending={isPending}
+            />
+            {metricsQuery.data && (
+              <ResponseTracker
+                metrics={metricsQuery.data}
+                connectionStatus={connectionStatus}
+              />
+            )}
+          </div>
+        </AppShell>
+      );
     },
   });
 
-  return adminLayoutRoute.addChildren([
-    adminSurveyBuilderRoute,
-    adminSurveyPublishRoute,
-    adminClientsRoute,
-    adminClientDetailRoute.addChildren([
-      adminClientOverviewRoute,
-      adminClientSurveysRoute,
-      adminClientUsersRoute,
+  // ── /users (CCC_ADMIN only — enforced by ROUTE_ACCESS) ───────────────────
+  const usersRoute = createRoute({
+    getParentRoute: () => parentRoute,
+    path: '/users',
+    beforeLoad: () => guardRoute('/users'),
+    component: function UsersLayout(): ReactElement {
+      return (
+        <AppShell>
+          <UsersPage />
+        </AppShell>
+      );
+    },
+  });
+
+  return [
+    clientsListRoute,
+    clientDetailRoute.addChildren([
+      clientOverviewRoute,
+      clientSurveysRoute,
+      clientUsersRoute,
     ]),
-    adminClientSettingsRoute,
-    adminSettingsRoute,
-    adminUsersRoute,
-  ]);
+    clientSettingsRoute,
+    surveyBuilderRoute,
+    surveyPublishRoute,
+    usersRoute,
+  ];
 }

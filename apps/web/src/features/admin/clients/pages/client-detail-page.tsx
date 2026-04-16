@@ -49,7 +49,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
 
   const handleTabSelect = useCallback(
     (tabId: string): void => {
-      void navigate({ to: `/admin/clients/$orgId/${tabId}`, params: { orgId } });
+      void navigate({ to: `/clients/$orgId/${tabId}`, params: { orgId } });
     },
     [orgId, navigate],
   );
@@ -85,7 +85,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
   if (error || !organization) {
     return (
       <div>
-        <DrilldownHeader backTo="/admin/clients" backLabel="Back to clients" title="Client not found" />
+        <DrilldownHeader backTo="/clients" backLabel="Back to clients" title="Client not found" />
         <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]" role="alert">
           Failed to load client. Please try again.
         </div>
@@ -118,7 +118,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
       )}
 
       {/* Drilldown header */}
-      <DrilldownHeader backTo="/admin/clients" backLabel="Back to clients" title={organization.name}>
+      <DrilldownHeader backTo="/clients" backLabel="Back to clients" title={organization.name}>
         {/* Action menu */}
         <div className="relative">
           <button

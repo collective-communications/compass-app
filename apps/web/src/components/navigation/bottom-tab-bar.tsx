@@ -1,23 +1,7 @@
 import type { ReactElement } from 'react';
 import { AppLink as Link } from './app-link';
-import {
-  Building,
-  TrendingUp,
-  Settings,
-  LayoutGrid,
-  Compass,
-  FileDown,
-} from 'lucide-react';
 import type { TabConfig } from '../../lib/navigation';
-
-const ICON_MAP: Record<string, typeof Building> = {
-  building: Building,
-  'trending-up': TrendingUp,
-  settings: Settings,
-  'layout-grid': LayoutGrid,
-  compass: Compass,
-  'file-down': FileDown,
-};
+import { ICON_MAP } from '../../lib/icons';
 
 interface BottomTabBarProps {
   tabs: TabConfig[];

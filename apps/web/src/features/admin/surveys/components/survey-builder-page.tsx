@@ -283,7 +283,7 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
   return (
     <div className="pb-20">
       {/* Header */}
-      <DrilldownHeader backTo={`/admin/clients/${survey.organizationId}`} backLabel="Back to client" title={survey.title}>
+      <DrilldownHeader backTo={`/clients/${survey.organizationId}`} backLabel="Back to client" title={survey.title}>
         <AutoSaveIndicator status={autoSaveStatus} />
       </DrilldownHeader>
 

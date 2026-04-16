@@ -30,6 +30,6 @@ export const Default: Story = {};
 export const WithClientContext: Story = {
   args: {
     clientName: 'Acme Corp',
-    backTo: '/admin/clients/acme',
+    backTo: '/clients/acme',
   },
 };

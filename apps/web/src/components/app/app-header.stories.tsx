@@ -2,13 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { AppHeader } from './app-header';
 import type { AuthUser } from '@compass/types';
-import type { TabConfig } from '../../lib/navigation';
-
-const clientTabs: TabConfig[] = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'layout-grid', href: '/dashboard' },
-  { id: 'results', label: 'Results', icon: 'compass', href: '/results' },
-  { id: 'reports', label: 'Reports', icon: 'file-down', href: '/reports' },
-];
+import { getNavConfigForRole } from '../../lib/navigation';
 
 const clientUser: AuthUser = {
   id: 'user-1',
@@ -36,7 +30,7 @@ const meta = {
   parameters: { layout: 'fullscreen' },
   args: {
     user: clientUser,
-    tabs: clientTabs,
+    config: getNavConfigForRole(clientUser.role),
     activeTabId: 'dashboard',
     onSignOut: fn(),
     onNavigate: fn(),
@@ -46,17 +40,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+/** Client (tier 2) — shows Dashboard / Results / Reports tab bar; clickable logo → /dashboard. */
+export const ClientTier: Story = {};
 
-/** Admin header — no tab bar, logo links to /admin/clients */
-export const AdminView: Story = {
+/** Admin (tier 1) — no tab bar; clickable logo → /clients. */
+export const AdminTier: Story = {
   args: {
     user: adminUser,
-    tabs: [],
+    config: getNavConfigForRole(adminUser.role),
     activeTabId: null,
   },
 };
 
+/** Client tier with no active tab — e.g. sub-route not matching any tab. */
 export const NoActiveTab: Story = {
   args: { activeTabId: null },
 };

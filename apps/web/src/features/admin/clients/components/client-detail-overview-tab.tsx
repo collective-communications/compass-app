@@ -41,19 +41,19 @@ export function ClientDetailOverviewTab({ orgId }: ClientDetailOverviewTabProps)
       },
       {
         onSuccess: (survey) => {
-          void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId: survey.id } });
+          void navigate({ to: '/surveys/$surveyId', params: { surveyId: survey.id } });
         },
       },
     );
   }, [orgId, user?.id, createSurvey, navigate]);
 
   const handleNavigateToSurveys = useCallback((): void => {
-    void navigate({ to: '/admin/clients/$orgId/surveys', params: { orgId } });
+    void navigate({ to: '/clients/$orgId/surveys', params: { orgId } });
   }, [orgId, navigate]);
 
   const handleNavigateToSurvey = useCallback(
     (surveyId: string): void => {
-      void navigate({ to: '/admin/surveys/$surveyId', params: { surveyId } });
+      void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
     },
     [navigate],
   );

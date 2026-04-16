@@ -155,9 +155,9 @@ function ResultsLayoutRoute(): ReactElement {
 
   function handleBack(): void {
     if (surveyMeta?.organization_id) {
-      void navigate({ to: '/admin/clients/$orgId/overview', params: { orgId: surveyMeta.organization_id } });
+      void navigate({ to: '/clients/$orgId/overview', params: { orgId: surveyMeta.organization_id } });
     } else {
-      void navigate({ to: '/admin/clients' });
+      void navigate({ to: '/clients' });
     }
   }
 

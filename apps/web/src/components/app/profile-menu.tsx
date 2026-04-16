@@ -1,6 +1,19 @@
 import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
-import { LogOut, User, HelpCircle, Settings, Sun, Moon } from 'lucide-react';
-import type { AuthUser, UserTier } from '@compass/types';
+import { Moon, Sun } from 'lucide-react';
+import type { AuthUser } from '@compass/types';
+import type { ProfileMenuItem } from '../../lib/navigation';
+import { ICON_MAP } from '../../lib/icons';
+
+/**
+ * Profile dropdown menu. Renders an ordered list of items supplied by the
+ * caller — tier differentiation lives in the nav config, not here. The menu
+ * supports two kinds of items:
+ *
+ *   - navigation items (`href` set): fire `onNavigate(href)`
+ *   - action items (`action` set):
+ *       * `signOut` → call `onSignOut`
+ *       * `toggleTheme` → flip local theme state
+ */
 
 type Theme = 'light' | 'dark';
 const THEME_KEY = 'compass-theme';
@@ -14,12 +27,12 @@ function getInitialTheme(): Theme {
 
 interface ProfileMenuProps {
   user: AuthUser;
-  tier: UserTier;
+  items: readonly ProfileMenuItem[];
   onSignOut: () => void;
   onNavigate: (path: string) => void;
 }
 
-export function ProfileMenu({ user, tier, onSignOut, onNavigate }: ProfileMenuProps): ReactElement {
+export function ProfileMenu({ user, items, onSignOut, onNavigate }: ProfileMenuProps): ReactElement {
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -81,7 +94,10 @@ export function ProfileMenu({ user, tier, onSignOut, onNavigate }: ProfileMenuPr
       </button>
 
       {open && (
-        <div className="absolute right-0 top-10 z-20 w-48 rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] py-1 shadow-lg">
+        <div
+          role="menu"
+          className="absolute right-0 top-10 z-20 w-48 rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] py-1 shadow-lg"
+        >
           <div className="border-b border-[var(--grey-200)] px-3 py-2">
             <p className="text-sm font-medium text-[var(--grey-900)]">
               {user.fullName ?? user.email}
@@ -89,61 +105,89 @@ export function ProfileMenu({ user, tier, onSignOut, onNavigate }: ProfileMenuPr
             <p className="text-xs text-[var(--text-secondary)]">{user.email}</p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => { setOpen(false); }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
-          >
-            <User size={16} />
-            Profile
-          </button>
+          {items.map((item, index) => {
+            // Sign-out is visually separated from nav/settings items
+            const needsSeparator =
+              item.action === 'signOut' && index > 0 && items[index - 1]?.action !== 'signOut';
 
-          {tier === 'tier_1' && (
-            <button
-              type="button"
-              onClick={() => { setOpen(false); }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
-            >
-              <HelpCircle size={16} />
-              Help
-            </button>
-          )}
+            const wrapperClass = needsSeparator ? 'border-t border-[var(--grey-200)]' : undefined;
 
-          {tier === 'tier_1' && (
-            <button
-              type="button"
-              onClick={() => { setOpen(false); onNavigate('/admin/settings'); }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
-            >
-              <Settings size={16} />
-              Settings
-            </button>
-          )}
+            if (item.action === 'toggleTheme') {
+              return (
+                <div key={item.id} className={wrapperClass}>
+                  <MenuButton
+                    label={theme === 'light' ? 'Dark mode' : 'Light mode'}
+                    icon={theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
+                    onClick={toggleTheme}
+                  />
+                </div>
+              );
+            }
 
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
-          >
-            {theme === 'light' ? <Moon size={16} /> : <Sun size={16} />}
-            {theme === 'light' ? 'Dark mode' : 'Light mode'}
-          </button>
+            if (item.action === 'signOut') {
+              return (
+                <div key={item.id} className={wrapperClass}>
+                  <MenuButton
+                    label={item.label}
+                    icon={renderIcon(item.icon)}
+                    onClick={() => {
+                      setOpen(false);
+                      onSignOut();
+                    }}
+                  />
+                </div>
+              );
+            }
 
-          <div className="border-t border-[var(--grey-200)]">
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                onSignOut();
-              }}
-              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
-            >
-              <LogOut size={16} />
-              Sign out
-            </button>
-          </div>
+            if (item.href) {
+              const href = item.href;
+              return (
+                <div key={item.id} className={wrapperClass}>
+                  <MenuButton
+                    label={item.label}
+                    icon={renderIcon(item.icon)}
+                    onClick={() => {
+                      setOpen(false);
+                      onNavigate(href);
+                    }}
+                  />
+                </div>
+              );
+            }
+
+            return null;
+          })}
         </div>
       )}
     </div>
   );
+}
+
+// ─── Presentational sub-components ──────────────────────────────────────────
+
+function MenuButton({
+  label,
+  icon,
+  onClick,
+}: {
+  label: string;
+  icon: ReactElement | null;
+  onClick: () => void;
+}): ReactElement {
+  return (
+    <button
+      type="button"
+      role="menuitem"
+      onClick={onClick}
+      className="flex w-full items-center gap-2 px-3 py-2 text-sm text-[var(--grey-700)] hover:bg-[var(--grey-100)]"
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+function renderIcon(iconId: string): ReactElement | null {
+  const Icon = ICON_MAP[iconId];
+  return Icon ? <Icon size={16} /> : null;
 }

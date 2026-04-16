@@ -5,6 +5,9 @@ import { createDashboardRoutes } from '../features/dashboard/routes';
 import { createReportsRoutes } from '../features/reports/routes';
 import { createSurveyRoutes } from '../features/survey/routes';
 import { createAuthRoutes } from '../features/auth/routes';
+import { createSettingsRoutes } from '../features/settings/routes';
+import { createHelpRoutes } from '../features/help/routes';
+import { createProfileRoutes } from '../features/profile/routes';
 
 
 const rootRoute = createRootRoute({
@@ -42,6 +45,9 @@ const resultsRoutes = createResultsRoutes(rootRoute);
 const adminRoutes = createAdminRoutes(rootRoute);
 const dashboardRoutes = createDashboardRoutes(rootRoute);
 const reportsRoutes = createReportsRoutes(rootRoute);
+const settingsRoutes = createSettingsRoutes(rootRoute);
+const helpRoutes = createHelpRoutes(rootRoute);
+const profileRoutes = createProfileRoutes(rootRoute);
 
 /* ── Not Found ─────────────────────────────────────────────────── */
 
@@ -65,8 +71,11 @@ export const routeTree = rootRoute.addChildren([
   surveyRoutes,
   authRoutes,
   resultsRoutes,
-  adminRoutes,
+  ...adminRoutes,
   dashboardRoutes,
   reportsRoutes,
+  settingsRoutes,
+  helpRoutes,
+  profileRoutes,
   notFoundRoute,
 ]);

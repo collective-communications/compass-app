@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { ProfileMenu } from './profile-menu';
 import type { AuthUser } from '@compass/types';
+import { getNavConfigForRole } from '../../lib/navigation';
 
 const clientUser: AuthUser = {
   id: 'user-1',
@@ -28,7 +29,7 @@ const meta = {
   component: ProfileMenu,
   args: {
     user: clientUser,
-    tier: 'tier_2',
+    items: getNavConfigForRole(clientUser.role).profileMenuItems,
     onSignOut: fn(),
     onNavigate: fn(),
   },
@@ -37,13 +38,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+/**
+ * Client tier. Profile menu items are identical to the admin tier by design
+ * — parity is the point of the refactor.
+ */
+export const ClientTier: Story = {};
 
-/** Admin tier — shows Help and Settings items in dropdown */
+/**
+ * Admin tier. Same item list as client — the menu no longer branches on
+ * role.
+ */
 export const AdminTier: Story = {
   args: {
     user: adminUser,
-    tier: 'tier_1',
+    items: getNavConfigForRole(adminUser.role).profileMenuItems,
   },
 };
 
@@ -53,6 +61,5 @@ export const EmailOnly: Story = {
       ...clientUser,
       fullName: null,
     },
-    tier: 'tier_2',
   },
 };

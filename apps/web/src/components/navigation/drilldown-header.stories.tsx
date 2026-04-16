@@ -12,7 +12,7 @@ const meta = {
     ),
   ],
   args: {
-    backTo: '/admin/clients',
+    backTo: '/clients',
     backLabel: 'Back to clients',
     title: 'Acme Corporation',
   },
@@ -25,7 +25,7 @@ export const Default: Story = {};
 
 export const WithActions: Story = {
   args: {
-    backTo: '/admin/clients',
+    backTo: '/clients',
     backLabel: 'Back to clients',
     title: 'Survey Builder',
     children: (
