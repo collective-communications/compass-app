@@ -5,7 +5,7 @@ test.use({ storageState: 'e2e/.auth/admin.json' });
 
 test.describe('Admin client management', () => {
   test('client list renders with cards or empty state', async ({ page }) => {
-    await page.goto('/admin/clients');
+    await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
     await expect(
@@ -24,7 +24,7 @@ test.describe('Admin client management', () => {
   });
 
   test('clicking a client card navigates to client detail', async ({ page }) => {
-    await page.goto('/admin/clients');
+    await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
     const clientCards = page.getByTestId('client-card').or(
@@ -36,7 +36,7 @@ test.describe('Admin client management', () => {
       await page.waitForLoadState('networkidle');
 
       // Should navigate to a client detail URL with /overview redirect
-      expect(page.url()).toContain('/admin/clients/');
+      expect(page.url()).toContain('/clients/');
       expect(page.url()).toContain('/overview');
 
       // Org info should be visible on detail page
@@ -46,7 +46,7 @@ test.describe('Admin client management', () => {
   });
 
   test('client detail page has horizontal tabs', async ({ page }) => {
-    await page.goto('/admin/clients');
+    await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
     const clientCards = page.getByTestId('client-card').or(
@@ -84,7 +84,7 @@ test.describe('Admin client management', () => {
         }
       } else {
         // Client detail is still loading — page navigated correctly
-        expect(hasLoading || page.url().includes('/admin/clients/')).toBe(true);
+        expect(hasLoading || page.url().includes('/clients/')).toBe(true);
       }
     }
   });
@@ -141,7 +141,7 @@ test.describe('Admin client management', () => {
   });
 
   test('client settings shows metadata dropdown configuration', async ({ page }) => {
-    await page.goto('/admin/clients');
+    await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
     const clientCards = page.getByTestId('client-card').or(
@@ -175,7 +175,7 @@ test.describe('Admin client management', () => {
 
   test('direct navigation to client tab URLs works', async ({ page }) => {
     // First, get a valid client ID by navigating to the list
-    await page.goto('/admin/clients');
+    await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
     const clientCards = page.getByTestId('client-card').or(
@@ -188,29 +188,29 @@ test.describe('Admin client management', () => {
       await page.waitForLoadState('networkidle');
 
       const detailUrl = page.url();
-      const clientIdMatch = detailUrl.match(/\/admin\/clients\/([^/]+)/);
+      const clientIdMatch = detailUrl.match(/\/clients\/([^/]+)/);
 
       if (clientIdMatch) {
         const clientId = clientIdMatch[1];
 
         // Test direct navigation to /surveys tab
-        await page.goto(`/admin/clients/${clientId}/surveys`);
+        await page.goto(`/clients/${clientId}/surveys`);
         await page.waitForLoadState('networkidle');
-        expect(page.url()).toContain(`/admin/clients/${clientId}/surveys`);
+        expect(page.url()).toContain(`/clients/${clientId}/surveys`);
         const surveysTab = page.getByRole('tab', { name: /surveys/i });
         await expect(surveysTab).toBeVisible({ timeout: 10000 });
 
         // Test direct navigation to /users tab
-        await page.goto(`/admin/clients/${clientId}/users`);
+        await page.goto(`/clients/${clientId}/users`);
         await page.waitForLoadState('networkidle');
-        expect(page.url()).toContain(`/admin/clients/${clientId}/users`);
+        expect(page.url()).toContain(`/clients/${clientId}/users`);
         const usersTab = page.getByRole('tab', { name: /users/i });
         await expect(usersTab).toBeVisible({ timeout: 10000 });
 
-        // Test redirect from base /admin/clients/{id} to /overview
-        await page.goto(`/admin/clients/${clientId}`);
+        // Test redirect from base /clients/{id} to /overview
+        await page.goto(`/clients/${clientId}`);
         await page.waitForLoadState('networkidle');
-        expect(page.url()).toContain(`/admin/clients/${clientId}/overview`);
+        expect(page.url()).toContain(`/clients/${clientId}/overview`);
       }
     }
   });

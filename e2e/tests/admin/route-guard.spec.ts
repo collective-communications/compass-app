@@ -1,89 +1,99 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Admin route guard — client user', () => {
+/**
+ * Route-access E2E tests. Paths are flat (no `/admin` prefix) as of the
+ * role-agnostic routes refactor. Access is enforced by the universal
+ * `checkRouteAccess` matrix — forbidden paths redirect to the user's
+ * tier home (ccc_admin/member → /clients, client roles → /dashboard).
+ */
+
+// ─── Tier 2: client user ─────────────────────────────────────────────────────
+
+test.describe('Route access — client user', () => {
   test.use({ storageState: 'e2e/.auth/client.json' });
 
-  test('redirects non-admin to /dashboard', async ({ page }) => {
-    await page.goto('/admin/clients');
-
-    // Client users should be redirected away from /admin routes
-    await page.waitForURL((url) => !url.pathname.startsWith('/admin'), { timeout: 10000 });
+  test('redirects client user from /clients to /dashboard', async ({ page }) => {
+    await page.goto('/clients');
+    await page.waitForURL((url) => url.pathname.startsWith('/dashboard'), { timeout: 10000 });
     expect(page.url()).toContain('/dashboard');
   });
 
-  test('redirects non-admin from /admin/settings', async ({ page }) => {
-    await page.goto('/admin/settings');
-    await page.waitForURL((url) => !url.pathname.startsWith('/admin'), { timeout: 10000 });
-    expect(page.url()).toContain('/dashboard');
+  test('allows client user on /settings (tier-aware content)', async ({ page }) => {
+    await page.goto('/settings');
+    await expect(page).toHaveURL(/\/settings/, { timeout: 10000 });
   });
 });
 
-test.describe('Admin route guard — admin user', () => {
+// ─── Tier 1: ccc_admin ───────────────────────────────────────────────────────
+
+test.describe('Route access — ccc_admin', () => {
   test.use({ storageState: 'e2e/.auth/admin.json' });
 
-  test('allows admin user to access /admin/clients', async ({ page }) => {
-    await page.goto('/admin/clients');
-
-    // Admin should stay on the admin page
+  test('allows ccc_admin on /clients', async ({ page }) => {
+    await page.goto('/clients');
     await expect(page.getByRole('heading', { name: /clients/i })).toBeVisible({ timeout: 10000 });
-    expect(page.url()).toContain('/admin');
+    await expect(page).toHaveURL(/\/clients/, { timeout: 10000 });
   });
 
-  test('allows admin user to access /admin/settings', async ({ page }) => {
-    await page.goto('/admin/settings');
-    await expect(page).toHaveURL(/\/admin\/settings/, { timeout: 10000 });
+  test('allows ccc_admin on /settings', async ({ page }) => {
+    await page.goto('/settings');
+    await expect(page).toHaveURL(/\/settings/, { timeout: 10000 });
   });
 
-  test('allows admin user to access /admin/settings/users', async ({ page }) => {
-    await page.goto('/admin/settings/users');
-    await expect(page).toHaveURL(/\/admin\/settings\/users/, { timeout: 10000 });
+  test('allows ccc_admin on /users', async ({ page }) => {
+    await page.goto('/users');
+    await expect(page).toHaveURL(/\/users/, { timeout: 10000 });
   });
 });
 
-test.describe('Admin route guard — director user', () => {
+// ─── Tier 2: director ────────────────────────────────────────────────────────
+
+test.describe('Route access — director', () => {
   test.use({ storageState: 'e2e/.auth/director.json' });
 
-  test('redirects director from /admin/clients to /dashboard', async ({ page }) => {
-    await page.goto('/admin/clients');
-    await page.waitForURL((url) => !url.pathname.startsWith('/admin'), { timeout: 10000 });
+  test('redirects director from /clients to /dashboard', async ({ page }) => {
+    await page.goto('/clients');
+    await page.waitForURL((url) => url.pathname.startsWith('/dashboard'), { timeout: 10000 });
     expect(page.url()).toContain('/dashboard');
   });
 });
 
-test.describe('Admin route guard — ccc_member user (tier_1, non-admin)', () => {
+// ─── Tier 1: ccc_member (admin access but not CCC_ADMIN-only pages) ──────────
+
+test.describe('Route access — ccc_member', () => {
   test.use({ storageState: 'e2e/.auth/ccc-member.json' });
 
-  test('allows ccc_member to access /admin/clients', async ({ page }) => {
-    await page.goto('/admin/clients');
+  test('allows ccc_member on /clients', async ({ page }) => {
+    await page.goto('/clients');
     await expect(page.getByRole('heading', { name: /clients/i })).toBeVisible({ timeout: 10000 });
-    expect(page.url()).toContain('/admin/clients');
+    await expect(page).toHaveURL(/\/clients/, { timeout: 10000 });
   });
 
-  test('redirects ccc_member from /admin/settings to /admin/clients', async ({ page }) => {
-    await page.goto('/admin/settings');
-    await page.waitForURL((url) => url.pathname.includes('/admin/clients'), { timeout: 10000 });
-    expect(page.url()).toContain('/admin/clients');
+  test('allows ccc_member on /settings (tier-aware content)', async ({ page }) => {
+    await page.goto('/settings');
+    await expect(page).toHaveURL(/\/settings/, { timeout: 10000 });
   });
 
-  test('redirects ccc_member from /admin/settings/users to /admin/clients', async ({ page }) => {
-    await page.goto('/admin/settings/users');
-    await page.waitForURL((url) => url.pathname.includes('/admin/clients'), { timeout: 10000 });
-    expect(page.url()).toContain('/admin/clients');
+  test('redirects ccc_member from /users to /clients (CCC_ADMIN only)', async ({ page }) => {
+    await page.goto('/users');
+    await page.waitForURL((url) => url.pathname.startsWith('/clients'), { timeout: 10000 });
+    expect(page.url()).toContain('/clients');
   });
 });
 
-test.describe('Admin route guard — manager user', () => {
+// ─── Tier 2: manager ─────────────────────────────────────────────────────────
+
+test.describe('Route access — manager', () => {
   test.use({ storageState: 'e2e/.auth/manager.json' });
 
-  test('redirects manager from /admin/clients to /dashboard', async ({ page }) => {
-    await page.goto('/admin/clients');
-    await page.waitForURL((url) => !url.pathname.startsWith('/admin'), { timeout: 10000 });
+  test('redirects manager from /clients to /dashboard', async ({ page }) => {
+    await page.goto('/clients');
+    await page.waitForURL((url) => url.pathname.startsWith('/dashboard'), { timeout: 10000 });
     expect(page.url()).toContain('/dashboard');
   });
 
-  test('redirects manager from /admin/settings to /dashboard', async ({ page }) => {
-    await page.goto('/admin/settings');
-    await page.waitForURL((url) => !url.pathname.startsWith('/admin'), { timeout: 10000 });
-    expect(page.url()).toContain('/dashboard');
+  test('allows manager on /settings (tier-aware content)', async ({ page }) => {
+    await page.goto('/settings');
+    await expect(page).toHaveURL(/\/settings/, { timeout: 10000 });
   });
 });

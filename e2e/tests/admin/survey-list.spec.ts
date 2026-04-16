@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
 test('admin can see surveys list via client detail', async ({ page }) => {
-  await page.goto('/admin/clients');
+  await page.goto('/clients');
   await expect(page.getByRole('heading', { name: /clients/i })).toBeVisible({ timeout: 10000 });
 
   // Click first client card to navigate to client detail

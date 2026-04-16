@@ -75,7 +75,7 @@ export class RecipientsPage {
 
   /** Navigate to the survey builder page (admin surveys) */
   async goto(): Promise<void> {
-    await this.page.goto('/admin/clients');
+    await this.page.goto('/clients');
   }
 
   /** Get the count of visible recipient rows */

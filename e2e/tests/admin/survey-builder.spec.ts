@@ -5,7 +5,7 @@ test.use({ storageState: 'e2e/.auth/admin.json' });
 
 /** Navigate to the Surveys tab of the first available client */
 async function gotoClientSurveys(page: import('@playwright/test').Page): Promise<void> {
-  await page.goto('/admin/clients');
+  await page.goto('/clients');
   await expect(page.getByRole('heading', { name: /clients/i })).toBeVisible({ timeout: 10000 });
 
   // Click first client card (aria-label="View {name}")
@@ -75,7 +75,8 @@ test.describe('Admin survey builder', () => {
       await page.waitForLoadState('networkidle');
 
       // At least the survey detail page should load
-      expect(page.url()).toContain('/admin/');
+      // Survey builder lives at /surveys/$surveyId after the flattening refactor
+      expect(page.url()).toContain('/surveys/');
     }
   });
 });
