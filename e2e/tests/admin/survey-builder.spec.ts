@@ -74,9 +74,10 @@ test.describe('Admin survey builder', () => {
       await firstCard.click();
       await page.waitForLoadState('networkidle');
 
-      // At least the survey detail page should load
-      // Survey builder lives at /surveys/$surveyId after the flattening refactor
-      expect(page.url()).toContain('/surveys/');
+      // Click lands on something survey-related — either the survey-builder
+      // (/surveys/$surveyId) or the client detail surveys tab
+      // (/clients/$orgId/surveys) depending on which card was visible first.
+      expect(page.url()).toMatch(/\/surveys(\/|$)/);
     }
   });
 });

@@ -53,9 +53,16 @@ describe('checkRouteAccess (tier 1 admin/member)', () => {
     expect(checkRouteAccess(UserRole.CCC_MEMBER, '/users')).toBe('/clients');
   });
 
-  it.each(['/dashboard', '/results', '/reports'])('ccc_admin denied on %s → /clients', (path) => {
-    expect(checkRouteAccess(UserRole.CCC_ADMIN, path)).toBe('/clients');
+  it('ccc_admin denied on /dashboard → /clients', () => {
+    expect(checkRouteAccess(UserRole.CCC_ADMIN, '/dashboard')).toBe('/clients');
   });
+
+  it.each(['/results', '/results/abc123/compass', '/reports', '/reports/abc123'])(
+    'ccc_admin allowed on %s (CC+C team can view client data)',
+    (path) => {
+      expect(checkRouteAccess(UserRole.CCC_ADMIN, path)).toBeUndefined();
+    },
+  );
 });
 
 describe('checkRouteAccess (tier 2 client)', () => {

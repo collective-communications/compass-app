@@ -29,15 +29,32 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   '/surveys':  [Roles.CCC_ADMIN, Roles.CCC_MEMBER],
   '/insights': [Roles.CCC_ADMIN, Roles.CCC_MEMBER],
 
-  // Tier 2 — client users
+  // Tier 2 — client dashboard (tier 1 have their own /clients home)
   '/dashboard': [
     Roles.CLIENT_EXEC,
     Roles.CLIENT_DIRECTOR,
     Roles.CLIENT_MANAGER,
     Roles.CLIENT_USER,
   ],
-  '/results': [Roles.CLIENT_EXEC, Roles.CLIENT_DIRECTOR, Roles.CLIENT_MANAGER],
-  '/reports': [Roles.CLIENT_EXEC, Roles.CLIENT_DIRECTOR, Roles.CLIENT_MANAGER],
+
+  // Results + reports: tier 1 (CC+C team) can view client data to support
+  // engagements; tier 2 viewers below client_user. The per-route bespoke
+  // guards in /results and /reports apply the additional organizations.
+  // client_access_enabled check for tier_2.
+  '/results': [
+    Roles.CCC_ADMIN,
+    Roles.CCC_MEMBER,
+    Roles.CLIENT_EXEC,
+    Roles.CLIENT_DIRECTOR,
+    Roles.CLIENT_MANAGER,
+  ],
+  '/reports': [
+    Roles.CCC_ADMIN,
+    Roles.CCC_MEMBER,
+    Roles.CLIENT_EXEC,
+    Roles.CLIENT_DIRECTOR,
+    Roles.CLIENT_MANAGER,
+  ],
 
   // All authenticated roles — tier-aware content lives inside the page
   '/settings': ALL_ROLES,
