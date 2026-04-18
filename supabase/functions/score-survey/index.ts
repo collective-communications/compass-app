@@ -57,13 +57,20 @@ import {
 import type { ArchetypeRow } from './db.ts';
 import { DIMENSION_CODES, type AnswerWithMeta, type SegmentScoreResult } from './types.ts';
 import {
-  roundTo,
   calculateAllDimensionScores,
   calculateSubDimensionScores,
   euclideanDistance,
   classifyCoreHealth,
+  CONFIDENCE_STRONG,
+  CONFIDENCE_MODERATE,
 } from './scoring.ts';
 import { buildQuestionLookup, buildSegmentGroups, flattenToScoreRows } from './pipeline.ts';
+
+/** Round to N decimal places using integer math; mirrors canonical scoring helper. */
+function roundTo(value: number, decimals: number): number {
+  const factor = Math.pow(10, decimals);
+  return Math.round(value * factor) / factor;
+}
 
 // ─── JSON Response Helpers ─────────────────────────────────────────────────
 
@@ -114,14 +121,18 @@ Deno.serve(async (req: Request) => {
   let recalcId: string | undefined;
 
   try {
-    // Verify survey exists
-    const exists = await surveyExists(client, surveyId);
+    // Survey existence and concurrency checks are independent — fire them
+    // in parallel to shave one DB round-trip off the critical path. The
+    // recalculation insert below gates on the combined result.
+    const [exists, concurrency] = await Promise.all([
+      surveyExists(client, surveyId),
+      checkConcurrency(client, surveyId),
+    ]);
+
     if (!exists) {
       return errorResponse('NOT_FOUND', `Survey ${surveyId} not found`, 404);
     }
 
-    // Concurrency check
-    const concurrency = await checkConcurrency(client, surveyId);
     if (concurrency.blocked) {
       return errorResponse(
         'CONFLICT',
@@ -173,7 +184,7 @@ Deno.serve(async (req: Request) => {
       }
 
       try {
-        const scores = calculateAllDimensionScores(segData.answers, likertSize);
+        const scores = calculateAllDimensionScores(segData.allAnswers, likertSize);
         segmentResults.push({
           segmentType: segType,
           segmentValue: segValue,
@@ -213,7 +224,12 @@ Deno.serve(async (req: Request) => {
       }
 
       if (bestArchetype) {
-        const confidence = bestDistance < 15 ? 'strong' : bestDistance < 25 ? 'moderate' : 'weak';
+        const confidence =
+          bestDistance < CONFIDENCE_STRONG
+            ? 'strong'
+            : bestDistance < CONFIDENCE_MODERATE
+              ? 'moderate'
+              : 'weak';
         archetypeMatch = {
           code: bestArchetype.code,
           name: bestArchetype.name,

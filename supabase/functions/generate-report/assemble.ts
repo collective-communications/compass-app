@@ -56,28 +56,40 @@ export async function assembleReportPayload(
   client: SupabaseClient,
   surveyId: string,
 ): Promise<ReportPayload> {
-  const [surveyResult, scoresResult, segmentScoresResult, recommendationsResult] =
-    await Promise.all([
-      client
-        .from('surveys')
-        .select('*, organizations(name, branding, settings)')
-        .eq('id', surveyId)
-        .single(),
-      client
-        .from('scores')
-        .select('*, dimensions!inner(code, name)')
-        .eq('survey_id', surveyId)
-        .eq('segment_type', 'overall'),
-      client
-        .from('safe_segment_scores')
-        .select('*')
-        .eq('survey_id', surveyId),
-      client
-        .from('recommendations')
-        .select('*, dimensions!inner(code)')
-        .eq('survey_id', surveyId)
-        .order('priority', { ascending: true }),
-    ]);
+  // All reads fire in parallel — the response-count head query is cheap and
+  // depends only on surveyId, so we fold it into the same Promise.all to
+  // avoid a needless serial round-trip.
+  const [
+    surveyResult,
+    scoresResult,
+    segmentScoresResult,
+    recommendationsResult,
+    responseCountResult,
+  ] = await Promise.all([
+    client
+      .from('surveys')
+      .select('*, organizations(name, branding, settings)')
+      .eq('id', surveyId)
+      .single(),
+    client
+      .from('scores')
+      .select('*, dimensions!inner(code, name)')
+      .eq('survey_id', surveyId)
+      .eq('segment_type', 'overall'),
+    client
+      .from('safe_segment_scores')
+      .select('*')
+      .eq('survey_id', surveyId),
+    client
+      .from('recommendations')
+      .select('*, dimensions!inner(code)')
+      .eq('survey_id', surveyId)
+      .order('priority', { ascending: true }),
+    client
+      .from('responses')
+      .select('id', { count: 'exact', head: true })
+      .eq('survey_id', surveyId),
+  ]);
 
   if (surveyResult.error) throw new Error(`Failed to load survey: ${surveyResult.error.message}`);
   if (scoresResult.error) throw new Error(`Failed to load scores: ${scoresResult.error.message}`);
@@ -90,16 +102,23 @@ export async function assembleReportPayload(
     throw new Error('Survey scores have not been calculated. Run scoring before generating a report.');
   }
 
-  // Response count
-  const { count: responseCount } = await client
-    .from('responses')
-    .select('id', { count: 'exact', head: true })
-    .eq('survey_id', surveyId);
+  const responseCount = responseCountResult.count;
 
   // Organization info
   const org = surveyRow['organizations'] as Record<string, unknown> | null;
   const orgSettings = (org?.['settings'] as Record<string, unknown>) ?? {};
   const brandColors = (orgSettings['brand_colors'] as Record<string, string>) ?? {};
+
+  // Likert scale size from survey settings (default 4 for legacy surveys).
+  // Percentages are normalized to [0, 100] using the canonical scoring
+  // formula: ((rawScore - 1) / (likertSize - 1)) * 100. A 5-point raw 5.0
+  // therefore maps to 100, a 4-point raw 4.0 also to 100, and a raw 1.0 to 0.
+  // Guard against a non-numeric or degenerate scale with a 4 fallback.
+  const surveySettings = (surveyRow['settings'] as Record<string, unknown> | null) ?? {};
+  const rawLikertSize =
+    typeof surveySettings['likertSize'] === 'number' ? (surveySettings['likertSize'] as number) : 4;
+  const likertSize = rawLikertSize >= 2 ? rawLikertSize : 4;
+  const likertRange = likertSize - 1;
 
   // Map dimension scores
   const dimensionScores: Record<string, number> = {};
@@ -113,7 +132,7 @@ export async function assembleReportPayload(
     const code = dim['code'] as string;
     const score = raw['raw_score'] as number;
     dimensionScores[code] = score;
-    dimensionPercentages[code] = (score / 4) * 100;
+    dimensionPercentages[code] = ((score - 1) / likertRange) * 100;
     overallScore += score;
     dimensionCount += 1;
   }

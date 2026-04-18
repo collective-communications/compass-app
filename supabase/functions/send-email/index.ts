@@ -3,55 +3,18 @@
  * Accepts service_role requests only. Logs all sends to email_log table.
  *
  * Uses the RESEND_CCC_SEND (send-only) API key stored as RESEND_API_KEY.
+ *
+ * Orchestration lives in `handler.ts` so the flow is testable under Bun.
+ * This entry preserves the legacy 500 SEND_FAILED envelope on provider
+ * errors (see handler.ts `errorMapping: 'legacy'`).
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { sendEmail, makeResendProvider, type SendEmailRequest } from './handler.ts';
 
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const FROM_ADDRESS = Deno.env.get('RESEND_FROM_ADDRESS') ?? 'noreply@mail.collectiveculturecompass.com';
-
-// ─── Resend Send ─────────────────────────────────────────────────────────────
-
-interface SendResult {
-  messageId: string;
-}
-
-async function sendViaResend(
-  to: string,
-  subject: string,
-  html: string,
-  replyTo?: string,
-): Promise<SendResult> {
-  const apiKey = Deno.env.get('RESEND_API_KEY');
-  if (!apiKey) {
-    throw new Error('RESEND_API_KEY must be set');
-  }
-
-  const response = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      from: FROM_ADDRESS,
-      to: [to],
-      subject,
-      html,
-      ...(replyTo ? { reply_to: [replyTo] } : {}),
-    }),
-  });
-
-  if (!response.ok) {
-    const err = await response.text();
-    console.error(`Resend API error ${response.status}:`, err);
-    throw new Error('Email delivery failed');
-  }
-
-  const data = await response.json() as { id: string };
-  return { messageId: data.id };
-}
 
 // ─── JSON Helpers ────────────────────────────────────────────────────────────
 
@@ -64,16 +27,6 @@ function jsonResponse(body: Record<string, unknown>, status = 200): Response {
 
 function errorResponse(error: string, message: string, status: number): Response {
   return jsonResponse({ error, message }, status);
-}
-
-// ─── Request Body ────────────────────────────────────────────────────────────
-
-interface SendEmailRequest {
-  to: string;
-  subject: string;
-  html: string;
-  templateType: 'survey_invitation' | 'reminder' | 'report_ready' | 'team_invitation';
-  replyTo?: string;
 }
 
 // ─── Main Handler ────────────────────────────────────────────────────────────
@@ -106,52 +59,12 @@ Deno.serve(async (req: Request) => {
     return errorResponse('INVALID_REQUEST', 'Request body must be valid JSON', 400);
   }
 
-  // Create Supabase client
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const client = createClient(supabaseUrl, serviceRoleKey);
 
-  // Insert queued log entry
-  const { data: logEntry, error: logError } = await client
-    .from('email_log')
-    .insert({
-      recipient: body.to,
-      subject: body.subject,
-      template_type: body.templateType,
-      status: 'queued',
-    })
-    .select('id')
-    .single();
+  const apiKey = Deno.env.get('RESEND_API_KEY') ?? '';
+  const provider = makeResendProvider(apiKey, FROM_ADDRESS);
 
-  if (logError) {
-    return errorResponse('LOG_ERROR', `Failed to create email log: ${logError.message}`, 500);
-  }
-
-  const logId = logEntry.id;
-
-  // Send via Resend
-  try {
-    const { messageId } = await sendViaResend(body.to, body.subject, body.html, body.replyTo);
-
-    // Update log to sent
-    await client
-      .from('email_log')
-      .update({
-        status: 'sent',
-        provider_message_id: messageId,
-        sent_at: new Date().toISOString(),
-      })
-      .eq('id', logId);
-
-    return jsonResponse({ success: true, logId, messageId });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-
-    // Update log to failed
-    await client
-      .from('email_log')
-      .update({ status: 'failed', error: message })
-      .eq('id', logId);
-
-    return errorResponse('SEND_FAILED', message, 500);
-  }
+  const result = await sendEmail(client, body, provider, { errorMapping: 'legacy' });
+  return jsonResponse(result.body, result.status);
 });

@@ -8,10 +8,15 @@ export interface AuthResult {
   role: string;
 }
 
-function errorResponse(error: string, message: string, status: number): Response {
+function errorResponse(
+  req: Request,
+  error: string,
+  message: string,
+  status: number,
+): Response {
   return new Response(
     JSON.stringify({ error, message }),
-    { status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+    { status, headers: { ...corsHeaders(req), 'Content-Type': 'application/json' } },
   );
 }
 
@@ -30,7 +35,7 @@ export async function authorize(
 ): Promise<{ result: AuthResult } | { error: Response }> {
   const authHeader = req.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) {
-    return { error: errorResponse('UNAUTHORIZED', 'Missing Authorization header', 401) };
+    return { error: errorResponse(req, 'UNAUTHORIZED', 'Missing Authorization header', 401) };
   }
 
   const token = authHeader.slice(7);
@@ -47,7 +52,7 @@ export async function authorize(
   const { data: { user }, error: authError } = await client.auth.getUser(token);
 
   if (authError || !user) {
-    return { error: errorResponse('UNAUTHORIZED', 'Invalid or expired token', 401) };
+    return { error: errorResponse(req, 'UNAUTHORIZED', 'Invalid or expired token', 401) };
   }
 
   // Look up the user's role from org_members
@@ -59,13 +64,14 @@ export async function authorize(
     .single();
 
   if (memberError || !membership) {
-    return { error: errorResponse('UNAUTHORIZED', 'User org membership not found', 401) };
+    return { error: errorResponse(req, 'UNAUTHORIZED', 'User org membership not found', 401) };
   }
 
   const allowedRoles = ['ccc_admin', 'ccc_member', 'client_exec'];
   if (!allowedRoles.includes(membership.role)) {
     return {
       error: errorResponse(
+        req,
         'FORBIDDEN',
         'Only ccc_admin, ccc_member, or client_exec users can generate reports',
         403,

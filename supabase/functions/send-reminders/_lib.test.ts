@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test';
-import { escapeHtml, renderTemplate, daysBetween, shouldSkipReminder } from './_lib';
+import { escapeHtml, renderTemplate, sanitizeUrl, daysBetween, shouldSkipReminder } from './_lib';
 
 describe('escapeHtml', () => {
   test('escapes ampersand', () => {
@@ -55,6 +55,65 @@ describe('daysBetween', () => {
     const from = '2025-01-01T00:00:00Z';
     const to = new Date('2025-01-01T23:00:00Z');
     expect(daysBetween(from, to)).toBe(0);
+  });
+});
+
+describe('sanitizeUrl', () => {
+  test('accepts an https URL', () => {
+    expect(sanitizeUrl('https://app.example.com/s/abc')).toBe('https://app.example.com/s/abc');
+  });
+
+  test('rejects http:// by default — falls back', () => {
+    expect(
+      sanitizeUrl('http://app.example.com/s/abc', { fallback: 'https://safe.example.com' }),
+    ).toBe('https://safe.example.com');
+  });
+
+  test('accepts http:// when allowInsecure is true (dev mode)', () => {
+    expect(sanitizeUrl('http://localhost:42333/s/abc', { allowInsecure: true })).toBe(
+      'http://localhost:42333/s/abc',
+    );
+  });
+
+  test('rejects javascript: pseudo-scheme', () => {
+    expect(
+      sanitizeUrl('javascript:alert(1)', { fallback: 'https://safe.example.com' }),
+    ).toBe('https://safe.example.com');
+  });
+
+  test('rejects javascript: with leading whitespace and mixed case', () => {
+    expect(
+      sanitizeUrl('\t JavaScript:alert(1)', { fallback: 'https://safe.example.com' }),
+    ).toBe('https://safe.example.com');
+  });
+
+  test('rejects data: scheme', () => {
+    expect(
+      sanitizeUrl('data:text/html,<script>', { fallback: 'https://safe.example.com' }),
+    ).toBe('https://safe.example.com');
+  });
+
+  test('rejects vbscript: scheme', () => {
+    expect(
+      sanitizeUrl('vbscript:msgbox(1)', { fallback: 'https://safe.example.com' }),
+    ).toBe('https://safe.example.com');
+  });
+
+  test('rejects protocol-relative URL', () => {
+    expect(sanitizeUrl('//evil.com/x', { fallback: 'https://safe.example.com' })).toBe(
+      'https://safe.example.com',
+    );
+  });
+
+  test('HTML-escapes the URL so it cannot break out of href', () => {
+    // A " in the URL would otherwise close the attribute and inject attrs.
+    expect(sanitizeUrl('https://example.com/"onerror=alert(1)')).toBe(
+      'https://example.com/&quot;onerror=alert(1)',
+    );
+  });
+
+  test('empty string falls back', () => {
+    expect(sanitizeUrl('', { fallback: 'https://safe.example.com' })).toBe('https://safe.example.com');
   });
 });
 

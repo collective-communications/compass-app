@@ -8,6 +8,47 @@ export function escapeHtml(str: string): string {
   return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+/**
+ * Sanitize a URL before interpolating it into an email template's `href`.
+ *
+ * See `supabase/functions/send-invitations/_lib.ts` for the authoritative
+ * documentation. Duplicated here because Deno edge functions can't share
+ * modules across directories without a publish step.
+ */
+export function sanitizeUrl(
+  url: string,
+  options: { fallback?: string; allowInsecure?: boolean } = {},
+): string {
+  const fallback = options.fallback ?? '';
+  const allowInsecure = options.allowInsecure ?? false;
+
+  if (typeof url !== 'string' || url.length === 0) {
+    return escapeHtml(fallback);
+  }
+
+  // eslint-disable-next-line no-control-regex -- intentional: matching C0 controls is the defense
+  const trimmed = url.replace(/^[\s\u0000-\u001F]+/, '');
+  const lower = trimmed.toLowerCase();
+  if (
+    lower.startsWith('javascript:') ||
+    lower.startsWith('data:') ||
+    lower.startsWith('vbscript:') ||
+    lower.startsWith('file:')
+  ) {
+    return escapeHtml(fallback);
+  }
+
+  if (lower.startsWith('https://')) {
+    return escapeHtml(trimmed);
+  }
+
+  if (lower.startsWith('http://') && allowInsecure) {
+    return escapeHtml(trimmed);
+  }
+
+  return escapeHtml(fallback);
+}
+
 /** Replace `{{key}}` placeholders in an HTML template string. */
 export function renderTemplate(
   html: string,

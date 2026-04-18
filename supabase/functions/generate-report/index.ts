@@ -24,62 +24,40 @@
  *
  * Error responses:
  *   400 — INVALID_REQUEST   (missing or invalid reportId)
+ *   403 — FORBIDDEN         (caller is not a member of the report's org)
  *   404 — NOT_FOUND         (report does not exist)
  *   405 — METHOD_NOT_ALLOWED
  *   409 — INVALID_STATE     (report is not in "queued" status)
  *   500 — GENERATION_FAILED (rendering or upload error; report marked "failed")
+ *
+ * Orchestration lives in `handler.ts` so the flow is testable under Bun
+ * without the Deno runtime.
  */
-import { createClient, SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { corsHeaders } from '../_shared/cors.ts';
 import { authorize } from './auth.ts';
-import { loadReport, updateReportStatus } from './db.ts';
-import { assembleReportPayload } from './assemble.ts';
-import { getRenderer } from './renderer.ts';
-
-// ─── Storage Helpers ──────────────────────────────────────────────────────
-
-/** Upload a rendered report to the reports storage bucket and return a signed URL. */
-async function uploadReport(
-  client: SupabaseClient,
-  reportId: string,
-  orgId: string,
-  buffer: Uint8Array,
-  contentType: string,
-  extension: string,
-): Promise<{ storagePath: string; signedUrl: string; fileSize: number }> {
-  const storagePath = `${orgId}/${reportId}${extension}`;
-
-  const { error: uploadError } = await client.storage
-    .from('reports')
-    .upload(storagePath, buffer, {
-      contentType,
-      upsert: true,
-    });
-  if (uploadError) throw new Error(`Storage upload failed: ${uploadError.message}`);
-
-  const { data: signedData, error: signedError } = await client.storage
-    .from('reports')
-    .createSignedUrl(storagePath, 86400); // 24h expiry
-  if (signedError) throw new Error(`Signed URL creation failed: ${signedError.message}`);
-
-  return {
-    storagePath,
-    signedUrl: signedData.signedUrl,
-    fileSize: buffer.byteLength,
-  };
-}
+import { generateReport } from './handler.ts';
 
 // ─── JSON Response Helpers ─────────────────────────────────────────────────
 
-function jsonResponse(body: Record<string, unknown>, status = 200): Response {
+function jsonResponse(
+  req: Request,
+  body: Record<string, unknown>,
+  status = 200,
+): Response {
   return new Response(JSON.stringify(body), {
     status,
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders(req), 'Content-Type': 'application/json' },
   });
 }
 
-function errorResponse(error: string, message: string, status: number): Response {
-  return jsonResponse({ error, message }, status);
+function errorResponse(
+  req: Request,
+  error: string,
+  message: string,
+  status: number,
+): Response {
+  return jsonResponse(req, { error, message }, status);
 }
 
 // ─── Main Handler ──────────────────────────────────────────────────────────
@@ -87,17 +65,17 @@ function errorResponse(error: string, message: string, status: number): Response
 Deno.serve(async (req: Request) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: corsHeaders(req) });
   }
 
   // GET = health check
   if (req.method === 'GET') {
-    return jsonResponse({ status: 'ok', function: 'generate-report' });
+    return jsonResponse(req, { status: 'ok', function: 'generate-report' });
   }
 
   // Only POST
   if (req.method !== 'POST') {
-    return errorResponse('METHOD_NOT_ALLOWED', 'Only POST/GET accepted', 405);
+    return errorResponse(req, 'METHOD_NOT_ALLOWED', 'Only POST/GET accepted', 405);
   }
 
   // Parse request body
@@ -107,10 +85,10 @@ Deno.serve(async (req: Request) => {
     reportId = body.reportId;
 
     if (!reportId || typeof reportId !== 'string') {
-      return errorResponse('INVALID_REQUEST', 'reportId is required', 400);
+      return errorResponse(req, 'INVALID_REQUEST', 'reportId is required', 400);
     }
   } catch {
-    return errorResponse('INVALID_REQUEST', 'Request body must be valid JSON with reportId', 400);
+    return errorResponse(req, 'INVALID_REQUEST', 'Request body must be valid JSON with reportId', 400);
   }
 
   // Create Supabase client with service_role for full access
@@ -121,62 +99,12 @@ Deno.serve(async (req: Request) => {
   // Authorize the caller
   const authResult = await authorize(req, client);
   if ('error' in authResult) return authResult.error;
-  const { userId } = authResult.result;
+  const { userId, role } = authResult.result;
 
-  try {
-    // Load report record
-    const report = await loadReport(client, reportId);
-    if (!report) {
-      return errorResponse('NOT_FOUND', `Report ${reportId} not found`, 404);
-    }
+  const result = await generateReport(client, {
+    reportId,
+    caller: { userId, role },
+  });
 
-    // Guard: only queued reports can be generated
-    if (report.status !== 'queued') {
-      return errorResponse(
-        'INVALID_STATE',
-        `Report is in "${report.status}" state; only "queued" reports can be generated`,
-        409,
-      );
-    }
-
-    // Mark as generating
-    await updateReportStatus(client, reportId, 'generating');
-
-    // Assemble report data from survey scores, segments, recommendations
-    const payload = await assembleReportPayload(client, report.survey_id);
-
-    // Resolve renderer for the requested format and render to bytes
-    const renderer = getRenderer(report.format);
-    const { buffer, contentType, extension } = await renderer.render(payload, report);
-
-    // Upload to storage
-    const { storagePath, signedUrl, fileSize } = await uploadReport(
-      client, reportId, report.organization_id, buffer, contentType, extension,
-    );
-
-    // Mark complete
-    await updateReportStatus(client, reportId, 'completed', {
-      storage_path: storagePath,
-      file_size: fileSize,
-    });
-
-    return jsonResponse({
-      reportId,
-      status: 'completed',
-      storagePath,
-      signedUrl,
-      generatedBy: userId,
-    });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-
-    // Best-effort: mark report as failed with error message
-    try {
-      await updateReportStatus(client, reportId, 'failed', { error: message });
-    } catch {
-      // Swallow cleanup errors
-    }
-
-    return errorResponse('GENERATION_FAILED', message, 500);
-  }
+  return jsonResponse(req, result.body, result.status);
 });
