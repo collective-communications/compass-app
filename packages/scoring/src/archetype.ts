@@ -3,10 +3,10 @@ import type { ArchetypeVector, ArchetypeMatch } from './archetype-types.js';
 import { ScoringError } from './errors.js';
 
 /** Euclidean distance threshold for strong confidence. */
-const CONFIDENCE_STRONG = 15;
+export const CONFIDENCE_STRONG = 15;
 
 /** Euclidean distance threshold for moderate confidence. */
-const CONFIDENCE_MODERATE = 25;
+export const CONFIDENCE_MODERATE = 25;
 
 /** Compute Euclidean distance between observed scores and a target vector. */
 export function euclideanDistance(
