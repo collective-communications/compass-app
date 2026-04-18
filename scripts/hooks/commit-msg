@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Commit-msg: enforce Conventional Commits via commitlint.
+# Installed automatically from scripts/hooks/ by scripts/install-hooks.sh
+# (wired to `bun install` via the "prepare" lifecycle in package.json).
+set -euo pipefail
+
+# $1 is the path to the file containing the proposed commit message.
+exec bunx --bun commitlint --edit "$1"

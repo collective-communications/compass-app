@@ -33,7 +33,6 @@ supabase/         — Migrations, edge functions, config
 ## Commands
 
 ```bash
-bun install       # Install dependencies
 bun run dev       # Start dev server
 bun run build     # Production build
 bun run test      # Run tests
@@ -41,6 +40,16 @@ bun run typecheck # Type-check all packages
 bun run lint      # Lint all packages
 bun run storybook # Launch Storybook
 ```
+
+## Commit messages
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org/) and are enforced by a `commit-msg` hook running [commitlint](https://commitlint.js.org/).
+
+- **Scope is required.** `feat(survey): add likert-5 support` — not `feat: add likert-5 support`.
+- **Types:** `feat`, `fix`, `chore`, `docs`, `refactor`, `test`, `perf`, `build`, `ci`, `style`, `revert`.
+- Config: [`commitlint.config.js`](./commitlint.config.js).
+
+The hook is installed into `.git/hooks/commit-msg` automatically by `bun install` via [`scripts/install-hooks.sh`](./scripts/install-hooks.sh), which copies every file in [`scripts/hooks/`](./scripts/hooks/). No Husky required. To re-install manually, run `bun install` or `bash scripts/install-hooks.sh`.
 
 ## Documentation
 
