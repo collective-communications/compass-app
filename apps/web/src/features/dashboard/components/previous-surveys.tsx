@@ -6,21 +6,12 @@
 
 import type { ReactElement } from 'react';
 import { ChevronRight } from 'lucide-react';
+import { formatDisplayDate } from '@compass/utils';
 import type { PreviousSurvey } from '../hooks/use-dashboard-data';
 
 interface PreviousSurveysProps {
   surveys: PreviousSurvey[];
   onSelectSurvey: (surveyId: string) => void;
-}
-
-/** Format an ISO date string to a readable format (e.g., "March 15, 2026") */
-function formatDate(iso: string | null): string {
-  if (!iso) return '--';
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
 }
 
 export function PreviousSurveys({ surveys, onSelectSurvey }: PreviousSurveysProps): ReactElement {
@@ -43,7 +34,7 @@ export function PreviousSurveys({ surveys, onSelectSurvey }: PreviousSurveysProp
                 {item.survey.title}
               </p>
               <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                {item.responseCount} responses &middot; Closed {formatDate(item.closedAt)}
+                {item.responseCount} responses &middot; Closed {formatDisplayDate(item.closedAt, 'long')}
               </p>
             </div>
             <ChevronRight className="h-5 w-5 shrink-0 text-[var(--text-tertiary)]" aria-hidden="true" />

@@ -108,8 +108,8 @@ export function useInvitationFlow(token: string | undefined): UseInvitationFlowR
         return;
       }
 
-      if (password.length < 8) {
-        setFormError('Password must be at least 8 characters.');
+      if (password.length < 12) {
+        setFormError('Password must be at least 12 characters.');
         passwordRef.current?.focus();
         return;
       }
@@ -153,8 +153,14 @@ export function useInvitationFlow(token: string | undefined): UseInvitationFlowR
 
         // Auto-sign in with the new credentials
         if (!result.isExistingUser) {
+          if (!invitation) {
+            // Invitation details missing — shouldn't happen in 'ready' state,
+            // but guard defensively to avoid crashing mid-submit.
+            setStatus('success');
+            return;
+          }
           const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
-            email: invitation!.email,
+            email: invitation.email,
             password,
           });
 
@@ -187,7 +193,7 @@ export function useInvitationFlow(token: string | undefined): UseInvitationFlowR
   );
 
   const isReady = status === 'ready';
-  const canSubmit = fullName.trim() !== '' && password.length >= 8 && password === confirmPassword && isReady;
+  const canSubmit = fullName.trim() !== '' && password.length >= 12 && password === confirmPassword && isReady;
 
   return {
     status,

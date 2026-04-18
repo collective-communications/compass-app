@@ -11,6 +11,7 @@ import type {
   SurveyStatus,
 } from '@compass/types';
 import { supabase } from '../../../../lib/supabase';
+import { logger } from '../../../../lib/logger';
 import { mapSurveyRow, mapDeploymentRow } from '../../../../lib/mappers/survey-mappers';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
@@ -72,9 +73,12 @@ export async function saveSurveyConfig(params: SaveSurveyConfigParams): Promise<
     .select('*')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'saveSurveyConfig', surveyId }, 'Failed to save survey config');
+    throw error;
+  }
 
-  return mapSurveyRow(data as Record<string, unknown>);
+  return mapSurveyRow(data);
 }
 
 // ─── Deployment ─────────────────────────────────────────────────────────────
@@ -92,7 +96,10 @@ export async function publishSurvey(params: PublishSurveyParams): Promise<Deploy
     .update({ status: 'active' as SurveyStatus })
     .eq('id', surveyId);
 
-  if (statusError) throw statusError;
+  if (statusError) {
+    logger.error({ err: statusError, fn: 'publishSurvey.updateStatus', surveyId }, 'Failed to flip survey to active');
+    throw statusError;
+  }
 
   // Create deployment record
   const { data, error } = await supabase
@@ -105,9 +112,12 @@ export async function publishSurvey(params: PublishSurveyParams): Promise<Deploy
     .select('*')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'publishSurvey.insertDeployment', surveyId, deploymentType }, 'Failed to create deployment record');
+    throw error;
+  }
 
-  return mapDeploymentRow(data as Record<string, unknown>);
+  return mapDeploymentRow(data);
 }
 
 /** Fetch the active deployment for a survey */
@@ -120,10 +130,13 @@ export async function getActiveDeployment(surveyId: string): Promise<Deployment 
     .limit(1)
     .maybeSingle();
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'getActiveDeployment', surveyId }, 'Failed to fetch active deployment');
+    throw error;
+  }
   if (!data) return null;
 
-  return mapDeploymentRow(data as Record<string, unknown>);
+  return mapDeploymentRow(data);
 }
 
 /** Unpublish a survey (close it early) */
@@ -136,14 +149,20 @@ export async function unpublishSurvey(
     .update({ status: 'closed' as SurveyStatus })
     .eq('id', surveyId);
 
-  if (surveyError) throw surveyError;
+  if (surveyError) {
+    logger.error({ err: surveyError, fn: 'unpublishSurvey.closeSurvey', surveyId }, 'Failed to close survey');
+    throw surveyError;
+  }
 
   const { error: deployError } = await supabase
     .from('deployments')
     .update({ closes_at: new Date().toISOString() })
     .eq('id', deploymentId);
 
-  if (deployError) throw deployError;
+  if (deployError) {
+    logger.error({ err: deployError, fn: 'unpublishSurvey.closeDeployment', deploymentId }, 'Failed to close deployment');
+    throw deployError;
+  }
 }
 
 /** Archive a survey (soft-delete: sets status to 'archived' and records timestamp) */
@@ -153,7 +172,10 @@ export async function archiveSurvey(surveyId: string): Promise<void> {
     .update({ status: 'archived' as SurveyStatus, archived_at: new Date().toISOString() })
     .eq('id', surveyId);
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'archiveSurvey', surveyId }, 'Failed to archive survey');
+    throw error;
+  }
 }
 
 /** Unarchive a survey (restore to 'closed' status) */
@@ -163,13 +185,77 @@ export async function unarchiveSurvey(surveyId: string): Promise<void> {
     .update({ status: 'closed' as SurveyStatus, archived_at: null })
     .eq('id', surveyId);
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'unarchiveSurvey', surveyId }, 'Failed to unarchive survey');
+    throw error;
+  }
 }
 
 // ─── Response Tracking ──────────────────────────────────────────────────────
 
-/** Fetch aggregated response metrics for a survey (queries via deployments → responses) */
+/**
+ * Shape returned by the `get_response_metrics` SQL RPC. Keys are camelCase to
+ * match the public {@link ResponseMetrics} contract — the RPC emits this shape
+ * directly so no mapping layer is required on the success path.
+ */
+interface ResponseMetricsRpcPayload {
+  totalResponses: number;
+  completedResponses: number;
+  completionRate: number;
+  averageCompletionTimeMs: number | null;
+  departmentBreakdown: DepartmentBreakdown[];
+  dailyCompletions: DailyCompletion[];
+}
+
+/** Row shape returned by the JS fallback's `responses` select */
+interface ResponseMetricsRow {
+  id: string;
+  submitted_at: string | null;
+  is_complete: boolean;
+  created_at: string;
+  metadata_department: string | null;
+}
+
+/**
+ * Fetch aggregated response metrics for a survey.
+ *
+ * Primary path: calls the `get_response_metrics` Postgres function, which
+ * aggregates totals, completion rate, average duration, department breakdown,
+ * and daily completions in a single round trip.
+ *
+ * Fallback path: if the RPC is unavailable (older schema, migration not yet
+ * applied) or returns an error, the function falls back to the historical
+ * client-side aggregation — two queries plus in-memory folding. The fallback
+ * preserves exact behavioural parity with callers that predate the RPC.
+ */
 export async function getResponseMetrics(surveyId: string): Promise<ResponseMetrics> {
+  // ─── Primary path: SQL RPC ────────────────────────────────────────────────
+  const { data: rpcData, error: rpcError } = await supabase.rpc('get_response_metrics', {
+    p_survey_id: surveyId,
+  });
+
+  if (!rpcError && rpcData) {
+    // RPC returns a Postgres `jsonb` — cast through `unknown` into the
+    // structured payload shape. The Postgres function contract is the source
+    // of truth; see migration 00000000000043.
+    const payload = rpcData as unknown as ResponseMetricsRpcPayload;
+    return {
+      totalResponses: payload.totalResponses ?? 0,
+      completedResponses: payload.completedResponses ?? 0,
+      completionRate: payload.completionRate ?? 0,
+      averageCompletionTimeMs: payload.averageCompletionTimeMs ?? null,
+      departmentBreakdown: payload.departmentBreakdown ?? [],
+      dailyCompletions: payload.dailyCompletions ?? [],
+    };
+  }
+
+  // ─── Fallback path: client-side aggregation ──────────────────────────────
+  // Only reached when the RPC is missing (pre-migration) or errors.
+  logger.warn(
+    { err: rpcError, fn: 'getResponseMetrics.rpc', surveyId },
+    'RPC get_response_metrics unavailable; falling back to client-side aggregation',
+  );
+
   // Responses reference deployment_id, not survey_id — resolve deployment IDs first
   const { data: deployments, error: depError } = await supabase
     .from('deployments')
@@ -178,7 +264,7 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
 
   if (depError) throw depError;
 
-  const deploymentIds = (deployments ?? []).map((d) => d.id as string);
+  const deploymentIds = (deployments ?? []).map((d: { id: string }) => d.id);
   if (deploymentIds.length === 0) {
     return {
       totalResponses: 0,
@@ -197,11 +283,9 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
 
   if (error) throw error;
 
-  const rows = responses ?? [];
+  const rows = (responses ?? []) as ResponseMetricsRow[];
   const totalResponses = rows.length;
-  const completedRows = rows.filter(
-    (r) => (r as Record<string, unknown>)['is_complete'] === true,
-  );
+  const completedRows = rows.filter((r) => r.is_complete === true);
   const completedResponses = completedRows.length;
   const completionRate = totalResponses > 0 ? (completedResponses / totalResponses) * 100 : 0;
 
@@ -209,11 +293,10 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
   let averageCompletionTimeMs: number | null = null;
   if (completedRows.length > 0) {
     const durations = completedRows
-      .filter((r) => (r as Record<string, unknown>)['submitted_at'] != null)
+      .filter((r) => r.submitted_at != null)
       .map((r) => {
-        const raw = r as Record<string, unknown>;
-        const created = new Date(raw['created_at'] as string).getTime();
-        const submitted = new Date(raw['submitted_at'] as string).getTime();
+        const created = new Date(r.created_at).getTime();
+        const submitted = new Date(r.submitted_at as string).getTime();
         return submitted - created;
       });
     averageCompletionTimeMs =
@@ -223,8 +306,7 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
   // Department breakdown (metadata_department is a flat column, not JSONB)
   const deptCounts = new Map<string, number>();
   for (const r of rows) {
-    const raw = r as Record<string, unknown>;
-    const dept = (raw['metadata_department'] as string) ?? 'Unknown';
+    const dept = r.metadata_department ?? 'Unknown';
     deptCounts.set(dept, (deptCounts.get(dept) ?? 0) + 1);
   }
   const departmentBreakdown: DepartmentBreakdown[] = Array.from(deptCounts.entries())
@@ -234,8 +316,7 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
   // Daily completions (by submitted_at date)
   const dailyCounts = new Map<string, number>();
   for (const r of completedRows) {
-    const raw = r as Record<string, unknown>;
-    const submittedAt = raw['submitted_at'] as string | null;
+    const submittedAt = r.submitted_at;
     if (!submittedAt) continue;
     const date = submittedAt.slice(0, 10);
     dailyCounts.set(date, (dailyCounts.get(date) ?? 0) + 1);
@@ -262,7 +343,10 @@ export async function triggerScoreRecalculation(surveyId: string): Promise<void>
     body: { surveyId },
   });
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'triggerScoreRecalculation', surveyId }, 'Failed to invoke score-survey function');
+    throw error;
+  }
 }
 
 // ─── Realtime ───────────────────────────────────────────────────────────────

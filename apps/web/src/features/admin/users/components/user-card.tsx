@@ -97,6 +97,10 @@ export function UserCard({
     setConfirmRemove(false);
   }, []);
 
+  // Fall back to the email local-part when fullName is null so the avatar,
+  // alt text, and aria-label always have a human-readable value.
+  const displayName = member.fullName ?? member.email.split('@')[0] ?? member.email;
+
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
       <div className="flex items-start gap-4">
@@ -104,7 +108,7 @@ export function UserCard({
         {member.avatarUrl ? (
           <img
             src={member.avatarUrl}
-            alt={`${member.fullName} avatar`}
+            alt={`${displayName} avatar`}
             className="h-10 w-10 shrink-0 rounded-full object-cover"
           />
         ) : (
@@ -116,7 +120,7 @@ export function UserCard({
             }}
             aria-hidden="true"
           >
-            {getInitials(member.fullName)}
+            {getInitials(displayName)}
           </div>
         )}
 
@@ -124,7 +128,7 @@ export function UserCard({
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h3 className="truncate text-base font-semibold text-[var(--grey-900)]">
-                {member.fullName}
+                {displayName}
                 {isSelf && (
                   <span className="ml-2 text-xs font-normal text-[var(--text-secondary)]">(you)</span>
                 )}
@@ -144,7 +148,7 @@ export function UserCard({
                   onChange={handleRoleChange}
                   disabled={isUpdating}
                   className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-1 text-xs font-medium text-[var(--grey-700)] disabled:opacity-50"
-                  aria-label={`Role for ${member.fullName}`}
+                  aria-label={`Role for ${displayName}`}
                 >
                   {availableRoles.map((r) => (
                     <option key={r.value} value={r.value}>
@@ -209,7 +213,7 @@ export function UserCard({
                   aria-label={
                     isLastAdmin
                       ? 'Cannot remove the last admin'
-                      : `Remove ${member.fullName}`
+                      : `Remove ${displayName}`
                   }
                   title={isLastAdmin ? 'Cannot remove the last admin' : undefined}
                 >

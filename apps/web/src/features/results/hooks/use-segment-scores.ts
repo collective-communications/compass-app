@@ -5,8 +5,8 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { DimensionCode } from '@compass/types';
-import type { DimensionScore } from '@compass/scoring';
 import { supabase } from '../../../lib/supabase';
+import { STALE_TIMES } from '../../../lib/query-config';
 import { resultKeys } from '../lib/query-keys';
 import type { DimensionScoreRow } from '../types';
 
@@ -62,7 +62,7 @@ export function useSegmentScores({
       if (error) throw error;
       return transformRows(data as SafeSegmentScoreRow[]);
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIMES.results,
     enabled: !!surveyId && !!segmentType,
   });
 }

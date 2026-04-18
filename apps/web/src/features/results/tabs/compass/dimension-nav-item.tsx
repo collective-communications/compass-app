@@ -40,7 +40,7 @@ export function DimensionNavItem({
     <button
       type="button"
       onClick={() => onClick(id)}
-      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors ${
+      className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] ${
         isActive
           ? 'border-l-[3px] border-l-[var(--grey-700)] bg-[var(--grey-50)]'
           : 'hover:bg-[var(--grey-50)]'

@@ -33,7 +33,7 @@ export function OpenEndedScreen({
 
         <div className="mb-2">
           <textarea
-            className="w-full resize-y rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-[var(--grey-900)] placeholder-[var(--grey-400)] transition-colors focus:border-[var(--color-interactive)] focus:outline-none"
+            className="w-full resize-y rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-[var(--grey-900)] placeholder-[var(--grey-400)] transition-colors focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20"
             rows={5}
             maxLength={MAX_CHARS}
             value={text}

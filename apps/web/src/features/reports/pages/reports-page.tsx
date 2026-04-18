@@ -31,24 +31,14 @@ interface ReportsPageProps {
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
-/** Split surveys into active (current) and previous (completed/closed) */
-function groupSurveys(surveys: ReportSurveyOption[]): {
-  active: ReportSurveyOption[];
-  previous: ReportSurveyOption[];
-} {
-  const active: ReportSurveyOption[] = [];
-  const previous: ReportSurveyOption[] = [];
-
-  for (const survey of surveys) {
-    if (survey.status === 'completed' || survey.status === 'closed') {
-      previous.push(survey);
-    } else {
-      // 'active' or undefined (backwards-compatible default)
-      active.push(survey);
-    }
-  }
-
-  return { active, previous };
+/**
+ * Filter surveys to those considered "active" (not completed/closed).
+ * Treats undefined status as active for backwards compatibility.
+ */
+function getActiveSurveys(surveys: ReportSurveyOption[]): ReportSurveyOption[] {
+  return surveys.filter(
+    (survey) => survey.status !== 'completed' && survey.status !== 'closed',
+  );
 }
 
 // ─── Component ──────────────────────────────────────────────────────────────
@@ -60,7 +50,7 @@ export function ReportsPage({
   initialSurveyId,
 }: ReportsPageProps): ReactElement {
   const [activeSurveyId, setActiveSurveyId] = useState<string | null>(
-    initialSurveyId ?? (surveys.length > 0 ? surveys[0]!.id : null),
+    initialSurveyId ?? surveys[0]?.id ?? null,
   );
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
 
@@ -75,8 +65,7 @@ export function ReportsPage({
 
   const canGenerate = userRole === 'client_exec';
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { active, previous } = useMemo(() => groupSurveys(surveys), [surveys]);
+  const activeSurveys = useMemo(() => getActiveSurveys(surveys), [surveys]);
 
   const handleSurveyChange = useCallback((surveyId: string): void => {
     setActiveSurveyId(surveyId);
@@ -87,7 +76,7 @@ export function ReportsPage({
   }, [refresh]);
 
   // Determine if the currently selected survey is active
-  const isActiveSurvey = active.some((s) => s.id === activeSurveyId);
+  const isActiveSurvey = activeSurveys.some((s) => s.id === activeSurveyId);
 
   return (
     <div className="flex flex-col gap-6">

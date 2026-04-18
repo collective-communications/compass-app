@@ -5,6 +5,7 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { supabase } from '../../../lib/supabase';
+import { STALE_TIMES } from '../../../lib/query-config';
 import { resultKeys } from '../lib/query-keys';
 
 export interface SurveyHistoryEntry {
@@ -43,7 +44,7 @@ export function useSurveyHistory(
         closesAt: row.closes_at,
       }));
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIMES.results,
     enabled: !!organizationId,
   });
 }

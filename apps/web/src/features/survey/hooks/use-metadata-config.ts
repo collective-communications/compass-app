@@ -6,6 +6,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { MetadataConfig } from '@compass/types';
 import { DEFAULT_METADATA_CONFIG } from '@compass/types';
+import { STALE_TIMES } from '../../../lib/query-config';
 import { createSurveyEngineAdapter } from '../services/survey-engine-adapter';
 
 const adapter = createSurveyEngineAdapter();
@@ -21,7 +22,7 @@ export function useMetadataConfig(organizationId: string | undefined) {
       return adapter.getMetadataConfig(organizationId);
     },
     enabled: !!organizationId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIMES.static,
     placeholderData: DEFAULT_METADATA_CONFIG,
   });
 }

@@ -7,10 +7,7 @@
 
 import { useCallback, useState, type ReactElement } from 'react';
 import { FileText, Plus } from 'lucide-react';
-import { useReports } from '../../../reports/hooks/use-reports';
-import { ReportCard } from '../../../reports/components/report-card';
-import { ReportPreview } from '../../../reports/components/report-preview';
-import { ExportModal } from '../../../reports/components/export-modal';
+import { useReports, ReportCard, ReportPreview, ExportModal } from '../../../reports';
 import { useAuthStore } from '../../../../stores/auth-store';
 import { useReportSelection } from '../../context/report-selection-context';
 

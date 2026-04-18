@@ -11,7 +11,12 @@ import {
   useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query';
+import type { Database } from '@compass/types';
 import { supabase } from '../../../../lib/supabase';
+import { logger } from '../../../../lib/logger';
+
+type OrgSettingsRow = Database['public']['Tables']['organization_settings']['Row'];
+type OrgSettingsUpdate = Database['public']['Tables']['organization_settings']['Update'];
 
 export type SaveStatus = 'saved' | 'saving' | 'error';
 
@@ -59,6 +64,39 @@ const METADATA_USAGE_COLUMNS: Record<MetadataCategory, string> = {
   tenureBands: 'metadata_tenure',
 };
 
+/**
+ * Narrows a `Json` column value to `MetadataListItem[]`.
+ * The column is declared `Json` in the generated schema but is always written as
+ * a metadata-list array by the admin UI. Falls back to [] for any non-array value.
+ */
+function toMetadataList(value: unknown): MetadataListItem[] {
+  return Array.isArray(value) ? (value as MetadataListItem[]) : [];
+}
+
+/**
+ * Map a generated `organization_settings` row to the domain-level `OrgSettings`.
+ * Shared between `fetchOrgSettings` and `updateOrgSettings` to keep column
+ * narrowing in one place.
+ */
+function toOrgSettings(row: OrgSettingsRow): OrgSettings {
+  return {
+    id: row.id,
+    orgId: row.organization_id,
+    metadata: {
+      departments: toMetadataList(row.metadata_departments),
+      roles: toMetadataList(row.metadata_roles),
+      locations: toMetadataList(row.metadata_locations),
+      tenureBands: toMetadataList(row.metadata_tenure_bands),
+    },
+    branding: {
+      displayName: row.display_name ?? '',
+      logoUrl: row.logo_url ?? null,
+    },
+    clientAccessEnabled: row.client_access_enabled ?? false,
+    updatedAt: row.updated_at,
+  };
+}
+
 async function fetchOrgSettings(orgId: string): Promise<OrgSettings> {
   const { data, error } = await supabase
     .from('organization_settings')
@@ -67,66 +105,46 @@ async function fetchOrgSettings(orgId: string): Promise<OrgSettings> {
     .single();
 
   if (error) {
+    logger.error({ err: error, fn: 'fetchOrgSettings', orgId }, 'Failed to fetch organization settings');
     throw new Error(`Failed to fetch organization settings: ${error.message}`);
   }
 
-  return {
-    id: data.id,
-    orgId: data.organization_id,
-    metadata: {
-      departments: data.metadata_departments ?? [],
-      roles: data.metadata_roles ?? [],
-      locations: data.metadata_locations ?? [],
-      tenureBands: data.metadata_tenure_bands ?? [],
-    },
-    branding: {
-      displayName: data.display_name ?? '',
-      logoUrl: data.logo_url ?? null,
-    },
-    clientAccessEnabled: data.client_access_enabled ?? false,
-    updatedAt: data.updated_at,
-  };
+  return toOrgSettings(data);
 }
+
+/**
+ * Shape of the auto-save payload — a subset of the generated `Update` type with
+ * JSON metadata columns narrowed to their runtime array shape.
+ */
+export type OrgSettingsUpdatePayload = Partial<{
+  metadata_departments: MetadataListItem[];
+  metadata_roles: MetadataListItem[];
+  metadata_locations: MetadataListItem[];
+  metadata_tenure_bands: MetadataListItem[];
+  display_name: string;
+  logo_url: string | null;
+  client_access_enabled: boolean;
+}>;
 
 async function updateOrgSettings(
   orgId: string,
-  updates: Partial<{
-    metadata_departments: MetadataListItem[];
-    metadata_roles: MetadataListItem[];
-    metadata_locations: MetadataListItem[];
-    metadata_tenure_bands: MetadataListItem[];
-    display_name: string;
-    logo_url: string | null;
-    client_access_enabled: boolean;
-  }>,
+  updates: OrgSettingsUpdatePayload,
 ): Promise<OrgSettings> {
+  // The generated Update type widens metadata columns to Json; MetadataListItem[]
+  // is a structural subtype but TS cannot prove it, so cast via OrgSettingsUpdate.
   const { data, error } = await supabase
     .from('organization_settings')
-    .update(updates)
+    .update(updates as OrgSettingsUpdate)
     .eq('organization_id', orgId)
     .select('*')
     .single();
 
   if (error) {
+    logger.error({ err: error, fn: 'updateOrgSettings', orgId }, 'Failed to update organization settings');
     throw new Error(`Failed to update organization settings: ${error.message}`);
   }
 
-  return {
-    id: data.id,
-    orgId: data.organization_id,
-    metadata: {
-      departments: data.metadata_departments ?? [],
-      roles: data.metadata_roles ?? [],
-      locations: data.metadata_locations ?? [],
-      tenureBands: data.metadata_tenure_bands ?? [],
-    },
-    branding: {
-      displayName: data.display_name ?? '',
-      logoUrl: data.logo_url ?? null,
-    },
-    clientAccessEnabled: data.client_access_enabled ?? false,
-    updatedAt: data.updated_at,
-  };
+  return toOrgSettings(data);
 }
 
 /**
@@ -153,14 +171,34 @@ async function fetchMetadataUsage(orgId: string): Promise<Record<MetadataCategor
     ),
   );
 
+  /**
+   * Narrow guard: returns the value at `column` iff it's a non-empty string.
+   * Supabase's typed client produces a `ParserError` pseudo-type when the
+   * select string is built dynamically, so we cannot statically assert the
+   * full row shape. We only ever read one column per row, so a guarded
+   * property-access is both sufficient and type-safe.
+   */
+  function readStringColumn(row: unknown, column: string): string | null {
+    if (row === null || typeof row !== 'object') return null;
+    const value = (row as { [k: string]: unknown })[column];
+    return typeof value === 'string' && value.length > 0 ? value : null;
+  }
+
   for (let i = 0; i < entries.length; i++) {
     const [category, column] = entries[i] as [MetadataCategory, string];
     const { data, error } = queryResults[i]!;
 
-    if (error) continue;
+    if (error) {
+      logger.error(
+        { err: error, fn: 'fetchMetadataUsage', orgId, category, column },
+        'Failed to load metadata usage — skipping category',
+      );
+      continue;
+    }
 
-    for (const row of ((data ?? []) as unknown) as Record<string, unknown>[]) {
-      const value = row[column] as string | null;
+    const rows: unknown[] = Array.isArray(data) ? data : [];
+    for (const row of rows) {
+      const value = readStringColumn(row, column);
       if (value) {
         result[category].add(value);
       }
@@ -228,7 +266,7 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
     [mutation],
   );
 
-  const DB_CATEGORY_MAP: Record<MetadataCategory, string> = {
+  const DB_CATEGORY_MAP: Record<MetadataCategory, keyof OrgSettingsUpdatePayload> = {
     departments: 'metadata_departments',
     roles: 'metadata_roles',
     locations: 'metadata_locations',
@@ -241,7 +279,7 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
         orgSettingsKeys.detail(orgId),
         (prev) => prev ? { ...prev, metadata: { ...prev.metadata, [category]: items } } : prev,
       );
-      debouncedMutate({ [DB_CATEGORY_MAP[category]]: items });
+      debouncedMutate({ [DB_CATEGORY_MAP[category]]: items } as OrgSettingsUpdatePayload);
     },
     [queryClient, orgId, debouncedMutate],
   );
@@ -252,7 +290,7 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
         orgSettingsKeys.detail(orgId),
         (prev) => prev ? { ...prev, branding: { ...prev.branding, ...branding } } : prev,
       );
-      const dbUpdates: Record<string, unknown> = {};
+      const dbUpdates: OrgSettingsUpdatePayload = {};
       if (branding.displayName !== undefined) dbUpdates.display_name = branding.displayName;
       if (branding.logoUrl !== undefined) dbUpdates.logo_url = branding.logoUrl;
       debouncedMutate(dbUpdates);

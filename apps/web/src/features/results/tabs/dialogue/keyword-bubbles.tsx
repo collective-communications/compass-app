@@ -5,7 +5,7 @@
  * Max 30 keywords displayed, radius scaled between 24px and 64px.
  */
 
-import { useMemo, type ReactElement } from 'react';
+import { useMemo, useState, type ReactElement } from 'react';
 
 /** Single keyword with its occurrence count. */
 export interface Keyword {
@@ -122,6 +122,8 @@ export function KeywordBubbles({
     [displayed, minCount, maxCount],
   );
 
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
+
   const viewBox = useMemo(() => {
     if (circles.length === 0) return { x: 0, y: 0, w: 100, h: 100 };
     let xMin = Infinity, xMax = -Infinity, yMin = Infinity, yMax = -Infinity;
@@ -145,8 +147,9 @@ export function KeywordBubbles({
       role="group"
       aria-label="Keyword filters"
     >
-      {circles.map((circle) => {
+      {circles.map((circle, i) => {
         const isActive = activeKeyword === circle.keyword.text;
+        const isFocused = focusIndex === i;
         const fontSize = getFontSize(circle.r, circle.keyword.text.length);
 
         return (
@@ -163,7 +166,9 @@ export function KeywordBubbles({
                 onKeywordClick(isActive ? null : circle.keyword.text);
               }
             }}
-            className="cursor-pointer"
+            onFocus={() => setFocusIndex(i)}
+            onBlur={() => setFocusIndex(null)}
+            className="cursor-pointer focus:outline-none"
           >
             <circle
               cx={circle.x}
@@ -173,6 +178,17 @@ export function KeywordBubbles({
               stroke={isActive ? 'var(--grey-700)' : 'var(--grey-200, #E5E4E0)'}
               strokeWidth={1}
             />
+            {isFocused && (
+              <circle
+                cx={circle.x}
+                cy={circle.y}
+                r={circle.r + 3}
+                fill="none"
+                stroke="var(--color-interactive)"
+                strokeWidth={2}
+                pointerEvents="none"
+              />
+            )}
             <text
               x={circle.x}
               y={circle.y}

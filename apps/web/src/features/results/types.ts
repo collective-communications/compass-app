@@ -82,14 +82,8 @@ export interface Recommendation {
   priority: number;
 }
 
-/** Survey available in the survey picker (scores already calculated). */
-export interface ScoredSurvey {
-  id: string;
-  title: string;
-  closedAt: string | null;
-  scoresCalculatedAt: string | null;
-  responseCount: number;
-}
+/** Survey available in the survey picker (scores already calculated). Canonical definition in lib/types/survey.ts. */
+export type { ScoredSurvey } from '../../lib/types/survey';
 
 // ─── Derived Types ──────────────────────────────────────────────────────────
 
@@ -113,6 +107,12 @@ export type ResultsTabId =
 export interface ResultsTab {
   id: ResultsTabId;
   label: string;
+}
+
+/** URL search params for the `/results/$surveyId/groups` route. */
+export interface GroupsSearch {
+  segmentType?: string;
+  segmentValue?: string;
 }
 
 export const RESULTS_TABS: ResultsTab[] = [

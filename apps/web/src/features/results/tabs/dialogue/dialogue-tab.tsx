@@ -62,7 +62,7 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
   const [dimensionFilter, setDimensionFilter] = useState<DimensionFilter>(null);
   const [searchText, setSearchText] = useState('');
 
-  const { data: allResponses, isLoading: responsesLoading } = useDialogueResponses({ surveyId });
+  const { data: allResponses, isLoading: responsesLoading, hasMore: responsesTruncated, cap: responsesCap } = useDialogueResponses({ surveyId });
   const { data: questionScores } = useQuestionScores({ surveyId });
 
   /** Map questionId → dimensionCode for filtering. */
@@ -137,6 +137,16 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
         hasAnyResponses={(allResponses ?? []).length > 0}
         onClearFilters={clearFilters}
       />
+
+      {responsesTruncated && (
+        <p
+          className="rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] px-4 py-3 text-center text-xs text-[var(--text-secondary)]"
+          role="note"
+        >
+          Showing the most recent {responsesCap.toLocaleString()} responses. Older
+          responses are hidden — use search or dimension filters to narrow the list.
+        </p>
+      )}
     </div>
   );
 }

@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type ReactElement,
+} from 'react';
 import { Moon, Sun } from 'lucide-react';
 import type { AuthUser } from '@compass/types';
 import type { ProfileMenuItem } from '../../lib/navigation';
@@ -13,6 +21,11 @@ import { ICON_MAP } from '../../lib/icons';
  *   - action items (`action` set):
  *       * `signOut` → call `onSignOut`
  *       * `toggleTheme` → flip local theme state
+ *
+ * Keyboard behaviour follows the WAI-ARIA menu pattern:
+ *   - ArrowDown / ArrowUp cycle focus through `menuitem` elements
+ *   - Home / End jump to first / last item
+ *   - Escape closes the menu and returns focus to the trigger
  */
 
 type Theme = 'light' | 'dark';
@@ -36,12 +49,16 @@ export function ProfileMenu({ user, items, onSignOut, onNavigate }: ProfileMenuP
   const [open, setOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const menuRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const menuListRef = useRef<HTMLDivElement>(null);
+  const menuId = useId();
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
   }, [theme]);
 
   const toggle = useCallback(() => setOpen((prev) => !prev), []);
+  const closeMenu = useCallback(() => setOpen(false), []);
 
   const toggleTheme = useCallback(() => {
     setTheme((prev) => {
@@ -64,6 +81,59 @@ export function ProfileMenu({ user, items, onSignOut, onNavigate }: ProfileMenuP
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [open]);
 
+  // When the menu opens, move focus to the first menuitem.
+  useEffect(() => {
+    if (!open) return;
+    const firstItem = menuListRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+    firstItem?.focus();
+  }, [open]);
+
+  /** Keyboard nav within the menu — arrow keys cycle, Home/End jump, Escape closes. */
+  const handleMenuKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>): void => {
+      if (!menuListRef.current) return;
+      const items = Array.from(
+        menuListRef.current.querySelectorAll<HTMLElement>('[role="menuitem"]'),
+      );
+      if (items.length === 0) return;
+
+      const active = document.activeElement as HTMLElement | null;
+      const currentIndex = active ? items.indexOf(active) : -1;
+
+      function focusIndex(index: number): void {
+        const target = items[(index + items.length) % items.length];
+        target?.focus();
+      }
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          focusIndex(currentIndex === -1 ? 0 : currentIndex + 1);
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          focusIndex(currentIndex === -1 ? items.length - 1 : currentIndex - 1);
+          break;
+        case 'Home':
+          event.preventDefault();
+          focusIndex(0);
+          break;
+        case 'End':
+          event.preventDefault();
+          focusIndex(items.length - 1);
+          break;
+        case 'Escape':
+          event.preventDefault();
+          closeMenu();
+          triggerRef.current?.focus();
+          break;
+        default:
+          break;
+      }
+    },
+    [closeMenu],
+  );
+
   const initials = user.fullName
     ? user.fullName
         .split(' ')
@@ -76,10 +146,12 @@ export function ProfileMenu({ user, items, onSignOut, onNavigate }: ProfileMenuP
   return (
     <div ref={menuRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={toggle}
         aria-expanded={open}
-        aria-haspopup="true"
+        aria-haspopup="menu"
+        aria-controls={menuId}
         className="flex h-8 w-8 items-center justify-center rounded-full bg-[var(--color-core)] text-xs font-medium text-white"
       >
         {user.avatarUrl ? (
@@ -95,7 +167,10 @@ export function ProfileMenu({ user, items, onSignOut, onNavigate }: ProfileMenuP
 
       {open && (
         <div
+          ref={menuListRef}
+          id={menuId}
           role="menu"
+          onKeyDown={handleMenuKeyDown}
           className="absolute right-0 top-10 z-20 w-48 rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] py-1 shadow-lg"
         >
           <div className="border-b border-[var(--grey-200)] px-3 py-2">

@@ -1,14 +1,22 @@
 /**
  * Dashboard route definitions for TanStack Router.
  * Creates the `/dashboard` route for Tier 2 client users.
+ *
+ * The dashboard page is loaded via `React.lazy` so it ships in its own chunk
+ * and stays out of the initial bundle for survey respondents / unauthenticated
+ * visitors.
  */
 
-import type { ReactElement } from 'react';
+import { Suspense, lazy, type ReactElement } from 'react';
 import { createRoute } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { AppShell } from '../../components/shells/app-shell';
+import { RouteLoading } from '../../components/app/route-loading';
 import { guardRoute } from '../../lib/route-guards';
-import { DashboardPage } from './pages/dashboard-page';
+
+const DashboardPage = lazy(() =>
+  import('./pages/dashboard-page').then((m) => ({ default: m.DashboardPage })),
+);
 
 export function createDashboardRoutes<TParent extends AnyRoute>(parentRoute: TParent) {
   const dashboardRoute = createRoute({
@@ -18,7 +26,9 @@ export function createDashboardRoutes<TParent extends AnyRoute>(parentRoute: TPa
     component: function DashboardLayout(): ReactElement {
       return (
         <AppShell>
-          <DashboardPage />
+          <Suspense fallback={<RouteLoading />}>
+            <DashboardPage />
+          </Suspense>
         </AppShell>
       );
     },

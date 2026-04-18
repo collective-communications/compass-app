@@ -7,7 +7,7 @@
 import type { CSSProperties, ReactElement, ReactNode } from 'react';
 import { useMemo } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { PillTabNav } from '../../../components/navigation/pill-tab-nav';
+import { PillTabNav, tabPanelId } from '../../../components/navigation/pill-tab-nav';
 import { InsightsPanel } from './insights-panel';
 import { SidebarColumn } from './sidebar-column';
 import { ResultsSkeleton } from './results-skeleton';
@@ -85,6 +85,7 @@ export function ResultsLayout({
         activeId={activeTab}
         onSelect={(id) => onTabChange(id as ResultsTabId)}
         ariaLabel="Results tabs"
+        idPrefix="results"
       />
 
       {/* Mobile sidebar strip — shown above main content on mobile only */}
@@ -103,7 +104,8 @@ export function ResultsLayout({
 
         <div
           role="tabpanel"
-          aria-label={`${activeTab} results`}
+          id={tabPanelId('results', activeTab)}
+          aria-labelledby={`results-${activeTab}`}
           className="min-w-0"
         >
           {children}

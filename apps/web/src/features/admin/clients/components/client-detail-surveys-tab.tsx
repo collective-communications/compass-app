@@ -79,7 +79,7 @@ export function ClientDetailSurveysTab({
 
   return (
     <>
-      <div role="tabpanel" aria-label="Surveys">
+      <div role="tabpanel" id="client-detail-panel-surveys" aria-labelledby="client-detail-surveys">
         <SurveyListPage
           organizationId={organizationId}
           userId={userId}

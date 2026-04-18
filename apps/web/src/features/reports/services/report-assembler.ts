@@ -4,13 +4,8 @@
  * and branding, then maps DB snake_case to camelCase.
  */
 
-import type { ReportConfig, ReportPayload, ReportSection } from '@compass/types';
+import type { ReportConfig, ReportPayload } from '@compass/types';
 import { supabase } from '../../../lib/supabase';
-
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-/** Minimum response count before segment-level data is included */
-const ANONYMITY_THRESHOLD = 5;
 
 // ─── Main ────────────────────────────────────────────────────────────────────
 
@@ -23,25 +18,38 @@ const ANONYMITY_THRESHOLD = 5;
 export async function assembleReportPayload(config: ReportConfig): Promise<ReportPayload> {
   const includedSections = config.sections.filter((s) => s.included);
 
-  const [surveyResult, orgResult, scoresResult, segmentScoresResult, recommendationsResult] =
-    await Promise.all([
-      supabase.from('surveys').select('*').eq('id', config.surveyId).single(),
-      fetchOrganizationForSurvey(config.surveyId),
-      supabase
-        .from('scores')
-        .select('*, dimensions!inner(code, name)')
-        .eq('survey_id', config.surveyId)
-        .is('segment_type', null),
-      supabase
-        .from('safe_segment_scores')
-        .select('*')
-        .eq('survey_id', config.surveyId),
-      supabase
-        .from('recommendations')
-        .select('*')
-        .eq('survey_id', config.surveyId)
-        .order('severity_rank', { ascending: true }),
-    ]);
+  // All reads fire in parallel — the response-count head query is cheap and has
+  // no dependency on the survey row beyond surveyId, so we fold it into the
+  // same Promise.all to avoid a needless serial round-trip.
+  const [
+    surveyResult,
+    orgResult,
+    scoresResult,
+    segmentScoresResult,
+    recommendationsResult,
+    responseCountResult,
+  ] = await Promise.all([
+    supabase.from('surveys').select('*').eq('id', config.surveyId).single(),
+    fetchOrganizationForSurvey(config.surveyId),
+    supabase
+      .from('scores')
+      .select('*, dimensions!inner(code, name)')
+      .eq('survey_id', config.surveyId)
+      .is('segment_type', null),
+    supabase
+      .from('safe_segment_scores')
+      .select('*')
+      .eq('survey_id', config.surveyId),
+    supabase
+      .from('recommendations')
+      .select('*')
+      .eq('survey_id', config.surveyId)
+      .order('severity_rank', { ascending: true }),
+    supabase
+      .from('responses')
+      .select('id', { count: 'exact', head: true })
+      .eq('survey_id', config.surveyId),
+  ]);
 
   if (surveyResult.error) throw surveyResult.error;
   if (scoresResult.error) throw scoresResult.error;
@@ -54,11 +62,20 @@ export async function assembleReportPayload(config: ReportConfig): Promise<Repor
     throw new Error('Survey scores have not been calculated. Run scoring before generating a report.');
   }
 
-  // Response count
-  const { count: responseCount } = await supabase
-    .from('responses')
-    .select('id', { count: 'exact', head: true })
-    .eq('survey_id', config.surveyId);
+  const responseCount = responseCountResult.count;
+
+  // Likert scale size from survey settings (default 4 for legacy surveys).
+  // Percentages normalize raw scores in [1, likertSize] to [0, 100] via
+  // ((rawScore - 1) / (likertSize - 1)) * 100 — matches the canonical
+  // scoring package and allows 5-point (or larger) scales to render
+  // correctly. Guard against a degenerate scale (< 2) with a 4 fallback.
+  const surveySettings = (surveyRow['settings'] as Record<string, unknown> | null) ?? {};
+  const rawLikertSize =
+    typeof surveySettings['likertSize'] === 'number'
+      ? (surveySettings['likertSize'] as number)
+      : 4;
+  const likertSize = rawLikertSize >= 2 ? rawLikertSize : 4;
+  const likertRange = likertSize - 1;
 
   // Map dimension scores
   const dimensionScores: Record<string, number> = {};
@@ -72,7 +89,7 @@ export async function assembleReportPayload(config: ReportConfig): Promise<Repor
     const code = dim['code'] as string;
     const score = raw['raw_score'] as number;
     dimensionScores[code] = score;
-    dimensionPercentages[code] = ((score / 4) * 100);
+    dimensionPercentages[code] = ((score - 1) / likertRange) * 100;
     overallScore += score;
     dimensionCount += 1;
   }

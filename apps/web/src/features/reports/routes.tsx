@@ -5,23 +5,54 @@
  * beforeLoad guard:
  *   - No user → redirect to /auth/login
  *   - tier_1 → always allowed
- *   - tier_2 → requires organizations.client_access_enabled
+ *   - tier_2 → requires `organization_settings.client_access_enabled`
+ *     (delegated to `guardClientAccess`)
+ *
+ * The `ReportsPage` is loaded via `React.lazy` so its report rendering /
+ * PDF generation footprint stays out of the initial bundle.
  */
 
-import type { ReactElement } from 'react';
+import { Suspense, lazy, type ReactElement } from 'react';
 import { createRoute, redirect } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
+import { UserRole } from '@compass/types';
 import { useAuthStore } from '../../stores/auth-store';
-import { supabase } from '../../lib/supabase';
+import { guardClientAccess } from '../../lib/route-guards';
 import { AppShell } from '../../components/shells/app-shell';
-import { ReportsPage } from './pages/reports-page';
+import { RouteLoading } from '../../components/app/route-loading';
 import { useScoredSurveys } from '../../hooks/use-scored-surveys';
 
-/** Map internal roles to the UserRole type expected by ReportsPage. */
-function mapUserRole(role: string): 'client_exec' | 'director' | 'manager' {
-  if (role === 'client_director') return 'director';
-  if (role === 'client_manager') return 'manager';
-  return 'client_exec';
+const ReportsPage = lazy(() =>
+  import('./pages/reports-page').then((m) => ({ default: m.ReportsPage })),
+);
+
+/**
+ * Narrowed role shape accepted by `ReportsPage`. Determines whether the
+ * "Generate Report" button appears — only `client_exec` can generate.
+ */
+type ReportsPageRole = 'client_exec' | 'director' | 'manager';
+
+/**
+ * Exhaustive mapping from platform `UserRole` to the narrowed role
+ * `ReportsPage` understands. TypeScript enforces every role is mapped;
+ * adding a new role without updating this table is a compile error.
+ *
+ * tier_1 (ccc_admin/ccc_member) gets `client_exec` so generate is available
+ * when they visit a client's reports; client_user has no generate capability
+ * so we treat them like a manager.
+ */
+const ROLE_TO_REPORTS_PAGE_ROLE: Record<UserRole, ReportsPageRole> = {
+  ccc_admin: 'client_exec',
+  ccc_member: 'client_exec',
+  client_exec: 'client_exec',
+  client_director: 'director',
+  client_manager: 'manager',
+  client_user: 'manager',
+};
+
+/** Map platform role to the narrowed ReportsPage role. */
+function mapUserRole(role: UserRole): ReportsPageRole {
+  return ROLE_TO_REPORTS_PAGE_ROLE[role];
 }
 
 export function createReportsRoutes<TParent extends AnyRoute>(parentRoute: TParent) {
@@ -36,14 +67,7 @@ export function createReportsRoutes<TParent extends AnyRoute>(parentRoute: TPare
       if (user.tier === 'tier_1') {
         return;
       }
-      const { data } = await supabase
-        .from('organizations')
-        .select('client_access_enabled')
-        .eq('id', user.organizationId)
-        .single();
-      if (!data?.client_access_enabled) {
-        throw redirect({ to: '/dashboard' });
-      }
+      await guardClientAccess(user);
     },
     component: function ReportsLayout(): ReactElement {
       const { surveyId } = reportsRoute.useParams() as { surveyId: string };
@@ -59,12 +83,14 @@ export function createReportsRoutes<TParent extends AnyRoute>(parentRoute: TPare
 
       return (
         <AppShell>
-          <ReportsPage
-            userRole={mapUserRole(user?.role ?? 'client_exec')}
-            surveys={surveys}
-            isSurveysLoading={isSurveysLoading}
-            initialSurveyId={surveyId}
-          />
+          <Suspense fallback={<RouteLoading />}>
+            <ReportsPage
+              userRole={mapUserRole(user?.role ?? UserRole.CLIENT_EXEC)}
+              surveys={surveys}
+              isSurveysLoading={isSurveysLoading}
+              initialSurveyId={surveyId}
+            />
+          </Suspense>
         </AppShell>
       );
     },

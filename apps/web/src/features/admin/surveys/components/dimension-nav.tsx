@@ -31,7 +31,7 @@ export function DimensionNav({
             <button
               type="button"
               onClick={() => onSelect(null)}
-              className={`whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
+              className={`whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] ${
                 activeDimensionId === null
                   ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                   : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
@@ -45,7 +45,7 @@ export function DimensionNav({
               <button
                 type="button"
                 onClick={() => onSelect(dim.id)}
-                className={`whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors ${
+                className={`whitespace-nowrap rounded-full px-4 py-1 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] ${
                   activeDimensionId === dim.id
                     ? 'bg-[var(--grey-900)] text-[var(--grey-50)]'
                     : 'text-[var(--grey-700)] hover:bg-[var(--grey-100)]'
@@ -65,7 +65,7 @@ export function DimensionNav({
             <button
               type="button"
               onClick={() => onSelect(null)}
-              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors ${
+              className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] ${
                 activeDimensionId === null
                   ? 'bg-[var(--grey-100)] font-medium text-[var(--grey-900)]'
                   : 'text-[var(--grey-700)] hover:bg-[var(--grey-50)]'
@@ -80,7 +80,7 @@ export function DimensionNav({
               <button
                 type="button"
                 onClick={() => onSelect(dim.id)}
-                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors ${
+                className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] ${
                   activeDimensionId === dim.id
                     ? 'bg-[var(--grey-100)] font-medium text-[var(--grey-900)]'
                     : 'text-[var(--grey-700)] hover:bg-[var(--grey-50)]'

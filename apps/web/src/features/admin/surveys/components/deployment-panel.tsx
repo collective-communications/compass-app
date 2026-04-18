@@ -5,6 +5,7 @@
 
 import { useState, useCallback, type ReactElement } from 'react';
 import type { Deployment, Survey } from '@compass/types';
+import { formatDisplayDate } from '@compass/utils';
 import { useRecipientStats, useSendInvitations } from '../hooks/use-recipients';
 
 export interface DeploymentPanelProps {
@@ -21,15 +22,6 @@ function getDaysRemaining(closesAt: string | null): number | null {
   const diffMs = new Date(closesAt).getTime() - Date.now();
   if (diffMs <= 0) return 0;
   return Math.ceil(diffMs / (1000 * 60 * 60 * 24));
-}
-
-function formatDate(iso: string | null): string {
-  if (!iso) return '--';
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 }
 
 export function DeploymentPanel({
@@ -90,11 +82,11 @@ export function DeploymentPanel({
       <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
         <div>
           <p className="text-[var(--text-secondary)]">Opens</p>
-          <p className="font-medium text-[var(--grey-900)]">{formatDate(survey.opensAt)}</p>
+          <p className="font-medium text-[var(--grey-900)]">{formatDisplayDate(survey.opensAt, 'short')}</p>
         </div>
         <div>
           <p className="text-[var(--text-secondary)]">Closes</p>
-          <p className="font-medium text-[var(--grey-900)]">{formatDate(survey.closesAt)}</p>
+          <p className="font-medium text-[var(--grey-900)]">{formatDisplayDate(survey.closesAt, 'short')}</p>
         </div>
       </div>
 

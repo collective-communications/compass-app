@@ -5,21 +5,12 @@
  */
 
 import type { ReactElement } from 'react';
+import { formatDisplayDate } from '@compass/utils';
 import type { ActiveSurvey } from '../hooks/use-dashboard-data';
 import { Card } from '../../../components/ui/card';
 
 interface ActiveSurveyCardProps {
   data: ActiveSurvey;
-}
-
-/** Format an ISO date string to a readable format (e.g., "March 15, 2026") */
-function formatDate(iso: string | null): string {
-  if (!iso) return '--';
-  return new Date(iso).toLocaleDateString(undefined, {
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric',
-  });
 }
 
 export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement {
@@ -31,7 +22,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
         <div className="min-w-0 flex-1">
           <h2 className="text-lg font-semibold text-[var(--grey-900)]">{survey.title}</h2>
           <p className="mt-1 text-sm text-[var(--text-tertiary)]">
-            Closes {formatDate(survey.closesAt)}
+            Closes {formatDisplayDate(survey.closesAt, 'long')}
           </p>
         </div>
         <span className="shrink-0 rounded-full bg-[var(--grey-700)] px-3 py-1 text-xs font-semibold uppercase text-[var(--grey-50)]">

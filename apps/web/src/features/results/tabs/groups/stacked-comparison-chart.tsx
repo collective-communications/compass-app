@@ -40,12 +40,6 @@ interface StackedComparisonChartProps {
   belowThresholdValues: Set<string>;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface SegmentDimensionEntry {
-  value: string;
-  score: number | null;
-}
-
 export function StackedComparisonChart({
   segmentRows,
   overallScores,

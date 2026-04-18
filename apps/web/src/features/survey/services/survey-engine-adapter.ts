@@ -3,6 +3,7 @@
  * Handles deployment resolution and response resumption via session tokens.
  */
 import type {
+  Database,
   SurveyEngineService,
   DeploymentResolution,
   SurveyResponse,
@@ -10,9 +11,57 @@ import type {
   QuestionWithDimension,
   LikertValue,
 } from '@compass/types';
+
+type ResponseInsert = Database['public']['Tables']['responses']['Insert'];
+type SurveyRow = Database['public']['Tables']['surveys']['Row'];
+type DeploymentRow = Database['public']['Tables']['deployments']['Row'];
+type QuestionRow = Database['public']['Tables']['questions']['Row'];
+type AnswerRow = Database['public']['Tables']['answers']['Row'];
+type ResponseRow = Database['public']['Tables']['responses']['Row'];
+
+/**
+ * Generated question Row is narrower than the runtime schema — these columns
+ * exist in the database (see migrations) but are not yet reflected in the
+ * generated types. Tracked for regeneration.
+ */
+type QuestionRowWithDrift = QuestionRow & {
+  description?: string | null;
+  options?: unknown;
+  diagnostic_focus?: string | null;
+  recommended_action?: string | null;
+  updated_at?: string;
+};
+
+/** Joined shape returned by the getQuestions select: question + its dimensions. */
+type QuestionRowWithDimensions = QuestionRowWithDrift & {
+  question_dimensions?: Array<{
+    id?: string;
+    question_id: string;
+    dimension_id: string;
+    weight?: number;
+  }> | {
+    id?: string;
+    question_id: string;
+    dimension_id: string;
+    weight?: number;
+  } | null;
+};
+
+/** Joined shape returned by resolveDeployment: deployment + its survey. */
+type DeploymentWithSurveyRow = DeploymentRow & {
+  survey: SurveyRow | null;
+};
+
+/** Joined shape returned by resumeResponse: response + its answers. */
+type ResponseWithAnswersRow = ResponseRow & {
+  answers: Array<Pick<AnswerRow, 'question_id' | 'likert_value' | 'open_text_value'>>;
+};
+
 import { DEFAULT_METADATA_CONFIG } from '@compass/types';
+import { formatDisplayDate } from '@compass/utils';
 import { supabase } from '../../../lib/supabase';
-import { mapSurveyRow, mapDeploymentRow } from '../../../lib/mappers/survey-mappers';
+import { logger } from '../../../lib/logger';
+import { mapSurveyRow, mapDeploymentRow, mapQuestionRow } from '../../../lib/mappers/survey-mappers';
 
 /**
  * Create a partial SurveyEngineService backed by Supabase.
@@ -34,42 +83,53 @@ export function createSurveyEngineAdapter(): Pick<
         .single();
 
       if (deploymentError || !deployment) {
+        if (deploymentError) {
+          logger.error(
+            { err: deploymentError, fn: 'resolveDeployment', token },
+            'Failed to resolve deployment token',
+          );
+        }
         return { status: 'not_found', message: 'This survey link is not valid.' };
       }
 
-      const survey = (deployment as Record<string, unknown>)['survey'] as Record<string, unknown> | null;
+      const row = deployment as DeploymentWithSurveyRow;
+      const survey = row.survey;
 
       if (!survey) {
         return { status: 'not_found', message: 'The survey associated with this link could not be found.' };
       }
 
       // Check if deployment has expired
-      const deploymentClosesAt = (deployment as Record<string, unknown>)['closes_at'] as string | null;
+      const deploymentClosesAt = row.closes_at;
       if (deploymentClosesAt && new Date(deploymentClosesAt) < new Date()) {
         return { status: 'expired', message: 'This survey link has expired.' };
       }
 
       // Check survey status
-      const surveyStatus = survey['status'] as string;
-      const closesAt = survey['closes_at'] as string | null;
-      const opensAt = survey['opens_at'] as string | null;
+      const surveyStatus = survey.status;
+      const closesAt = survey.closes_at;
+      const opensAt = survey.opens_at;
 
       if (surveyStatus === 'closed' || surveyStatus === 'archived') {
-        return { status: 'closed', message: `This survey closed on ${formatDate(closesAt)}.`, closesAt };
+        return {
+          status: 'closed',
+          message: `This survey closed on ${formatDisplayDate(closesAt, 'long', { nullFallback: 'an unknown date' })}.`,
+          closesAt,
+        };
       }
 
       // Check if survey has not opened yet
       if (opensAt && new Date(opensAt) > new Date()) {
         return {
           status: 'not_yet_open',
-          message: `This survey opens on ${formatDate(opensAt)}.`,
+          message: `This survey opens on ${formatDisplayDate(opensAt, 'long', { nullFallback: 'an unknown date' })}.`,
           opensAt,
         };
       }
 
       return {
         status: 'valid',
-        deployment: mapDeploymentRow(deployment as Record<string, unknown>),
+        deployment: mapDeploymentRow(row),
         survey: mapSurveyRow(survey),
       };
     },
@@ -85,11 +145,18 @@ export function createSurveyEngineAdapter(): Pick<
         .eq('id', sessionToken)
         .maybeSingle();
 
+      if (error) {
+        logger.error(
+          { err: error, fn: 'resumeResponse', deploymentId },
+          'Failed to resume survey response',
+        );
+      }
+
       if (error || !data) {
         return null;
       }
 
-      return mapResponseWithAnswers(data as Record<string, unknown>);
+      return mapResponseWithAnswers(data as ResponseWithAnswersRow);
     },
 
     async getMetadataConfig(organizationId: string): Promise<MetadataConfig> {
@@ -99,13 +166,21 @@ export function createSurveyEngineAdapter(): Pick<
         .eq('id', organizationId)
         .single();
 
+      if (error) {
+        logger.error(
+          { err: error, fn: 'getMetadataConfig', organizationId },
+          'Failed to read organization settings — falling back to defaults',
+        );
+      }
+
       if (error || !data?.settings) {
         return { ...DEFAULT_METADATA_CONFIG };
       }
 
-      const orgConfig = (data.settings as Record<string, unknown>).metadataConfig as
-        | Partial<MetadataConfig>
-        | undefined;
+      // The `settings` column is JSONB; narrow it to the one nested key this
+      // function cares about without going through `Record<string, unknown>`.
+      const settings = data.settings as { metadataConfig?: Partial<MetadataConfig> };
+      const orgConfig = settings?.metadataConfig;
 
       if (!orgConfig) {
         return { ...DEFAULT_METADATA_CONFIG };
@@ -149,6 +224,10 @@ export function createSurveyEngineAdapter(): Pick<
           .eq('id', params.responseId);
 
         if (error) {
+          logger.error(
+            { err: error, fn: 'saveResponse.update', responseId: params.responseId },
+            'Failed to update existing survey response',
+          );
           throw new Error(`Failed to update response: ${error.message}`);
         }
 
@@ -159,7 +238,14 @@ export function createSurveyEngineAdapter(): Pick<
       // sessionToken === responseId throughout the survey flow.
       const responseId = params.sessionToken || crypto.randomUUID();
 
-      const row = {
+      // deployment_id is non-null in the DB; the domain type widens it to
+      // string | null for in-memory drafts. Reject the insert up-front so the
+      // DB's NOT NULL constraint is not the first line of defense.
+      if (!params.deploymentId) {
+        throw new Error('Cannot save response without a deployment ID.');
+      }
+
+      const row: ResponseInsert = {
         id: responseId,
         deployment_id: params.deploymentId,
         session_token: responseId,
@@ -169,6 +255,10 @@ export function createSurveyEngineAdapter(): Pick<
       const { error } = await supabase.from('responses').insert(row);
 
       if (error) {
+        logger.error(
+          { err: error, fn: 'saveResponse.insert', responseId, deploymentId: params.deploymentId },
+          'Failed to create new survey response',
+        );
         throw new Error(`Failed to create response: ${error.message}`);
       }
 
@@ -183,6 +273,10 @@ export function createSurveyEngineAdapter(): Pick<
         .order('order_index', { ascending: true });
 
       if (error) {
+        logger.error(
+          { err: error, fn: 'getQuestions', surveyId },
+          'Failed to load survey questions',
+        );
         throw new Error(`Failed to load questions: ${error.message}`);
       }
 
@@ -190,35 +284,21 @@ export function createSurveyEngineAdapter(): Pick<
         return [];
       }
 
-      return data.map((row: Record<string, unknown>) => {
-        const qdRaw = row['question_dimensions'];
-        const qd = Array.isArray(qdRaw)
-          ? (qdRaw[0] as Record<string, unknown> | undefined)
-          : (qdRaw as Record<string, unknown> | undefined);
+      return (data as QuestionRowWithDimensions[]).map((row) => {
+        const qdRaw = row.question_dimensions;
+        const qd = Array.isArray(qdRaw) ? qdRaw[0] : qdRaw ?? undefined;
 
+        const base = mapQuestionRow(row);
         return {
-          id: row['id'] as string,
-          surveyId: row['survey_id'] as string,
-          text: row['text'] as string,
-          description: (row['description'] as string) ?? null,
-          type: row['type'] as QuestionWithDimension['type'],
-          reverseScored: (row['reverse_scored'] as boolean) ?? false,
-          options: row['options'] ?? null,
-          required: (row['required'] as boolean) ?? true,
-          displayOrder: row['order_index'] as number,
-          diagnosticFocus: (row['diagnostic_focus'] as string) ?? null,
-          recommendedAction: (row['recommended_action'] as string) ?? null,
-          createdAt: row['created_at'] as string,
-          updatedAt: row['updated_at'] as string,
-          subDimensionId: (row['sub_dimension_id'] as string) ?? null,
+          ...base,
           dimension: qd
             ? {
-                id: (qd['id'] as string) ?? '',
-                questionId: qd['question_id'] as string,
-                dimensionId: qd['dimension_id'] as string,
-                weight: (qd['weight'] as number) ?? 1,
+                id: qd.id ?? '',
+                questionId: qd.question_id,
+                dimensionId: qd.dimension_id,
+                weight: qd.weight ?? 1,
               }
-            : { id: '', questionId: row['id'] as string, dimensionId: '', weight: 1 },
+            : { id: '', questionId: base.id, dimensionId: '', weight: 1 },
           subDimension: null,
         } satisfies QuestionWithDimension;
       });
@@ -232,6 +312,10 @@ export function createSurveyEngineAdapter(): Pick<
         .eq('is_complete', false);
 
       if (error) {
+        logger.error(
+          { err: error, fn: 'submitResponse', responseId },
+          'Failed to mark survey response as complete',
+        );
         throw new Error(`Failed to submit response: ${error.message}`);
       }
     },
@@ -256,47 +340,51 @@ export function createSurveyEngineAdapter(): Pick<
         .upsert(row, { onConflict: 'response_id,question_id' });
 
       if (error) {
+        logger.error(
+          { err: error, fn: 'upsertAnswer', responseId, questionId },
+          'Failed to upsert survey answer',
+        );
         throw new Error(`Failed to save answer: ${error.message}`);
       }
     },
   };
 }
 
-/** Format a date string for display in edge state messages */
-function formatDate(dateStr: string | null): string {
-  if (!dateStr) return 'an unknown date';
-  return new Date(dateStr).toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-}
-
-/** Map response row with joined answers from the answers table */
-function mapResponseWithAnswers(row: Record<string, unknown>): SurveyResponse {
-  // Build answers map from the joined answers rows
-  const rawAnswers = row['answers'];
-  const answersArray = Array.isArray(rawAnswers) ? rawAnswers as Array<Record<string, unknown>> : [];
+/**
+ * Map a response row with its joined answers.
+ *
+ * `surveyId`, `completedAt`, `userAgent`, `metadata`, and `updatedAt` are part
+ * of the in-memory `SurveyResponse` domain type but are not columns on the
+ * `responses` table (metadata is stored per-field as `metadata_department`,
+ * etc., and the remaining fields are derived elsewhere). Placeholders are used
+ * here so the function returns the full domain shape.
+ */
+function mapResponseWithAnswers(row: ResponseWithAnswersRow): SurveyResponse {
   const answers: Record<string, LikertValue | string> = {};
 
-  for (const a of answersArray) {
-    if (a['likert_value'] != null) {
-      answers[a['question_id'] as string] = a['likert_value'] as LikertValue;
-    } else if (a['open_text_value'] != null) {
-      answers[a['question_id'] as string] = a['open_text_value'] as string;
+  for (const a of row.answers ?? []) {
+    if (a.likert_value != null) {
+      answers[a.question_id] = a.likert_value as LikertValue;
+    } else if (a.open_text_value != null) {
+      answers[a.question_id] = a.open_text_value;
     }
   }
 
   return {
-    id: row['id'] as string,
-    surveyId: row['survey_id'] as string,
-    deploymentId: row['deployment_id'] as string,
+    id: row.id,
+    surveyId: '',
+    deploymentId: row.deployment_id,
     answers,
-    metadata: row['metadata'] as SurveyResponse['metadata'],
-    completedAt: (row['completed_at'] as string) ?? null,
-    ipHash: (row['ip_hash'] as string) ?? null,
-    userAgent: (row['user_agent'] as string) ?? null,
-    createdAt: row['created_at'] as string,
-    updatedAt: row['updated_at'] as string,
+    metadata: {
+      department: row.metadata_department ?? '',
+      role: row.metadata_role ?? '',
+      location: row.metadata_location ?? '',
+      tenure: row.metadata_tenure ?? '',
+    },
+    completedAt: row.submitted_at ?? null,
+    ipHash: row.ip_hash ?? null,
+    userAgent: null,
+    createdAt: row.created_at,
+    updatedAt: row.started_at,
   };
 }

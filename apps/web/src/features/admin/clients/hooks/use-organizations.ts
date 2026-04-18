@@ -11,6 +11,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query';
 import type { Organization, OrganizationSummary, CreateOrganizationParams } from '@compass/types';
+import { STALE_TIMES } from '../../../../lib/query-config';
 import { listOrganizations, createOrganization } from '../services/client-service';
 
 /** Query key factory for organization queries */
@@ -26,7 +27,7 @@ export function useOrganizations(): UseQueryResult<OrganizationSummary[]> {
   return useQuery({
     queryKey: organizationKeys.list(),
     queryFn: listOrganizations,
-    staleTime: 30_000,
+    staleTime: STALE_TIMES.fast,
   });
 }
 

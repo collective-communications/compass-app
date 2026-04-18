@@ -4,7 +4,7 @@
  * expected by the Compass component.
  */
 
-import type { ReactElement } from 'react';
+import { useMemo, type ReactElement } from 'react';
 import { Compass, type DimensionScore as CompassDimensionScore } from '@compass/compass';
 import type { DimensionCode } from '@compass/types';
 import { dimensions } from '@compass/tokens';
@@ -43,7 +43,9 @@ function toCompassScores(rows: DimensionScoreRow[]): CompassDimensionScore[] {
 }
 
 export function SegmentCompass({ rows, className, size = 320 }: SegmentCompassProps): ReactElement {
-  const scores = toCompassScores(rows);
+  // Memoize so the Compass component keeps a stable score-array reference
+  // across parent re-renders that don't actually change `rows`.
+  const scores = useMemo(() => toCompassScores(rows), [rows]);
 
   return (
     <div className={className} data-testid="segment-compass">

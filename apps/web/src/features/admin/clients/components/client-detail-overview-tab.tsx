@@ -60,7 +60,7 @@ export function ClientDetailOverviewTab({ orgId }: ClientDetailOverviewTabProps)
 
   if (isLoading) {
     return (
-      <div role="tabpanel" aria-label="Overview">
+      <div role="tabpanel" id="client-detail-panel-overview" aria-labelledby="client-detail-overview">
         <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Loading overview...</p>
       </div>
     );
@@ -68,7 +68,7 @@ export function ClientDetailOverviewTab({ orgId }: ClientDetailOverviewTabProps)
 
   if (!organization) {
     return (
-      <div role="tabpanel" aria-label="Overview">
+      <div role="tabpanel" id="client-detail-panel-overview" aria-labelledby="client-detail-overview">
         <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]" role="alert">
           Organization not found.
         </div>
@@ -77,7 +77,7 @@ export function ClientDetailOverviewTab({ orgId }: ClientDetailOverviewTabProps)
   }
 
   return (
-    <div role="tabpanel" aria-label="Overview">
+    <div role="tabpanel" id="client-detail-panel-overview" aria-labelledby="client-detail-overview">
       <div className="flex flex-col gap-6 lg:flex-row">
         {/* Left column (65%) */}
         <div className="flex flex-col gap-6 lg:w-[65%]">

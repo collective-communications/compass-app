@@ -64,7 +64,7 @@ export function EditOrgModal({ open, organization, onClose }: EditOrgModalProps)
   const nameInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useFocusTrap(containerRef, true);
+  useFocusTrap(containerRef, open);
 
   // Reset form when modal opens or organization changes
   useEffect(() => {

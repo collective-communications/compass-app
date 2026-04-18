@@ -99,9 +99,9 @@ export function LoginForm({ onSubmit, isLoading, error }: LoginFormProps): React
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] focus:outline-none"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20"
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            tabIndex={-1}
+            aria-pressed={showPassword}
           >
             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>

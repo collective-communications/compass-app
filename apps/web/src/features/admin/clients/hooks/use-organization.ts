@@ -60,7 +60,8 @@ async function fetchOrganization(orgId: string): Promise<OrganizationSummary> {
         title,
         status,
         closes_at
-      )
+      ),
+      organization_settings(logo_url)
     `)
     .eq('id', orgId)
     .single();
@@ -82,13 +83,18 @@ async function fetchOrganization(orgId: string): Promise<OrganizationSummary> {
     daysRemaining = diffMs > 0 ? Math.ceil(diffMs / (1000 * 60 * 60 * 24)) : 0;
   }
 
+  // organization_settings is a 1:1 relation — normalize to object or null.
+  const settings = Array.isArray(data.organization_settings)
+    ? data.organization_settings[0]
+    : data.organization_settings;
+
   return {
     id: data.id,
     name: data.name,
     slug: data.slug,
     industry: data.industry,
     employeeCount: data.employee_count,
-    logoUrl: data.logo_url,
+    logoUrl: settings?.logo_url ?? null,
     primaryContactName: data.primary_contact_name,
     primaryContactEmail: data.primary_contact_email,
     createdAt: data.created_at,

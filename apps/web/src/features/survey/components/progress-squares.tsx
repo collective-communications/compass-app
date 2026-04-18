@@ -53,6 +53,7 @@ export function ProgressSquares({
   questionTexts,
 }: ProgressSquaresProps): React.ReactNode {
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
+  const [focusIndex, setFocusIndex] = useState<number | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<(HTMLButtonElement | null)[]>([]);
   const { baseSize, gap, radius } = squareLayout(total);
@@ -65,6 +66,14 @@ export function ProgressSquares({
     },
     [onJump, answeredIndices, currentIndex],
   );
+
+  const handleFocus = useCallback((index: number) => {
+    setFocusIndex(index);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    setFocusIndex(null);
+  }, []);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLDivElement>) => {
@@ -92,15 +101,18 @@ export function ProgressSquares({
     setHoverIndex(null);
   }, []);
 
-  // Tooltip: show for answered squares when hovered
-  const showTooltip =
-    hoverIndex !== null &&
-    answeredIndices.has(hoverIndex) &&
-    hoverIndex !== currentIndex &&
-    questionTexts?.[hoverIndex];
+  // Tooltip target: prefer focus (keyboard), fall back to hover (pointer).
+  // Keeps tooltip parity between keyboard and mouse users.
+  const tooltipIndex = focusIndex ?? hoverIndex;
 
-  // Which row the hovered square belongs to
-  const hoverRowIdx = hoverIndex !== null ? Math.floor(hoverIndex / SQUARES_PER_ROW) : null;
+  const showTooltip =
+    tooltipIndex !== null &&
+    answeredIndices.has(tooltipIndex) &&
+    tooltipIndex !== currentIndex &&
+    questionTexts?.[tooltipIndex];
+
+  // Which row the targeted square belongs to
+  const tooltipRowIdx = tooltipIndex !== null ? Math.floor(tooltipIndex / SQUARES_PER_ROW) : null;
 
   // Chunk squares into rows of SQUARES_PER_ROW
   const rows: number[][] = [];
@@ -126,8 +138,8 @@ export function ProgressSquares({
         >
           {/* Tooltip — clamped to stay within row bounds */}
           {/* eslint-disable-next-line @typescript-eslint/explicit-function-return-type */}
-          {showTooltip && hoverRowIdx === rowIdx && hoverIndex !== null && (() => {
-            const btn = buttonRefs.current[hoverIndex];
+          {showTooltip && tooltipRowIdx === rowIdx && tooltipIndex !== null && (() => {
+            const btn = buttonRefs.current[tooltipIndex];
             const rowEl = btn?.parentElement;
             if (!btn || !rowEl) return null;
             const btnRect = btn.getBoundingClientRect();
@@ -141,11 +153,12 @@ export function ProgressSquares({
             const arrowLeft = centerX - clampedLeft + halfTooltip;
             return (
               <div
+                role="tooltip"
                 className="pointer-events-none absolute bottom-full z-10 mb-2 w-[280px] rounded-lg bg-[var(--grey-900)] px-3 py-2 text-xs text-white shadow-lg"
                 style={{ left: clampedLeft, transform: 'translateX(-50%)' }}
               >
-                <span className="mr-1.5 text-[10px] font-bold opacity-50">{hoverIndex + 1}</span>
-                <span className="line-clamp-2">{questionTexts![hoverIndex]}</span>
+                <span className="mr-1.5 text-[10px] font-bold opacity-50">{tooltipIndex + 1}</span>
+                <span className="line-clamp-2">{questionTexts![tooltipIndex]}</span>
                 <div
                   className="absolute top-full border-x-[5px] border-t-[5px] border-x-transparent border-t-[var(--grey-900)]"
                   style={{ left: arrowLeft, transform: 'translateX(-50%)' }}
@@ -171,6 +184,8 @@ export function ProgressSquares({
                 type="button"
                 aria-label={`Question ${i + 1} of ${total}, ${isCurrent ? 'current' : isAnswered ? 'answered' : 'unanswered'}`}
                 onClick={() => handleClick(i)}
+                onFocus={() => handleFocus(i)}
+                onBlur={handleBlur}
                 style={{
                   width: size,
                   height: size,

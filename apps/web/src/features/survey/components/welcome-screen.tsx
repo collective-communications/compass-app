@@ -81,8 +81,9 @@ export function WelcomeScreen({ questionCount, onStart }: WelcomeScreenProps): R
 
         {/* Metadata form */}
         {isConfigLoading || !metadataConfig ? (
-          <div className="flex items-center justify-center py-8">
+          <div className="flex items-center justify-center py-8" role="status" aria-label="Loading">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--grey-100)] border-t-[var(--color-interactive)]" />
+            <span className="sr-only">Loading</span>
           </div>
         ) : (
           <MetadataForm

@@ -3,26 +3,18 @@
  * results access for the current user's organization.
  *
  * This is the client-side complement to the route-level guard
- * in results/routes.tsx — it controls UI visibility (button state)
- * rather than navigation access.
+ * `guardClientAccess` in `apps/web/src/lib/route-guards.ts` — it controls
+ * UI visibility (button state) rather than navigation access. Both resolve
+ * via `queryClientAccessEnabled` so the hook and the guard cannot disagree
+ * about what `client_access_enabled` means.
  */
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '../../../lib/supabase';
+import { queryClientAccessEnabled } from '../../../lib/route-guards';
+import { STALE_TIMES } from '../../../lib/query-config';
 
 export { clientAccessKeys } from './client-access-keys';
 import { clientAccessKeys } from './client-access-keys';
-
-async function fetchClientAccessEnabled(orgId: string): Promise<boolean> {
-  const { data, error } = await supabase
-    .from('organization_settings')
-    .select('client_access_enabled')
-    .eq('organization_id', orgId)
-    .single();
-
-  if (error) return false;
-  return data?.client_access_enabled ?? false;
-}
 
 export interface UseClientAccessOptions {
   organizationId: string | null;
@@ -35,9 +27,10 @@ export interface UseClientAccessOptions {
 export function useClientAccess({ organizationId }: UseClientAccessOptions): boolean {
   const query = useQuery({
     queryKey: clientAccessKeys.org(organizationId ?? ''),
-    queryFn: () => fetchClientAccessEnabled(organizationId!),
+    // `enabled` guards against the null case; the non-null assertion is safe.
+    queryFn: () => queryClientAccessEnabled(organizationId as string),
     enabled: !!organizationId,
-    staleTime: 60_000,
+    staleTime: STALE_TIMES.default,
   });
 
   return query.data ?? false;

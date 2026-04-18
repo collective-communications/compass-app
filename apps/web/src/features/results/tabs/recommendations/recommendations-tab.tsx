@@ -13,13 +13,14 @@ import { RecommendationCard } from './recommendation-card';
 import { TrustLadderCard } from './trust-ladder-card';
 import { ServiceLinksCard } from './service-links-card';
 
-interface RecommendationsTabProps {
-  surveyId: string;
-}
-
-/** Main Recommendations tab content. */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function RecommendationsTab(_props: RecommendationsTabProps): ReactElement {
+/**
+ * Main Recommendations tab content.
+ *
+ * Reads sortedRecommendations + activeIndex from RecommendationsNavContext —
+ * no local props needed. Navigation chrome (sidebar, mobile strip) is rendered
+ * externally by the results layout.
+ */
+export function RecommendationsTab(): ReactElement {
   const { sortedRecommendations, activeIndex } = useRecommendationsNav();
 
   if (sortedRecommendations.length === 0) {
@@ -27,7 +28,11 @@ export function RecommendationsTab(_props: RecommendationsTabProps): ReactElemen
   }
 
   const clampedIndex = Math.min(activeIndex, sortedRecommendations.length - 1);
-  const activeRec = sortedRecommendations[clampedIndex]!;
+  const activeRec = sortedRecommendations[clampedIndex];
+
+  if (!activeRec) {
+    return <EmptyState />;
+  }
 
   return (
     <div className="flex flex-col gap-4">

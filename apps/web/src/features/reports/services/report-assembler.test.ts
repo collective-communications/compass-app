@@ -102,6 +102,7 @@ function setupMocks(overrides?: {
     archetype_description: 'Builds bridges',
     closes_at: '2026-04-01',
     organization_id: 'org-1',
+    settings: { likertSize: 4 },
     ...overrides?.survey,
   };
 
@@ -196,7 +197,7 @@ describe('assembleReportPayload', () => {
     expect(payload.scores.overall).toBe(3.0);
   });
 
-  test('maps dimension percentages correctly: (rawScore / 4) * 100', async () => {
+  test('maps dimension percentages for legacy 4-point Likert: ((raw - 1) / 3) * 100', async () => {
     setupMocks({
       scores: [
         { raw_score: 3.2, dimensions: { code: 'core', name: 'Core' } },
@@ -204,7 +205,40 @@ describe('assembleReportPayload', () => {
     });
     const payload = await assembleReportPayload(defaultConfig);
 
-    expect(payload.compass.dimensionPercentages['core']).toBe(80); // (3.2 / 4) * 100
+    // ((3.2 - 1) / (4 - 1)) * 100 = 73.333...
+    expect(payload.compass.dimensionPercentages['core']).toBeCloseTo(73.333, 2);
+  });
+
+  test('maps dimension percentages for 5-point Likert: ((raw - 1) / 4) * 100', async () => {
+    setupMocks({
+      survey: { settings: { likertSize: 5 } },
+      scores: [
+        { raw_score: 4.0, dimensions: { code: 'core', name: 'Core' } },
+        { raw_score: 5.0, dimensions: { code: 'clarity', name: 'Clarity' } },
+        { raw_score: 1.0, dimensions: { code: 'connection', name: 'Connection' } },
+      ],
+    });
+    const payload = await assembleReportPayload(defaultConfig);
+
+    // ((4 - 1) / (5 - 1)) * 100 = 75
+    expect(payload.compass.dimensionPercentages['core']).toBeCloseTo(75, 2);
+    // ((5 - 1) / (5 - 1)) * 100 = 100
+    expect(payload.compass.dimensionPercentages['clarity']).toBeCloseTo(100, 2);
+    // ((1 - 1) / (5 - 1)) * 100 = 0
+    expect(payload.compass.dimensionPercentages['connection']).toBeCloseTo(0, 2);
+  });
+
+  test('falls back to 4-point scale when survey.settings.likertSize is missing', async () => {
+    setupMocks({
+      survey: { settings: {} },
+      scores: [
+        { raw_score: 4.0, dimensions: { code: 'core', name: 'Core' } },
+      ],
+    });
+    const payload = await assembleReportPayload(defaultConfig);
+
+    // fallback likertSize=4 → ((4 - 1) / 3) * 100 = 100
+    expect(payload.compass.dimensionPercentages['core']).toBeCloseTo(100, 2);
   });
 
   test('throws when scores_calculated = false', async () => {
@@ -275,6 +309,7 @@ describe('assembleReportPayload', () => {
     const payload = await assembleReportPayload(defaultConfig);
 
     expect(payload.scores.dimensions['core']).toBe(3.0);
-    expect(payload.compass.dimensionPercentages['core']).toBe(75);
+    // ((3.0 - 1) / (4 - 1)) * 100 = 66.667
+    expect(payload.compass.dimensionPercentages['core']).toBeCloseTo(66.667, 2);
   });
 });

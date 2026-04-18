@@ -4,7 +4,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { ReportRow } from '../../reports/services/report-api';
+import type { ReportRow } from '../../reports';
 
 export interface ReportSelectionContextValue {
   selectedReport: ReportRow | null;

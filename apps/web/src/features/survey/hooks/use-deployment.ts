@@ -4,6 +4,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import type { DeploymentResolution } from '@compass/types';
+import { STALE_TIMES } from '../../../lib/query-config';
 import { createSurveyEngineAdapter } from '../services/survey-engine-adapter';
 
 const adapter = createSurveyEngineAdapter();
@@ -22,7 +23,7 @@ export function useDeployment(token: string | undefined) {
       return adapter.resolveDeployment(token);
     },
     enabled: !!token,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIMES.results,
     retry: 2,
   });
 }

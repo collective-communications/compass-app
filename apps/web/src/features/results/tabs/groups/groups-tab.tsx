@@ -15,6 +15,7 @@
  */
 
 import { useState, useMemo, useCallback, useEffect, type ReactElement } from 'react';
+import { useNavigate } from '@tanstack/react-router';
 import type { DimensionCode } from '@compass/types';
 import type { SegmentType } from '@compass/scoring';
 import { useOverallScores } from '../../hooks/use-overall-scores';
@@ -35,6 +36,7 @@ import { TopIssuesCard } from './top-issues-card';
 import { ObservationsPanel } from './observations-panel';
 import { CompareWithGrid } from './compare-with-grid';
 import { RecommendedActionCard } from './recommended-action-card';
+import { useSegmentValues } from './use-segment-values';
 import {
   computeDimensionDeltas,
   hasSubcultureDeviation,
@@ -54,6 +56,7 @@ interface GroupsTabProps {
 }
 
 export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }: GroupsTabProps): ReactElement {
+  const navigate = useNavigate();
   const [segmentType, setSegmentType] = useState<SegmentType>(initialSegmentType ?? DEFAULT_SEGMENT_TYPE);
   const [segmentValue, setSegmentValue] = useState<string>(initialSegmentValue ?? ALL_VALUE);
 
@@ -104,50 +107,13 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
 
   // ── Derived state ─────────────────────────────────────────────────────────
 
-  /** Distinct segment values for the current type. */
-  const segmentValues = useMemo<string[]>(() => {
-    if (!allSegmentRows) return [];
-    const unique = new Set<string>();
-    for (const row of allSegmentRows) {
-      unique.add(row.segmentValue);
-    }
-    return [...unique].sort();
-  }, [allSegmentRows]);
-
-  /** Segment values that fall below the anonymity threshold (score is null/0 with no data). */
-  const belowThresholdValues = useMemo<Set<string>>(() => {
-    if (!allSegmentRows) return new Set();
-    const belowSet = new Set<string>();
-
-    /** Group rows by segment value to check if ALL dimensions have null-equivalent scores. */
-    const byValue = new Map<string, DimensionScoreRow[]>();
-    for (const row of allSegmentRows) {
-      let group = byValue.get(row.segmentValue);
-      if (!group) {
-        group = [];
-        byValue.set(row.segmentValue, group);
-      }
-      group.push(row);
-    }
-
-    /**
-     * The safe_segment_scores view sets is_masked = true when below threshold.
-     * A segment is below threshold if it has no rows or all rows are masked.
-     */
-    for (const value of segmentValues) {
-      const rows = byValue.get(value);
-      if (!rows || rows.length === 0) {
-        belowSet.add(value);
-        continue;
-      }
-      const allMasked = rows.every((r) => r.isMasked);
-      if (allMasked) {
-        belowSet.add(value);
-      }
-    }
-
-    return belowSet;
-  }, [allSegmentRows, segmentValues]);
+  /**
+   * Distinct segment values and the below-anonymity-threshold subset.
+   * Shared with {@link GroupsInsights} via {@link useSegmentValues}; TanStack
+   * Query dedupes the underlying request so both components read the same
+   * cached rows and compute the same memoized result.
+   */
+  const { segmentValues, belowThresholdValues } = useSegmentValues(allSegmentRows);
 
   /** Whether the currently selected segment is below anonymity threshold. */
   const isSelectedBelowThreshold = !isAllSelected && belowThresholdValues.has(segmentValue);
@@ -169,16 +135,25 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
 
   // ── URL sync ────────────────────────────────────────────────────────────
 
+  // Keep the `segmentType` / `segmentValue` search params in sync with local
+  // state. Router-native navigation (with `replace: true`) preserves the
+  // previous semantics — no new history entry — while letting TanStack
+  // Router see the change and keep its own state consistent. When "All" is
+  // selected we omit `segmentValue` so the URL stays clean.
   useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('segmentType', segmentType);
-    if (segmentValue === ALL_VALUE) {
-      url.searchParams.delete('segmentValue');
-    } else {
-      url.searchParams.set('segmentValue', segmentValue);
+    const search: Record<string, string> = { segmentType };
+    if (segmentValue !== ALL_VALUE) {
+      search.segmentValue = segmentValue;
     }
-    window.history.replaceState(null, '', url.toString());
-  }, [segmentType, segmentValue]);
+    void navigate({
+      // TanStack Router's typed `search` reducer infers a narrow union
+      // across the whole route tree; the segment-scoped params are only
+      // valid on this specific route, so we cast to accept the structural
+      // shape.
+      search: search as never,
+      replace: true,
+    });
+  }, [navigate, segmentType, segmentValue]);
 
   // ── Handlers ──────────────────────────────────────────────────────────────
 
@@ -192,10 +167,11 @@ export function GroupsTab({ surveyId, initialSegmentType, initialSegmentValue }:
   }, []);
 
   const handleExportReport = useCallback(() => {
-    const url = new URL(window.location.href);
-    url.pathname = url.pathname.replace(/\/groups$/, '/reports');
-    window.location.href = url.toString();
-  }, []);
+    // Hop from `/results/$surveyId/groups` to the sibling reports tab via
+    // the router so we avoid a full page reload and preserve TanStack
+    // Router's state.
+    void navigate({ to: '/results/$surveyId/reports', params: { surveyId } });
+  }, [navigate, surveyId]);
 
   // ── Loading state ─────────────────────────────────────────────────────────
 
@@ -327,36 +303,10 @@ export function GroupsInsights({
 
   const isAllSelected = !segmentValue || segmentValue === ALL_VALUE;
 
-  // Derive segment values and below-threshold set from all-segments data
-  const segmentValues = useMemo<string[]>(() => {
-    if (!allSegmentRows) return [];
-    const unique = new Set<string>();
-    for (const row of allSegmentRows) {
-      unique.add(row.segmentValue);
-    }
-    return [...unique].sort();
-  }, [allSegmentRows]);
-
-  const belowThresholdValues = useMemo<Set<string>>(() => {
-    if (!allSegmentRows) return new Set();
-    const belowSet = new Set<string>();
-    const byValue = new Map<string, DimensionScoreRow[]>();
-    for (const row of allSegmentRows) {
-      let group = byValue.get(row.segmentValue);
-      if (!group) {
-        group = [];
-        byValue.set(row.segmentValue, group);
-      }
-      group.push(row);
-    }
-    for (const value of segmentValues) {
-      const rows = byValue.get(value);
-      if (!rows || rows.length === 0 || rows.every((r) => r.isMasked)) {
-        belowSet.add(value);
-      }
-    }
-    return belowSet;
-  }, [allSegmentRows, segmentValues]);
+  // Shared derivation with GroupsTab — the TanStack Query cache means
+  // `allSegmentRows` is the same reference in both callers, so this hook
+  // returns the already-memoized values rather than recomputing.
+  const { segmentValues, belowThresholdValues } = useSegmentValues(allSegmentRows);
 
   if (isAllSelected || isBelowThreshold) return null;
 

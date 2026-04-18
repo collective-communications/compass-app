@@ -2,8 +2,8 @@
 export const resultKeys = {
   all: ['results'] as const,
 
-  scoredSurveys: (orgId: string) =>
-    [...resultKeys.all, 'scoredSurveys', orgId] as const,
+  surveyMeta: (surveyId: string) =>
+    [...resultKeys.all, 'surveyMeta', surveyId] as const,
 
   overallScores: (surveyId: string) =>
     [...resultKeys.all, 'overallScores', surveyId] as const,

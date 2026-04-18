@@ -8,7 +8,7 @@
  * - Mobile: chip strip → compass content → insights stacked
  */
 
-import { useState, useCallback, type ReactElement } from 'react';
+import { useState, useCallback, useMemo, type ReactElement } from 'react';
 import { Compass } from '@compass/compass';
 import type { DimensionCode } from '@compass/types';
 import { dimensions } from '@compass/tokens';
@@ -67,7 +67,9 @@ export function CompassTab({ scores, archetype, riskFlags, activeDimension: cont
     setActiveDimension(activeDimension === dimension ? 'overview' : dimension);
   }, [activeDimension, setActiveDimension]);
 
-  const compassScores = toCompassScores(scores);
+  // Memoize so the Compass component gets a stable array identity when
+  // unrelated props (activeDimension, riskFlags) change.
+  const compassScores = useMemo(() => toCompassScores(scores), [scores]);
   const coreScore = scores.core?.score ?? 0;
 
   return (

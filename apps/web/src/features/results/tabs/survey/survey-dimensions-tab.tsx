@@ -60,10 +60,17 @@ function deriveSubDimensionScores(
   for (const [code, group] of groups) {
     const avgRaw = group.scores.reduce((sum, s) => sum + s, 0) / group.scores.length;
     const totalCount = group.counts.reduce((sum, c) => sum + c, 0);
-    // meanScore from the view is already on the 1-N scale; convert to 0-100%
-    // Determine scale from distribution keys of the first question in this group
+    // meanScore from the view is already on the 1-N scale; convert to 0-100%.
+    // Determine scale from distribution keys of the first question in this
+    // group. Use a `reduce` rather than `Math.max(...arr)` so we don't
+    // allocate a spread frame for each per-group iteration.
     const sampleQ = questions.find((q) => q.subDimensionCode === code);
-    const scaleSize = sampleQ ? Math.max(...Object.keys(sampleQ.distribution).map(Number)) : 5;
+    const scaleSize = sampleQ
+      ? Object.keys(sampleQ.distribution).reduce(
+          (max, k) => Math.max(max, Number(k)),
+          -Infinity,
+        )
+      : 5;
     const score = scaleSize > 1 ? ((avgRaw - 1) / (scaleSize - 1)) * 100 : 0;
 
     results.push({

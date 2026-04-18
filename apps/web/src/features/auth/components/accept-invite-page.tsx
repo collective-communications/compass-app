@@ -217,14 +217,14 @@ export function AcceptInvitePage({ token }: AcceptInvitePageProps): ReactElement
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={status === 'submitting'}
                     className="w-full rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] px-3 py-2.5 pr-10 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 disabled:cursor-not-allowed disabled:opacity-50"
-                    placeholder="At least 8 characters"
+                    placeholder="At least 12 characters"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((prev) => !prev)}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] focus:outline-none"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded text-[var(--text-tertiary)] hover:text-[var(--text-tertiary)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20"
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    tabIndex={-1}
+                    aria-pressed={showPassword}
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>

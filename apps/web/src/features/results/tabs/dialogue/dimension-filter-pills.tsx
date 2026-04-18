@@ -40,7 +40,7 @@ export function DimensionFilterPills({
             <button
               type="button"
               onClick={() => onChange(option.value)}
-              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors ${
+              className={`whitespace-nowrap rounded-full px-4 py-1.5 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)] ${
                 active === option.value
                   ? 'bg-[var(--grey-700)] text-[var(--grey-50)]'
                   : 'text-[var(--text-secondary)] hover:bg-[var(--grey-50)]'

@@ -4,9 +4,6 @@ import { RecommendationsTab, RecommendationsInsightsContent } from './recommenda
 const meta = {
   title: 'Features/Results/Recommendations/RecommendationsTab',
   component: RecommendationsTab,
-  args: {
-    surveyId: 'survey-001',
-  },
   parameters: {
     docs: {
       description: {

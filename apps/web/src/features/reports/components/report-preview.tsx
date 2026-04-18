@@ -6,6 +6,7 @@
 
 import type { ReactElement } from 'react';
 import { Download, FileText, Loader2 } from 'lucide-react';
+import { formatDisplayDate } from '@compass/utils';
 import type { ReportRow } from '../services/report-api';
 import { useReportDownload } from '../hooks/use-report-download';
 
@@ -19,17 +20,6 @@ function formatFileSize(bytes: number | null): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  return date.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 /** Map section IDs to readable labels */
@@ -94,7 +84,7 @@ export function ReportPreview({ report }: ReportPreviewProps): ReactElement {
       <dl className="flex flex-col gap-2 text-sm">
         <div className="flex justify-between">
           <dt className="text-[var(--text-secondary)]">Generated</dt>
-          <dd className="text-[var(--grey-700)]">{formatDate(report.createdAt)}</dd>
+          <dd className="text-[var(--grey-700)]">{formatDisplayDate(report.createdAt, 'long')}</dd>
         </div>
         {report.fileSize !== null && (
           <div className="flex justify-between">

@@ -7,6 +7,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { DimensionCode } from '@compass/types';
 import type { DimensionScoreMap, DimensionScore } from '@compass/scoring';
 import { supabase } from '../../../lib/supabase';
+import { STALE_TIMES } from '../../../lib/query-config';
 import { resultKeys } from '../lib/query-keys';
 
 interface SafeSegmentScoreRow {
@@ -36,6 +37,14 @@ function transformToScoreMap(rows: SafeSegmentScoreRow[]): DimensionScoreMap {
   return map as DimensionScoreMap;
 }
 
+/**
+ * Fetch the overall (unfiltered) dimension score map for a survey.
+ * Reads from `safe_segment_scores` filtered to the 'overall' segment;
+ * the view enforces the anonymity threshold server-side.
+ *
+ * @param surveyId - Target survey. When empty the query is disabled.
+ * @returns TanStack query result whose data is a `DimensionScoreMap` keyed by `DimensionCode`.
+ */
 export function useOverallScores(surveyId: string): UseQueryResult<DimensionScoreMap> {
   return useQuery({
     queryKey: resultKeys.overallScores(surveyId),
@@ -49,7 +58,7 @@ export function useOverallScores(surveyId: string): UseQueryResult<DimensionScor
       if (error) throw error;
       return transformToScoreMap(data as SafeSegmentScoreRow[]);
     },
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIMES.results,
     enabled: !!surveyId,
   });
 }

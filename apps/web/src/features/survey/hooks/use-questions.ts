@@ -4,6 +4,7 @@
  */
 import { useQuery } from '@tanstack/react-query';
 import type { QuestionWithDimension } from '@compass/types';
+import { STALE_TIMES } from '../../../lib/query-config';
 import { createSurveyEngineAdapter } from '../services/survey-engine-adapter';
 
 const adapter = createSurveyEngineAdapter();
@@ -17,7 +18,7 @@ export function useQuestions(surveyId: string | undefined) {
       return adapter.getQuestions(surveyId);
     },
     enabled: !!surveyId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: STALE_TIMES.static,
     retry: 2,
   });
 }

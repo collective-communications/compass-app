@@ -90,7 +90,7 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
 
   if (membersLoading) {
     return (
-      <div role="tabpanel" aria-label="Users">
+      <div role="tabpanel" id="client-detail-panel-users" aria-labelledby="client-detail-users">
         <p className="py-12 text-center text-sm text-[var(--text-secondary)]">Loading users...</p>
       </div>
     );
@@ -98,7 +98,7 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
 
   if (membersError) {
     return (
-      <div role="tabpanel" aria-label="Users">
+      <div role="tabpanel" id="client-detail-panel-users" aria-labelledby="client-detail-users">
         <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]" role="alert">
           Failed to load client users. Please try again.
         </div>
@@ -107,7 +107,7 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
   }
 
   return (
-    <div role="tabpanel" aria-label="Users">
+    <div role="tabpanel" id="client-detail-panel-users" aria-labelledby="client-detail-users">
       {/* Invite form */}
       <div className="mb-6">
         <InviteForm

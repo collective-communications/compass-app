@@ -5,19 +5,10 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
+import { formatDisplayDate } from '@compass/utils';
 
 interface ReportCoverProps {
   payload: ReportPayload;
-}
-
-/** Format an ISO date string to a locale-friendly display string. */
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  return date.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
 }
 
 /**
@@ -100,7 +91,7 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
 
       {/* Metadata */}
       <p style={{ fontSize: '9pt', color: '#9E9E9E', marginBottom: '4px' }}>
-        Survey closed {formatDate(survey.closesAt)}
+        Survey closed {formatDisplayDate(survey.closesAt, 'long')}
       </p>
       <p style={{ fontSize: '9pt', color: '#9E9E9E' }}>
         {survey.responseCount} responses

@@ -352,13 +352,18 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
                 <div className="flex flex-col gap-4">
                   {dimensionGroups.map((group) => {
                     const isCollapsed = collapsedDimensions.has(group.dimension.id);
+                    const buttonId = `dim-toggle-${group.dimension.id}`;
+                    const panelId = `dim-panel-${group.dimension.id}`;
                     return (
                       <div key={group.dimension.id}>
                         {/* Dimension section header */}
                         <button
                           type="button"
+                          id={buttonId}
+                          aria-expanded={!isCollapsed}
+                          aria-controls={panelId}
                           onClick={() => toggleDimension(group.dimension.id)}
-                          className="mb-2 flex w-full items-center gap-2 text-left"
+                          className="mb-2 flex w-full items-center gap-2 rounded text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)]"
                         >
                           {isCollapsed ? (
                             <ChevronRight size={16} className="text-[var(--text-secondary)]" />
@@ -378,29 +383,33 @@ export function SurveyBuilderPage({ surveyId, onBack }: SurveyBuilderPageProps):
                         </button>
 
                         {/* Question rows with optional sub-dimension grouping */}
-                        {!isCollapsed && (
-                          <div className="flex flex-col gap-2 pl-6">
-                            {group.subGroups.map((subGroup, sgIdx) => (
-                              <div key={subGroup.subDimension?.id ?? `ungrouped-${sgIdx}`}>
-                                {subGroup.subDimension && (
-                                  <p className="mb-1.5 mt-2 text-xs font-medium text-[var(--text-secondary)]">
-                                    {subGroup.subDimension.name}
-                                  </p>
-                                )}
-                                {subGroup.questions.map((question) => (
-                                  <div key={question.id} className="mb-2">
-                                    <QuestionRow
-                                      question={question}
-                                      isLocked={hasResponses}
-                                      onEdit={setEditingQuestionId}
-                                      questionCode={questionCodes.get(question.id) ?? '?'}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                        <div
+                          id={panelId}
+                          role="region"
+                          aria-labelledby={buttonId}
+                          hidden={isCollapsed}
+                          className="flex flex-col gap-2 pl-6"
+                        >
+                          {group.subGroups.map((subGroup, sgIdx) => (
+                            <div key={subGroup.subDimension?.id ?? `ungrouped-${sgIdx}`}>
+                              {subGroup.subDimension && (
+                                <p className="mb-1.5 mt-2 text-xs font-medium text-[var(--text-secondary)]">
+                                  {subGroup.subDimension.name}
+                                </p>
+                              )}
+                              {subGroup.questions.map((question) => (
+                                <div key={question.id} className="mb-2">
+                                  <QuestionRow
+                                    question={question}
+                                    isLocked={hasResponses}
+                                    onEdit={setEditingQuestionId}
+                                    questionCode={questionCodes.get(question.id) ?? '?'}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     );
                   })}

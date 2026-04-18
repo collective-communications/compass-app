@@ -9,30 +9,66 @@
  *
  * The unified `/settings` route (tier-aware content) lives in
  * `features/settings` — it is not declared here. Likewise `/help`, `/profile`.
+ *
+ * ## Code splitting
+ *
+ * Heavy admin page components (survey builder, client detail, users list,
+ * org settings) are loaded via `React.lazy` so they ship in their own chunks
+ * and don't bloat the initial bundle shipped to respondents or new visitors.
+ * Each route's render tree is wrapped in `<Suspense fallback={<RouteLoading />}>`.
+ *
+ * The small building blocks used inline (`DeploymentPanel`, `ResponseTracker`)
+ * stay eager — they're needed on the publish page's synchronous render path
+ * once the dynamic parent chunk has loaded, and lazy-loading them separately
+ * would multiply network round-trips for no real savings.
  */
 
-import type { ReactElement } from 'react';
+import { Suspense, lazy, type ReactElement } from 'react';
 import { createRoute, redirect, useNavigate } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { useAuthStore } from '../../stores/auth-store';
 import { AppShell } from '../../components/shells/app-shell';
+import { RouteLoading } from '../../components/app/route-loading';
 import { guardRoute } from '../../lib/route-guards';
-import {
-  SurveyBuilderPage,
-  DeploymentPanel,
-  ResponseTracker,
-} from './surveys';
+import { DeploymentPanel, ResponseTracker } from './surveys';
 import { useDeploymentManagement } from './surveys/hooks/use-deployment-management';
 import { useResponseTracking } from './surveys/hooks/use-response-tracking';
 import { useRealtimeResponses } from './surveys/hooks/use-realtime-responses';
 import { useSurveyBuilder } from './surveys/hooks/use-survey-builder';
-import { ClientListPage } from './clients';
-import { ClientDetailPage } from './clients/pages/client-detail-page';
-import { ClientDetailOverviewTab } from './clients/components/client-detail-overview-tab';
-import { ClientDetailSurveysTab } from './clients/components/client-detail-surveys-tab';
-import { ClientUsersTab } from './clients/components/client-users-tab';
-import { OrgSettingsPage } from './clients/pages/org-settings-page';
-import { UsersPage } from './users';
+
+// ── Lazy page components ────────────────────────────────────────────────────
+// Each page is a distinct chunk so we don't drag the full admin surface into
+// the initial JS payload. Imports point at the module file directly (not the
+// barrel) so Rollup can tree-shake and code-split cleanly.
+
+const SurveyBuilderPage = lazy(() =>
+  import('./surveys/components/survey-builder-page').then((m) => ({ default: m.SurveyBuilderPage })),
+);
+const ClientListPage = lazy(() =>
+  import('./clients/pages/client-list-page').then((m) => ({ default: m.ClientListPage })),
+);
+const ClientDetailPage = lazy(() =>
+  import('./clients/pages/client-detail-page').then((m) => ({ default: m.ClientDetailPage })),
+);
+const ClientDetailOverviewTab = lazy(() =>
+  import('./clients/components/client-detail-overview-tab').then((m) => ({
+    default: m.ClientDetailOverviewTab,
+  })),
+);
+const ClientDetailSurveysTab = lazy(() =>
+  import('./clients/components/client-detail-surveys-tab').then((m) => ({
+    default: m.ClientDetailSurveysTab,
+  })),
+);
+const ClientUsersTab = lazy(() =>
+  import('./clients/components/client-users-tab').then((m) => ({ default: m.ClientUsersTab })),
+);
+const OrgSettingsPage = lazy(() =>
+  import('./clients/pages/org-settings-page').then((m) => ({ default: m.OrgSettingsPage })),
+);
+const UsersPage = lazy(() =>
+  import('./users/pages/users-page').then((m) => ({ default: m.UsersPage })),
+);
 
 /**
  * Creates the flat set of admin-owned routes. Each is a top-level child of
@@ -49,11 +85,13 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       const navigate = useNavigate();
       return (
         <AppShell>
-          <ClientListPage
-            onSelectClient={(orgId) => {
-              void navigate({ to: '/clients/$orgId/overview', params: { orgId } });
-            }}
-          />
+          <Suspense fallback={<RouteLoading />}>
+            <ClientListPage
+              onSelectClient={(orgId) => {
+                void navigate({ to: '/clients/$orgId/overview', params: { orgId } });
+              }}
+            />
+          </Suspense>
         </AppShell>
       );
     },
@@ -78,7 +116,9 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       const { orgId } = clientDetailRoute.useParams() as { orgId: string };
       return (
         <AppShell>
-          <ClientDetailPage orgId={orgId} />
+          <Suspense fallback={<RouteLoading />}>
+            <ClientDetailPage orgId={orgId} />
+          </Suspense>
         </AppShell>
       );
     },
@@ -89,7 +129,11 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     path: '/overview',
     component: function ClientOverviewPage(): ReactElement {
       const { orgId } = clientDetailRoute.useParams() as { orgId: string };
-      return <ClientDetailOverviewTab orgId={orgId} />;
+      return (
+        <Suspense fallback={<RouteLoading />}>
+          <ClientDetailOverviewTab orgId={orgId} />
+        </Suspense>
+      );
     },
   });
 
@@ -101,19 +145,21 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       const user = useAuthStore((s) => s.user);
       const navigate = useNavigate();
       return (
-        <ClientDetailSurveysTab
-          organizationId={orgId}
-          userId={user?.id ?? ''}
-          onSelectSurvey={(surveyId) => {
-            void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
-          }}
-          onEditQuestions={(surveyId) => {
-            void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
-          }}
-          onViewResults={(surveyId) => {
-            void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
-          }}
-        />
+        <Suspense fallback={<RouteLoading />}>
+          <ClientDetailSurveysTab
+            organizationId={orgId}
+            userId={user?.id ?? ''}
+            onSelectSurvey={(surveyId) => {
+              void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
+            }}
+            onEditQuestions={(surveyId) => {
+              void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
+            }}
+            onViewResults={(surveyId) => {
+              void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
+            }}
+          />
+        </Suspense>
       );
     },
   });
@@ -123,7 +169,11 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     path: '/users',
     component: function ClientUsersPage(): ReactElement {
       const { orgId } = clientDetailRoute.useParams() as { orgId: string };
-      return <ClientUsersTab organizationId={orgId} />;
+      return (
+        <Suspense fallback={<RouteLoading />}>
+          <ClientUsersTab organizationId={orgId} />
+        </Suspense>
+      );
     },
   });
 
@@ -135,7 +185,9 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     component: function ClientSettingsLayout(): ReactElement {
       return (
         <AppShell>
-          <OrgSettingsPage />
+          <Suspense fallback={<RouteLoading />}>
+            <OrgSettingsPage />
+          </Suspense>
         </AppShell>
       );
     },
@@ -151,15 +203,17 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
       const navigate = useNavigate();
       return (
         <AppShell>
-          <SurveyBuilderPage
-            surveyId={surveyId}
-            onBack={(organizationId: string) => {
-              void navigate({
-                to: '/clients/$orgId/overview',
-                params: { orgId: organizationId },
-              });
-            }}
-          />
+          <Suspense fallback={<RouteLoading />}>
+            <SurveyBuilderPage
+              surveyId={surveyId}
+              onBack={(organizationId: string) => {
+                void navigate({
+                  to: '/clients/$orgId/overview',
+                  params: { orgId: organizationId },
+                });
+              }}
+            />
+          </Suspense>
         </AppShell>
       );
     },
@@ -231,7 +285,9 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     component: function UsersLayout(): ReactElement {
       return (
         <AppShell>
-          <UsersPage />
+          <Suspense fallback={<RouteLoading />}>
+            <UsersPage />
+          </Suspense>
         </AppShell>
       );
     },

@@ -5,7 +5,7 @@
  * Child routes: /overview, /surveys, /users.
  */
 
-import { useState, useCallback, type ReactElement } from 'react';
+import { useState, useCallback, useEffect, useId, useRef, type KeyboardEvent, type ReactElement } from 'react';
 import { useNavigate, useLocation, Outlet } from '@tanstack/react-router';
 import { MoreVertical } from 'lucide-react';
 import type { SubTab } from '../../../../components/navigation/sub-tab-nav';
@@ -34,6 +34,69 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
+  const menuId = useId();
+  const menuContainerRef = useRef<HTMLDivElement>(null);
+  const menuListRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Click-outside closes menu
+  useEffect(() => {
+    if (!menuOpen) return;
+    function onDocMouseDown(e: MouseEvent): void {
+      if (menuContainerRef.current && !menuContainerRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onDocMouseDown);
+    return () => document.removeEventListener('mousedown', onDocMouseDown);
+  }, [menuOpen]);
+
+  // Focus first menuitem when menu opens
+  useEffect(() => {
+    if (!menuOpen) return;
+    const first = menuListRef.current?.querySelector<HTMLElement>('[role="menuitem"]:not([disabled])');
+    first?.focus();
+  }, [menuOpen]);
+
+  const handleMenuKeyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>): void => {
+      if (!menuListRef.current) return;
+      const items = Array.from(
+        menuListRef.current.querySelectorAll<HTMLElement>('[role="menuitem"]:not([disabled])'),
+      );
+      if (items.length === 0) return;
+      const active = document.activeElement as HTMLElement | null;
+      const currentIndex = active ? items.indexOf(active) : -1;
+      const focusAt = (i: number): void => {
+        items[(i + items.length) % items.length]?.focus();
+      };
+
+      switch (event.key) {
+        case 'ArrowDown':
+          event.preventDefault();
+          focusAt(currentIndex === -1 ? 0 : currentIndex + 1);
+          break;
+        case 'ArrowUp':
+          event.preventDefault();
+          focusAt(currentIndex === -1 ? items.length - 1 : currentIndex - 1);
+          break;
+        case 'Home':
+          event.preventDefault();
+          focusAt(0);
+          break;
+        case 'End':
+          event.preventDefault();
+          focusAt(items.length - 1);
+          break;
+        case 'Escape':
+          event.preventDefault();
+          setMenuOpen(false);
+          triggerRef.current?.focus();
+          break;
+      }
+    },
+    [],
+  );
 
   const isArchived = organization && 'archivedAt' in organization && !!(organization as Record<string, unknown>).archivedAt;
 
@@ -120,20 +183,25 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
       {/* Drilldown header */}
       <DrilldownHeader backTo="/clients" backLabel="Back to clients" title={organization.name}>
         {/* Action menu */}
-        <div className="relative">
+        <div ref={menuContainerRef} className="relative">
           <button
+            ref={triggerRef}
             type="button"
             onClick={() => setMenuOpen((prev) => !prev)}
-            className="rounded-lg px-3 py-1.5 text-lg text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)]"
+            className="rounded-lg px-3 py-1.5 text-lg text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-interactive)]"
             aria-label="Actions menu"
             aria-expanded={menuOpen}
             aria-haspopup="menu"
+            aria-controls={menuId}
           >
             <MoreVertical size={18} aria-hidden="true" />
           </button>
 
           {menuOpen && (
             <div
+              ref={menuListRef}
+              id={menuId}
+              onKeyDown={handleMenuKeyDown}
               className="absolute right-0 top-full z-10 mt-1 w-40 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] py-1 shadow-lg"
               role="menu"
             >
@@ -189,6 +257,7 @@ export function ClientDetailPage({ orgId }: ClientDetailPageProps): ReactElement
           activeId={activeTabId}
           onSelect={handleTabSelect}
           ariaLabel="Client detail tabs"
+          idPrefix="client-detail"
         />
       </div>
 

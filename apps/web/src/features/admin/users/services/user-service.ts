@@ -15,7 +15,8 @@ export type ClientRole = 'client_exec' | 'client_director' | 'client_manager';
 export interface TeamMember {
   id: string;
   email: string;
-  fullName: string;
+  /** Null when the user has not set a display name in their profile. */
+  fullName: string | null;
   avatarUrl: string | null;
   role: CccRole | ClientRole;
   assignedClients: string[];
@@ -30,7 +31,8 @@ export interface Invitation {
   organizationId: string | null;
   expiresAt: string;
   createdAt: string;
-  invitedBy: string;
+  /** Null when the invitation was created by a system/automated flow. */
+  invitedBy: string | null;
 }
 
 export interface InviteParams {

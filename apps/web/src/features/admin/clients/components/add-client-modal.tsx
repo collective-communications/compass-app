@@ -62,7 +62,7 @@ export function AddClientModal({ open, onClose, onCreated }: AddClientModalProps
   const nameInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useFocusTrap(containerRef, true);
+  useFocusTrap(containerRef, open);
 
   // Focus name input when modal opens
   useEffect(() => {

@@ -7,6 +7,7 @@
 import type { ReactElement } from 'react';
 import { Download, Loader2, AlertCircle } from 'lucide-react';
 import type { ReportStatus } from '@compass/types';
+import { formatDisplayDate } from '@compass/utils';
 
 interface ReportCardProps {
   report: ReportStatus;
@@ -21,18 +22,6 @@ function formatFileSize(bytes: number | null): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-/** Format ISO date to readable string */
-function formatDate(iso: string): string {
-  const date = new Date(iso);
-  return date.toLocaleDateString('en-CA', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
 }
 
 /** Map report format to display badge */
@@ -62,7 +51,7 @@ export function ReportCard({
   return (
     <div
       role="group"
-      aria-label={`Report generated ${formatDate(report.createdAt)}, format ${report.format.toUpperCase()}, ${report.status}`}
+      aria-label={`Report generated ${formatDisplayDate(report.createdAt, 'short')}, format ${report.format.toUpperCase()}, ${report.status}`}
       aria-current={isSelected ? 'true' : undefined}
       className={[
         'relative w-full rounded-lg border border-[var(--grey-100)] border-l-4 bg-[var(--surface-card)] p-4 text-left transition-colors',
@@ -75,14 +64,14 @@ export function ReportCard({
         type="button"
         onClick={onSelect}
         className="absolute inset-0 z-0 cursor-pointer rounded-lg"
-        aria-label={`Select report from ${formatDate(report.createdAt)}`}
+        aria-label={`Select report from ${formatDisplayDate(report.createdAt, 'short')}`}
       />
 
       {/* Top row: format badge + date + download */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FormatBadge format={report.format} />
-          <span className="text-sm text-[var(--text-secondary)]">{formatDate(report.createdAt)}</span>
+          <span className="text-sm text-[var(--text-secondary)]">{formatDisplayDate(report.createdAt, 'short')}</span>
         </div>
 
         {isReady && report.fileUrl !== null && (

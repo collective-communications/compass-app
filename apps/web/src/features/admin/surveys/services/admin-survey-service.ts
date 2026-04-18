@@ -4,6 +4,7 @@
  */
 
 import type {
+  Database,
   Survey,
   SurveyStatus,
   Question,
@@ -13,7 +14,61 @@ import type {
   SurveyTemplate,
 } from '@compass/types';
 import { supabase } from '../../../../lib/supabase';
+import { logger } from '../../../../lib/logger';
 import { mapSurveyRow, mapQuestionRow, mapDimensionRow, mapSubDimensionRow } from '../../../../lib/mappers/survey-mappers';
+
+type QuestionInsert = Database['public']['Tables']['questions']['Insert'];
+type QuestionType = Database['public']['Enums']['question_type'];
+type SurveyRow = Database['public']['Tables']['surveys']['Row'];
+type QuestionRow = Database['public']['Tables']['questions']['Row'];
+type SurveyTemplateRow = Database['public']['Tables']['survey_templates']['Row'];
+
+/**
+ * Question row shape returned by the admin builder select — the generated
+ * `questions` Row is missing columns present in the live DB (`description`,
+ * `options`, `diagnostic_focus`, `recommended_action`, `updated_at`). Tracked
+ * for regeneration; using an intersection keeps reads type-safe today.
+ */
+type QuestionRowWithDrift = QuestionRow & {
+  description?: string | null;
+  options?: unknown;
+  diagnostic_focus?: string | null;
+  recommended_action?: string | null;
+  updated_at?: string;
+};
+
+/** Joined question row with its question_dimensions relation. */
+type QuestionRowWithDimensions = QuestionRowWithDrift & {
+  question_dimensions?: Array<{
+    id?: string;
+    question_id: string;
+    dimension_id: string;
+    weight: number;
+  }>;
+};
+
+/** Shape of the survey_templates.questions JSONB array — authored by admin UI. */
+type TemplateQuestionEntry = {
+  text: string;
+  type?: QuestionType;
+  reverse_scored?: boolean;
+  required?: boolean;
+  sub_dimension_id?: string | null;
+  dimension_id?: string;
+  weight?: number;
+  dimensions?: Array<{ dimension_id: string; weight?: number }>;
+};
+
+/** Joined survey + deployments shape used by listSurveys. */
+type SurveyRowWithDeployments = SurveyRow & {
+  deployments?: Array<{
+    token: string;
+    is_active: boolean;
+    responses?: Array<{ count: number }>;
+  }>;
+  // Drift: present in the live DB, not yet in the generated Row.
+  scores_calculated_at?: string | null;
+};
 
 // ─── List Types ─────────────────────────────────────────────────────────────
 
@@ -82,17 +137,22 @@ export async function listSurveys(
 
   const { data, error } = await query;
 
-  if (error) throw error;
+  if (error) {
+    logger.error(
+      { err: error, fn: 'listSurveys', organizationId, statusFilter },
+      'Failed to list surveys',
+    );
+    throw error;
+  }
 
-  return (data ?? []).map((row) => {
-    const raw = row as Record<string, unknown>;
-    const deployments = raw['deployments'] as Array<{ token: string; is_active: boolean; responses: Array<{ count: number }> }> | undefined;
+  return ((data ?? []) as SurveyRowWithDeployments[]).map((row) => {
+    const deployments = row.deployments;
     const responseCount = deployments?.reduce(
       (sum, d) => sum + (d.responses?.[0]?.count ?? 0), 0,
     ) ?? 0;
     const activeDeployment = deployments?.find((d) => d.is_active);
     return {
-      ...mapSurveyRow(raw),
+      ...mapSurveyRow(row),
       responseCount,
       completionPercent: 0, // Calculated server-side if needed
       activeDeploymentToken: activeDeployment?.token ?? null,
@@ -117,29 +177,39 @@ export async function getSurveyBuilderData(surveyId: string): Promise<SurveyBuil
       .eq('survey_id', surveyId),
   ]);
 
-  if (surveyResult.error) throw surveyResult.error;
-  if (questionsResult.error) throw questionsResult.error;
-  if (dimensionsResult.error) throw dimensionsResult.error;
-  if (subDimensionsResult.error) throw subDimensionsResult.error;
+  if (surveyResult.error) {
+    logger.error({ err: surveyResult.error, fn: 'getSurveyBuilderData.survey', surveyId }, 'Failed to load survey');
+    throw surveyResult.error;
+  }
+  if (questionsResult.error) {
+    logger.error({ err: questionsResult.error, fn: 'getSurveyBuilderData.questions', surveyId }, 'Failed to load questions');
+    throw questionsResult.error;
+  }
+  if (dimensionsResult.error) {
+    logger.error({ err: dimensionsResult.error, fn: 'getSurveyBuilderData.dimensions', surveyId }, 'Failed to load dimensions');
+    throw dimensionsResult.error;
+  }
+  if (subDimensionsResult.error) {
+    logger.error({ err: subDimensionsResult.error, fn: 'getSurveyBuilderData.subDimensions', surveyId }, 'Failed to load sub-dimensions');
+    throw subDimensionsResult.error;
+  }
 
-  const survey = mapSurveyRow(surveyResult.data as Record<string, unknown>);
+  const survey = mapSurveyRow(surveyResult.data);
   const dimensions = (dimensionsResult.data ?? []).map(mapDimensionRow);
   const subDimensions = (subDimensionsResult.data ?? []).map(mapSubDimensionRow);
 
   const subDimMap = new Map(subDimensions.map((sd) => [sd.id, sd]));
 
-  const questions: QuestionWithDimension[] = (questionsResult.data ?? []).map((row) => {
-    const raw = row as Record<string, unknown>;
-    const qdArr = raw['question_dimensions'] as Array<Record<string, unknown>> | undefined;
-    const qd = qdArr?.[0];
-    const mapped = mapQuestionRow(raw);
+  const questions: QuestionWithDimension[] = ((questionsResult.data ?? []) as QuestionRowWithDimensions[]).map((row) => {
+    const qd = row.question_dimensions?.[0];
+    const mapped = mapQuestionRow(row);
     return {
       ...mapped,
       dimension: {
-        id: (qd?.['id'] as string) ?? '',
-        questionId: (qd?.['question_id'] as string) ?? '',
-        dimensionId: (qd?.['dimension_id'] as string) ?? '',
-        weight: (qd?.['weight'] as number) ?? 1,
+        id: qd?.id ?? '',
+        questionId: qd?.question_id ?? '',
+        dimensionId: qd?.dimension_id ?? '',
+        weight: qd?.weight ?? 1,
       },
       subDimension: mapped.subDimensionId ? (subDimMap.get(mapped.subDimensionId) ?? null) : null,
     };
@@ -172,9 +242,15 @@ export async function createSurvey(params: CreateSurveyParams): Promise<Survey> 
     .select('*')
     .single();
 
-  if (surveyError) throw surveyError;
+  if (surveyError) {
+    logger.error(
+      { err: surveyError, fn: 'createSurvey', organizationId, title },
+      'Failed to insert new survey',
+    );
+    throw surveyError;
+  }
 
-  const survey = mapSurveyRow(surveyData as Record<string, unknown>);
+  const survey = mapSurveyRow(surveyData);
 
   // Copy questions from template or existing survey.
   // When neither is specified, fall back to the system template so new surveys
@@ -197,16 +273,25 @@ export async function createSurvey(params: CreateSurveyParams): Promise<Survey> 
 export async function updateQuestion(params: UpdateQuestionParams): Promise<Question> {
   const { id, ...updates } = params;
 
-  const dbUpdates: Record<string, unknown> = {};
-  if (updates.text !== undefined) dbUpdates['text'] = updates.text;
-  if (updates.description !== undefined) dbUpdates['description'] = updates.description;
-  if (updates.reverseScored !== undefined) dbUpdates['reverse_scored'] = updates.reverseScored;
-  if (updates.diagnosticFocus !== undefined) dbUpdates['diagnostic_focus'] = updates.diagnosticFocus;
+  // The generated Update type is missing the drift columns (`description`,
+  // `diagnostic_focus`, `recommended_action`) present in the live DB; extend
+  // via intersection until types are regenerated.
+  type QuestionUpdate = Database['public']['Tables']['questions']['Update'] & {
+    description?: string | null;
+    diagnostic_focus?: string | null;
+    recommended_action?: string | null;
+  };
+
+  const dbUpdates: QuestionUpdate = {};
+  if (updates.text !== undefined) dbUpdates.text = updates.text;
+  if (updates.description !== undefined) dbUpdates.description = updates.description;
+  if (updates.reverseScored !== undefined) dbUpdates.reverse_scored = updates.reverseScored;
+  if (updates.diagnosticFocus !== undefined) dbUpdates.diagnostic_focus = updates.diagnosticFocus;
   if (updates.recommendedAction !== undefined) {
-    dbUpdates['recommended_action'] = updates.recommendedAction;
+    dbUpdates.recommended_action = updates.recommendedAction;
   }
   if (updates.subDimensionId !== undefined) {
-    dbUpdates['sub_dimension_id'] = updates.subDimensionId;
+    dbUpdates.sub_dimension_id = updates.subDimensionId;
   }
 
   const { data, error } = await supabase
@@ -216,9 +301,12 @@ export async function updateQuestion(params: UpdateQuestionParams): Promise<Ques
     .select('*')
     .single();
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'updateQuestion', questionId: id }, 'Failed to update question');
+    throw error;
+  }
 
-  return mapQuestionRow(data as Record<string, unknown>);
+  return mapQuestionRow(data);
 }
 
 /** Reorder questions by updating order_index values via a single RPC call */
@@ -231,7 +319,10 @@ export async function reorderQuestions(
     p_question_ids: reorders.map((r) => r.questionId),
     p_new_orders: reorders.map((r) => r.newOrder),
   });
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'reorderQuestions', surveyId }, 'Failed to reorder questions');
+    throw error;
+  }
 }
 
 /** Update survey status */
@@ -244,7 +335,10 @@ export async function updateSurveyStatus(
     .update({ status })
     .eq('id', surveyId);
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'updateSurveyStatus', surveyId, status }, 'Failed to update survey status');
+    throw error;
+  }
 }
 
 /** Fetch available survey templates */
@@ -257,21 +351,21 @@ export async function listTemplates(
     .or(`organization_id.eq.${organizationId},is_system.eq.true`)
     .eq('is_active', true);
 
-  if (error) throw error;
+  if (error) {
+    logger.error({ err: error, fn: 'listTemplates', organizationId }, 'Failed to list survey templates');
+    throw error;
+  }
 
-  return (data ?? []).map((row) => {
-    const raw = row as Record<string, unknown>;
-    return {
-      id: raw['id'] as string,
-      name: raw['name'] as string,
-      description: (raw['description'] as string) ?? null,
-      organizationId: (raw['organization_id'] as string) ?? null,
-      questions: raw['questions'] ?? null,
-      settings: (raw['settings'] as SurveyTemplate['settings']) ?? null,
-      isSystem: (raw['is_system'] as boolean) ?? false,
-      isActive: (raw['is_active'] as boolean) ?? true,
-    };
-  });
+  return ((data ?? []) as SurveyTemplateRow[]).map((row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description ?? null,
+    organizationId: row.organization_id ?? null,
+    questions: row.questions ?? null,
+    settings: (row.settings as SurveyTemplate['settings']) ?? null,
+    isSystem: row.is_system ?? false,
+    isActive: row.is_active ?? true,
+  }));
 }
 
 // ─── Internal Helpers ───────────────────────────────────────────────────────
@@ -305,19 +399,26 @@ async function copyQuestionsFromTemplate(
     .eq('id', templateId)
     .single();
 
-  if (error || !template) return;
+  if (error) {
+    logger.error(
+      { err: error, fn: 'copyQuestionsFromTemplate', templateId, targetSurveyId },
+      'Failed to read template questions — skipping copy',
+    );
+    return;
+  }
+  if (!template) return;
 
-  const templateQuestions = template.questions as Array<Record<string, unknown>> | null;
+  const templateQuestions = (template.questions as TemplateQuestionEntry[] | null) ?? null;
   if (!templateQuestions?.length) return;
 
-  const questionInserts = templateQuestions.map((q, index) => ({
+  const questionInserts: QuestionInsert[] = templateQuestions.map((q, index) => ({
     survey_id: targetSurveyId,
-    text: q['text'] as string,
-    type: (q['type'] as string) ?? 'likert',
-    reverse_scored: (q['reverse_scored'] as boolean) ?? false,
-    required: (q['required'] as boolean) ?? true,
+    text: q.text,
+    type: q.type ?? 'likert',
+    reverse_scored: q.reverse_scored ?? false,
+    required: q.required ?? true,
     order_index: index + 1,
-    sub_dimension_id: (q['sub_dimension_id'] as string) ?? null,
+    sub_dimension_id: q.sub_dimension_id ?? null,
   }));
 
   const { data: insertedQuestions, error: insertError } = await supabase
@@ -325,7 +426,14 @@ async function copyQuestionsFromTemplate(
     .insert(questionInserts)
     .select('id');
 
-  if (insertError || !insertedQuestions) return;
+  if (insertError) {
+    logger.error(
+      { err: insertError, fn: 'copyQuestionsFromTemplate.insertQuestions', templateId, targetSurveyId },
+      'Failed to insert copied questions',
+    );
+    return;
+  }
+  if (!insertedQuestions) return;
 
   // Map dimension assignments from template.
   // Each template question carries a `dimensions` array to support multi-dimension
@@ -335,30 +443,36 @@ async function copyQuestionsFromTemplate(
 
   insertedQuestions.forEach((inserted, index) => {
     const templateQ = templateQuestions[index];
-    const dims = templateQ?.['dimensions'] as Array<Record<string, unknown>> | undefined;
+    const dims = templateQ?.dimensions;
 
     if (dims?.length) {
       for (const d of dims) {
         dimensionMappings.push({
-          question_id: inserted.id as string,
-          dimension_id: d['dimension_id'] as string,
-          weight: (d['weight'] as number) ?? 1,
+          question_id: inserted.id,
+          dimension_id: d.dimension_id,
+          weight: d.weight ?? 1,
         });
       }
     } else {
-      const dimId = templateQ?.['dimension_id'] as string | undefined;
+      const dimId = templateQ?.dimension_id;
       if (dimId) {
         dimensionMappings.push({
-          question_id: inserted.id as string,
+          question_id: inserted.id,
           dimension_id: dimId,
-          weight: (templateQ?.['weight'] as number) ?? 1,
+          weight: templateQ?.weight ?? 1,
         });
       }
     }
   });
 
   if (dimensionMappings.length > 0) {
-    await supabase.from('question_dimensions').insert(dimensionMappings);
+    const { error: mappingError } = await supabase.from('question_dimensions').insert(dimensionMappings);
+    if (mappingError) {
+      logger.error(
+        { err: mappingError, fn: 'copyQuestionsFromTemplate.insertMappings', targetSurveyId },
+        'Failed to insert dimension mappings for copied questions',
+      );
+    }
   }
 }
 
@@ -372,43 +486,61 @@ async function copyQuestionsFromSurvey(
     .eq('survey_id', sourceSurveyId)
     .order('order_index', { ascending: true });
 
-  if (error || !sourceQuestions?.length) return;
+  if (error) {
+    logger.error(
+      { err: error, fn: 'copyQuestionsFromSurvey.fetch', sourceSurveyId, targetSurveyId },
+      'Failed to read source questions — skipping duplicate',
+    );
+    return;
+  }
+  if (!sourceQuestions?.length) return;
 
-  const questionInserts = sourceQuestions.map((q) => {
-    const raw = q as Record<string, unknown>;
-    return {
-      survey_id: targetSurveyId,
-      text: raw['text'] as string,
-      type: (raw['type'] as string) ?? 'likert',
-      reverse_scored: (raw['reverse_scored'] as boolean) ?? false,
-      required: (raw['required'] as boolean) ?? true,
-      order_index: raw['order_index'] as number,
-      sub_dimension_id: (raw['sub_dimension_id'] as string) ?? null,
-    };
-  });
+  const typedSourceQuestions = sourceQuestions as QuestionRowWithDimensions[];
+
+  const questionInserts: QuestionInsert[] = typedSourceQuestions.map((q) => ({
+    survey_id: targetSurveyId,
+    text: q.text,
+    type: q.type ?? 'likert',
+    reverse_scored: q.reverse_scored ?? false,
+    required: q.required ?? true,
+    order_index: q.order_index,
+    sub_dimension_id: q.sub_dimension_id ?? null,
+  }));
 
   const { data: insertedQuestions, error: insertError } = await supabase
     .from('questions')
     .insert(questionInserts)
     .select('id');
 
-  if (insertError || !insertedQuestions) return;
+  if (insertError) {
+    logger.error(
+      { err: insertError, fn: 'copyQuestionsFromSurvey.insertQuestions', sourceSurveyId, targetSurveyId },
+      'Failed to insert duplicated questions',
+    );
+    return;
+  }
+  if (!insertedQuestions) return;
 
   const dimensionMappings = insertedQuestions
     .map((inserted, index) => {
-      const sourceQ = sourceQuestions[index] as Record<string, unknown>;
-      const qdArr = sourceQ['question_dimensions'] as Array<Record<string, unknown>> | undefined;
-      const qd = qdArr?.[0];
+      const sourceQ = typedSourceQuestions[index];
+      const qd = sourceQ?.question_dimensions?.[0];
       if (!qd) return null;
       return {
-        question_id: inserted.id as string,
-        dimension_id: qd['dimension_id'] as string,
-        weight: (qd['weight'] as number) ?? 1,
+        question_id: inserted.id,
+        dimension_id: qd.dimension_id,
+        weight: qd.weight ?? 1,
       };
     })
     .filter((m): m is NonNullable<typeof m> => m !== null);
 
   if (dimensionMappings.length > 0) {
-    await supabase.from('question_dimensions').insert(dimensionMappings);
+    const { error: mappingError } = await supabase.from('question_dimensions').insert(dimensionMappings);
+    if (mappingError) {
+      logger.error(
+        { err: mappingError, fn: 'copyQuestionsFromSurvey.insertMappings', targetSurveyId },
+        'Failed to insert dimension mappings for duplicated questions',
+      );
+    }
   }
 }

@@ -29,18 +29,23 @@ export function extractInitials(name: string): string {
   const trimmed = name.trim();
   if (!trimmed) return '';
 
-  const words = trimmed.split(/\s+/);
+  const words = trimmed.split(/\s+/).filter((w) => w.length > 0);
 
-  if (words.length >= 2) {
-    return `${words[0]![0]!.toUpperCase()}${words[1]![0]!.toUpperCase()}`;
+  const first = words[0];
+  if (!first) return '';
+
+  const second = words[1];
+  if (second) {
+    const firstChar = first[0] ?? '';
+    const secondChar = second[0] ?? '';
+    return `${firstChar}${secondChar}`.toUpperCase();
   }
 
-  const single = words[0]!;
-  if (single.length >= 2) {
-    return `${single[0]!.toUpperCase()}${single[1]!.toUpperCase()}`;
+  if (first.length >= 2) {
+    return first.slice(0, 2).toUpperCase();
   }
 
-  return single[0]!.toUpperCase();
+  return first.toUpperCase();
 }
 
 /**

@@ -4,6 +4,7 @@
  */
 
 import type { ReactElement } from 'react';
+import { formatDisplayDate } from '@compass/utils';
 import { useConsultant } from '../hooks/use-organization';
 
 export interface ConsultantCardProps {
@@ -17,15 +18,6 @@ function getInitials(name: string): string {
     .slice(0, 2)
     .map((word) => word.charAt(0).toUpperCase())
     .join('');
-}
-
-/** Formats a date string as "MMM D, YYYY" */
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
 }
 
 export function ConsultantCard({ orgId }: ConsultantCardProps): ReactElement {
@@ -56,7 +48,7 @@ export function ConsultantCard({ orgId }: ConsultantCardProps): ReactElement {
           <div>
             <p className="text-sm font-medium text-[var(--grey-900)]">{consultant.name}</p>
             <p className="text-xs text-[var(--text-secondary)]">
-              Assigned {formatDate(consultant.assignedAt)}
+              Assigned {formatDisplayDate(consultant.assignedAt, 'short', { locale: 'en-US' })}
             </p>
           </div>
         </div>

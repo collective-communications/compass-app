@@ -2,17 +2,29 @@
  * Auth route definitions for TanStack Router.
  * Creates the `/auth` route tree for login, callback, password reset,
  * and invitation acceptance.
+ *
+ * ## Code splitting
+ *
+ * Login is the most common entry point and stays eager so the first paint
+ * has no Suspense flash. `AcceptInvitePage` — an occasional deep link path
+ * new users follow once — is lazy-loaded to keep its weight off the initial
+ * bundle.
  */
 
-import { useState, useEffect } from 'react';
+import { Suspense, lazy, useState, useEffect } from 'react';
 import { createRoute, Link, Outlet, useNavigate } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { type UserRole, getTierFromRole, getTierHomeRoute } from '@compass/types';
 import { PublicShell } from '../../components/shells/public-shell';
-import { BrandPanel, LoginForm, ForgotPasswordForm, SocialSignOnButtons, AcceptInvitePage } from './components';
+import { BrandPanel, LoginForm, ForgotPasswordForm, SocialSignOnButtons } from './components';
+import { RouteLoading } from '../../components/app/route-loading';
 import { useAuth, usePasswordReset } from './hooks';
 import { ArrowLeft, Lock, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+
+const AcceptInvitePage = lazy(() =>
+  import('./components/accept-invite-page').then((m) => ({ default: m.AcceptInvitePage })),
+);
 
 export interface LoginSearch {
   returnTo?: string;
@@ -279,7 +291,11 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
     }),
     component: function AcceptInviteWrapper(): React.ReactElement {
       const { token } = acceptInviteRoute.useSearch() as AcceptInviteSearch;
-      return <AcceptInvitePage token={token} />;
+      return (
+        <Suspense fallback={<RouteLoading />}>
+          <AcceptInvitePage token={token} />
+        </Suspense>
+      );
     },
   });
 

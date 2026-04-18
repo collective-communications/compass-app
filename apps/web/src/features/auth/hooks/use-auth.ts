@@ -57,12 +57,51 @@ function mapSupabaseError(message: string): string {
   return LOGIN_ERRORS.UNKNOWN;
 }
 
-/** Validate returnTo is a safe relative path (no protocol, no double-slash) */
-function isValidReturnTo(value: string): boolean {
-  if (!value.startsWith('/')) return false;
-  if (value.startsWith('//')) return false;
-  if (value.includes('://')) return false;
-  if (value.includes('\\')) return false;
+/**
+ * Validate that a returnTo search param is a safe same-origin relative path.
+ *
+ * Rejects any of the following (evaluated against BOTH the raw value and its
+ * fully-decoded form — repeated `decodeURIComponent` until it stabilizes — so
+ * single- and double-encoded attacks are handled identically):
+ *
+ *   - Empty / non-string input.
+ *   - Paths that do not start with a single `/` (i.e. not a relative app path).
+ *   - Protocol-relative URLs like `//evil.com` (browsers treat as absolute).
+ *   - Fully-qualified URLs containing `://` (e.g. `https://evil.com`).
+ *   - Backslashes (`\\`) — some browsers normalize `\\evil.com` to `//evil.com`.
+ *   - Malformed percent-encoding (`decodeURIComponent` throws).
+ *
+ * Decoding in a loop matters: an attacker who double-encodes `//` as
+ * `%252F%252F` would otherwise slip past a single-pass decode because the first
+ * decode yields `%2F%2F`, which does not contain a literal `/`. Iterating until
+ * the string stops changing collapses every level of encoding to its ultimate
+ * decoded form before we check.
+ */
+export function isValidReturnTo(value: unknown): boolean {
+  if (typeof value !== 'string' || value.length === 0) return false;
+
+  // Iteratively decode so double-encoded traversal (`%252F%252F…`) is rejected.
+  let decoded = value;
+  try {
+    for (let i = 0; i < 5; i++) {
+      const next = decodeURIComponent(decoded);
+      if (next === decoded) break;
+      decoded = next;
+    }
+  } catch {
+    // Malformed percent-encoding → unsafe.
+    return false;
+  }
+
+  // Check BOTH raw and fully-decoded forms so `%2F%2Fevil.com` (which decodes
+  // to `//evil.com`) is rejected even though it starts with `%` in raw form.
+  for (const candidate of [value, decoded]) {
+    if (!candidate.startsWith('/')) return false;
+    if (candidate.startsWith('//')) return false;
+    if (candidate.includes('://')) return false;
+    if (candidate.includes('\\')) return false;
+  }
+
   return true;
 }
 

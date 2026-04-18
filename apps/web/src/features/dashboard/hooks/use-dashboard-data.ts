@@ -7,6 +7,7 @@
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { Survey, Deployment, SurveyStatus } from '@compass/types';
 import { supabase } from '../../../lib/supabase';
+import { STALE_TIMES } from '../../../lib/query-config';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -40,10 +41,14 @@ export const dashboardKeys = {
 // ─── Fetcher ────────────────────────────────────────────────────────────────
 
 async function fetchDashboardData(organizationId: string): Promise<DashboardData> {
-  // Fetch surveys with response counts for this organization
+  // Fetch surveys, response counts, AND deployments in a single round trip.
+  // Previously the deployment row was fetched in a second sequential call
+  // after the active survey was identified — folding it into the survey
+  // select as a nested relation eliminates that round trip entirely. Closed
+  // surveys also get their deployments joined, but those are ignored below.
   const { data: surveys, error: surveysError } = await supabase
     .from('surveys')
-    .select('*, responses:responses(count)')
+    .select('*, responses:responses(count), deployments(*)')
     .eq('organization_id', organizationId)
     .in('status', ['active', 'closed'] satisfies SurveyStatus[])
     .order('created_at', { ascending: false });
@@ -60,18 +65,17 @@ async function fetchDashboardData(organizationId: string): Promise<DashboardData
   let activeSurvey: ActiveSurvey | null = null;
 
   if (activeSurveyRow) {
-    // Fetch the deployment for the active survey
-    const { data: deployments, error: depError } = await supabase
-      .from('deployments')
-      .select('*')
-      .eq('survey_id', activeSurveyRow.id)
-      .limit(1);
-
-    if (depError) throw depError;
-
-    const deployment = deployments?.[0] ?? null;
+    // Deployment comes from the joined `deployments` array on the survey row.
+    // The schema allows multiple deployments per survey; we take the first
+    // to preserve the prior `.limit(1)` behaviour.
+    const deploymentRows = (activeSurveyRow as Record<string, unknown>).deployments as
+      | Record<string, unknown>[]
+      | undefined;
+    const deployment = deploymentRows?.[0] ?? null;
     const responseCount = extractCount(activeSurveyRow);
-    const expectedCount = deployment?.settings?.maxResponses ?? 0;
+    // max_responses lives as a top-level column on deployments; there is no
+    // deployments.settings JSON column in the current schema.
+    const expectedCount = (deployment?.max_responses as number | null | undefined) ?? 0;
     const completionPercent =
       expectedCount > 0 ? Math.round((responseCount / expectedCount) * 100) : 0;
 
@@ -130,12 +134,20 @@ function mapSurvey(row: Record<string, unknown>): Survey {
 
 /** Map snake_case DB row to camelCase Deployment */
 function mapDeployment(row: Record<string, unknown>): Deployment {
+  // The deployments table has `max_responses` as a top-level column and does
+  // not store a `settings` JSON blob; synthesize the legacy settings shape
+  // from the known columns so the domain type keeps its shape.
+  const maxResponses = (row.max_responses as number | null | undefined) ?? null;
   return {
     id: row.id as string,
     surveyId: row.survey_id as string,
     type: row.type as Deployment['type'],
     token: row.token as string,
-    settings: (row.settings as Deployment['settings']) ?? null,
+    settings: {
+      maxResponses,
+      recipientEmail: null,
+      allowMultiple: false,
+    },
     closesAt: (row.closes_at as string) ?? null,
     accessCount: (row.access_count as number) ?? 0,
     lastAccessedAt: (row.last_accessed_at as string) ?? null,
@@ -169,6 +181,11 @@ export function useDashboardData({
     queryKey: dashboardKeys.data(organizationId ?? ''),
     queryFn: () => fetchDashboardData(organizationId!),
     enabled: enabled && !!organizationId,
+    // Dashboard data rarely changes mid-session — hold the cache fresh for
+    // 5 minutes (STALE_TIMES.results) and keep it in memory for 10 minutes
+    // so remounts (e.g. navigating away and back) don't refetch.
+    staleTime: STALE_TIMES.results,
+    gcTime: 10 * 60 * 1000,
   });
 
   return {

@@ -5,7 +5,7 @@
 
 import { useState, useCallback, type ReactElement } from 'react';
 import { SurveyStatus } from '@compass/types';
-import { PillTabNav, type PillTab } from '../../../../components/navigation/pill-tab-nav';
+import { PillTabNav, tabPanelId, type PillTab } from '../../../../components/navigation/pill-tab-nav';
 import { DrilldownHeader } from '../../../../components/navigation/drilldown-header';
 import { useSurveys } from '../hooks/use-surveys';
 import { useCreateSurvey } from '../hooks/use-create-survey';
@@ -97,45 +97,53 @@ export function SurveyListPage({
           tabs={STATUS_PILLS}
           activeId={activeFilter}
           onSelect={setActiveFilter}
+          ariaLabel="Survey status filter"
+          idPrefix="survey-status"
         />
       </div>
 
-      {isLoading && (
-        <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
-          Loading surveys...
-        </div>
-      )}
+      <div
+        role="tabpanel"
+        id={tabPanelId('survey-status', activeFilter)}
+        aria-labelledby={`survey-status-${activeFilter}`}
+      >
+        {isLoading && (
+          <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
+            Loading surveys...
+          </div>
+        )}
 
-      {error && (
-        <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]" role="alert">
-          Failed to load surveys. Please try again.
-        </div>
-      )}
+        {error && (
+          <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4 text-sm text-[var(--feedback-error-text)]" role="alert">
+            Failed to load surveys. Please try again.
+          </div>
+        )}
 
-      {surveys && surveys.length === 0 && !isLoading && (
-        <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
-          {statusFilter
-            ? `No ${statusFilter} surveys found.`
-            : 'No surveys yet. Create your first survey to get started.'}
-        </div>
-      )}
+        {surveys && surveys.length === 0 && !isLoading && (
+          <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
+            {statusFilter
+              ? `No ${statusFilter} surveys found.`
+              : 'No surveys yet. Create your first survey to get started.'}
+          </div>
+        )}
 
-      {surveys && surveys.length > 0 && (
-        <div className="flex flex-col gap-3">
-          {surveys.map((survey) => (
-            <SurveyCard
-              key={survey.id}
-              survey={survey}
-              onClick={onSelectSurvey}
-              onConfigure={onConfigure}
-              onEditQuestions={onEditQuestions}
-              onCopyLink={onCopyLink}
-              onViewResults={onViewResults}
-              onArchive={onArchive}
-            />
-          ))}
-        </div>
-      )}
+        {surveys && surveys.length > 0 && (
+          <div className="flex flex-col gap-3">
+            {surveys.map((survey) => (
+              <SurveyCard
+                key={survey.id}
+                survey={survey}
+                onClick={onSelectSurvey}
+                onConfigure={onConfigure}
+                onEditQuestions={onEditQuestions}
+                onCopyLink={onCopyLink}
+                onViewResults={onViewResults}
+                onArchive={onArchive}
+              />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

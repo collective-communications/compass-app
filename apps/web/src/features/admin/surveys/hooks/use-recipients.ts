@@ -10,6 +10,7 @@ import {
   type UseMutationResult,
 } from '@tanstack/react-query';
 import type { SurveyRecipient } from '@compass/types';
+import { STALE_TIMES } from '../../../../lib/query-config';
 import {
   listRecipients,
   addRecipients,
@@ -29,7 +30,7 @@ export function useRecipients(surveyId: string): UseQueryResult<SurveyRecipient[
     queryKey: recipientKeys.list(surveyId),
     queryFn: () => listRecipients(surveyId),
     enabled: !!surveyId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIMES.results,
   });
 }
 
@@ -39,7 +40,7 @@ export function useRecipientStats(surveyId: string): UseQueryResult<RecipientSta
     queryKey: recipientKeys.stats(surveyId),
     queryFn: () => getRecipientStats(surveyId),
     enabled: !!surveyId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: STALE_TIMES.results,
   });
 }
 

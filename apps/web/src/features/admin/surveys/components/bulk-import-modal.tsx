@@ -158,7 +158,7 @@ export function BulkImportModal({
               onChange={(e) => setPasteContent(e.target.value)}
               placeholder="email,name,department,role,location,tenure&#10;jane@example.com,Jane Doe,Engineering,Manager,Remote,3-5 years"
               rows={6}
-              className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--grey-500)] focus:outline-none resize-none"
+              className="w-full rounded-lg border border-[var(--grey-100)] px-3 py-2 text-sm text-[var(--grey-900)] placeholder:text-[var(--text-placeholder)] focus:border-[var(--grey-500)] focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)]/20 resize-none"
             />
             <button
               type="button"
