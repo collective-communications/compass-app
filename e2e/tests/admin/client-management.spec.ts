@@ -3,8 +3,21 @@ import { AdminPage } from '../../page-objects/admin.page';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
+/**
+ * Admin client management E2E tests.
+ *
+ * The seed fixture (scripts/seed-dev.ts) always provisions at least one
+ * client organization and one active survey, so the tests below assert
+ * unconditionally instead of wrapping each step in `if (isVisible())`
+ * guards that silently skip. Matches the fixture-deterministic style
+ * from `e2e/tests/reports/report-list.spec.ts`.
+ */
+
+const clientCardLocator = (page: import('@playwright/test').Page) =>
+  page.getByTestId('client-card').or(page.locator('button[aria-label^="View"]'));
+
 test.describe('Admin client management', () => {
-  test('client list renders with cards or empty state', async ({ page }) => {
+  test('client list renders with at least one seeded client card', async ({ page }) => {
     await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
@@ -12,165 +25,115 @@ test.describe('Admin client management', () => {
       page.getByRole('heading', { name: /clients/i }),
     ).toBeVisible({ timeout: 10000 });
 
-    const clientCards = page.getByTestId('client-card').or(
-      page.locator('button[aria-label^="View"]'),
-    );
-    const emptyState = page.getByText(/no clients/i);
-
-    const hasCards = await clientCards.first().isVisible({ timeout: 5000 }).catch(() => false);
-    const hasEmpty = await emptyState.isVisible({ timeout: 5000 }).catch(() => false);
-
-    expect(hasCards || hasEmpty).toBe(true);
+    // Seed guarantees at least one client org — no empty-state fallback.
+    await expect(clientCardLocator(page).first()).toBeVisible({ timeout: 10000 });
   });
 
   test('clicking a client card navigates to client detail', async ({ page }) => {
     await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
-    const clientCards = page.getByTestId('client-card').or(
-      page.locator('button[aria-label^="View"]'),
-    );
+    const firstCard = clientCardLocator(page).first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
+    await firstCard.click();
+    await page.waitForLoadState('networkidle');
 
-    if (await clientCards.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-      await clientCards.first().click();
-      await page.waitForLoadState('networkidle');
+    // Should navigate to a client detail URL with /overview redirect
+    expect(page.url()).toContain('/clients/');
+    expect(page.url()).toContain('/overview');
 
-      // Should navigate to a client detail URL with /overview redirect
-      expect(page.url()).toContain('/clients/');
-      expect(page.url()).toContain('/overview');
-
-      // Org info should be visible on detail page
-      const orgHeading = page.getByRole('heading').first();
-      await expect(orgHeading).toBeVisible({ timeout: 10000 });
-    }
+    // Org info should be visible on detail page
+    const orgHeading = page.getByRole('heading').first();
+    await expect(orgHeading).toBeVisible({ timeout: 10000 });
   });
 
   test('client detail page has horizontal tabs', async ({ page }) => {
     await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
-    const clientCards = page.getByTestId('client-card').or(
-      page.locator('button[aria-label^="View"]'),
-    );
+    await clientCardLocator(page).first().click();
+    await page.waitForLoadState('networkidle');
 
-    if (await clientCards.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-      await clientCards.first().click();
-      await page.waitForLoadState('networkidle');
+    const tabs = page.getByRole('tab');
+    await expect(tabs.first()).toBeVisible({ timeout: 10000 });
 
-      // Client detail may still be loading — wait for tabs or loading state
-      const tabs = page.getByRole('tab');
-      const loadingMsg = page.getByText(/loading client/i);
+    const tabCount = await tabs.count();
+    expect(tabCount).toBeGreaterThanOrEqual(2);
 
-      const hasTabs = await tabs.first().isVisible({ timeout: 10000 }).catch(() => false);
-      const hasLoading = await loadingMsg.isVisible().catch(() => false);
+    // Overview + Surveys tabs are both part of the client detail shell.
+    const overviewTab = page.getByRole('tab', { name: /overview/i });
+    const surveysTab = page.getByRole('tab', { name: /surveys/i });
+    await expect(overviewTab).toBeVisible();
+    await expect(surveysTab).toBeVisible();
 
-      if (hasTabs) {
-        const tabCount = await tabs.count();
-        expect(tabCount).toBeGreaterThanOrEqual(2);
-
-        const overviewTab = page.getByRole('tab', { name: /overview/i });
-        const surveysTab = page.getByRole('tab', { name: /surveys/i });
-        const hasOverview = await overviewTab.isVisible().catch(() => false);
-        const hasSurveys = await surveysTab.isVisible().catch(() => false);
-        expect(hasOverview || hasSurveys).toBe(true);
-
-        // Verify tab navigation changes the URL
-        if (hasSurveys) {
-          const currentUrl = page.url();
-          await surveysTab.click();
-          await page.waitForLoadState('networkidle');
-          expect(page.url()).not.toEqual(currentUrl);
-          expect(page.url()).toContain('/surveys');
-        }
-      } else {
-        // Client detail is still loading — page navigated correctly
-        expect(hasLoading || page.url().includes('/clients/')).toBe(true);
-      }
-    }
+    // Clicking the Surveys tab updates the URL.
+    const currentUrl = page.url();
+    await surveysTab.click();
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).not.toEqual(currentUrl);
+    expect(page.url()).toContain('/surveys');
   });
 
-  test('survey creation flow opens builder with title field', async ({ page }) => {
-    const admin = new AdminPage(page);
-    await admin.goto();
-
-    if (await admin.newSurveyButton.isVisible({ timeout: 10000 }).catch(() => false)) {
-      await admin.newSurveyButton.click();
-      await page.waitForLoadState('networkidle');
-
-      // Builder or creation form should load
-      const titleField = page.getByRole('textbox', { name: /title|name/i }).or(
-        page.getByPlaceholder(/survey title|survey name/i),
-      );
-      const builderHeading = page.getByRole('heading', { name: /new survey|create survey|survey builder/i });
-
-      const hasTitle = await titleField.isVisible({ timeout: 5000 }).catch(() => false);
-      const hasHeading = await builderHeading.isVisible({ timeout: 5000 }).catch(() => false);
-
-      expect(hasTitle || hasHeading || page.url().includes('new')).toBe(true);
-    }
-  });
-
-  test('deploy button opens deployment panel with survey link', async ({ page }) => {
-    const admin = new AdminPage(page);
-    await admin.goto();
-
-    // Navigate into an existing survey
-    const firstCard = admin.surveyCards.first();
-    if (await firstCard.isVisible({ timeout: 5000 }).catch(() => false)) {
-      await firstCard.click();
-      await page.waitForLoadState('networkidle');
-
-      if (await admin.deployButton.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await admin.deployButton.click();
-        await page.waitForLoadState('networkidle');
-
-        // Deployment panel should show a survey link or deployment info
-        const surveyLink = admin.surveyLinkDisplay.or(
-          page.getByText(/survey link|share link|copy link/i),
-        );
-        const deployPanel = page.getByTestId('deploy-panel').or(
-          page.locator('[class*="panel"], [class*="modal"]').filter({ hasText: /deploy|link/i }),
-        );
-
-        const hasLink = await surveyLink.isVisible({ timeout: 5000 }).catch(() => false);
-        const hasPanel = await deployPanel.first().isVisible({ timeout: 5000 }).catch(() => false);
-
-        expect(hasLink || hasPanel).toBe(true);
-      }
-    }
-  });
-
-  test('client settings shows metadata dropdown configuration', async ({ page }) => {
+  test('survey creation button is available on the client-detail surveys tab', async ({ page }) => {
     await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
-    const clientCards = page.getByTestId('client-card').or(
-      page.locator('button[aria-label^="View"]'),
-    );
+    await clientCardLocator(page).first().click();
+    await page.waitForLoadState('networkidle');
 
-    if (await clientCards.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-      await clientCards.first().click();
-      await page.waitForLoadState('networkidle');
+    // Navigate to the Surveys tab — that's where the "New Survey" CTA lives.
+    const surveysTab = page.getByRole('tab', { name: /surveys/i });
+    await expect(surveysTab).toBeVisible({ timeout: 10000 });
+    await surveysTab.click();
+    await page.waitForLoadState('networkidle');
 
-      // Navigate to settings tab if available
-      const settingsTab = page.getByRole('tab', { name: /settings/i });
-      if (await settingsTab.isVisible({ timeout: 5000 }).catch(() => false)) {
-        await settingsTab.click();
-        await page.waitForLoadState('networkidle');
+    const admin = new AdminPage(page);
+    await expect(admin.newSurveyButton).toBeVisible({ timeout: 10000 });
+  });
 
-        // URL should change to include /settings
-        expect(page.url()).toContain('/settings');
+  test('deploy affordance surfaces when drilling into a seeded survey', async ({ page }) => {
+    // Navigate: /clients → first client → Surveys tab → first survey card.
+    await page.goto('/clients');
+    await page.waitForLoadState('networkidle');
 
-        // Metadata dropdowns for departments, roles, etc.
-        const dropdowns = page.getByRole('combobox').or(page.locator('select'));
-        const metadataLabel = page.getByText(/department|role|location|metadata/i);
+    await clientCardLocator(page).first().click();
+    await page.waitForLoadState('networkidle');
 
-        const hasDropdowns = await dropdowns.first().isVisible({ timeout: 5000 }).catch(() => false);
-        const hasLabels = await metadataLabel.first().isVisible({ timeout: 5000 }).catch(() => false);
+    const surveysTab = page.getByRole('tab', { name: /surveys/i });
+    await expect(surveysTab).toBeVisible({ timeout: 10000 });
+    await surveysTab.click();
+    await page.waitForLoadState('networkidle');
 
-        expect(hasDropdowns || hasLabels).toBe(true);
-      }
-    }
+    const admin = new AdminPage(page);
+    await expect(admin.surveyCards.first()).toBeVisible({ timeout: 10000 });
+    await admin.surveyCards.first().click();
+    await page.waitForLoadState('networkidle');
+
+    // We're now on the survey builder / detail page. The Publish (deploy)
+    // affordance is only rendered on that surface — seed guarantees it.
+    await expect(admin.deployButton).toBeVisible({ timeout: 10000 });
+  });
+
+  test('client settings tab shows metadata dropdown configuration', async ({ page }) => {
+    await page.goto('/clients');
+    await page.waitForLoadState('networkidle');
+
+    await clientCardLocator(page).first().click();
+    await page.waitForLoadState('networkidle');
+
+    const settingsTab = page.getByRole('tab', { name: /settings/i });
+    await expect(settingsTab).toBeVisible({ timeout: 10000 });
+    await settingsTab.click();
+    await page.waitForLoadState('networkidle');
+
+    expect(page.url()).toContain('/settings');
+
+    // Either metadata dropdowns or a department/role label surfaces.
+    // Both are valid renderings depending on metadata-config state.
+    const dropdowns = page.getByRole('combobox').or(page.locator('select'));
+    const metadataLabel = page.getByText(/department|role|location|metadata/i).first();
+
+    await expect(dropdowns.first().or(metadataLabel)).toBeVisible({ timeout: 10000 });
   });
 
   test('direct navigation to client tab URLs works', async ({ page }) => {
@@ -178,40 +141,35 @@ test.describe('Admin client management', () => {
     await page.goto('/clients');
     await page.waitForLoadState('networkidle');
 
-    const clientCards = page.getByTestId('client-card').or(
-      page.locator('button[aria-label^="View"]'),
-    );
+    const firstCard = clientCardLocator(page).first();
+    await expect(firstCard).toBeVisible({ timeout: 10000 });
 
-    if (await clientCards.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-      // Navigate to first client to extract ID from URL
-      await clientCards.first().click();
-      await page.waitForLoadState('networkidle');
+    // Navigate to first client to extract ID from URL
+    await firstCard.click();
+    await page.waitForLoadState('networkidle');
 
-      const detailUrl = page.url();
-      const clientIdMatch = detailUrl.match(/\/clients\/([^/]+)/);
+    const detailUrl = page.url();
+    const clientIdMatch = detailUrl.match(/\/clients\/([^/]+)/);
+    expect(clientIdMatch).not.toBeNull();
+    const clientId = clientIdMatch![1];
 
-      if (clientIdMatch) {
-        const clientId = clientIdMatch[1];
+    // Test direct navigation to /surveys tab
+    await page.goto(`/clients/${clientId}/surveys`);
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toContain(`/clients/${clientId}/surveys`);
+    const surveysTab = page.getByRole('tab', { name: /surveys/i });
+    await expect(surveysTab).toBeVisible({ timeout: 10000 });
 
-        // Test direct navigation to /surveys tab
-        await page.goto(`/clients/${clientId}/surveys`);
-        await page.waitForLoadState('networkidle');
-        expect(page.url()).toContain(`/clients/${clientId}/surveys`);
-        const surveysTab = page.getByRole('tab', { name: /surveys/i });
-        await expect(surveysTab).toBeVisible({ timeout: 10000 });
+    // Test direct navigation to /users tab
+    await page.goto(`/clients/${clientId}/users`);
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toContain(`/clients/${clientId}/users`);
+    const usersTab = page.getByRole('tab', { name: /users/i });
+    await expect(usersTab).toBeVisible({ timeout: 10000 });
 
-        // Test direct navigation to /users tab
-        await page.goto(`/clients/${clientId}/users`);
-        await page.waitForLoadState('networkidle');
-        expect(page.url()).toContain(`/clients/${clientId}/users`);
-        const usersTab = page.getByRole('tab', { name: /users/i });
-        await expect(usersTab).toBeVisible({ timeout: 10000 });
-
-        // Test redirect from base /clients/{id} to /overview
-        await page.goto(`/clients/${clientId}`);
-        await page.waitForLoadState('networkidle');
-        expect(page.url()).toContain(`/clients/${clientId}/overview`);
-      }
-    }
+    // Test redirect from base /clients/{id} to /overview
+    await page.goto(`/clients/${clientId}`);
+    await page.waitForLoadState('networkidle');
+    expect(page.url()).toContain(`/clients/${clientId}/overview`);
   });
 });

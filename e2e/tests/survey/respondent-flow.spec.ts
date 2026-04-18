@@ -162,7 +162,9 @@ test('resume incomplete survey shows welcome-back with progress', async ({ page 
   await survey.fillMetadata();
   await survey.startButton.click();
 
-  // Answer first 3 questions
+  // Answer first 3 questions so the server-side response row exists with
+  // progress > 0. The autosave debounce is 300ms, so we wait for a trailing
+  // idle after the last click to ensure the PATCH landed.
   for (let i = 0; i < 3; i++) {
     await survey.likertOptions.first().waitFor({ state: 'visible', timeout: 10000 });
     await survey.likertOptions.first().click();
@@ -170,34 +172,29 @@ test('resume incomplete survey shows welcome-back with progress', async ({ page 
     await survey.nextButton.click();
   }
 
-  // Wait for autosave to flush (debounce is 300ms, add margin for network round-trip)
+  // Wait for autosave to flush (debounce is 300ms, add margin for network round-trip).
   await page.waitForTimeout(2000);
 
-  // Navigate away and return
+  // Navigate away and return to the same token.
   await page.goto('/');
   await page.waitForLoadState('networkidle');
   await survey.goto(token);
   await page.waitForLoadState('networkidle');
 
-  // Wait for the page to fully load — either the welcome-back screen,
-  // the welcome screen, or the question screen should appear
-  // Use expect().toBeVisible() which auto-retries unlike locator.isVisible()
-  const resumePrompt = page.getByText(/welcome back/i);
-  const welcomeScreen = page.getByText(/hello/i);
-  const questionVisible = survey.likertOptions.first();
+  // With a partially completed response, the resume engine MUST show the
+  // welcome-back screen — not the first-time welcome, not a mid-question
+  // view. This is the only correct outcome; the previous three-way OR let
+  // the test pass in any of those states.
+  const welcomeBackHeading = page.getByRole('heading', { name: /welcome back/i });
+  await expect(welcomeBackHeading).toBeVisible({ timeout: 20000 });
 
-  // Wait for any of these to appear (whichever loads first)
-  try {
-    await expect(resumePrompt.or(welcomeScreen).or(questionVisible)).toBeVisible({ timeout: 20000 });
-  } catch {
-    // If none appeared, the test will fail at the assertion below
-  }
+  // The first-time welcome "Hello." heading and the question radios must
+  // NOT be on the page while the welcome-back screen is showing.
+  await expect(page.getByRole('heading', { name: /^hello\.?$/i })).not.toBeVisible();
+  await expect(survey.likertOptions.first()).not.toBeVisible();
 
-  const hasResume = await resumePrompt.isVisible();
-  const hasQuestion = await questionVisible.isVisible();
-  const hasWelcome = await welcomeScreen.isVisible();
-
-  expect(hasResume || hasQuestion || hasWelcome).toBe(true);
+  // And the resume action button is present.
+  await expect(page.getByRole('button', { name: /resume survey/i })).toBeVisible();
 });
 
 test('already completed survey shows already-completed screen on revisit', async ({ page }) => {

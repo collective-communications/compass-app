@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { createAdminClient } from '../../helpers/db';
 import { SEED_SURVEY_ID, SEED_ORG_ID } from '../../helpers/survey';
+import { deleteAllReports, seedCompletedReport } from '../../helpers/reports';
 
 /**
  * Report list E2E tests.
@@ -8,6 +9,15 @@ import { SEED_SURVEY_ID, SEED_ORG_ID } from '../../helpers/survey';
  * All tier_2 tests require client_access_enabled = true on the client org
  * to reach the reports page. Each describe block sets state explicitly
  * via beforeAll so tests are deterministic.
+ *
+ * Fixture strategy:
+ *   - `empty state` tests: `deleteAllReports(surveyId)` in beforeEach, then
+ *     assert the "no reports yet" copy is visible AND the list is NOT.
+ *   - `populated` tests: `seedCompletedReport(surveyId)` in beforeEach, then
+ *     assert the list IS visible AND the empty-state copy is NOT.
+ *
+ * There are no `if (await x.isVisible()) …` escape hatches — every test
+ * asserts a single definitive outcome.
  */
 
 async function setClientAccess(enabled: boolean): Promise<void> {
@@ -22,31 +32,33 @@ async function setClientAccess(enabled: boolean): Promise<void> {
     .eq('organization_id', SEED_ORG_ID);
 }
 
-// ─── client_exec ────────────────────────────────────────────────────────────
+// ─── client_exec — empty state ─────────────────────────────────────────────
 
-test.describe('Report list page — client_exec', () => {
+test.describe('Report list page — client_exec, empty state', () => {
   test.use({ storageState: 'e2e/.auth/client.json' });
 
   test.beforeAll(async () => {
     await setClientAccess(true);
   });
 
-  test('client_exec sees reports page with empty state or report list', async ({ page }) => {
+  test.beforeEach(async () => {
+    await deleteAllReports(SEED_SURVEY_ID);
+  });
+
+  test('client_exec sees empty-state copy when no reports exist', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
-    // Should stay on reports page (not redirected)
     expect(page.url()).toContain('/reports');
 
     const emptyMessage = page.getByText(/no reports yet/i);
-    const reportList = page.getByRole('list', { name: /generated reports/i });
+    const reportList = page.getByRole('list', { name: /available reports|previous survey/i });
 
-    const hasEmpty = await emptyMessage.isVisible().catch(() => false);
-    const hasList = await reportList.isVisible().catch(() => false);
-    expect(hasEmpty || hasList).toBe(true);
+    await expect(emptyMessage).toBeVisible({ timeout: 10000 });
+    await expect(reportList).toHaveCount(0);
   });
 
-  test('client_exec sees Generate Report button', async ({ page }) => {
+  test('client_exec sees Generate Report button (empty state)', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
@@ -56,91 +68,84 @@ test.describe('Report list page — client_exec', () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
-  test('report card shows format and date', async ({ page }) => {
+  test('client_exec can open generate modal and select sections', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
-    const reportList = page.getByRole('list', { name: /generated reports/i });
-    if (await reportList.isVisible().catch(() => false)) {
-      const listItems = reportList.getByRole('listitem');
-      const firstItem = listItems.first();
-      await expect(firstItem).toBeVisible();
+    expect(page.url()).toContain('/reports');
 
-      const formatBadge = firstItem.locator('span').filter({ hasText: /pdf|docx|pptx/i }).first();
-      await expect(formatBadge).toBeVisible();
-    }
-  });
+    const generateButton = page.getByRole('button', { name: /generate report/i }).first();
+    await expect(generateButton).toBeVisible({ timeout: 10000 });
+    await generateButton.click();
 
-  test('selecting report shows preview panel', async ({ page }) => {
-    await page.goto(`/reports/${SEED_SURVEY_ID}`);
-    await page.waitForLoadState('networkidle');
+    // Modal appears and is focus-trapped
+    const modal = page.getByRole('dialog', { name: /export report/i });
+    await expect(modal).toBeVisible({ timeout: 5000 });
 
-    const reportList = page.getByRole('list', { name: /generated reports/i });
-    if (await reportList.isVisible().catch(() => false)) {
-      const firstCard = reportList.getByRole('listitem').first().getByRole('button');
-      await firstCard.click();
-      await expect(firstCard).toHaveAttribute('aria-selected', 'true');
-    }
+    // Configure panel has at least one section checkbox
+    const checkboxes = modal.getByRole('checkbox');
+    await expect(checkboxes.first()).toBeVisible({ timeout: 3000 });
+    const checkboxCount = await checkboxes.count();
+    expect(checkboxCount).toBeGreaterThan(0);
+
+    // Footer has the in-modal "Generate Report" confirm button
+    const confirmButton = modal.getByRole('button', { name: /generate report/i });
+    await expect(confirmButton).toBeVisible();
   });
 });
 
-// ─── Generate flow ──────────────────────────────────────────────────────────
+// ─── client_exec — populated state ─────────────────────────────────────────
 
-test.describe('Report list page — generate flow', () => {
+test.describe('Report list page — client_exec, populated', () => {
   test.use({ storageState: 'e2e/.auth/client.json' });
 
   test.beforeAll(async () => {
     await setClientAccess(true);
   });
 
-  test('client_exec can open generate modal and select sections', async ({ page }) => {
-    await page.goto(`/reports/${SEED_SURVEY_ID}`);
-    await page.waitForLoadState('networkidle');
-
-    if (!page.url().includes('/reports')) return;
-
-    const generateButton = page.getByRole('button', { name: /generate report/i }).first();
-    if (await generateButton.isVisible({ timeout: 10000 }).catch(() => false)) {
-      await generateButton.click();
-
-      const modal = page.getByRole('dialog').or(
-        page.locator('[class*="modal"], [class*="dialog"], [class*="panel"]').filter({ hasText: /section|generate/i }),
-      );
-      const hasModal = await modal.first().isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (hasModal) {
-        const checkboxes = modal.first().getByRole('checkbox');
-        const checkboxCount = await checkboxes.count();
-
-        if (checkboxCount > 0) {
-          await checkboxes.first().check();
-          await expect(checkboxes.first()).toBeChecked();
-        }
-
-        const confirmButton = modal.first().getByRole('button', { name: /confirm|generate|create/i });
-        const hasConfirm = await confirmButton.isVisible({ timeout: 3000 }).catch(() => false);
-        expect(hasConfirm).toBe(true);
-      }
-    }
+  test.beforeEach(async () => {
+    await deleteAllReports(SEED_SURVEY_ID);
+    await seedCompletedReport(SEED_SURVEY_ID, 'pdf');
   });
 
-  test('report card has download action', async ({ page }) => {
+  test('client_exec sees the report list (not empty-state copy)', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
-    const reportList = page.getByRole('list', { name: /generated reports/i });
-    if (await reportList.isVisible({ timeout: 5000 }).catch(() => false)) {
-      const downloadButton = reportList.first().getByRole('button', { name: /download/i }).or(
-        reportList.first().getByRole('link', { name: /download/i }),
-      );
+    const reportList = page.getByRole('list', { name: /available reports|previous survey/i }).first();
+    await expect(reportList).toBeVisible({ timeout: 10000 });
 
-      if (await downloadButton.first().isVisible({ timeout: 5000 }).catch(() => false)) {
-        const downloadPromise = page.waitForEvent('download', { timeout: 5000 }).catch(() => null);
-        await downloadButton.first().click();
-        await downloadPromise;
-        expect(true).toBe(true);
-      }
-    }
+    const emptyMessage = page.getByText(/no reports yet/i);
+    await expect(emptyMessage).toHaveCount(0);
+  });
+
+  test('report card shows format badge and date', async ({ page }) => {
+    await page.goto(`/reports/${SEED_SURVEY_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    const reportList = page.getByRole('list', { name: /available reports|previous survey/i }).first();
+    await expect(reportList).toBeVisible({ timeout: 10000 });
+
+    const firstItem = reportList.getByRole('listitem').first();
+    await expect(firstItem).toBeVisible();
+
+    const formatBadge = firstItem.locator('span').filter({ hasText: /pdf|docx|pptx/i }).first();
+    await expect(formatBadge).toBeVisible();
+  });
+
+  test('selecting a report marks the card as current (aria-current=true)', async ({ page }) => {
+    await page.goto(`/reports/${SEED_SURVEY_ID}`);
+    await page.waitForLoadState('networkidle');
+
+    const reportList = page.getByRole('list', { name: /available reports|previous survey/i }).first();
+    await expect(reportList).toBeVisible({ timeout: 10000 });
+
+    // Each report card is a role="group" with a stretched click overlay button.
+    const card = reportList.getByRole('group').first();
+    const clickOverlay = card.getByRole('button', { name: /select report/i });
+    await clickOverlay.click();
+
+    await expect(card).toHaveAttribute('aria-current', 'true');
   });
 });
 
@@ -148,6 +153,10 @@ test.describe('Report list page — generate flow', () => {
 
 test.describe('Report list page — admin generate access', () => {
   test.use({ storageState: 'e2e/.auth/admin.json' });
+
+  test.beforeEach(async () => {
+    await deleteAllReports(SEED_SURVEY_ID);
+  });
 
   test('admin sees Generate Report button', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
@@ -158,15 +167,11 @@ test.describe('Report list page — admin generate access', () => {
     ).toBeVisible({ timeout: 10000 });
   });
 
-  test('admin can view report list', async ({ page }) => {
+  test('admin sees empty-state copy with no reports seeded', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
-    const emptyMessage = page.getByText(/no reports yet/i);
-    const reportList = page.getByRole('list', { name: /generated reports/i });
-    const hasContent = await emptyMessage.isVisible().catch(() => false)
-      || await reportList.isVisible().catch(() => false);
-    expect(hasContent).toBe(true);
+    await expect(page.getByText(/no reports yet/i)).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -177,6 +182,10 @@ test.describe('Report list page — director role', () => {
 
   test.beforeAll(async () => {
     await setClientAccess(true);
+  });
+
+  test.beforeEach(async () => {
+    await deleteAllReports(SEED_SURVEY_ID);
   });
 
   test('director does NOT see Generate Report button', async ({ page }) => {
@@ -192,17 +201,12 @@ test.describe('Report list page — director role', () => {
     await expect(generateButton).not.toBeVisible({ timeout: 5000 });
   });
 
-  test('director can view report list', async ({ page }) => {
+  test('director sees empty-state copy when no reports exist', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
     expect(page.url()).toContain('/reports');
-
-    const emptyMessage = page.getByText(/no reports yet/i);
-    const reportList = page.getByRole('list', { name: /generated reports/i });
-    const hasContent = await emptyMessage.isVisible().catch(() => false)
-      || await reportList.isVisible().catch(() => false);
-    expect(hasContent).toBe(true);
+    await expect(page.getByText(/no reports yet/i)).toBeVisible({ timeout: 10000 });
   });
 });
 
@@ -215,6 +219,10 @@ test.describe('Report list page — manager role', () => {
     await setClientAccess(true);
   });
 
+  test.beforeEach(async () => {
+    await deleteAllReports(SEED_SURVEY_ID);
+  });
+
   test('manager does NOT see Generate Report button', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
@@ -225,16 +233,11 @@ test.describe('Report list page — manager role', () => {
     await expect(generateButton).not.toBeVisible({ timeout: 5000 });
   });
 
-  test('manager can view report list', async ({ page }) => {
+  test('manager sees empty-state copy when no reports exist', async ({ page }) => {
     await page.goto(`/reports/${SEED_SURVEY_ID}`);
     await page.waitForLoadState('networkidle');
 
     expect(page.url()).toContain('/reports');
-
-    const emptyMessage = page.getByText(/no reports yet/i);
-    const reportList = page.getByRole('list', { name: /generated reports/i });
-    const hasContent = await emptyMessage.isVisible().catch(() => false)
-      || await reportList.isVisible().catch(() => false);
-    expect(hasContent).toBe(true);
+    await expect(page.getByText(/no reports yet/i)).toBeVisible({ timeout: 10000 });
   });
 });
