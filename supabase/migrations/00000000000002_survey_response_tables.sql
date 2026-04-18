@@ -62,6 +62,14 @@ CREATE TRIGGER deployments_updated_at
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 -- NO user_id column — structural anonymity
+-- NOTE: `ip_hash` on this table is currently dead weight. No code path in the
+-- app or edge functions ever writes to it (verified 2026-04-16). The column is
+-- read once (null-safe) by the survey-engine adapter. It is slated for removal
+-- in a future migration — see `_adrs/adr-006-ip-hash-strategy.md`. Do NOT
+-- populate this column in new code without first adding a salt strategy and
+-- updating that ADR; an unsalted SHA-256 of a respondent IP is reversible via
+-- rainbow table against the IPv4 address space and would violate the
+-- structural-anonymity guarantee this table was designed to uphold.
 CREATE TABLE responses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   deployment_id UUID NOT NULL REFERENCES deployments(id) ON DELETE CASCADE,
