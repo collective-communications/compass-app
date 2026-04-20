@@ -47,9 +47,9 @@ export function SocialSignOnButtons({ onSignIn, isLoading }: SocialSignOnButtons
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-3 py-1">
-        <div className="h-px flex-1 bg-[var(--grey-200)]" />
+        <div className="h-px flex-1 bg-[var(--grey-100)]" />
         <span className="text-xs text-[var(--text-tertiary)]">or</span>
-        <div className="h-px flex-1 bg-[var(--grey-200)]" />
+        <div className="h-px flex-1 bg-[var(--grey-100)]" />
       </div>
 
       <button

@@ -193,7 +193,7 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
 
                 <ForgotPasswordForm onSubmit={requestReset} isLoading={isLoading} error={error} />
 
-                <div className="mt-6 rounded-lg border border-[var(--grey-200)] bg-[var(--grey-50)] p-4">
+                <div className="mt-6 rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-4">
                   <p className="mb-2 text-sm font-medium text-[var(--grey-700)]">
                     Didn&apos;t receive the email?
                   </p>

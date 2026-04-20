@@ -21,33 +21,32 @@ export function BrandPanel(): React.ReactElement {
             color: 'transparent',
           }}
         >
-          Collective Culture Compass
+          The Collective Culture Compass&#8482;
         </h1>
 
         <p
           className="mt-2 text-sm font-light tracking-wide"
-          style={{ fontFamily: 'var(--font-body)', color: '#C2C1C2' }}
+          style={{ fontFamily: 'var(--font-body)', color: 'var(--text-tertiary)' }}
         >
           by COLLECTIVE culture + communication
         </p>
 
         <p
-          className="mt-6 max-w-xs text-base font-light leading-relaxed text-[#E5E4E0]"
+          className="mt-6 max-w-xs text-base font-light leading-relaxed text-[var(--grey-100)]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
-          Understand your organization&apos;s culture.
+          Know where your culture stands.
           <br />
-          Make communication that lands.
+          Navigate where you&apos;re going.
         </p>
       </div>
 
       <div className="px-10 pb-8">
-        <p className="text-[10px] font-semibold tracking-[3px] text-[#8AC3A9]">
-          COLLECTIVE
-        </p>
-        <p className="mt-1 text-[9px] text-[#C2C1C2]">
-          culture + communication
-        </p>
+        <img
+          src="/wordmark-white.png"
+          alt="COLLECTIVE culture + communication"
+          className="h-10 w-auto opacity-80"
+        />
         <p className="mt-3 text-[8px] font-semibold tracking-[1.5px] text-white/25">
           YOUR PEOPLE. YOUR STORY.
         </p>
