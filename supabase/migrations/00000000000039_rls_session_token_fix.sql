@@ -169,5 +169,3 @@ RETURNS UUID AS $$
    ORDER BY created_at ASC, id ASC
    LIMIT 1;
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
-</content>
-</invoke>

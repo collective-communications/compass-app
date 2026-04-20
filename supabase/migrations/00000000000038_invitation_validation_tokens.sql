@@ -68,5 +68,3 @@ REVOKE ALL ON invitation_validation_tokens FROM authenticated;
 
 COMMENT ON TABLE invitation_validation_tokens IS
   'Short-lived (15 min) validation grants binding invitation GET to POST by IP hash. Service-role only.';
-</content>
-</invoke>

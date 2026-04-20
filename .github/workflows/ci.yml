@@ -193,6 +193,7 @@ jobs:
 
       - name: Install Playwright
         run: bunx playwright install --with-deps chromium
+        working-directory: apps/storybook
 
       - name: Run visual regression tests
         run: bun run test:visual

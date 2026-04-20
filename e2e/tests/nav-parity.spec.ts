@@ -42,8 +42,11 @@ for (const role of ROLES) {
       const avatarButton = page.getByRole('button', { expanded: false }).filter({
         hasText: /./, // any content — initials or image alt
       }).first();
-      // Fall back to aria-haspopup target if the filter is too loose
-      const menuTrigger = page.locator('button[aria-haspopup="true"]').first();
+      // Match any aria-haspopup target — the ProfileMenu uses the
+      // spec-correct "menu" value, older code used "true"; both are valid.
+      const menuTrigger = page
+        .locator('button[aria-haspopup="menu"], button[aria-haspopup="true"]')
+        .first();
       await menuTrigger.click();
 
       const menu = page.getByRole('menu');
