@@ -31,13 +31,17 @@ export function SurveyShell({ orgName, logoUrl, onSave, children }: SurveyShellP
     <div className="flex min-h-screen flex-col bg-[var(--grey-50)]">
       <SurveyHeader orgName={orgName} logoUrl={logoUrl} onSave={onSave} />
 
-      <main className="mx-auto w-full max-w-[600px] flex-1 px-4 py-6">
+      <main className="container-survey flex-1">
         {children}
       </main>
 
       <SurveyFooter onHelpClick={handleHelpClick} />
 
       <HelpDrawer isOpen={helpOpen} onClose={() => setHelpOpen(false)} />
+
+      <div className="border-t border-[var(--grey-100)] bg-[var(--grey-50)] py-3 text-center text-xs text-[var(--text-tertiary)]">
+        &copy; 2026 Collective Culture + Communication Inc.
+      </div>
     </div>
   );
 }

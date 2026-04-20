@@ -16,7 +16,7 @@ export function PublicShell({ children }: PublicShellProps): ReactElement {
             className="mt-2 text-sm font-semibold text-[var(--grey-900)]"
             style={{ fontFamily: 'var(--font-headings)' }}
           >
-            Collective Culture Compass
+            The Collective Culture Compass&#8482;
           </span>
           <span className="text-xs text-[var(--text-secondary)]">
             culture + communication

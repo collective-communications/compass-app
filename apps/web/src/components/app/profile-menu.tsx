@@ -173,7 +173,7 @@ export function ProfileMenu({ user, items, onSignOut, onNavigate }: ProfileMenuP
           onKeyDown={handleMenuKeyDown}
           className="absolute right-0 top-10 z-20 w-48 rounded-lg border border-[var(--grey-300)] bg-[var(--grey-50)] py-1 shadow-lg"
         >
-          <div className="border-b border-[var(--grey-200)] px-3 py-2">
+          <div className="border-b border-[var(--grey-100)] px-3 py-2">
             <p className="text-sm font-medium text-[var(--grey-900)]">
               {user.fullName ?? user.email}
             </p>
@@ -185,7 +185,7 @@ export function ProfileMenu({ user, items, onSignOut, onNavigate }: ProfileMenuP
             const needsSeparator =
               item.action === 'signOut' && index > 0 && items[index - 1]?.action !== 'signOut';
 
-            const wrapperClass = needsSeparator ? 'border-t border-[var(--grey-200)]' : undefined;
+            const wrapperClass = needsSeparator ? 'border-t border-[var(--grey-100)]' : undefined;
 
             if (item.action === 'toggleTheme') {
               return (

@@ -28,7 +28,7 @@ export const Default: Story = {
 /** With a logo URL. */
 export const WithLogo: Story = {
   args: {
-    logoUrl: 'https://placehold.co/36x36/0A3B4F/white?text=A',
+    logoUrl: 'https://placehold.co/36x36/0C3D50/white?text=A',
     children: (
       <div style={{ padding: '48px 0', textAlign: 'center', color: 'var(--grey-400)' }}>
         Survey content area
@@ -76,7 +76,7 @@ export const WithContent: Story = {
               key={label}
               style={{
                 padding: '12px 16px',
-                border: '1px solid var(--grey-200)',
+                border: '1px solid var(--grey-100)',
                 borderRadius: '8px',
                 fontSize: '13px',
                 color: 'var(--grey-600)',

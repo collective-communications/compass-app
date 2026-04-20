@@ -48,7 +48,7 @@ export const PublicShellDecorator: Decorator = (Story) => (
           fontFamily: 'var(--font-headings)',
           fontSize: '16px',
           fontWeight: 400,
-          color: '#0A3B4F',
+          color: '#0C3D50',
           letterSpacing: '0.02em',
         }}
       >
@@ -146,7 +146,7 @@ export const AppShellDecorator: Decorator = (Story) => (
           fontFamily: 'var(--font-headings)',
           fontSize: '14px',
           fontWeight: 400,
-          color: '#0A3B4F',
+          color: '#0C3D50',
         }}
       >
         <strong style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -202,7 +202,7 @@ export const AppShellDecorator: Decorator = (Story) => (
           key={tab}
           style={{
             fontSize: '11px',
-            color: tab === 'Home' ? '#0A3B4F' : 'var(--text-secondary, #424242)',
+            color: tab === 'Home' ? '#0C3D50' : 'var(--text-secondary, #424242)',
             fontWeight: tab === 'Home' ? 600 : 400,
             textAlign: 'center',
           }}

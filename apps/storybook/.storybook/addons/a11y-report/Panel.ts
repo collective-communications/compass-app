@@ -78,7 +78,7 @@ export function PanelContent(): React.ReactElement {
           resolve(null);
         }, SCAN_DELAY_MS);
 
-        const onResult = (axeResults: AxeResults, storyId?: string) => {
+        const onResult = (axeResults: AxeResults, _storyId?: string) => {
           clearTimeout(timeout);
           channel.off(A11Y_EVENTS.RESULT, onResult);
           channel.off(A11Y_EVENTS.ERROR, onError);
@@ -163,7 +163,7 @@ export function PanelContent(): React.ReactElement {
     fontWeight: 500,
     border: 'none',
     borderRadius: 6,
-    background: '#0A3B4F',
+    background: '#0C3D50',
     color: '#fff',
     cursor: 'pointer',
   };
@@ -195,7 +195,7 @@ export function PanelContent(): React.ReactElement {
         `Scanning story ${progress.current} of ${progress.total}…`,
       ),
       h('div', { style: { height: 6, borderRadius: 3, background: '#E5E4E0', overflow: 'hidden' } },
-        h('div', { style: { height: '100%', width: `${pct}%`, background: '#0A3B4F', borderRadius: 3, transition: 'width 0.3s ease' } }),
+        h('div', { style: { height: '100%', width: `${pct}%`, background: '#0C3D50', borderRadius: 3, transition: 'width 0.3s ease' } }),
       ),
       h('p', { style: { margin: '8px 0 0', fontSize: 12, color: '#757575' } }, progress.storyName),
       h('button', {

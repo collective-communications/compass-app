@@ -21,6 +21,9 @@ export function BaseLayout({ header, children, footer, className }: BaseLayoutPr
           {footer}
         </footer>
       )}
+      <div className="border-t border-[var(--grey-100)] bg-[var(--grey-50)] py-3 text-center text-xs text-[var(--text-tertiary)]">
+        &copy; 2026 Collective Culture + Communication Inc.
+      </div>
     </div>
   );
 }
