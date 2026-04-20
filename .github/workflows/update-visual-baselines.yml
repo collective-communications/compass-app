@@ -1,0 +1,66 @@
+name: Update Visual Baselines
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: update-visual-baselines-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  regenerate-baselines:
+    name: Regenerate Visual Baselines
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.ref }}
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.5"
+
+      - name: Cache bun dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build Storybook
+        run: bun run build-storybook
+
+      - name: Install Playwright
+        run: bunx playwright install --with-deps chromium
+        working-directory: apps/storybook
+
+      - name: Regenerate visual baselines
+        run: bunx playwright test --config playwright.config.ts --update-snapshots
+        working-directory: apps/storybook
+
+      - name: Commit updated snapshots
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(visual): regenerate baseline snapshots"
+          file_pattern: apps/storybook/__snapshots__/**/*.png
+          branch: ${{ github.ref_name }}
+          commit_user_name: github-actions[bot]
+          commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
+
+      - name: Upload snapshot artifacts on failure
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-baselines-debug
+          path: |
+            apps/storybook/__snapshots__/
+            apps/storybook/test-results/
+            apps/storybook/playwright-report/
+          retention-days: 14
