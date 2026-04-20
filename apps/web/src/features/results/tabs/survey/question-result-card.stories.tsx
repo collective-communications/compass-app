@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { QuestionResultCard } from './question-result-card';
-import type { QuestionScoreRow } from '../../types';
 
 const meta = {
   title: 'Features/Results/Survey/QuestionResultCard',
@@ -24,7 +23,7 @@ export const HighScore: Story = {
       subDimensionCode: null,
       subDimensionName: null,
     },
-    dimensionColor: '#0A3B4F',
+    dimensionColor: '#0C3D50',
   },
 };
 
@@ -58,7 +57,7 @@ export const ReverseScored: Story = {
       subDimensionCode: null,
       subDimensionName: null,
     },
-    dimensionColor: '#0A3B4F',
+    dimensionColor: '#0C3D50',
   },
 };
 

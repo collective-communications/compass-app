@@ -19,7 +19,7 @@ export const ActiveCore: Story = {
     id: 'core',
     label: 'Core',
     score: 82,
-    color: '#0A3B4F',
+    color: '#0C3D50',
     isActive: true,
   },
 };

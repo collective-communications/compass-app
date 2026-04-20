@@ -10,7 +10,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Core: Story = {
-  args: { score: 82, color: '#0A3B4F' },
+  args: { score: 82, color: '#0C3D50' },
 };
 
 export const Clarity: Story = {
@@ -26,7 +26,7 @@ export const Collaboration: Story = {
 };
 
 export const FullScore: Story = {
-  args: { score: 100, color: '#0A3B4F' },
+  args: { score: 100, color: '#0C3D50' },
 };
 
 export const ZeroScore: Story = {
@@ -34,7 +34,7 @@ export const ZeroScore: Story = {
 };
 
 export const LargeRing: Story = {
-  args: { score: 72, color: '#0A3B4F', size: 96, strokeWidth: 8 },
+  args: { score: 72, color: '#0C3D50', size: 96, strokeWidth: 8 },
 };
 
 export const SmallWithoutLabel: Story = {

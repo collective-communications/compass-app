@@ -35,7 +35,7 @@ interface Segment {
 const DISAGREE_DARK = 'var(--grey-500)';
 const DISAGREE_MID = 'var(--grey-400)';
 const DISAGREE_LIGHT = 'var(--grey-300)';
-const NEUTRAL_COLOR = 'var(--grey-200)';
+const NEUTRAL_COLOR = 'var(--grey-100)';
 
 /** Compute percentage from raw count relative to total. */
 function toPercentage(count: number, total: number): number {

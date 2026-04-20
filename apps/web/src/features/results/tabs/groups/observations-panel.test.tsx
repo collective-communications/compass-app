@@ -10,7 +10,7 @@ const mockObservations: SegmentObservation[] = [
     dimensionCode: 'core',
     title: 'Strong core alignment',
     description: 'Core is 8% above the organization average',
-    dotColor: '#0A3B4F',
+    dotColor: '#0C3D50',
   },
   {
     dimensionCode: 'clarity',

@@ -29,14 +29,14 @@ type Story = StoryObj<typeof meta>;
 export const CoreDimension: Story = {
   args: {
     questions: coreQuestions,
-    dimensionColor: '#0A3B4F',
+    dimensionColor: '#0C3D50',
   },
 };
 
 export const GroupedBySubDimension: Story = {
   args: {
     questions: groupedQuestions,
-    dimensionColor: '#0A3B4F',
+    dimensionColor: '#0C3D50',
   },
 };
 
@@ -50,6 +50,6 @@ export const SingleQuestion: Story = {
 export const Empty: Story = {
   args: {
     questions: [],
-    dimensionColor: '#0A3B4F',
+    dimensionColor: '#0C3D50',
   },
 };

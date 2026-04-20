@@ -43,7 +43,7 @@ export function DashboardPage(): ReactElement {
   };
 
   return (
-    <div className="mx-auto max-w-[1232px]">
+    <div className="container-default">
       {/* Welcome greeting */}
       {firstName && (
         <h1 className="mb-6 text-2xl font-semibold text-[var(--grey-900)]">
@@ -78,9 +78,9 @@ export function DashboardPage(): ReactElement {
 
       {/* Dashboard content — two-column on desktop */}
       {!isLoading && !error && hasSurveys && (
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_432px] md:gap-10">
+        <div className="grid grid-cols-1 gap-5 md:layout-split-lg">
           {/* Left column: active survey + quick actions */}
-          <div className="flex max-w-[760px] flex-col gap-5">
+          <div className="flex container-narrow flex-col gap-5">
             {activeSurvey && (
               <>
                 <ActiveSurveyCard data={activeSurvey} />
@@ -105,7 +105,7 @@ export function DashboardPage(): ReactElement {
                 Latest Results
               </h2>
               {/* Mini compass preview placeholder */}
-              <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-200)] bg-[var(--surface-card)]">
+              <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-100)] bg-[var(--surface-card)]">
                 <p className="text-xs text-[var(--text-tertiary)]">Compass Preview</p>
               </div>
               {resultsEnabled && activeSurvey && (

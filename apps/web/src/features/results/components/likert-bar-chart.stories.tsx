@@ -13,7 +13,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     distribution: { 1: 5, 2: 10, 3: 35, 4: 50 },
-    agreeColor: '#0A3B4F',
+    agreeColor: '#0C3D50',
     scaleSize: 4,
   },
 };
@@ -21,7 +21,7 @@ export const Default: Story = {
 export const FivePointScale: Story = {
   args: {
     distribution: { 1: 3, 2: 8, 3: 15, 4: 35, 5: 39 },
-    agreeColor: '#0A3B4F',
+    agreeColor: '#0C3D50',
     scaleSize: 5,
   },
 };
@@ -29,7 +29,7 @@ export const FivePointScale: Story = {
 export const CoreDimension: Story = {
   args: {
     distribution: { 1: 3, 2: 8, 3: 40, 4: 49 },
-    agreeColor: '#0A3B4F',
+    agreeColor: '#0C3D50',
     scaleSize: 4,
   },
 };
@@ -61,7 +61,7 @@ export const CollaborationDimension: Story = {
 export const HighlyPositive: Story = {
   args: {
     distribution: { 1: 1, 2: 2, 3: 20, 4: 77 },
-    agreeColor: '#0A3B4F',
+    agreeColor: '#0C3D50',
     scaleSize: 4,
   },
 };
@@ -77,7 +77,7 @@ export const HighlyNegative: Story = {
 export const FivePointHighlyPositive: Story = {
   args: {
     distribution: { 1: 1, 2: 2, 3: 5, 4: 30, 5: 62 },
-    agreeColor: '#0A3B4F',
+    agreeColor: '#0C3D50',
     scaleSize: 5,
   },
 };
@@ -93,7 +93,7 @@ export const SevenPointScale: Story = {
 export const WithoutLabels: Story = {
   args: {
     distribution: { 1: 10, 2: 15, 3: 35, 4: 40 },
-    agreeColor: '#0A3B4F',
+    agreeColor: '#0C3D50',
     scaleSize: 4,
     showLabels: false,
   },

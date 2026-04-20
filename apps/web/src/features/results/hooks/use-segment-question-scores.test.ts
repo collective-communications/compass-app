@@ -50,7 +50,7 @@ function makeRow(overrides: Record<string, unknown> = {}): Record<string, unknow
     dimension_id: 'dim-core',
     dimension_code: 'core',
     dimension_name: 'Core',
-    dimension_color: '#0A3B4F',
+    dimension_color: '#0C3D50',
     response_count: 42,
     mean_score: 3.8,
     dist_1: 1,

@@ -40,7 +40,7 @@ export function SegmentFilterBar({
   return (
     <div className="flex flex-col gap-0">
       {/* Segment type dropdown bar */}
-      <div className="flex items-center justify-between border-b border-[var(--grey-200)] bg-[var(--surface-subtle)] px-6 py-3">
+      <div className="flex items-center justify-between border-b border-[var(--grey-100)] bg-[var(--surface-subtle)] px-6 py-3">
         <div className="flex items-center gap-3">
           <span className="text-xs font-semibold uppercase tracking-wide text-[var(--text-tertiary)]">
             Filter by:
@@ -49,7 +49,7 @@ export function SegmentFilterBar({
             <select
               value={segmentType}
               onChange={(e) => onTypeChange(e.target.value as SegmentType)}
-              className="appearance-none rounded-md border border-[var(--grey-200)] bg-[var(--surface-card)] py-2 pl-3 pr-8 text-sm text-[var(--text-secondary)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
+              className="appearance-none rounded-md border border-[var(--grey-100)] bg-[var(--surface-card)] py-2 pl-3 pr-8 text-sm text-[var(--text-secondary)] focus:border-[var(--color-interactive)] focus:outline-none focus:ring-1 focus:ring-[var(--color-interactive)]"
               aria-label="Segment type"
             >
               {SEGMENT_TYPE_OPTIONS.map((type) => (

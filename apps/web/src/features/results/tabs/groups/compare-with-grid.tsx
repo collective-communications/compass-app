@@ -43,7 +43,7 @@ export function CompareWithGrid({
               className={`flex items-center justify-center gap-1.5 rounded-md px-3 py-2 text-xs text-center transition-colors ${
                 isActive
                   ? 'bg-[var(--color-core)] text-white font-medium'
-                  : 'bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:bg-[var(--grey-200)]'
+                  : 'bg-[var(--surface-subtle)] text-[var(--text-secondary)] hover:bg-[var(--grey-100)]'
               }`}
             >
               {isBelowThreshold && (

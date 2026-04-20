@@ -24,7 +24,7 @@ const DIMENSION_LABELS: Record<DimensionCode, string> = {
  * Chosen for sufficient contrast on white backgrounds.
  */
 const SEGMENT_PALETTE = [
-  '#0A3B4F',
+  '#0C3D50',
   '#FF7F50',
   '#9FD7C3',
   '#E8B4A8',

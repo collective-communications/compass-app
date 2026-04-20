@@ -21,7 +21,7 @@ export const Core: Story = {
   args: {
     dimensionName: 'Core',
     score: 82,
-    color: '#0A3B4F',
+    color: '#0C3D50',
     questions: coreQuestions,
   },
 };
@@ -30,7 +30,7 @@ export const WithSubDimensions: Story = {
   args: {
     dimensionName: 'Core',
     score: 82,
-    color: '#0A3B4F',
+    color: '#0C3D50',
     questions: coreQuestions,
     subDimensionScores: [
       { subDimensionCode: 'trust_safety', dimensionCode: 'core', score: 85, rawScore: 3.4, responseCount: 284 },
@@ -67,7 +67,7 @@ export const FivePointScale: Story = {
   args: {
     dimensionName: 'Core',
     score: 75,
-    color: '#0A3B4F',
+    color: '#0C3D50',
     scaleSize: 5,
     questions: [
       { questionId: 'q7', questionText: 'I feel safe to speak up at work.', dimensionCode: 'core', meanScore: 3.8, distribution: { 1: 2, 2: 5, 3: 15, 4: 38, 5: 40 }, responseCount: 142, isReverseScored: false, subDimensionCode: null, subDimensionName: null },

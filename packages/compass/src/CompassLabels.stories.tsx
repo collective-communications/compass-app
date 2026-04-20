@@ -7,7 +7,7 @@ const CX = SVG_SIZE / 2;
 const CY = SVG_SIZE / 2;
 
 const scores: DimensionScore[] = [
-  { dimension: 'core', score: 72, color: '#0A3B4F', label: 'Core' },
+  { dimension: 'core', score: 72, color: '#0C3D50', label: 'Core' },
   { dimension: 'clarity', score: 65, color: '#FF7F50', label: 'Clarity' },
   { dimension: 'connection', score: 81, color: '#9FD7C3', label: 'Connection' },
   { dimension: 'collaboration', score: 54, color: '#E8B4A8', label: 'Collaboration' },
@@ -49,7 +49,7 @@ export const Default: Story = {};
 export const HighScores: Story = {
   args: {
     scores: [
-      { dimension: 'core', score: 95, color: '#0A3B4F', label: 'Core' },
+      { dimension: 'core', score: 95, color: '#0C3D50', label: 'Core' },
       { dimension: 'clarity', score: 92, color: '#FF7F50', label: 'Clarity' },
       { dimension: 'connection', score: 97, color: '#9FD7C3', label: 'Connection' },
       { dimension: 'collaboration', score: 90, color: '#E8B4A8', label: 'Collaboration' },

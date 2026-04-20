@@ -12,7 +12,7 @@ const meta = {
     cx: CX,
     cy: CY,
     radius: 40,
-    color: '#0A3B4F',
+    color: '#0C3D50',
     score: 72,
   },
   decorators: [

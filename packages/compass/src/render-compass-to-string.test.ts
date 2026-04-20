@@ -4,7 +4,7 @@ import type { CompassProps } from './types.js';
 
 const baseProps: CompassProps = {
   scores: [
-    { dimension: 'core', score: 75, color: '#0A3B4F', label: 'COLLECTIVE' },
+    { dimension: 'core', score: 75, color: '#0C3D50', label: 'COLLECTIVE' },
     { dimension: 'clarity', score: 68, color: '#FF7F50', label: 'Clarity' },
     { dimension: 'connection', score: 82, color: '#9FD7C3', label: 'Connection' },
     { dimension: 'collaboration', score: 59, color: '#E8B4A8', label: 'Collaboration' },

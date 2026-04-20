@@ -175,7 +175,7 @@ export function KeywordBubbles({
               cy={circle.y}
               r={circle.r}
               fill={isActive ? 'var(--grey-700)' : 'var(--grey-50)'}
-              stroke={isActive ? 'var(--grey-700)' : 'var(--grey-200, #E5E4E0)'}
+              stroke={isActive ? 'var(--grey-700)' : 'var(--grey-100)'}
               strokeWidth={1}
             />
             {isFocused && (

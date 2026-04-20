@@ -6,7 +6,7 @@ import { Compass } from './Compass.js';
 import type { DimensionScore } from './types.js';
 
 const TEST_SCORES: DimensionScore[] = [
-  { dimension: 'core', score: 75, color: '#0A3B4F', label: 'COLLECTIVE' },
+  { dimension: 'core', score: 75, color: '#0C3D50', label: 'COLLECTIVE' },
   { dimension: 'clarity', score: 60, color: '#FF7F50', label: 'Clarity' },
   { dimension: 'connection', score: 85, color: '#9FD7C3', label: 'Connection' },
   { dimension: 'collaboration', score: 45, color: '#E8B4A8', label: 'Collaboration' },
