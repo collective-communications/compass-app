@@ -59,7 +59,7 @@ export const typography = {
   display: "'DM Sans', 'Calibri', Arial, sans-serif",
   headings: "'DM Sans', 'Calibri', Arial, sans-serif",
   body: "'DM Sans', 'Calibri', Arial, sans-serif",
-  mono: "'Consolas', 'Monaco', ui-monospace, monospace",
+  mono: "'Consolas', 'Monaco', monospace",
 } as const;
 
 /** Type scale (px). */
@@ -127,6 +127,17 @@ export const shadow = {
   md: '0 3px 10px rgba(0, 0, 0, 0.1)',
   lg: '0 4px 20px rgba(12, 61, 80, 0.08)',
   xl: '0 8px 30px rgba(12, 61, 80, 0.12)',
+} as const;
+
+/** Neutral charcoal — compass logo outline on light backgrounds. */
+export const neutralCharcoal = '#323130' as const;
+
+/** Chart accent palette — stacked bar segments beyond dimension colors. */
+export const chartColors = {
+  neutral: '#6B7280',
+  warning: '#FBBF24',
+  success: '#34D399',
+  error: '#F87171',
 } as const;
 
 /** Severity level color tokens — border, light background, dark background. */
@@ -241,6 +252,14 @@ export function injectTokens(): void {
   for (const [key, value] of Object.entries(layout.gap)) {
     root.style.setProperty(`--layout-gap-${key}`, value);
   }
+
+  // Chart colors
+  for (const [key, value] of Object.entries(chartColors)) {
+    root.style.setProperty(`--chart-${key}`, value);
+  }
+
+  // Neutral charcoal
+  root.style.setProperty('--neutral-charcoal', neutralCharcoal);
 
   // Archetype presets — CSS uses abbreviated names per design system convention
   const archetypeCssNames: Record<string, string> = {

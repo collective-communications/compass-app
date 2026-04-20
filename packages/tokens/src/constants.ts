@@ -6,11 +6,14 @@ export {
   colors,
   extendedColors,
   greyscale,
+  textColors,
   severity,
   dimensions,
   typography,
   spacing,
   radius,
   shadow,
+  neutralCharcoal,
+  chartColors,
 } from './index';
 export type { SeverityLevel, DimensionKey } from './index';

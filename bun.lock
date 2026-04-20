@@ -95,6 +95,9 @@
     "packages/compass": {
       "name": "@compass/compass",
       "version": "0.0.0",
+      "dependencies": {
+        "@compass/tokens": "workspace:*",
+      },
       "devDependencies": {
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
