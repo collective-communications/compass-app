@@ -276,6 +276,9 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA tests
 \if :{?TAP_HELPERS_INCLUDED}
   -- Being `\ir`'d into a real test — the including file will call plan().
 \else
-SELECT plan(0);
-SELECT * FROM finish();
+-- Standalone run: emit a minimal TAP stream with zero tests via psql
+-- `\echo`. pgTAP's own `plan(0)` / `finish()` raise "No tests run!" and
+-- exit the session non-zero, which fails the whole suite. Raw TAP keeps
+-- pg_prove happy and lets this file report as skipped.
+\echo 1..0 # SKIP fixtures helper — not a standalone test
 \endif
