@@ -80,7 +80,7 @@ CREATE TRIGGER survey_templates_updated_at
 
 -- Seed the 4 compass dimensions
 INSERT INTO dimensions (code, name, color, display_order, segment_start_angle, segment_end_angle) VALUES
-  ('core', 'Core', '#0A3B4F', 0, NULL, NULL),
+  ('core', 'Core', '#0C3D50', 0, NULL, NULL),
   ('clarity', 'Clarity', '#FF7F50', 1, 210, 330),
   ('connection', 'Connection', '#9FD7C3', 2, 90, 210),
   ('collaboration', 'Collaboration', '#E8B4A8', 3, 330, 90);

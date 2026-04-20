@@ -31,7 +31,7 @@ import {
 // ─── Brand Tokens (mirrored from tokens.ts) ────────────────────────────────
 
 const BRAND = {
-  core: '0A3B4F',
+  core: '0C3D50',
   lightGrey: 'F5F5F5',
   darkGrey: '424242',
   textPrimary: '212121',

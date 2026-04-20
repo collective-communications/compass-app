@@ -65,7 +65,7 @@ CREATE TABLE platform_settings (
   welcome_message TEXT NOT NULL DEFAULT 'Welcome to the Culture Compass survey.',
   completion_message TEXT NOT NULL DEFAULT 'Thank you for completing the survey.',
   logo_url TEXT,
-  brand_colors JSONB NOT NULL DEFAULT '{"core": "#0A3B4F", "clarity": "#FF7F50", "connection": "#9FD7C3", "collaboration": "#E8B4A8"}',
+  brand_colors JSONB NOT NULL DEFAULT '{"core": "#0C3D50", "clarity": "#FF7F50", "connection": "#9FD7C3", "collaboration": "#E8B4A8"}',
   data_retention_policy TEXT NOT NULL DEFAULT '3 years',
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -242,6 +242,6 @@ INSERT INTO platform_settings (
   14,
   'Welcome to the Culture Compass survey.',
   'Thank you for completing the survey.',
-  '{"core": "#0A3B4F", "clarity": "#FF7F50", "connection": "#9FD7C3", "collaboration": "#E8B4A8"}',
+  '{"core": "#0C3D50", "clarity": "#FF7F50", "connection": "#9FD7C3", "collaboration": "#E8B4A8"}',
   '3 years'
 );

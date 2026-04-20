@@ -5,7 +5,7 @@
 
 /** Brand color palette used for dimension mapping. */
 export const BRAND = {
-  core: '#0A3B4F',
+  core: '#0C3D50',
   clarity: '#FF7F50',
   connection: '#9FD7C3',
   collaboration: '#E8B4A8',
