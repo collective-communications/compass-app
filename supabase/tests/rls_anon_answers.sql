@@ -52,6 +52,7 @@ VALUES (
 -- for its own in-progress response.
 -- ===========================================================================
 SET LOCAL ROLE anon;
+SELECT tests.set_anon_claim();
 SELECT tests.set_session_token_header('own-session-token');
 
 SELECT lives_ok(
@@ -98,6 +99,7 @@ UPDATE public.responses
  WHERE id = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid;
 
 SET LOCAL ROLE anon;
+SELECT tests.set_anon_claim();
 SELECT tests.set_session_token_header('own-session-token');
 SELECT is(
   (SELECT count(*)::int FROM public.answers

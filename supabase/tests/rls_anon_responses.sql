@@ -51,6 +51,7 @@ VALUES (
 -- Assertion 1: anon CAN insert a response for an active deployment.
 -- ===========================================================================
 SET LOCAL ROLE anon;
+SELECT tests.set_anon_claim();
 SELECT tests.set_session_token_header('own-session-token');
 
 SELECT lives_ok(

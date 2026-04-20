@@ -201,6 +201,30 @@ END;
 $$;
 
 -- ---------------------------------------------------------------------------
+-- set_anon_claim() -> VOID
+--
+-- Stuffs `{"role": "anon"}` into the `request.jwt.claims` GUC. Supabase's
+-- `auth.role()` reads from this claim rather than from `current_user`, so
+-- policies that gate on `auth.role() = 'anon'` (e.g. `anon_insert_responses`)
+-- evaluate to NULL — and therefore reject — when the claim is absent, even
+-- if the session has `SET LOCAL ROLE anon`. Call this after switching to
+-- the anon role and before the first INSERT/SELECT that exercises such a
+-- policy. Paired with `clear_auth()` for teardown.
+-- ---------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION tests.set_anon_claim()
+RETURNS VOID
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  PERFORM set_config(
+    'request.jwt.claims',
+    json_build_object('role', 'anon')::text,
+    true -- is_local: only for the current transaction
+  );
+END;
+$$;
+
+-- ---------------------------------------------------------------------------
 -- clear_auth() -> VOID
 --
 -- Resets both GUCs so subsequent assertions start from a clean slate.
