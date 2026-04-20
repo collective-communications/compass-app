@@ -19,7 +19,7 @@
 --      with a high response count, is also surfaced and unmasked.
 
 BEGIN;
-\ir helpers/fixtures.sql
+\ir ../tests_helpers/fixtures.sql
 SELECT plan(7);
 
 -- ---------------------------------------------------------------------------

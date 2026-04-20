@@ -2,8 +2,10 @@
 --
 -- This file is `\ir`-included at the top of every test file. It is
 -- intentionally *not* a pgTAP test itself — no `plan()` / `finish()` —
--- and it lives under `helpers/` so Supabase CLI's top-level glob
--- (`supabase/tests/*.sql`) does not pick it up as a test.
+-- and it lives in the sibling `supabase/tests_helpers/` directory because
+-- Supabase CLI recurses `supabase/tests/**/*.sql` when running the pgTAP
+-- suite: a nested `supabase/tests/helpers/` would be executed as a test
+-- and pg_prove would fail the run with "No plan found in TAP output".
 --
 -- Each helper inserts a minimal-valid row and returns the new id. Helpers
 -- are SECURITY DEFINER so tests running under `anon` / `authenticated` can

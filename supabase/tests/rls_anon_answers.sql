@@ -16,7 +16,7 @@
 --      (is_valid_response() checks r.is_complete = false).
 
 BEGIN;
-\ir helpers/fixtures.sql
+\ir ../tests_helpers/fixtures.sql
 SELECT plan(4);
 
 -- ---------------------------------------------------------------------------

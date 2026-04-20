@@ -15,7 +15,7 @@
 -- All assertions run inside a single transaction and are rolled back.
 
 BEGIN;
-\ir helpers/fixtures.sql
+\ir ../tests_helpers/fixtures.sql
 SELECT plan(5);
 
 -- ---------------------------------------------------------------------------

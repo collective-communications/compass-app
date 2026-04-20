@@ -16,7 +16,7 @@
 -- symmetric, not accidentally one-way.
 
 BEGIN;
-\ir helpers/fixtures.sql
+\ir ../tests_helpers/fixtures.sql
 SELECT plan(8);
 
 -- ---------------------------------------------------------------------------

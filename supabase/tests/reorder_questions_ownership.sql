@@ -18,7 +18,7 @@
 --   * CC+C staff caller -> success (regardless of org membership).
 
 BEGIN;
-\ir helpers/fixtures.sql
+\ir ../tests_helpers/fixtures.sql
 SELECT plan(4);
 
 -- ---------------------------------------------------------------------------
