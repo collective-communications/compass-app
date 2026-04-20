@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import type { Decorator, Meta, StoryObj } from '@storybook/react-vite';
 import { fn } from 'storybook/test';
 import { SubTabNav } from '../../../../components/navigation/sub-tab-nav';
@@ -90,7 +91,7 @@ const AdminDetailDecorator: Decorator = (Story, context) => {
 /*  Placeholder content components                                            */
 /* -------------------------------------------------------------------------- */
 
-const OverviewContent = () => (
+const OverviewContent = (): ReactElement => (
   <div style={{ display: 'flex', gap: '24px' }}>
     <div style={{ flex: '0 0 65%' }}>
       <div
@@ -184,7 +185,7 @@ const OverviewContent = () => (
   </div>
 );
 
-const SurveysContent = () => (
+const SurveysContent = (): ReactElement => (
   <div
     style={{
       padding: '24px',
@@ -215,7 +216,7 @@ const SurveysContent = () => (
   </div>
 );
 
-const UsersContent = () => (
+const UsersContent = (): ReactElement => (
   <div
     style={{
       padding: '24px',
