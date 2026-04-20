@@ -9,6 +9,7 @@ import type { ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
 import type { DimensionScoreRow } from '../../types';
 import type { DimensionScoreMap } from '@compass/scoring';
+import { colors, chartColors } from '@compass/tokens';
 
 const DIMENSIONS: DimensionCode[] = ['core', 'clarity', 'connection', 'collaboration'];
 
@@ -24,14 +25,14 @@ const DIMENSION_LABELS: Record<DimensionCode, string> = {
  * Chosen for sufficient contrast on white backgrounds.
  */
 const SEGMENT_PALETTE = [
-  '#0C3D50',
-  '#FF7F50',
-  '#9FD7C3',
-  '#E8B4A8',
-  '#6B7280',
-  '#FBBF24',
-  '#34D399',
-  '#F87171',
+  colors.core,
+  colors.clarity,
+  colors.connection,
+  colors.collaboration,
+  chartColors.neutral,
+  chartColors.warning,
+  chartColors.success,
+  chartColors.error,
 ];
 
 interface StackedComparisonChartProps {

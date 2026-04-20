@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { greyscale, textColors } from '@compass/tokens';
 import type { DimensionScore } from './types';
 import { SEGMENT_ANGLES } from './constants';
 import { polarToCartesian } from './utils';
@@ -41,7 +42,7 @@ export const CompassLabels = memo(function CompassLabels(
               y={pos.y - 7}
               textAnchor="middle"
               dominantBaseline="auto"
-              fill="#424242"
+              fill={greyscale[700]}
               fontSize={11}
               fontWeight={600}
               fontFamily="sans-serif"
@@ -54,7 +55,7 @@ export const CompassLabels = memo(function CompassLabels(
               y={pos.y + 9}
               textAnchor="middle"
               dominantBaseline="auto"
-              fill="#616161"
+              fill={textColors.tertiary.light}
               fontSize={13}
               fontWeight={700}
               fontFamily="sans-serif"

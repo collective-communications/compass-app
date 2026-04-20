@@ -6,6 +6,7 @@
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
 import { formatDisplayDate } from '@compass/utils';
+import { colors, greyscale } from '@compass/tokens';
 
 interface ReportCoverProps {
   payload: ReportPayload;
@@ -44,7 +45,7 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
         style={{
           fontSize: '28pt',
           fontWeight: 700,
-          color: '#0C3D50',
+          color: colors.core,
           marginBottom: '8px',
           lineHeight: 1.2,
         }}
@@ -56,7 +57,7 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
         style={{
           fontSize: '16pt',
           fontWeight: 500,
-          color: '#424242',
+          color: greyscale[700],
           marginBottom: '4px',
         }}
       >
@@ -66,7 +67,7 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
       <p
         style={{
           fontSize: '11pt',
-          color: '#757575',
+          color: greyscale[500],
           marginBottom: '40px',
         }}
       >
@@ -79,10 +80,10 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
           display: 'inline-block',
           padding: '8px 24px',
           borderRadius: '24px',
-          background: '#F5F5F5',
+          background: greyscale[50],
           fontSize: '12pt',
           fontWeight: 600,
-          color: '#0C3D50',
+          color: colors.core,
           marginBottom: '16px',
         }}
       >
@@ -90,10 +91,10 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
       </div>
 
       {/* Metadata */}
-      <p style={{ fontSize: '9pt', color: '#9E9E9E', marginBottom: '4px' }}>
+      <p style={{ fontSize: '9pt', color: greyscale[400], marginBottom: '4px' }}>
         Survey closed {formatDisplayDate(survey.closesAt, 'long')}
       </p>
-      <p style={{ fontSize: '9pt', color: '#9E9E9E' }}>
+      <p style={{ fontSize: '9pt', color: greyscale[400] }}>
         {survey.responseCount} responses
       </p>
 
@@ -115,7 +116,7 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
             style={{ maxHeight: '24px' }}
           />
         ) : (
-          <span style={{ fontSize: '8pt', color: '#9E9E9E', letterSpacing: '0.05em' }}>
+          <span style={{ fontSize: '8pt', color: greyscale[400], letterSpacing: '0.05em' }}>
             <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>COLLECTIVE</span>{' '}
             culture + communication
           </span>

@@ -29,7 +29,7 @@ const AdminDetailDecorator: Decorator = (Story, context) => {
           alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '1px solid var(--grey-100)',
-          backgroundColor: 'var(--grey-0, #ffffff)',
+          backgroundColor: 'var(--surface-card)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -65,7 +65,7 @@ const AdminDetailDecorator: Decorator = (Story, context) => {
       </div>
 
       {/* SubTabNav */}
-      <div style={{ padding: '0 24px', backgroundColor: 'var(--grey-0, #ffffff)' }}>
+      <div style={{ padding: '0 24px', backgroundColor: 'var(--surface-card)' }}>
         <SubTabNav
           tabs={[
             { id: 'overview', label: 'Overview' },

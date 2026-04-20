@@ -9,6 +9,7 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import type { ReportPayload } from '@compass/types';
+import { colors, greyscale, severity } from '@compass/tokens';
 
 interface ReportLayoutProps {
   payload: ReportPayload;
@@ -46,7 +47,7 @@ export function ReportLayout({ payload, children }: ReportLayoutProps): ReactEle
                 font-family: 'DM Sans', 'Calibri', Arial, sans-serif;
                 font-size: 10pt;
                 line-height: 1.5;
-                color: #424242;
+                color: ${greyscale[700]};
                 background: #FFFFFF;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
@@ -67,7 +68,7 @@ export function ReportLayout({ payload, children }: ReportLayoutProps): ReactEle
                 align-items: center;
                 justify-content: space-between;
                 padding-bottom: 8mm;
-                border-bottom: 1px solid #E5E4E0;
+                border-bottom: 1px solid ${greyscale[100]};
                 margin-bottom: 8mm;
               }
 
@@ -82,13 +83,13 @@ export function ReportLayout({ payload, children }: ReportLayoutProps): ReactEle
                 bottom: 0;
                 left: 16mm;
                 right: 16mm;
-                border-top: 1px solid #E5E4E0;
+                border-top: 1px solid ${greyscale[100]};
                 padding-top: 4mm;
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
                 font-size: 7pt;
-                color: #9E9E9E;
+                color: ${greyscale[400]};
               }
 
               .report-footer .brand-mark {
@@ -103,7 +104,7 @@ export function ReportLayout({ payload, children }: ReportLayoutProps): ReactEle
               /* Utility classes for report sections */
               .report-card {
                 background: #FFFFFF;
-                border: 1px solid #E5E4E0;
+                border: 1px solid ${greyscale[100]};
                 border-radius: 8px;
                 padding: 20px 24px;
                 margin-bottom: 16px;
@@ -112,27 +113,27 @@ export function ReportLayout({ payload, children }: ReportLayoutProps): ReactEle
               .report-section-title {
                 font-size: 16pt;
                 font-weight: 700;
-                color: #0C3D50;
+                color: ${colors.core};
                 margin-bottom: 12px;
               }
 
               .report-subtitle {
                 font-size: 12pt;
                 font-weight: 600;
-                color: #212121;
+                color: ${greyscale[900]};
                 margin-bottom: 8px;
               }
 
               .report-body {
                 font-size: 10pt;
-                color: #424242;
+                color: ${greyscale[700]};
                 line-height: 1.6;
               }
 
-              .severity-border-critical { border-left: 4px solid #B71C1C; }
-              .severity-border-high { border-left: 4px solid #E65100; }
-              .severity-border-medium { border-left: 4px solid #F9A825; }
-              .severity-border-healthy { border-left: 4px solid #2E7D32; }
+              .severity-border-critical { border-left: 4px solid ${severity.critical.border}; }
+              .severity-border-high { border-left: 4px solid ${severity.high.border}; }
+              .severity-border-medium { border-left: 4px solid ${severity.medium.border}; }
+              .severity-border-healthy { border-left: 4px solid ${severity.healthy.border}; }
 
               @media print {
                 .report-footer {
@@ -173,7 +174,7 @@ export function ReportPageHeader({
       {branding.cccLogoUrl ? (
         <img src={branding.cccLogoUrl} alt="COLLECTIVE culture + communication" />
       ) : (
-        <span style={{ fontWeight: 700, fontSize: '10pt', color: '#0C3D50' }}>
+        <span style={{ fontWeight: 700, fontSize: '10pt', color: colors.core }}>
           <span style={{ textTransform: 'uppercase' }}>COLLECTIVE</span>{' '}
           culture + communication
         </span>

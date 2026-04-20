@@ -9,7 +9,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
-import { dimensions } from '@compass/tokens';
+import { dimensions, greyscale, severity } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface SegmentAnalysisProps {
@@ -41,7 +41,7 @@ function SegmentBar({
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Score: ${Math.round(clamped)}%`}>
-      <rect x={0} y={0} width={width} height={height} rx={6} fill="#E5E4E0" />
+      <rect x={0} y={0} width={width} height={height} rx={6} fill={greyscale[100]} />
       <rect x={0} y={0} width={fillWidth} height={height} rx={6} fill={color} />
     </svg>
   );
@@ -61,7 +61,7 @@ export function SegmentAnalysis({
         <ReportPageHeader branding={branding} />
         <h2 className="report-section-title">Segment Analysis</h2>
         <div className="report-card">
-          <p className="report-body" style={{ color: '#757575' }}>
+          <p className="report-body" style={{ color: greyscale[500] }}>
             No segment data is available for this survey.
           </p>
         </div>
@@ -103,7 +103,7 @@ export function SegmentAnalysis({
           className="report-card"
           style={{
             background: '#FFFBEB',
-            borderColor: '#F9A825',
+            borderColor: severity.medium.border,
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
@@ -112,7 +112,7 @@ export function SegmentAnalysis({
           }}
         >
           <span style={{ fontSize: '14px' }} aria-hidden="true">&#128274;</span>
-          <p style={{ fontSize: '9pt', color: '#424242' }}>
+          <p style={{ fontSize: '9pt', color: greyscale[700] }}>
             {hiddenCount} segment{hiddenCount !== 1 ? 's' : ''} hidden due to insufficient
             responses (fewer than {anonymityThreshold}). Data is withheld to protect
             respondent anonymity.
@@ -123,12 +123,12 @@ export function SegmentAnalysis({
       {/* Segment comparison table */}
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '9pt' }}>
         <thead>
-          <tr style={{ borderBottom: '2px solid #E5E4E0' }}>
-            <th style={{ textAlign: 'left', padding: '6px 8px', color: '#9E9E9E', fontWeight: 500, width: '100px' }}>
+          <tr style={{ borderBottom: `2px solid ${greyscale[100]}` }}>
+            <th style={{ textAlign: 'left', padding: '6px 8px', color: greyscale[400], fontWeight: 500, width: '100px' }}>
               Segment
             </th>
             {dimensionKeys.map((dim) => (
-              <th key={dim} style={{ textAlign: 'center', padding: '6px 4px', color: '#9E9E9E', fontWeight: 500 }}>
+              <th key={dim} style={{ textAlign: 'center', padding: '6px 4px', color: greyscale[400], fontWeight: 500 }}>
                 {DIMENSION_META[dim]?.label ?? dim}
               </th>
             ))}
@@ -138,15 +138,15 @@ export function SegmentAnalysis({
           {visibleSegments.map((segKey) => {
             const dimScores = segments[segKey] ?? {};
             return (
-              <tr key={segKey} style={{ borderBottom: '1px solid #F5F5F5' }}>
-                <td style={{ padding: '8px', fontWeight: 500, color: '#212121' }}>
+              <tr key={segKey} style={{ borderBottom: `1px solid ${greyscale[50]}` }}>
+                <td style={{ padding: '8px', fontWeight: 500, color: greyscale[900] }}>
                   {segKey}
                 </td>
                 {dimensionKeys.map((dim) => {
                   const score = dimScores[dim];
                   if (score === null || score === undefined) {
                     return (
-                      <td key={dim} style={{ padding: '8px 4px', textAlign: 'center', color: '#BDBDBD' }}>
+                      <td key={dim} style={{ padding: '8px 4px', textAlign: 'center', color: greyscale[300] }}>
                         &mdash;
                       </td>
                     );
@@ -154,8 +154,8 @@ export function SegmentAnalysis({
                   return (
                     <td key={dim} style={{ padding: '8px 4px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                        <SegmentBar score={score} color={DIMENSION_META[dim]?.color ?? '#9E9E9E'} width={80} />
-                        <span style={{ fontWeight: 600, color: '#424242', minWidth: '28px', textAlign: 'right' }}>
+                        <SegmentBar score={score} color={DIMENSION_META[dim]?.color ?? greyscale[400]} width={80} />
+                        <span style={{ fontWeight: 600, color: greyscale[700], minWidth: '28px', textAlign: 'right' }}>
                           {Math.round(score)}%
                         </span>
                       </div>

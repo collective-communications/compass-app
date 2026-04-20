@@ -5,7 +5,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
-import { dimensions } from '@compass/tokens';
+import { dimensions, greyscale, colors, severity } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface ExecutiveSummaryProps {
@@ -48,7 +48,7 @@ function PrintScoreRing({
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={`Score: ${Math.round(clamped)}%`}>
-      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="#E5E4E0" strokeWidth={strokeWidth} />
+      <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke={greyscale[100]} strokeWidth={strokeWidth} />
       <circle
         cx={size / 2}
         cy={size / 2}
@@ -61,7 +61,7 @@ function PrintScoreRing({
         strokeDashoffset={dashOffset}
         transform={`rotate(-90 ${size / 2} ${size / 2})`}
       />
-      <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle" style={{ fontSize: '12px', fontWeight: 600, fill: '#424242' }}>
+      <text x="50%" y="50%" dominantBaseline="central" textAnchor="middle" style={{ fontSize: '12px', fontWeight: 600, fill: greyscale[700] }}>
         {Math.round(clamped)}
       </text>
     </svg>
@@ -82,11 +82,11 @@ export function ExecutiveSummary({ payload }: ExecutiveSummaryProps): ReactEleme
 
       {/* Overall score */}
       <div className="report-card" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <PrintScoreRing score={scores.overall} color="#0C3D50" size={72} strokeWidth={6} />
+        <PrintScoreRing score={scores.overall} color={colors.core} size={72} strokeWidth={6} />
         <div>
           <p className="report-subtitle" style={{ marginBottom: '2px' }}>Overall Culture Score</p>
           <p className="report-body">{scores.overall}% — {compass.archetype}</p>
-          <p style={{ fontSize: '9pt', color: '#757575', marginTop: '4px' }}>
+          <p style={{ fontSize: '9pt', color: greyscale[500], marginTop: '4px' }}>
             {compass.archetypeDescription}
           </p>
         </div>
@@ -102,15 +102,15 @@ export function ExecutiveSummary({ payload }: ExecutiveSummaryProps): ReactEleme
               display: 'flex',
               alignItems: 'center',
               gap: '12px',
-              borderLeft: `4px solid ${DIMENSION_COLORS[dim] ?? '#E5E4E0'}`,
+              borderLeft: `4px solid ${DIMENSION_COLORS[dim] ?? greyscale[100]}`,
             }}
           >
-            <PrintScoreRing score={score} color={DIMENSION_COLORS[dim] ?? '#9E9E9E'} size={48} strokeWidth={4} />
+            <PrintScoreRing score={score} color={DIMENSION_COLORS[dim] ?? greyscale[400]} size={48} strokeWidth={4} />
             <div>
-              <p style={{ fontWeight: 600, fontSize: '10pt', color: '#212121' }}>
+              <p style={{ fontWeight: 600, fontSize: '10pt', color: greyscale[900] }}>
                 {DIMENSION_LABELS[dim] ?? dim}
               </p>
-              <p style={{ fontSize: '9pt', color: '#757575' }}>{score}%</p>
+              <p style={{ fontSize: '9pt', color: greyscale[500] }}>{score}%</p>
             </div>
           </div>
         ))}
@@ -120,15 +120,15 @@ export function ExecutiveSummary({ payload }: ExecutiveSummaryProps): ReactEleme
       {(criticalCount > 0 || highCount > 0) && (
         <div className="report-card">
           <p className="report-subtitle">Key Findings</p>
-          <ul style={{ paddingLeft: '16px', fontSize: '10pt', color: '#424242' }}>
+          <ul style={{ paddingLeft: '16px', fontSize: '10pt', color: greyscale[700] }}>
             {criticalCount > 0 && (
               <li style={{ marginBottom: '4px' }}>
-                <strong style={{ color: '#B71C1C' }}>{criticalCount}</strong> critical risk{criticalCount !== 1 ? 's' : ''} identified
+                <strong style={{ color: severity.critical.border }}>{criticalCount}</strong> critical risk{criticalCount !== 1 ? 's' : ''} identified
               </li>
             )}
             {highCount > 0 && (
               <li>
-                <strong style={{ color: '#E65100' }}>{highCount}</strong> high-priority area{highCount !== 1 ? 's' : ''} requiring attention
+                <strong style={{ color: severity.high.border }}>{highCount}</strong> high-priority area{highCount !== 1 ? 's' : ''} requiring attention
               </li>
             )}
           </ul>

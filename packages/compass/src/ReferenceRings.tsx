@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { greyscale } from '@compass/tokens';
 import { REFERENCE_RINGS } from './constants';
 
 interface ReferenceRingsProps {
@@ -25,7 +26,7 @@ export const ReferenceRings = memo(function ReferenceRings(
             cy={cy}
             r={ringRadius}
             fill="none"
-            stroke="#E5E4E0"
+            stroke={greyscale[100]}
             strokeWidth={1}
             strokeDasharray="6 4"
           />

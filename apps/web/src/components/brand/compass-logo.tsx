@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { neutralCharcoal } from '@compass/tokens';
 
 interface CompassLogoProps {
   size?: 'sm' | 'md' | 'lg';
@@ -39,7 +40,7 @@ export function CompassLogo({ size = 'md', variant = 'default', className }: Com
         cy="24"
         r="22"
         fill="var(--color-core)"
-        stroke={onDark ? 'none' : '#323130'}
+        stroke={onDark ? 'none' : neutralCharcoal}
         strokeWidth={onDark ? 0 : 1}
       />
       {/* Clarity — top */}
