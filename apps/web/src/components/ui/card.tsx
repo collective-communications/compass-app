@@ -22,7 +22,7 @@ interface CardProps extends HTMLAttributes<HTMLDivElement> {
 }
 
 export function Card({ severity, children, className, ...rest }: CardProps): ReactNode {
-  const base = 'bg-[var(--surface-card)] border border-[var(--grey-200,#E5E4E0)] rounded-lg p-6';
+  const base = 'bg-[var(--surface-card)] border border-[var(--grey-100)] rounded-lg p-6';
   const severityClass = severity ? SEVERITY_STYLES[severity] : '';
   const classes = [base, severityClass, className].filter(Boolean).join(' ');
 

@@ -19,7 +19,7 @@ export const Default: Story = {};
 export const WithLogo: Story = {
   args: {
     orgName: 'Acme Corporation',
-    logoUrl: 'https://placehold.co/32x32/0A3B4F/ffffff?text=AC',
+    logoUrl: 'https://placehold.co/32x32/0C3D50/ffffff?text=AC',
   },
 };
 

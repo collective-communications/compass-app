@@ -25,7 +25,7 @@ export function ThankYouScreen({
 }: ThankYouScreenProps): ReactNode {
   return (
     <div className="flex min-h-[60vh] items-center justify-center px-4 py-8">
-      <div className="w-full max-w-[600px] bg-[var(--surface-card)] p-6 sm:p-8">
+      <div className="container-survey bg-[var(--surface-card)] p-6 sm:p-8">
         {/* Checkmark */}
         <div className="mb-4 flex justify-center">
           <svg

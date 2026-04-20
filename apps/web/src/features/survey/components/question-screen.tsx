@@ -120,7 +120,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
 
   if (isLoading) {
     return (
-      <div className="mx-auto flex max-w-[600px] items-center justify-center py-24">
+      <div className="container-survey flex items-center justify-center py-24">
         <div className="text-sm text-[var(--text-secondary)]">Loading questions...</div>
       </div>
     );
@@ -128,7 +128,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
 
   if (error || !allQuestions) {
     return (
-      <div className="mx-auto flex max-w-[600px] items-center justify-center py-24">
+      <div className="container-survey flex items-center justify-center py-24">
         <div className="text-sm text-[var(--severity-critical-text)]">
           Failed to load survey questions. Please refresh and try again.
         </div>
@@ -138,7 +138,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
 
   if (likertQuestions.length === 0) {
     return (
-      <div className="mx-auto flex max-w-[600px] items-center justify-center py-24">
+      <div className="container-survey flex items-center justify-center py-24">
         <div className="text-sm text-[var(--text-secondary)]">No questions found for this survey.</div>
       </div>
     );
@@ -149,7 +149,7 @@ export function QuestionScreen({ onComplete }: QuestionScreenProps): React.React
   }
 
   return (
-    <div className="mx-auto flex max-w-[600px] flex-col gap-8 px-4 py-8">
+    <div className="container-survey flex flex-col gap-8 py-8">
       {/* Progress squares — above question for orientation */}
       <ProgressSquares
         total={likertQuestions.length}

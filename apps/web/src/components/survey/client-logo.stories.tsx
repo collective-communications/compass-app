@@ -20,7 +20,7 @@ export const Default: Story = {};
 
 export const WithImage: Story = {
   args: {
-    src: 'https://placehold.co/48x48/0A3B4F/ffffff?text=RV',
+    src: 'https://placehold.co/48x48/0C3D50/ffffff?text=RV',
     orgName: 'River Valley',
     size: 'lg',
   },

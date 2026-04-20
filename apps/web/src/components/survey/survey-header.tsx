@@ -20,7 +20,7 @@ export function SurveyHeader({ orgName, logoUrl, onSave }: SurveyHeaderProps): R
     <header
       className="sticky top-0 z-10 bg-[var(--grey-50)] border-b border-[var(--grey-100)]"
     >
-      <div className="mx-auto flex max-w-[600px] items-center gap-3 px-4 py-3">
+      <div className="container-survey flex items-center gap-3 py-3">
         <ClientLogo src={logoUrl} orgName={orgName} size="md" />
         <span className="truncate text-sm font-medium text-[var(--grey-700)]">
           {orgName}
