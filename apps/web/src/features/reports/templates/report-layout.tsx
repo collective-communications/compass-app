@@ -112,7 +112,7 @@ export function ReportLayout({ payload, children }: ReportLayoutProps): ReactEle
               .report-section-title {
                 font-size: 16pt;
                 font-weight: 700;
-                color: #0A3B4F;
+                color: #0C3D50;
                 margin-bottom: 12px;
               }
 
@@ -173,7 +173,7 @@ export function ReportPageHeader({
       {branding.cccLogoUrl ? (
         <img src={branding.cccLogoUrl} alt="COLLECTIVE culture + communication" />
       ) : (
-        <span style={{ fontWeight: 700, fontSize: '10pt', color: '#0A3B4F' }}>
+        <span style={{ fontWeight: 700, fontSize: '10pt', color: '#0C3D50' }}>
           <span style={{ textTransform: 'uppercase' }}>COLLECTIVE</span>{' '}
           culture + communication
         </span>

@@ -69,7 +69,7 @@ function CompassSvg({
       })}
 
       {/* Score polygon */}
-      <polygon points={polygonPoints} fill="rgba(10, 59, 79, 0.12)" stroke="#0A3B4F" strokeWidth={2} />
+      <polygon points={polygonPoints} fill="rgba(12, 61, 80, 0.12)" stroke="#0C3D50" strokeWidth={2} />
 
       {/* Score dots and labels on each axis */}
       {DIMENSION_CONFIG.map(({ key, label, color, angle }) => {
@@ -110,7 +110,7 @@ function CompassSvg({
         y={CENTER - 4}
         textAnchor="middle"
         dominantBaseline="central"
-        style={{ fontSize: '14px', fontWeight: 700, fill: '#0A3B4F' }}
+        style={{ fontSize: '14px', fontWeight: 700, fill: '#0C3D50' }}
       >
         {Math.round(overallScore)}
       </text>
@@ -142,7 +142,7 @@ export function CompassOverview({ payload }: CompassOverviewProps): ReactElement
       </div>
 
       {/* Archetype card */}
-      <div className="report-card" style={{ borderLeft: '4px solid #0A3B4F' }}>
+      <div className="report-card" style={{ borderLeft: '4px solid #0C3D50' }}>
         <p className="report-subtitle">{compass.archetype}</p>
         <p className="report-body">{compass.archetypeDescription}</p>
       </div>

@@ -82,7 +82,7 @@ export function ExecutiveSummary({ payload }: ExecutiveSummaryProps): ReactEleme
 
       {/* Overall score */}
       <div className="report-card" style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <PrintScoreRing score={scores.overall} color="#0A3B4F" size={72} strokeWidth={6} />
+        <PrintScoreRing score={scores.overall} color="#0C3D50" size={72} strokeWidth={6} />
         <div>
           <p className="report-subtitle" style={{ marginBottom: '2px' }}>Overall Culture Score</p>
           <p className="report-body">{scores.overall}% — {compass.archetype}</p>

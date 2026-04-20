@@ -112,7 +112,7 @@ function setupMocks(overrides?: {
       name: 'Acme Corp',
       logo_url: 'https://example.com/logo.png',
       settings: {
-        brand_colors: { primary: '#0A3B4F', accent: '#FF7F50' },
+        brand_colors: { primary: '#0C3D50', accent: '#FF7F50' },
       },
     },
   };
@@ -262,7 +262,7 @@ describe('assembleReportPayload', () => {
     setupMocks();
     const payload = await assembleReportPayload(defaultConfig);
 
-    expect(payload.branding.colors).toEqual({ primary: '#0A3B4F', accent: '#FF7F50' });
+    expect(payload.branding.colors).toEqual({ primary: '#0C3D50', accent: '#FF7F50' });
     expect(payload.branding.orgLogoUrl).toBe('https://example.com/logo.png');
   });
 

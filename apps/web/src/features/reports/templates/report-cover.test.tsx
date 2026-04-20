@@ -32,7 +32,7 @@ function makePayload(overrides: Partial<ReportPayload> = {}): ReportPayload {
     branding: {
       orgLogoUrl: 'https://example.com/acme-logo.png',
       cccLogoUrl: null,
-      colors: { primary: '#0A3B4F' },
+      colors: { primary: '#0C3D50' },
     },
     sections: [],
     ...overrides,

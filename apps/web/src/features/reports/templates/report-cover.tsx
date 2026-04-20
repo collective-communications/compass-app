@@ -44,7 +44,7 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
         style={{
           fontSize: '28pt',
           fontWeight: 700,
-          color: '#0A3B4F',
+          color: '#0C3D50',
           marginBottom: '8px',
           lineHeight: 1.2,
         }}
@@ -82,7 +82,7 @@ export function ReportCover({ payload }: ReportCoverProps): ReactElement {
           background: '#F5F5F5',
           fontSize: '12pt',
           fontWeight: 600,
-          color: '#0A3B4F',
+          color: '#0C3D50',
           marginBottom: '16px',
         }}
       >
