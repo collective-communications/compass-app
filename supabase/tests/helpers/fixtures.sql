@@ -214,3 +214,13 @@ BEGIN
   PERFORM set_config('request.headers', '', true);
 END;
 $$;
+
+-- ---------------------------------------------------------------------------
+-- Grant usage + execute so test bodies running under the unprivileged
+-- `anon` and `authenticated` roles can reach into this schema. The helpers
+-- themselves are SECURITY DEFINER where they need to bypass RLS.
+-- ---------------------------------------------------------------------------
+GRANT USAGE ON SCHEMA tests TO anon, authenticated, PUBLIC;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA tests TO anon, authenticated, PUBLIC;
+ALTER DEFAULT PRIVILEGES IN SCHEMA tests
+  GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, PUBLIC;
