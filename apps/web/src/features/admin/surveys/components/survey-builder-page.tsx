@@ -118,7 +118,7 @@ function groupByDimension(
       code: 'core' as DimensionCode,
       name: 'Other',
       description: null,
-      color: '#9E9E9E',
+      color: 'var(--grey-400)',
       displayOrder: 999,
       segmentStartAngle: null,
       segmentEndAngle: null,

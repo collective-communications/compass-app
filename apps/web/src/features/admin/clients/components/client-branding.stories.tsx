@@ -24,7 +24,7 @@ export const WithLogo: Story = {
   args: {
     branding: {
       displayName: 'Acme Corporation',
-      logoUrl: 'https://placehold.co/48x48/0A3B4F/white?text=AC',
+      logoUrl: 'https://placehold.co/48x48/0C3D50/white?text=AC',
     },
   },
 };

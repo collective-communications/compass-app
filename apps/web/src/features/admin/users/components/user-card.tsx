@@ -21,8 +21,8 @@ export interface UserCardProps {
 
 /** Role-coded avatar background colors */
 const ROLE_AVATAR_COLORS: Record<string, { bg: string; text: string }> = {
-  ccc_admin: { bg: '#0A3B4F', text: '#FFFFFF' },
-  ccc_member: { bg: '#9FD7C3', text: '#0A3B4F' },
+  ccc_admin: { bg: '#0C3D50', text: '#FFFFFF' },
+  ccc_member: { bg: '#9FD7C3', text: '#0C3D50' },
 };
 
 /** Role display labels */
@@ -115,7 +115,7 @@ export function UserCard({
           <div
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
             style={{
-              backgroundColor: ROLE_AVATAR_COLORS[member.role]?.bg ?? 'var(--grey-200)',
+              backgroundColor: ROLE_AVATAR_COLORS[member.role]?.bg ?? 'var(--grey-100)',
               color: ROLE_AVATAR_COLORS[member.role]?.text ?? 'var(--grey-700)',
             }}
             aria-hidden="true"

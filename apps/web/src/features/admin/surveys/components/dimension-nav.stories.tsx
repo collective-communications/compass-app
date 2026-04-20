@@ -4,7 +4,7 @@ import type { Dimension } from '@compass/types';
 import { DimensionNav } from './dimension-nav';
 
 const dimensions: Dimension[] = [
-  { id: 'dim-core', code: 'core', name: 'Core', description: null, color: '#0A3B4F', displayOrder: 1, segmentStartAngle: null, segmentEndAngle: null, createdAt: '' },
+  { id: 'dim-core', code: 'core', name: 'Core', description: null, color: '#0C3D50', displayOrder: 1, segmentStartAngle: null, segmentEndAngle: null, createdAt: '' },
   { id: 'dim-clarity', code: 'clarity', name: 'Clarity', description: null, color: '#FF7F50', displayOrder: 2, segmentStartAngle: null, segmentEndAngle: null, createdAt: '' },
   { id: 'dim-connection', code: 'connection', name: 'Connection', description: null, color: '#9FD7C3', displayOrder: 3, segmentStartAngle: null, segmentEndAngle: null, createdAt: '' },
   { id: 'dim-collaboration', code: 'collaboration', name: 'Collaboration', description: null, color: '#E8B4A8', displayOrder: 4, segmentStartAngle: null, segmentEndAngle: null, createdAt: '' },

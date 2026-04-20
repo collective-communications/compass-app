@@ -55,7 +55,7 @@ export function RecipientList({
 
   if (recipients.length === 0) {
     return (
-      <div className="rounded-lg border border-dashed border-[var(--grey-200)] py-8 text-center">
+      <div className="rounded-lg border border-dashed border-[var(--grey-100)] py-8 text-center">
         <p className="text-sm text-[var(--text-secondary)]">
           No recipients added yet. Import a CSV or add manually.
         </p>

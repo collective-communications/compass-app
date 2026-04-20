@@ -70,7 +70,7 @@ export const WithAvatar: Story = {
   args: {
     member: {
       ...baseMember,
-      avatarUrl: 'https://placehold.co/40x40/0A3B4F/white?text=JP',
+      avatarUrl: 'https://placehold.co/40x40/0C3D50/white?text=JP',
     },
   },
 };

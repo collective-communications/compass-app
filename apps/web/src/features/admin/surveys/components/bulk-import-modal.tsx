@@ -144,7 +144,7 @@ export function BulkImportModal({
                 type="file"
                 accept=".csv,text/csv"
                 onChange={handleFileChange}
-                className="block w-full text-sm text-[var(--grey-700)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--grey-100)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--grey-700)] hover:file:bg-[var(--grey-200)]"
+                className="block w-full text-sm text-[var(--grey-700)] file:mr-3 file:rounded-lg file:border-0 file:bg-[var(--grey-100)] file:px-4 file:py-2 file:text-sm file:font-medium file:text-[var(--grey-700)] hover:file:bg-[var(--grey-300)]"
               />
             </label>
             <p className="mt-2 text-xs text-[var(--text-secondary)]">

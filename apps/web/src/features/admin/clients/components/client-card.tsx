@@ -65,7 +65,7 @@ export function ClientCard({ organization, onClick }: ClientCardProps): ReactEle
           />
         ) : (
           <div
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--grey-200)] text-sm font-semibold text-[var(--grey-700)]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--grey-100)] text-sm font-semibold text-[var(--grey-700)]"
             aria-hidden="true"
           >
             {initials}

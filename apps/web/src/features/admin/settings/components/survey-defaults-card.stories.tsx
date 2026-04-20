@@ -11,7 +11,7 @@ const defaultSettings: SystemSettings = {
   completion_message: 'Thank you for completing the survey. Your input is valuable and will contribute to meaningful organizational insights.',
   logo_url: null,
   brand_colors: {
-    core: '#0A3B4F',
+    core: '#0C3D50',
     clarity: '#FF7F50',
     connection: '#9FD7C3',
     collaboration: '#E8B4A8',

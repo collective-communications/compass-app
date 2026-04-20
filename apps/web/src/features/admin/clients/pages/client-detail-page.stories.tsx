@@ -28,7 +28,7 @@ const AdminDetailDecorator: Decorator = (Story, context) => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid var(--grey-200)',
+          borderBottom: '1px solid var(--grey-100)',
           backgroundColor: 'var(--grey-0, #ffffff)',
         }}
       >
@@ -98,7 +98,7 @@ const OverviewContent = () => (
           padding: '24px',
           backgroundColor: 'white',
           borderRadius: '8px',
-          border: '1px solid var(--grey-200)',
+          border: '1px solid var(--grey-100)',
           marginBottom: '16px',
         }}
       >
@@ -127,7 +127,7 @@ const OverviewContent = () => (
           padding: '24px',
           backgroundColor: 'white',
           borderRadius: '8px',
-          border: '1px solid var(--grey-200)',
+          border: '1px solid var(--grey-100)',
         }}
       >
         <h3
@@ -157,7 +157,7 @@ const OverviewContent = () => (
           padding: '24px',
           backgroundColor: 'white',
           borderRadius: '8px',
-          border: '1px solid var(--grey-200)',
+          border: '1px solid var(--grey-100)',
         }}
       >
         <h3
@@ -190,7 +190,7 @@ const SurveysContent = () => (
       padding: '24px',
       backgroundColor: 'white',
       borderRadius: '8px',
-      border: '1px solid var(--grey-200)',
+      border: '1px solid var(--grey-100)',
     }}
   >
     <h3
@@ -221,7 +221,7 @@ const UsersContent = () => (
       padding: '24px',
       backgroundColor: 'white',
       borderRadius: '8px',
-      border: '1px solid var(--grey-200)',
+      border: '1px solid var(--grey-100)',
     }}
   >
     <h3

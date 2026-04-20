@@ -41,7 +41,7 @@ const SETTINGS_DEFAULTS: Omit<SystemSettings, 'id' | 'updated_at'> = {
     'Thank you for completing the survey. Your anonymous responses have been recorded.',
   logo_url: null,
   brand_colors: {
-    core: '#0A3B4F',
+    core: '#0C3D50',
     clarity: '#FF7F50',
     connection: '#9FD7C3',
     collaboration: '#E8B4A8',

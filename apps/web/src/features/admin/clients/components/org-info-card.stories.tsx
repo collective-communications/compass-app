@@ -42,7 +42,7 @@ export const WithLogo: Story = {
   args: {
     organization: {
       ...baseOrg,
-      logoUrl: 'https://placehold.co/64x64/0A3B4F/white?text=ML',
+      logoUrl: 'https://placehold.co/64x64/0C3D50/white?text=ML',
     },
   },
 };
