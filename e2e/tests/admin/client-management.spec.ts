@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { AdminPage } from '../../page-objects/admin.page';
+import { SEED_ORG_ID } from '../../helpers/survey';
 
 test.use({ storageState: 'e2e/.auth/admin.json' });
 
@@ -11,6 +12,12 @@ test.use({ storageState: 'e2e/.auth/admin.json' });
  * unconditionally instead of wrapping each step in `if (isVisible())`
  * guards that silently skip. Matches the fixture-deterministic style
  * from `e2e/tests/reports/report-list.spec.ts`.
+ *
+ * Tests that require a specific survey or settings affordance navigate
+ * directly to the seeded org's detail route (SEED_ORG_ID) rather than
+ * relying on the first card, which is alphabetically ordered and may
+ * resolve to an unrelated client left over from prior test runs on the
+ * shared remote E2E database.
  */
 
 const clientCardLocator = (page: import('@playwright/test').Page) =>
@@ -91,49 +98,40 @@ test.describe('Admin client management', () => {
     await expect(admin.newSurveyButton).toBeVisible({ timeout: 10000 });
   });
 
-  test('deploy affordance surfaces when drilling into a seeded survey', async ({ page }) => {
-    // Navigate: /clients → first client → Surveys tab → first survey card.
-    await page.goto('/clients');
-    await page.waitForLoadState('networkidle');
-
-    await clientCardLocator(page).first().click();
-    await page.waitForLoadState('networkidle');
-
-    const surveysTab = page.getByRole('tab', { name: /surveys/i });
-    await expect(surveysTab).toBeVisible({ timeout: 10000 });
-    await surveysTab.click();
+  test('deploy affordance surfaces when configuring a seeded survey', async ({ page }) => {
+    // Navigate directly to the seeded org's Surveys tab so we always land
+    // on the client that has an active survey (seed-dev.ts provisions it).
+    // The first alphabetical card can be a different org left over from
+    // prior runs on the shared remote DB, which has no surveys.
+    await page.goto(`/clients/${SEED_ORG_ID}/surveys`);
     await page.waitForLoadState('networkidle');
 
     const admin = new AdminPage(page);
     await expect(admin.surveyCards.first()).toBeVisible({ timeout: 10000 });
-    await admin.surveyCards.first().click();
-    await page.waitForLoadState('networkidle');
 
-    // We're now on the survey builder / detail page. The Publish (deploy)
-    // affordance is only rendered on that surface — seed guarantees it.
+    // Open the survey config modal via the per-card "Configure" affordance.
+    // That modal is where the Publish (deploy) button lives — the builder
+    // page itself only exposes Save/Done actions.
+    const configureButton = page.getByRole('button', { name: /configure survey/i }).first();
+    await expect(configureButton).toBeVisible({ timeout: 10000 });
+    await configureButton.click();
+
     await expect(admin.deployButton).toBeVisible({ timeout: 10000 });
   });
 
-  test('client settings tab shows metadata dropdown configuration', async ({ page }) => {
-    await page.goto('/clients');
-    await page.waitForLoadState('networkidle');
-
-    await clientCardLocator(page).first().click();
-    await page.waitForLoadState('networkidle');
-
-    const settingsTab = page.getByRole('tab', { name: /settings/i });
-    await expect(settingsTab).toBeVisible({ timeout: 10000 });
-    await settingsTab.click();
+  test('client settings page shows metadata dropdown configuration', async ({ page }) => {
+    // Client settings is a standalone route (/clients/$orgId/settings), not a
+    // child of the client-detail tab layout, so navigate directly rather than
+    // hunting for a "Settings" tab that doesn't exist in the current shell.
+    await page.goto(`/clients/${SEED_ORG_ID}/settings`);
     await page.waitForLoadState('networkidle');
 
     expect(page.url()).toContain('/settings');
 
-    // Either metadata dropdowns or a department/role label surfaces.
-    // Both are valid renderings depending on metadata-config state.
-    const dropdowns = page.getByRole('combobox').or(page.locator('select'));
+    // Metadata config sections render Departments / Roles / Locations labels
+    // from the seeded organization_settings row.
     const metadataLabel = page.getByText(/department|role|location|metadata/i).first();
-
-    await expect(dropdowns.first().or(metadataLabel)).toBeVisible({ timeout: 10000 });
+    await expect(metadataLabel).toBeVisible({ timeout: 10000 });
   });
 
   test('direct navigation to client tab URLs works', async ({ page }) => {
