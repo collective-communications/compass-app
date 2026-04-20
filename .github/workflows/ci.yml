@@ -170,6 +170,12 @@ jobs:
   visual-regression:
     name: Visual Regression
     runs-on: ubuntu-latest
+    # Disabled until baselines are generated. Run the
+    # `update-visual-baselines.yml` workflow (workflow_dispatch) to
+    # produce and commit the initial PNG set under
+    # `apps/storybook/__snapshots__/`, then remove the `if: false` line
+    # below to re-enable this job on every push / PR.
+    if: false
     steps:
       - uses: actions/checkout@v4
 
