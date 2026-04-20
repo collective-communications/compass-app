@@ -1,11 +1,15 @@
 -- Shared fixture helpers for the pgTAP RLS test suite.
 --
--- This file is `\ir`-included at the top of every test file. It is
--- intentionally *not* a pgTAP test itself — no `plan()` / `finish()` —
--- and it lives in the sibling `supabase/tests_helpers/` directory because
--- Supabase CLI recurses `supabase/tests/**/*.sql` when running the pgTAP
--- suite: a nested `supabase/tests/helpers/` would be executed as a test
--- and pg_prove would fail the run with "No plan found in TAP output".
+-- This file is `\ir`-included at the top of every test file. It defines
+-- zero pgTAP assertions of its own — the including file is responsible
+-- for calling `plan(n)` with the total assertion count.
+--
+-- Supabase CLI recurses `supabase/tests/**/*.sql` when running pgTAP, so
+-- pg_prove ALSO runs this file standalone. To prevent "No plan found in
+-- TAP output" failing the whole suite, the tail of this file guards an
+-- empty `plan(0)` behind a psql variable: real tests `\set
+-- TAP_HELPERS_INCLUDED 1` before `\ir`, standalone runs do not. See the
+-- guard block at the bottom.
 --
 -- Each helper inserts a minimal-valid row and returns the new id. Helpers
 -- are SECURITY DEFINER so tests running under `anon` / `authenticated` can
@@ -250,3 +254,28 @@ GRANT USAGE ON SCHEMA tests TO anon, authenticated, PUBLIC;
 GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA tests TO anon, authenticated, PUBLIC;
 ALTER DEFAULT PRIVILEGES IN SCHEMA tests
   GRANT EXECUTE ON FUNCTIONS TO anon, authenticated, PUBLIC;
+
+-- ---------------------------------------------------------------------------
+-- Standalone-run guard.
+--
+-- Supabase CLI recursively globs `supabase/tests/**/*.sql`, so pg_prove
+-- executes this file standalone — not only when test files `\ir` it. A
+-- standalone run that never calls `plan()` makes pg_prove fail the whole
+-- suite with "Parse errors: No plan found in TAP output".
+--
+-- Including test files must set the psql variable `TAP_HELPERS_INCLUDED`
+-- BEFORE the `\ir`, e.g.:
+--
+--   \set TAP_HELPERS_INCLUDED 1
+--   \ir helpers/fixtures.sql
+--   SELECT plan(5);
+--
+-- When that variable is absent (pg_prove running the file directly), emit
+-- an empty pgTAP plan so the file passes cleanly as a zero-test file.
+-- ---------------------------------------------------------------------------
+\if :{?TAP_HELPERS_INCLUDED}
+  -- Being `\ir`'d into a real test — the including file will call plan().
+\else
+SELECT plan(0);
+SELECT * FROM finish();
+\endif

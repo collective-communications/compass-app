@@ -10,7 +10,7 @@ This directory contains pgTAP tests that verify the "structural anonymity" guara
 
 | File | Purpose |
 | --- | --- |
-| `../tests_helpers/fixtures.sql` | Not a test — `\ir`-included at the top of every test file. Installs the `pgtap` extension (idempotent) and registers shared helper functions (`create_test_org`, `create_test_user`, `create_test_survey`, `create_test_deployment`, `create_test_question`, plus `set_auth_uid` / `set_anon_claim` / `set_session_token_header` / `clear_auth` for role-switch convenience). Lives in the sibling `supabase/tests_helpers/` directory because Supabase CLI recurses `supabase/tests/**/*.sql` — a nested `helpers/` would be executed as a test and fail with "No plan found". |
+| `helpers/fixtures.sql` | Not a standalone test — `\ir`-included at the top of every test file. Installs the `pgtap` extension (idempotent) and registers shared helper functions (`create_test_org`, `create_test_user`, `create_test_survey`, `create_test_deployment`, `create_test_question`, plus `set_auth_uid` / `set_anon_claim` / `set_session_token_header` / `clear_auth` for role-switch convenience). Supabase CLI recurses `supabase/tests/**/*.sql`, so pg_prove also runs this file directly — the tail of the file emits an empty pgTAP plan behind the `TAP_HELPERS_INCLUDED` psql variable so a standalone run reports zero tests instead of failing the suite with "No plan found". |
 | `rls_anon_responses.sql` | Anonymous caller can INSERT a response for a valid deployment, cannot SELECT another session's response (verifies migration `039` session-token binding), cannot SELECT responses for an inactive deployment. |
 | `rls_anon_answers.sql` | Parallel coverage for the `answers` table. |
 | `rls_authenticated_cross_org.sql` | A signed-in user in org A cannot read any data (responses, answers, surveys, deployments) belonging to org B. |
@@ -48,7 +48,8 @@ Every test file follows the same shape:
 
 ```sql
 BEGIN;
-\ir ../tests_helpers/fixtures.sql
+\set TAP_HELPERS_INCLUDED 1
+\ir helpers/fixtures.sql
 SELECT plan(<number_of_assertions>);
 
 -- seed fixtures
@@ -60,4 +61,4 @@ SELECT * FROM finish();
 ROLLBACK;
 ```
 
-Use the helpers in `../tests_helpers/fixtures.sql` rather than hand-rolling INSERTs so new tests automatically pick up any schema additions.
+Use the helpers in `helpers/fixtures.sql` rather than hand-rolling INSERTs so new tests automatically pick up any schema additions.

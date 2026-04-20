@@ -16,7 +16,8 @@
 --      (is_valid_response() checks r.is_complete = false).
 
 BEGIN;
-\ir ../tests_helpers/fixtures.sql
+\set TAP_HELPERS_INCLUDED 1
+\ir helpers/fixtures.sql
 SELECT plan(4);
 
 -- ---------------------------------------------------------------------------
