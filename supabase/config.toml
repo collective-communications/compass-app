@@ -303,6 +303,17 @@ enabled = false
 # Obtain from https://clerk.com/setup/supabase
 # domain = "example.clerk.accounts.dev"
 
+# ─── Edge function config ─────────────────────────────────────────────────────
+# Per-function verify_jwt settings. Functions that are callable by unauth'd
+# users (survey respondents, invitation acceptance) need verify_jwt=false —
+# they enforce their own auth via tokens carried in the request body.
+
+[functions.accept-invitation]
+# The invitation token itself is the authorization (see index.ts header).
+# Supabase anon-key format has shifted to `sb_publishable_*` which the
+# default JWT verifier rejects with UNAUTHORIZED_INVALID_JWT_FORMAT.
+verify_jwt = false
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

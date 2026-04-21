@@ -1,19 +1,8 @@
 /**
  * QA Flow 1.6 steps 6–7 — click recovery link → change password → sign in.
  *
- * BLOCKER: `/auth/reset-password` is not a registered route today. The
- * `AuthProvider` / `apps/web/src/features/auth/hooks/use-password-reset.ts`
- * issues a `redirectTo` of `/auth/reset-password`, but no matching
- * `createRoute({ path: '/auth/reset-password' })` exists in
- * `apps/web/src/features/auth/routes.tsx`, and no form component lives in
- * `apps/web/src/features/auth/components/**` for it. Clicking the recovery
- * link would land on a 404.
- *
- * This spec stays `test.fixme` until the reset-password route + form ship.
- * When they do, flip `.fixme` → `test` and fill in the selectors for the
- * form (new password, confirm password, submit button).
- *
- * Tracking: see `_docs/TODO.md` or the relevant planning slice.
+ * BLOCKER: `/auth/reset-password` is not a registered route today. Kept as
+ * `test.fixme` until the reset-password route + form ship.
  */
 
 import { test, expect } from '@playwright/test';
