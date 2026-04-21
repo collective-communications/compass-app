@@ -19,15 +19,11 @@ const BASE_URL = process.env.E2E_BASE_URL ?? 'http://localhost:42333';
 test.use({ storageState: { cookies: [], origins: [] } });
 
 test.describe.serial('Password reset happy path (Flow 1.6 steps 6–7)', () => {
-  // Un-fixme once `http://localhost:42333/auth/reset-password` is in the
-  // Supabase project's URI allow-list — otherwise the recovery action_link
-  // redirects to site_url root (empirically: drops us on `/`). The fix is
-  // either (a) populate `SUPABASE_ACCESS_TOKEN` in the vault and run the
-  // tkr-deploy \`configureAuth\` deploy step (which calls
-  // `adapter.addRedirectUrl` to append to the allow-list), or (b) add the
-  // URL by hand in the Supabase dashboard → Authentication → URL
-  // Configuration → Redirect URLs.
-  test.fixme('recovery link opens reset form, new password sets, sign-in works', async ({ page }) => {
+  // `http://localhost:42333/auth/reset-password` must be in the Supabase
+  // project's URI allow-list, otherwise the recovery action_link redirects
+  // to site_url root. Ensured via the tkr-deploy `configureAuth` step
+  // (which pushes both APP_URL- and DEV_APP_URL-derived paths).
+  test('recovery link opens reset form, new password sets, sign-in works', async ({ page }) => {
     const admin = createAdminClient();
 
     // Find the seeded user so teardown can reset their password at the end.
@@ -59,10 +55,13 @@ test.describe.serial('Password reset happy path (Flow 1.6 steps 6–7)', () => {
     // The action_link bounces through Supabase then lands on our reset
     // page with `#type=recovery&access_token=…&refresh_token=…`. Wait for
     // the form to render.
-    await expect(page.getByLabel('New password')).toBeVisible({ timeout: 15_000 });
+    // Two password fields share a "New password" prefix, so match exactly.
+    const newPasswordField = page.getByLabel('New password', { exact: true });
+    const confirmPasswordField = page.getByLabel('Confirm new password');
+    await expect(newPasswordField).toBeVisible({ timeout: 15_000 });
 
-    await page.getByLabel('New password').fill(NEW_PASSWORD);
-    await page.getByLabel('Confirm new password').fill(NEW_PASSWORD);
+    await newPasswordField.fill(NEW_PASSWORD);
+    await confirmPasswordField.fill(NEW_PASSWORD);
     await page.getByRole('button', { name: /update password/i }).click();
 
     // Successful update redirects us to /auth/login?passwordReset=1.
