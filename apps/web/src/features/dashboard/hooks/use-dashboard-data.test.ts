@@ -4,6 +4,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement, type PropsWithChildren, type ReactElement } from 'react';
 import type { AuthUser, UserRole as UserRoleType } from '@compass/types';
 import { UserRole } from '@compass/types';
+// Static imports preserve zustand's attached methods (.getState, .setState).
+// Dynamic `await import(...)` returned a proxied namespace on CI that lost
+// them — `useAuthStore.getState is not a function`.
+import { useAuthStore } from '../../../stores/auth-store';
+import { useDashboardData } from './use-dashboard-data';
 
 /**
  * Tests for useDashboardData — Wave 1.1's split-query behaviour.
@@ -68,8 +73,6 @@ mock.module('../../../lib/supabase', () => ({
 }));
 
 // Drive the role via the auth store — hook subscribes with a selector.
-const { useAuthStore } = await import('../../../stores/auth-store');
-
 function setRole(role: UserRoleType | undefined): void {
   if (role === undefined) {
     useAuthStore.getState().clearSession();
@@ -91,8 +94,6 @@ function setRole(role: UserRoleType | undefined): void {
     user,
   });
 }
-
-const { useDashboardData } = await import('./use-dashboard-data.js');
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
