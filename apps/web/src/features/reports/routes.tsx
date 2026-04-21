@@ -13,11 +13,11 @@
  */
 
 import { Suspense, lazy, type ReactElement } from 'react';
-import { createRoute, redirect } from '@tanstack/react-router';
+import { createRoute } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { UserRole } from '@compass/types';
 import { useAuthStore } from '../../stores/auth-store';
-import { guardClientAccess } from '../../lib/route-guards';
+import { guardClientAccess, guardRoute } from '../../lib/route-guards';
 import { AppShell } from '../../components/shells/app-shell';
 import { RouteLoading } from '../../components/app/route-loading';
 import { useScoredSurveys } from '../../hooks/use-scored-surveys';
@@ -59,15 +59,12 @@ export function createReportsRoutes<TParent extends AnyRoute>(parentRoute: TPare
   const reportsRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/reports/$surveyId',
-    beforeLoad: async () => {
+    beforeLoad: async ({ location }) => {
+      guardRoute(location.pathname);
       const { user } = useAuthStore.getState();
-      if (!user) {
-        throw redirect({ to: '/auth/login' });
+      if (user?.tier === 'tier_2') {
+        await guardClientAccess(user);
       }
-      if (user.tier === 'tier_1') {
-        return;
-      }
-      await guardClientAccess(user);
     },
     component: function ReportsLayout(): ReactElement {
       const { surveyId } = reportsRoute.useParams() as { surveyId: string };

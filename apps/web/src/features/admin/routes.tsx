@@ -102,7 +102,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     getParentRoute: () => parentRoute,
     path: '/clients/$orgId',
     beforeLoad: async ({ params: { orgId }, location }) => {
-      guardRoute('/clients');
+      guardRoute(location.pathname);
       const basePath = `/clients/${orgId}`;
       if (location.pathname === basePath || location.pathname === `${basePath}/`) {
         throw redirect({
@@ -181,7 +181,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   const clientSettingsRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/clients/$orgId/settings',
-    beforeLoad: () => guardRoute('/clients'),
+    beforeLoad: ({ location }) => guardRoute(location.pathname),
     component: function ClientSettingsLayout(): ReactElement {
       return (
         <AppShell>
@@ -197,7 +197,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   const surveyBuilderRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/surveys/$surveyId',
-    beforeLoad: () => guardRoute('/surveys'),
+    beforeLoad: ({ location }) => guardRoute(location.pathname),
     component: function SurveyBuilderLayout(): ReactElement {
       const { surveyId } = surveyBuilderRoute.useParams() as { surveyId: string };
       const navigate = useNavigate();
@@ -223,7 +223,7 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
   const surveyPublishRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/surveys/$surveyId/publish',
-    beforeLoad: () => guardRoute('/surveys'),
+    beforeLoad: ({ location }) => guardRoute(location.pathname),
     component: function SurveyPublishLayout(): ReactElement {
       const { surveyId } = surveyPublishRoute.useParams() as { surveyId: string };
       const { deployment, unpublish, isPending } = useDeploymentManagement({ surveyId });

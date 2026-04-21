@@ -27,7 +27,7 @@ import { Suspense, lazy, type ComponentType, type ReactElement } from 'react';
 import { createRoute, redirect } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { useAuthStore } from '../../stores/auth-store';
-import { guardClientAccess } from '../../lib/route-guards';
+import { guardClientAccess, guardRoute } from '../../lib/route-guards';
 import { RouteLoading } from '../../components/app/route-loading';
 import type { GroupsSearch } from './types';
 
@@ -88,15 +88,12 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
   const resultsLayoutRoute = createRoute({
     getParentRoute: () => parentRoute,
     path: '/results/$surveyId',
-    beforeLoad: async () => {
+    beforeLoad: async ({ location }) => {
+      guardRoute(location.pathname);
       const { user } = useAuthStore.getState();
-      if (!user) {
-        throw redirect({ to: '/auth/login' });
+      if (user?.tier === 'tier_2') {
+        await guardClientAccess(user);
       }
-      if (user.tier === 'tier_1') {
-        return;
-      }
-      await guardClientAccess(user);
     },
     component: withSuspense(ResultsLayoutRoute),
   });
