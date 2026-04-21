@@ -4,10 +4,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createElement, type PropsWithChildren, type ReactElement } from 'react';
 import type { AuthUser, UserRole as UserRoleType } from '@compass/types';
 import { UserRole } from '@compass/types';
-// Static imports preserve zustand's attached methods (.getState, .setState).
-// Dynamic `await import(...)` returned a proxied namespace on CI that lost
-// them — `useAuthStore.getState is not a function`.
-import { useAuthStore } from '../../../stores/auth-store';
 import { useDashboardData } from './use-dashboard-data';
 
 /**
@@ -72,13 +68,26 @@ mock.module('../../../lib/supabase', () => ({
   },
 }));
 
-// Drive the role via the auth store — hook subscribes with a selector.
+// Mock the auth store module directly so the hook sees a stable selector
+// without depending on zustand's static `.getState` / `.setState`. Bun's
+// `mock.module` matches by literal specifier, so an indirect mock of
+// supabase isn't enough on CI when the real auth-store's own
+// `'../lib/supabase'` specifier fails to resolve the mock.
+let currentUser: AuthUser | null = null;
+type AuthStoreSelector<T> = (state: { user: AuthUser | null }) => T;
+mock.module('../../../stores/auth-store', () => ({
+  useAuthStore: <T>(selector?: AuthStoreSelector<T>): T | { user: AuthUser | null } => {
+    const state = { user: currentUser };
+    return selector ? selector(state) : state;
+  },
+}));
+
 function setRole(role: UserRoleType | undefined): void {
   if (role === undefined) {
-    useAuthStore.getState().clearSession();
+    currentUser = null;
     return;
   }
-  const user: AuthUser = {
+  currentUser = {
     id: 'u-1',
     email: `${role}@example.com`,
     fullName: 'Test',
@@ -87,12 +96,6 @@ function setRole(role: UserRoleType | undefined): void {
     organizationId: 'org-1',
     tier: role === UserRole.CCC_ADMIN || role === UserRole.CCC_MEMBER ? 'tier_1' : 'tier_2',
   };
-  useAuthStore.getState().setSession({
-    accessToken: 'at',
-    refreshToken: 'rt',
-    expiresAt: Date.now() + 1e7,
-    user,
-  });
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
