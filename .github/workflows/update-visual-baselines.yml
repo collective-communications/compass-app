@@ -45,11 +45,19 @@ jobs:
         run: bunx playwright test --config playwright.config.ts --update-snapshots
         working-directory: apps/storybook
 
+      # Stage new snapshot files explicitly — the bash glob used by
+      # `git-auto-commit-action`'s `file_pattern` doesn't expand `**` without
+      # `shopt -s globstar`, so a fresh baseline run produced untracked files
+      # the action couldn't see. Recursive `git add` on the snapshot dir
+      # picks them up reliably.
+      - name: Stage snapshot files
+        run: git add -A apps/storybook/__snapshots__/
+
       - name: Commit updated snapshots
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(visual): regenerate baseline snapshots"
-          file_pattern: apps/storybook/__snapshots__/**/*.png
+          file_pattern: "apps/storybook/__snapshots__/"
           branch: ${{ github.ref_name }}
           commit_user_name: github-actions[bot]
           commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com
