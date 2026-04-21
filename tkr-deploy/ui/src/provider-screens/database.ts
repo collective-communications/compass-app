@@ -303,6 +303,72 @@ function buildFunctionsCard(data: FunctionsData, disabled: boolean): HTMLElement
   return card;
 }
 
+/**
+ * Card exposing the `/api/database/auth/oauth/sync` endpoint so CCC admins
+ * can push Google / Microsoft OAuth credentials from the vault into the
+ * Supabase Auth config without running the full deploy. The credentials
+ * themselves are entered in the tkr-secrets UI under the "Google OAuth" /
+ * "Microsoft OAuth" groups — this button just pushes what's there.
+ */
+function buildOAuthProvidersCard(disabled: boolean): HTMLElement {
+  const card = createCard();
+
+  const status = document.createElement('p');
+  status.style.margin = '0';
+  status.style.fontSize = 'var(--font-size-sm)';
+  status.style.color = 'var(--color-text-secondary)';
+  status.textContent =
+    'Push Google and Microsoft OAuth credentials from the vault into the Supabase Auth config. Values must already be set under "Google OAuth" and/or "Microsoft OAuth" in the secrets UI.';
+
+  const syncBtn = createButton('Sync OAuth providers', {
+    variant: 'primary',
+    disabled,
+    onClick: async () => {
+      syncBtn.disabled = true;
+      status.style.color = 'var(--color-text-secondary)';
+      status.textContent = 'Syncing…';
+      try {
+        const { detail } = await apiFetch<{ detail: string }>(
+          '/api/database/auth/oauth/sync',
+          { method: 'POST' },
+        );
+        status.textContent = detail;
+        status.style.color = detail.startsWith('Skipped')
+          ? 'var(--color-text-muted)'
+          : 'var(--color-text-secondary)';
+      } catch (err) {
+        status.textContent = err instanceof Error ? err.message : 'Sync failed';
+        status.style.color = 'var(--color-error-text, crimson)';
+      } finally {
+        syncBtn.disabled = disabled;
+      }
+    },
+  });
+
+  const wrapper = document.createElement('div');
+  wrapper.style.display = 'flex';
+  wrapper.style.alignItems = 'center';
+  wrapper.style.justifyContent = 'space-between';
+  wrapper.style.marginBottom = 'var(--space-md)';
+  wrapper.style.flexWrap = 'wrap';
+  wrapper.style.gap = 'var(--space-sm)';
+
+  const left = document.createElement('div');
+  const h2 = document.createElement('h2');
+  h2.textContent = 'OAuth providers';
+  h2.style.margin = '0';
+  h2.style.fontSize = 'var(--font-size-lg)';
+  h2.style.fontWeight = '600';
+  left.appendChild(h2);
+
+  wrapper.appendChild(left);
+  wrapper.appendChild(syncBtn);
+  card.appendChild(wrapper);
+  card.appendChild(status);
+
+  return card;
+}
+
 function buildPgvectorCard(data: ExtensionData, disabled: boolean): HTMLElement {
   const card = createCard();
   const statusText = data.pgvector === 'enabled' ? 'Enabled'
@@ -394,9 +460,9 @@ export function render(target: HTMLElement): void {
   `;
   container.appendChild(style);
 
-  // 4 skeleton slots
+  // 5 skeleton slots — connection, migrations, functions, pgvector, oauth
   const slots: HTMLElement[] = [];
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 5; i++) {
     const slot = document.createElement('div');
     slot.appendChild(createSkeleton());
     grid.appendChild(slot);
@@ -453,6 +519,12 @@ export function render(target: HTMLElement): void {
     slots[3].innerHTML = '';
     slots[3].appendChild(buildErrorCard('pgvector', err));
   });
+
+  // OAuth providers card has no GET endpoint — it renders immediately and
+  // gates only on the health check's disabled flag. Start enabled; the
+  // `updateDisabledState` pass after health resolves will disable if needed.
+  slots[4].innerHTML = '';
+  slots[4].appendChild(buildOAuthProvidersCard(false));
 
   // After all resolve, check vault + db status for disabling
   Promise.all([healthP, migrationsP, functionsP, extensionsP]).catch(() => {

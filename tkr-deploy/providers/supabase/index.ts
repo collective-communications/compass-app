@@ -1,6 +1,7 @@
 import { SupabaseAdapter } from './adapter.js';
 import type { SupabaseAdapterConfig } from './adapter.js';
 import type { ProviderPluginFactory } from '../../src/types/plugin.js';
+import { jsonSuccess, jsonError } from '../../src/api/router.js';
 import { registerDatabaseRoutes } from './routes.js';
 
 export type { SupabaseAdapterConfig };
@@ -51,6 +52,15 @@ export function createSupabasePlugin(
         { vaultKey: 'RESEND_FROM_ADDRESS' },
         { vaultKey: 'OPENAI_API_KEY' },
         { vaultKey: 'APP_URL' },
+        // OAuth provider credentials flow through the `configureOAuthProviders`
+        // deploy step (not the function-secrets sync path) because they set
+        // project-level auth config, not edge-function env vars. Listing them
+        // here so the sync dashboard shows their vault presence.
+        { vaultKey: 'GOOGLE_OAUTH_CLIENT_ID' },
+        { vaultKey: 'GOOGLE_OAUTH_CLIENT_SECRET' },
+        { vaultKey: 'AZURE_OAUTH_CLIENT_ID' },
+        { vaultKey: 'AZURE_OAUTH_CLIENT_SECRET' },
+        { vaultKey: 'AZURE_OAUTH_TENANT' },
       ],
 
       syncTarget: {
@@ -112,6 +122,13 @@ export function createSupabasePlugin(
             return `Set site_url=${appUrl}, redirect ${callbackUrl} already in allow-list`;
           },
         },
+        {
+          id: 'configureOAuthProviders',
+          label: 'Configure OAuth providers (Google, Microsoft)',
+          provider: 'supabase',
+          order: 400,
+          execute: syncOAuthProviders,
+        },
       ],
 
       screen: {
@@ -122,7 +139,68 @@ export function createSupabasePlugin(
 
       registerRoutes(router) {
         registerDatabaseRoutes(router, adapter);
+
+        // On-demand OAuth sync from the dashboard without running the full
+        // deploy. Same logic as the `configureOAuthProviders` deploy step.
+        router.post('/api/database/auth/oauth/sync', async () => {
+          try {
+            const detail = await syncOAuthProviders();
+            return jsonSuccess({ detail });
+          } catch (err) {
+            return jsonError(err instanceof Error ? err.message : String(err), 500);
+          }
+        });
       },
     };
+
+    /**
+     * Read OAuth credentials from the vault and push the configured
+     * provider(s) into the Supabase Auth config. Shared by the deploy step
+     * and the on-demand route.
+     *
+     * @returns A human-readable detail string — what was configured, or a
+     *   "skipped" message when no credentials are present.
+     */
+    async function syncOAuthProviders(): Promise<string> {
+      const [
+        googleClientId,
+        googleSecret,
+        azureClientId,
+        azureSecret,
+        azureTenantRaw,
+      ] = await Promise.all([
+        getSecret('GOOGLE_OAUTH_CLIENT_ID'),
+        getSecret('GOOGLE_OAUTH_CLIENT_SECRET'),
+        getSecret('AZURE_OAUTH_CLIENT_ID'),
+        getSecret('AZURE_OAUTH_CLIENT_SECRET'),
+        getSecret('AZURE_OAUTH_TENANT'),
+      ]);
+
+      const azureTenant = (azureTenantRaw || 'common').trim();
+      const updates: Parameters<typeof adapter.updateAuthConfig>[0] = {};
+      const configured: string[] = [];
+
+      if (googleClientId && googleSecret) {
+        updates.external_google_enabled = true;
+        updates.external_google_client_id = googleClientId;
+        updates.external_google_secret = googleSecret;
+        configured.push('Google');
+      }
+
+      if (azureClientId && azureSecret) {
+        updates.external_azure_enabled = true;
+        updates.external_azure_client_id = azureClientId;
+        updates.external_azure_secret = azureSecret;
+        updates.external_azure_url = `https://login.microsoftonline.com/${azureTenant}/v2.0`;
+        configured.push(`Microsoft (${azureTenant === 'common' ? 'multi-tenant' : azureTenant})`);
+      }
+
+      if (configured.length === 0) {
+        return 'Skipped — no OAuth provider credentials in vault';
+      }
+
+      await adapter.updateAuthConfig(updates);
+      return `Configured ${configured.join(' + ')}`;
+    }
   };
 }
