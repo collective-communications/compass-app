@@ -3,9 +3,10 @@
  * Creates the `/s/$token` route tree for survey respondents.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
+import { useQueryClient } from '@tanstack/react-query';
 import { QuestionType } from '@compass/types';
 import { SurveyShell } from '../../shells/survey';
 import { SurveyProvider, useSurveyContext } from './context/survey-context';
@@ -83,6 +84,19 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
     path: '/s/$token',
     component: function SurveyLayout(): React.ReactElement {
       const { token } = surveyLayoutRoute.useParams() as { token: string };
+      const queryClient = useQueryClient();
+
+      // Invalidate any stale resolution cache on mount so a deployment that
+      // transitioned (e.g. survey was closed server-side) is re-evaluated
+      // against the live database. Without this, TanStack Query's staleTime
+      // could let a previously-resolved `valid` result satisfy the next
+      // mount even though the survey is now closed.
+      useEffect(() => {
+        if (token) {
+          void queryClient.invalidateQueries({ queryKey: ['deployment', token] });
+        }
+      }, [queryClient, token]);
+
       const { data: resolution, isLoading, error } = useDeployment(token);
       const navigate = useNavigate();
 
@@ -118,27 +132,14 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
         );
       }
 
-      // Edge states — render within SurveyShell for consistent layout
+      // Edge states — the resolver's `status` is the single source of truth.
+      // The session cookie is only consulted after `valid` is established,
+      // so a stale cookie can never mask a closed/expired/future deployment.
+      // Order mirrors Wave 1.2 spec: not_found → closed → expired → not_yet_open → already_completed.
       if (resolution.status === 'not_found') {
         return (
           <SurveyShell orgName="">
             <InvalidTokenScreen />
-          </SurveyShell>
-        );
-      }
-
-      if (resolution.status === 'expired') {
-        return (
-          <SurveyShell orgName="">
-            <DeploymentExpiredScreen />
-          </SurveyShell>
-        );
-      }
-
-      if (resolution.status === 'not_yet_open') {
-        return (
-          <SurveyShell orgName="">
-            <SurveyNotOpenScreen opensDate={resolution.opensAt} />
           </SurveyShell>
         );
       }
@@ -151,6 +152,22 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
         );
       }
 
+      if (resolution.status === 'expired') {
+        return (
+          <SurveyShell orgName="">
+            <DeploymentExpiredScreen closesAt={resolution.closesAt} />
+          </SurveyShell>
+        );
+      }
+
+      if (resolution.status === 'not_yet_open') {
+        return (
+          <SurveyShell orgName="">
+            <SurveyNotOpenScreen opensDate={resolution.opensAt} />
+          </SurveyShell>
+        );
+      }
+
       if (resolution.status === 'already_completed') {
         return (
           <SurveyShell orgName="">
@@ -159,7 +176,9 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
         );
       }
 
-      // Valid deployment — provide context to child routes
+      // Valid deployment — provide context to child routes.
+      // The session cookie only matters here; SurveyLayoutInner handles
+      // returning-user welcome-back vs. fresh-start rendering.
       const { deployment, survey } = resolution;
       const sessionToken = SessionCookieManager.getOrCreateSession(deployment.id);
 

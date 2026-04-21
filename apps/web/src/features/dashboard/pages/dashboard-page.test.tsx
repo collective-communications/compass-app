@@ -47,7 +47,7 @@ interface MockDashboardData {
       status: string;
     };
     deployment: { token: string } | null;
-    responseCount: number;
+    responseCount: number | null;
     expectedCount: number;
     completionPercent: number;
     daysRemaining: number | null;

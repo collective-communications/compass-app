@@ -19,6 +19,8 @@ import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { seedDates } from './seed-dates.ts';
+
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
@@ -61,10 +63,25 @@ const IDS = {
   org: {
     ccc: '00000000-0000-0000-0000-000000000001',
     client: '00000000-0000-0000-0000-000000000002',
+    clientB: '00000000-0000-0000-0000-000000000003',
+    // Variant orgs for QA coverage
+    noAccess: '00000000-0000-0000-0000-000000000004',    // client_access_enabled=false
+    noSettings: '00000000-0000-0000-0000-000000000005',  // no organization_settings row
   },
+  // Fixed invitation id so QA flows can reuse it deterministically.
+  invitation: '10000000-ccc0-4000-8000-000000000001',
   template: '00000000-0000-0000-0000-000000000010',
   survey: '00000000-0000-0000-0000-000000000100',
+  surveyB: '00000000-0000-0000-0000-000000000101',
+  surveyClosed: '00000000-0000-0000-0000-000000000102',
   deployment: '00000000-0000-0000-0000-000000000200',
+  deploymentExpired: '00000000-0000-0000-0000-000000000201',
+  deploymentNotOpen: '00000000-0000-0000-0000-000000000202',
+  deploymentClosed: '00000000-0000-0000-0000-000000000203',
+  report: {
+    visible: '00000000-0000-0000-0000-000000000300',
+    hidden: '00000000-0000-0000-0000-000000000301',
+  },
   /** Q1-Q56 Likert + Q57 open-ended. UUID format: 00000000-0000-0000-0000-1000000000NN */
   questions: Object.fromEntries([
     ...Array.from({ length: 57 }, (_, i) => [
@@ -77,39 +94,103 @@ const IDS = {
 // Test user passwords (all the same for dev convenience)
 const TEST_PASSWORD = 'TestPass123!';
 
-const TEST_USERS = [
+// ---------------------------------------------------------------------------
+// Relative seed dates
+//
+// All deployment (and `opens_at`/`closes_at` on the "closed" demo survey)
+// dates are expressed relative to "now" so the seed never goes stale. Do not
+// pin historical columns here (survey `created_at`, user timestamps) — those
+// stay whatever the DB default sets. See `./seed-dates.ts`.
+// ---------------------------------------------------------------------------
+
+const DATES = seedDates();
+
+type TestUser = {
+  email: string;
+  name: string;
+  role:
+    | 'ccc_admin'
+    | 'ccc_member'
+    | 'client_exec'
+    | 'client_director'
+    | 'client_manager'
+    | 'client_user';
+  /** `null` = "orphan" user — auth user is created but no `org_members` row. */
+  orgId: string | null;
+  department?: string;
+  team?: string;
+};
+
+const TEST_USERS: TestUser[] = [
   {
     email: 'admin@collectivecommunication.ca',
     name: 'Amanda Bates',
-    role: 'ccc_admin' as const,
+    role: 'ccc_admin',
     orgId: IDS.org.ccc,
   },
   {
     email: 'member@collectivecommunication.ca',
     name: 'Amy Myer',
-    role: 'ccc_member' as const,
+    role: 'ccc_member',
     orgId: IDS.org.ccc,
   },
   {
     email: 'exec@rivervalleyhealth.ca',
     name: 'Jordan Chen',
-    role: 'client_exec' as const,
+    role: 'client_exec',
     orgId: IDS.org.client,
   },
   {
     email: 'director@rivervalleyhealth.ca',
     name: 'Priya Sharma',
-    role: 'client_director' as const,
+    role: 'client_director',
     orgId: IDS.org.client,
     department: 'Nursing',
   },
   {
     email: 'manager@rivervalleyhealth.ca',
     name: 'Marcus Williams',
-    role: 'client_manager' as const,
+    role: 'client_manager',
     orgId: IDS.org.client,
     department: 'Emergency',
     team: 'Triage',
+  },
+  {
+    email: 'user@rivervalleyhealth.ca',
+    name: 'Taylor Kim',
+    role: 'client_user',
+    orgId: IDS.org.client,
+    department: 'Outpatient',
+  },
+  {
+    email: 'exec@lakesideclinic.ca',
+    name: 'Dana Okafor',
+    role: 'client_exec',
+    orgId: IDS.org.clientB,
+    department: 'Administration',
+  },
+  // --- QA-coverage variants ------------------------------------------------
+  // Exec on an org with client_access_enabled=false — tests the access-gate path.
+  {
+    email: 'noaccess_exec@rivervalleyhealth.ca',
+    name: 'Sam Okonkwo',
+    role: 'client_exec',
+    orgId: IDS.org.noAccess,
+  },
+  // User on an org that deliberately has no `organization_settings` row —
+  // tests the settings-missing fallback.
+  {
+    email: 'nosettings_user@rivervalleyhealth.ca',
+    name: 'Alex Moreau',
+    role: 'client_user',
+    orgId: IDS.org.noSettings,
+  },
+  // Auth user with no org membership — tests the "orphan" path.
+  {
+    email: 'orphan@collectivecommunication.ca',
+    name: 'Riley Singh',
+    role: 'client_user',
+    orgId: null,
   },
 ];
 
@@ -122,30 +203,18 @@ async function seedUsers(): Promise<Map<string, string>> {
   const emailToId = new Map<string, string>();
 
   for (const user of TEST_USERS) {
-    // Check if user already exists
-    const { data: existing } = await supabase.auth.admin.listUsers();
-    const found = existing?.users?.find((u) => u.email === user.email);
-
-    if (found) {
-      console.log(`  exists: ${user.email} (${found.id})`);
-      emailToId.set(user.email, found.id);
-      continue;
-    }
-
-    const { data, error } = await supabase.auth.admin.createUser({
+    // Delegate auth-user creation to `seedUser`; pass `orgId: null` so that
+    // membership upsert happens once via the batch in `seedOrgMembers`.
+    const userId = await seedUser(supabase, {
       email: user.email,
-      password: TEST_PASSWORD,
-      email_confirm: true,
-      user_metadata: { full_name: user.name },
+      name: user.name,
+      role: user.role,
+      orgId: null,
     });
 
-    if (error) {
-      console.error(`  FAILED: ${user.email} — ${error.message}`);
-      continue;
+    if (userId) {
+      emailToId.set(user.email, userId);
     }
-
-    console.log(`  created: ${user.email} (${data.user.id})`);
-    emailToId.set(user.email, data.user.id);
   }
 
   return emailToId;
@@ -154,11 +223,12 @@ async function seedUsers(): Promise<Map<string, string>> {
 async function seedOrganizations(): Promise<void> {
   console.log('Creating organizations...');
 
-  await supabase.from('organizations').upsert([
+  const { error } = await supabase.from('organizations').upsert([
     {
       id: IDS.org.ccc,
       name: 'COLLECTIVE culture + communication',
       slug: 'ccc',
+      client_access_enabled: false,
       settings: { timezone: 'America/Toronto', anonymityThreshold: 5 },
     },
     {
@@ -177,18 +247,55 @@ async function seedOrganizations(): Promise<void> {
         },
       },
     },
+    {
+      id: IDS.org.clientB,
+      name: 'Lakeside Community Clinic',
+      slug: 'lakeside-clinic',
+      client_access_enabled: true,
+      settings: {
+        timezone: 'America/Toronto',
+        anonymityThreshold: 5,
+        metadata: {
+          departments: ['Administration', 'Family Medicine', 'Pediatrics'],
+          roles: ['Director', 'Manager', 'Staff'],
+          locations: ['Main Building'],
+          tenureBands: ['< 1 year', '1-3 years', '3-5 years', '5+ years'],
+        },
+      },
+    },
+    // QA variant — client access is switched off, so exec should be blocked.
+    {
+      id: IDS.org.noAccess,
+      name: 'River Valley Ops',
+      slug: 'river-valley-ops',
+      client_access_enabled: false,
+      settings: { timezone: 'America/Toronto', anonymityThreshold: 5 },
+    },
+    // QA variant — org exists but organization_settings is NOT inserted below.
+    {
+      id: IDS.org.noSettings,
+      name: 'Summit Analytics',
+      slug: 'summit-analytics',
+      client_access_enabled: true,
+      settings: { timezone: 'America/Toronto', anonymityThreshold: 5 },
+    },
   ], { onConflict: 'id' });
 
-  console.log('  done');
+  if (error) {
+    console.error(`  FAILED: ${error.message}`);
+  } else {
+    console.log('  done');
+  }
 }
 
 async function seedOrgMembers(emailToId: Map<string, string>): Promise<void> {
   console.log('Creating org memberships...');
 
   const members = TEST_USERS
-    .filter((u) => emailToId.has(u.email))
+    // Orphan users (orgId=null) intentionally have no org_members row.
+    .filter((u) => u.orgId !== null && emailToId.has(u.email))
     .map((u) => ({
-      organization_id: u.orgId,
+      organization_id: u.orgId as string,
       user_id: emailToId.get(u.email)!,
       role: u.role,
       department: u.department ?? null,
@@ -222,8 +329,8 @@ async function seedSurvey(): Promise<void> {
     template_id: IDS.template,
     title: 'Q1 2026 Culture Assessment',
     status: 'active',
-    opens_at: '2026-01-15T00:00:00Z',
-    closes_at: '2026-03-31T23:59:59Z',
+    opens_at: DATES.activeOpens,
+    closes_at: DATES.activeCloses,
   }], { onConflict: 'id' });
 
   console.log('  done');
@@ -503,8 +610,8 @@ async function seedDeployment(): Promise<void> {
     survey_id: IDS.survey,
     type: 'anonymous_link',
     is_active: true,
-    opens_at: '2026-01-15T00:00:00Z',
-    closes_at: '2026-03-31T23:59:59Z',
+    opens_at: DATES.activeOpens,
+    closes_at: DATES.activeCloses,
   }], { onConflict: 'id' });
 
   if (error) {
@@ -514,6 +621,229 @@ async function seedDeployment(): Promise<void> {
     const { data } = await supabase.from('deployments').select('token').eq('id', IDS.deployment).single();
     console.log(`  done — survey link: ${SUPABASE_URL?.replace('.supabase.co', '')}/survey/${data?.token}`);
   }
+}
+
+async function seedEdgeCaseDeployments(): Promise<void> {
+  console.log('Creating edge-case deployments (expired, not-yet-open, closed)...');
+
+  // Closed survey for the closed-deployment test
+  await supabase.from('surveys').upsert([{
+    id: IDS.surveyClosed,
+    organization_id: IDS.org.client,
+    template_id: IDS.template,
+    title: 'Q4 2025 Culture Assessment (Closed)',
+    status: 'closed',
+    opens_at: DATES.expiredOpens,
+    closes_at: DATES.expiredCloses,
+  }], { onConflict: 'id' });
+
+  // Expired deployment — closes_at in the past, on the active survey
+  await supabase.from('deployments').upsert([{
+    id: IDS.deploymentExpired,
+    survey_id: IDS.survey,
+    type: 'anonymous_link',
+    is_active: true,
+    opens_at: DATES.expiredOpens,
+    closes_at: DATES.expiredCloses,
+  }], { onConflict: 'id' });
+
+  // Not-yet-open deployment — opens_at in the future
+  await supabase.from('deployments').upsert([{
+    id: IDS.deploymentNotOpen,
+    survey_id: IDS.survey,
+    type: 'anonymous_link',
+    is_active: true,
+    opens_at: DATES.futureOpens,
+    closes_at: DATES.futureCloses,
+  }], { onConflict: 'id' });
+
+  // Closed-survey deployment — kept active so anon RLS
+  // (`anon_read_active_deployments`) can read the row and the resolver can
+  // surface `SurveyClosedScreen` driven by `survey.status = 'closed'`.
+  // A deactivated deployment would be indistinguishable from a bogus token.
+  await supabase.from('deployments').upsert([{
+    id: IDS.deploymentClosed,
+    survey_id: IDS.surveyClosed,
+    type: 'anonymous_link',
+    is_active: true,
+    opens_at: DATES.expiredOpens,
+    closes_at: DATES.expiredCloses,
+  }], { onConflict: 'id' });
+
+  // Print tokens for the QA doc
+  const { data: tokens } = await supabase
+    .from('deployments')
+    .select('id, token')
+    .in('id', [IDS.deploymentExpired, IDS.deploymentNotOpen, IDS.deploymentClosed]);
+
+  if (tokens) {
+    for (const t of tokens) {
+      const label =
+        t.id === IDS.deploymentExpired ? 'expired' :
+        t.id === IDS.deploymentNotOpen ? 'not-yet-open' :
+        'closed';
+      console.log(`  ${label} token: ${t.token}`);
+    }
+  }
+}
+
+async function seedOrgBSurvey(): Promise<void> {
+  console.log('Creating Org B survey + deployment...');
+
+  await supabase.from('surveys').upsert([{
+    id: IDS.surveyB,
+    organization_id: IDS.org.clientB,
+    template_id: IDS.template,
+    title: 'Q1 2026 Lakeside Assessment',
+    status: 'active',
+    opens_at: DATES.activeOpens,
+    closes_at: DATES.activeCloses,
+  }], { onConflict: 'id' });
+
+  // Minimal scores for Org B so results pages render
+  const { data: dims } = await supabase.from('dimensions').select('id, code');
+  if (dims) {
+    const dimMap = Object.fromEntries(dims.map((d: { id: string; code: string }) => [d.code, d.id]));
+    const orgBScores = [
+      { code: 'core', score: 58.0, rawScore: 3.32 },
+      { code: 'clarity', score: 55.5, rawScore: 3.22 },
+      { code: 'connection', score: 61.0, rawScore: 3.44 },
+      { code: 'collaboration', score: 57.0, rawScore: 3.28 },
+    ].map((s) => ({
+      survey_id: IDS.surveyB,
+      dimension_id: dimMap[s.code],
+      segment_type: 'overall',
+      segment_value: 'all',
+      score: s.score,
+      raw_score: s.rawScore,
+      response_count: 18,
+    }));
+
+    await supabase.from('scores').upsert(orgBScores, {
+      onConflict: 'survey_id,dimension_id,segment_type,segment_value',
+    });
+  }
+
+  console.log('  done');
+}
+
+async function seedReports(): Promise<void> {
+  console.log('Creating test reports (client-visible + hidden)...');
+
+  const { error } = await supabase.from('reports').upsert([
+    {
+      id: IDS.report.visible,
+      survey_id: IDS.survey,
+      organization_id: IDS.org.client,
+      title: 'Q1 2026 Culture Assessment — Executive Summary',
+      status: 'ready',
+      storage_path: 'reports/seed-visible-report.pdf',
+      client_visible: true,
+      triggered_by: 'seed-script',
+    },
+    {
+      id: IDS.report.hidden,
+      survey_id: IDS.survey,
+      organization_id: IDS.org.client,
+      title: 'Q1 2026 Culture Assessment — Internal Draft',
+      status: 'ready',
+      storage_path: 'reports/seed-hidden-report.pdf',
+      client_visible: false,
+      triggered_by: 'seed-script',
+    },
+  ], { onConflict: 'id' });
+
+  if (error) {
+    console.error(`  FAILED: ${error.message}`);
+  } else {
+    console.log('  2 reports (1 client-visible, 1 hidden)');
+  }
+}
+
+async function seedInvitations(): Promise<void> {
+  console.log('Creating test invitation...');
+
+  // NOTE: `invitations.id` is the token the acceptance link carries (no
+  // separate `token` column; see migration 00000000000007). We use a fixed
+  // UUID so QA flows can hit `/accept-invitation?token=<IDS.invitation>`
+  // repeatedly without having to chase generated IDs.
+  const { error } = await supabase.from('invitations').upsert([{
+    id: IDS.invitation,
+    email: 'invited_member@collectivecommunication.ca',
+    role: 'ccc_member',
+    organization_id: IDS.org.ccc,
+    expires_at: DATES.activeCloses,
+  }], { onConflict: 'id' });
+
+  if (error) {
+    console.error(`  FAILED: ${error.message}`);
+  } else {
+    console.log(`  done — invitation token: ${IDS.invitation}`);
+  }
+}
+
+/**
+ * Upserts a Supabase auth user and (optionally) its `org_members` row.
+ *
+ * Internal helper — callers pass `orgId = null` for "orphan" users (auth user
+ * is created; no `org_members` row is inserted).
+ *
+ * `seedUsers` + `seedOrgMembers` currently split this into two batch passes
+ * for efficiency; this helper exists for ad-hoc user creation and as the
+ * single-user refactor target.
+ *
+ * @returns the auth user id (existing or newly created), or `null` on failure.
+ */
+async function seedUser(
+  client: typeof supabase,
+  params: {
+    email: string;
+    name: string;
+    role: TestUser['role'];
+    orgId: string | null;
+    department?: string;
+    team?: string;
+  },
+): Promise<string | null> {
+  const { email, name, role, orgId, department, team } = params;
+
+  const { data: existing } = await client.auth.admin.listUsers();
+  let userId = existing?.users?.find((u) => u.email === email)?.id ?? null;
+
+  if (userId) {
+    console.log(`  exists: ${email} (${userId})`);
+  } else {
+    const { data, error } = await client.auth.admin.createUser({
+      email,
+      password: TEST_PASSWORD,
+      email_confirm: true,
+      user_metadata: { full_name: name },
+    });
+    if (error || !data.user) {
+      console.error(`  FAILED: ${email} — ${error?.message ?? 'no user returned'}`);
+      return null;
+    }
+    userId = data.user.id;
+    console.log(`  created: ${email} (${userId})`);
+  }
+
+  if (orgId !== null) {
+    const { error: mErr } = await client.from('org_members').upsert(
+      {
+        organization_id: orgId,
+        user_id: userId,
+        role,
+        department: department ?? null,
+        team: team ?? null,
+      },
+      { onConflict: 'organization_id,user_id' },
+    );
+    if (mErr) {
+      console.error(`  seedUser membership FAILED: ${email} — ${mErr.message}`);
+    }
+  }
+
+  return userId;
 }
 
 async function seedResponses(): Promise<void> {
@@ -609,6 +939,15 @@ async function seedOrgSettings(): Promise<void> {
       metadata_locations: JSON.stringify(['Main Campus', 'West Wing', 'East Annex']),
       metadata_tenure_bands: JSON.stringify(['< 1 year', '1-3 years', '3-5 years', '5-10 years', '10+ years']),
       display_name: 'River Valley Health',
+      client_access_enabled: true,
+    },
+    {
+      organization_id: IDS.org.clientB,
+      metadata_departments: JSON.stringify(['Administration', 'Family Medicine', 'Pediatrics']),
+      metadata_roles: JSON.stringify(['Director', 'Manager', 'Staff']),
+      metadata_locations: JSON.stringify(['Main Building']),
+      metadata_tenure_bands: JSON.stringify(['< 1 year', '1-3 years', '3-5 years', '5+ years']),
+      display_name: 'Lakeside Community Clinic',
       client_access_enabled: true,
     },
   ], { onConflict: 'organization_id' });
@@ -793,17 +1132,31 @@ async function seedScores(): Promise<void> {
 async function clean(): Promise<void> {
   console.log('Tearing down seed data...');
 
+  // Delete invitations
+  console.log('  deleting invitations...');
+  await supabase.from('invitations').delete().eq('id', IDS.invitation);
+
+  // Delete reports
+  console.log('  deleting reports...');
+  await supabase.from('reports').delete().in('id', Object.values(IDS.report));
+
   // Delete scores
   console.log('  deleting scores...');
   await supabase.from('scores').delete().eq('survey_id', IDS.survey);
+  await supabase.from('scores').delete().eq('survey_id', IDS.surveyB);
 
   // Delete responses/answers (cascade from deployment)
   console.log('  deleting responses...');
   await supabase.from('responses').delete().eq('deployment_id', IDS.deployment);
 
-  // Delete deployment
-  console.log('  deleting deployment...');
-  await supabase.from('deployments').delete().eq('id', IDS.deployment);
+  // Delete deployments
+  console.log('  deleting deployments...');
+  await supabase.from('deployments').delete().in('id', [
+    IDS.deployment,
+    IDS.deploymentExpired,
+    IDS.deploymentNotOpen,
+    IDS.deploymentClosed,
+  ]);
 
   // Delete question_dimensions + questions
   console.log('  deleting questions...');
@@ -818,26 +1171,30 @@ async function clean(): Promise<void> {
   const allSubDimIds = Object.values(SUB);
   await supabase.from('sub_dimensions').delete().in('id', allSubDimIds);
 
-  // Delete survey
-  console.log('  deleting survey...');
-  await supabase.from('surveys').delete().eq('id', IDS.survey);
+  // Delete surveys
+  console.log('  deleting surveys...');
+  await supabase.from('surveys').delete().in('id', [IDS.survey, IDS.surveyB, IDS.surveyClosed]);
 
   // Delete template
   console.log('  deleting template...');
   await supabase.from('survey_templates').delete().eq('id', IDS.template);
 
-  // Delete org members + orgs
   // Delete org settings
   console.log('  deleting org settings...');
   await supabase.from('organization_settings').delete().eq('organization_id', IDS.org.client);
+  await supabase.from('organization_settings').delete().eq('organization_id', IDS.org.clientB);
 
+  // Delete org memberships
   console.log('  deleting org memberships...');
-  await supabase.from('org_members').delete().eq('organization_id', IDS.org.ccc);
-  await supabase.from('org_members').delete().eq('organization_id', IDS.org.client);
+  for (const orgId of Object.values(IDS.org)) {
+    await supabase.from('org_members').delete().eq('organization_id', orgId);
+  }
 
+  // Delete organizations
   console.log('  deleting organizations...');
-  await supabase.from('organizations').delete().eq('id', IDS.org.ccc);
-  await supabase.from('organizations').delete().eq('id', IDS.org.client);
+  for (const orgId of Object.values(IDS.org)) {
+    await supabase.from('organizations').delete().eq('id', orgId);
+  }
 
   // Delete auth users
   console.log('  deleting auth users...');
@@ -875,8 +1232,12 @@ async function main(): Promise<void> {
   await seedSubDimensions();
   await seedQuestions();
   await seedDeployment();
+  await seedEdgeCaseDeployments();
+  await seedOrgBSurvey();
   await seedResponses();
   await seedScores();
+  await seedReports();
+  await seedInvitations();
 
   console.log('\n--- Seed complete ---');
   console.log('\nTest accounts (all use password: TestPass123!):');

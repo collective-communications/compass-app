@@ -203,6 +203,50 @@ test('open-ended textarea enforces 500 character limit', async ({ page }) => {
   await expect(page.getByRole('button', { name: /resume survey/i })).toBeVisible();
 });
 
+test('save progress via "Continue Later" → saved screen → "Continue Survey" resumes', async ({ page }) => {
+  const survey = new SurveyPage(page);
+
+  await survey.goto(token);
+  await survey.fillMetadata();
+  await survey.startButton.click();
+
+  // Answer first 3 questions so there is resumable progress
+  for (let i = 0; i < 3; i++) {
+    await survey.likertOptions.first().waitFor({ state: 'visible', timeout: 10000 });
+    await survey.likertOptions.first().click();
+    await expect(survey.nextButton).toBeEnabled({ timeout: 3000 });
+    await survey.nextButton.click();
+  }
+
+  // Wait for the 4th question to appear so we know we're past the 3rd
+  await survey.likertOptions.first().waitFor({ state: 'visible', timeout: 10000 });
+
+  // Allow autosave debounce (300ms) plus network round-trip to flush
+  await page.waitForTimeout(2000);
+
+  // Click the "Continue Later" link in the header
+  const continueLaterLink = page.getByRole('button', { name: /continue later/i });
+  await expect(continueLaterLink).toBeVisible();
+  await continueLaterLink.click();
+
+  // Assert URL routed to /s/$token/saved
+  await expect(page).toHaveURL(new RegExp(`/s/${token}/saved$`), { timeout: 10000 });
+
+  // Assert copy on the saved screen: remaining count, Continue Survey, and Copy survey link
+  await expect(page.getByRole('heading', { name: /progress saved/i })).toBeVisible();
+  await expect(page.getByText(/questions? remaining/i)).toBeVisible();
+  const continueSurveyButton = page.getByRole('button', { name: /continue survey/i });
+  await expect(continueSurveyButton).toBeVisible();
+  await expect(page.getByRole('button', { name: /copy survey link/i })).toBeVisible();
+
+  // Click "Continue Survey" to resume
+  await continueSurveyButton.click();
+
+  // Assert URL returns to /s/$token/q/$index (resumes at question 4, not q/1)
+  await expect(page).toHaveURL(new RegExp(`/s/${token}/q/4$`), { timeout: 10000 });
+  await expect(survey.likertOptions.first()).toBeVisible({ timeout: 10000 });
+});
+
 test('already completed survey shows already-completed screen on revisit', async ({ page }) => {
   test.setTimeout(90_000);
   const survey = new SurveyPage(page);

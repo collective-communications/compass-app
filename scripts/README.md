@@ -36,13 +36,20 @@ bun run db:clean    # tear down all test data
 
 All accounts use password: `TestPass123!`
 
-| Role | Email |
-|------|-------|
-| `ccc_admin` | admin@collectivecommunication.ca |
-| `ccc_member` | member@collectivecommunication.ca |
-| `client_exec` | exec@rivervalleyhealth.ca |
-| `client_director` | director@rivervalleyhealth.ca |
-| `client_manager` | manager@rivervalleyhealth.ca |
+| Role | Email | Notes |
+|------|-------|-------|
+| `ccc_admin` | admin@collectivecommunication.ca | — |
+| `ccc_member` | member@collectivecommunication.ca | — |
+| `client_exec` | exec@rivervalleyhealth.ca | River Valley Health |
+| `client_director` | director@rivervalleyhealth.ca | River Valley Health · Nursing |
+| `client_manager` | manager@rivervalleyhealth.ca | River Valley Health · Emergency / Triage |
+| `client_user` | user@rivervalleyhealth.ca | River Valley Health · Outpatient |
+| `client_exec` | exec@lakesideclinic.ca | Lakeside Community Clinic |
+| `client_exec` | noaccess_exec@rivervalleyhealth.ca | Org `river-valley-ops` with `client_access_enabled=false` — login should hit the access-gate screen |
+| `client_user` | nosettings_user@rivervalleyhealth.ca | Org `summit-analytics` deliberately has no `organization_settings` row — exercises the missing-settings fallback |
+| `client_user` | orphan@collectivecommunication.ca | Auth user with NO `org_members` row — exercises the "orphan" path |
+
+A fixed invitation token is also seeded at `10000000-ccc0-4000-8000-000000000001` (role `ccc_member`, CC+C org) so the accept-invitation flow has a stable URL to hit.
 
 ### Response distribution
 

@@ -2,27 +2,45 @@
  * Combined TanStack Query hook for the client dashboard.
  * Fetches surveys and deployments for the authenticated user's organization,
  * splits them into active vs. previous (closed) buckets.
+ *
+ * Response counts are only materialised for ccc_* roles because the
+ * `responses` table RLS (see migrations/00000000000004_rls_policies.sql)
+ * blocks all client_* roles from the responses aggregate. For client roles
+ * we skip the responses query entirely and return `null` counts — callers
+ * are responsible for rendering a placeholder (e.g. `—`).
  */
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
-import type { Survey, Deployment, SurveyStatus } from '@compass/types';
+import type { Survey, Deployment, SurveyStatus, UserRole } from '@compass/types';
 import { supabase } from '../../../lib/supabase';
 import { STALE_TIMES } from '../../../lib/query-config';
+import { useAuthStore } from '../../../stores/auth-store';
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
+/**
+ * Row shape for the currently-active survey.
+ *
+ * `responseCount` is `number | null` — `null` means the caller's role cannot
+ * read the `responses` table (RLS blocks all client_* roles). Renderers must
+ * display a placeholder (e.g. `—`) for null values rather than a misleading `0`.
+ */
 export interface ActiveSurvey {
   survey: Survey;
   deployment: Deployment | null;
-  responseCount: number;
+  responseCount: number | null;
   expectedCount: number;
   completionPercent: number;
   daysRemaining: number | null;
 }
 
+/**
+ * Row shape for a closed (previous) survey. See {@link ActiveSurvey} for the
+ * `responseCount: number | null` semantics.
+ */
 export interface PreviousSurvey {
   survey: Survey;
-  responseCount: number;
+  responseCount: number | null;
   closedAt: string | null;
 }
 
@@ -35,30 +53,84 @@ export interface DashboardData {
 
 export const dashboardKeys = {
   all: ['dashboard'] as const,
-  data: (orgId: string) => [...dashboardKeys.all, 'data', orgId] as const,
+  /**
+   * Include role in the key because a role switch (e.g. impersonation in dev)
+   * changes whether response counts are materialised. Two users in the same
+   * org at different roles must not share the same cached payload.
+   */
+  data: (orgId: string, role: UserRole | 'anonymous') =>
+    [...dashboardKeys.all, 'data', orgId, role] as const,
 };
 
 // ─── Fetcher ────────────────────────────────────────────────────────────────
 
-async function fetchDashboardData(organizationId: string): Promise<DashboardData> {
-  // Fetch surveys, response counts, AND deployments in a single round trip.
-  // Previously the deployment row was fetched in a second sequential call
-  // after the active survey was identified — folding it into the survey
-  // select as a nested relation eliminates that round trip entirely. Closed
-  // surveys also get their deployments joined, but those are ignored below.
+/**
+ * Determine whether the caller may query the `responses` table directly.
+ * Role check mirrors RLS: ccc_admin / ccc_member are allowed; client_* are blocked.
+ */
+function canReadResponses(role: UserRole | undefined): boolean {
+  return role === 'ccc_admin' || role === 'ccc_member';
+}
+
+async function fetchDashboardData(
+  organizationId: string,
+  role: UserRole | undefined,
+): Promise<DashboardData> {
+  // Step 1 — survey + deployment in a single round trip. The `responses`
+  // aggregate was previously folded in here, but that join fails with an RLS
+  // error for client_* roles, which makes the entire dashboard unrenderable.
+  // Splitting it out means the survey/deployment fetch always succeeds and
+  // we only talk to `responses` when the caller is actually allowed to.
   const { data: surveys, error: surveysError } = await supabase
     .from('surveys')
-    .select('*, responses:responses(count), deployments(*)')
+    .select('*, deployments(*)')
     .eq('organization_id', organizationId)
     .in('status', ['active', 'closed'] satisfies SurveyStatus[])
     .order('created_at', { ascending: false });
 
-  if (surveysError) throw surveysError;
+  if (surveysError) {
+    throw new Error(
+      `dashboard: surveys load failed: ${surveysError.code ?? 'unknown'}: ${surveysError.message}${
+        surveysError.hint ? ` (hint: ${surveysError.hint})` : ''
+      }`,
+    );
+  }
 
-  const activeSurveyRow = (surveys ?? []).find(
+  const rows = surveys ?? [];
+
+  // Step 2 — response counts, only when the caller's role can read `responses`.
+  // For client_* roles we leave `responseCount` as null and downstream UI
+  // renders a placeholder instead. For ccc_* roles we issue one count-only
+  // query per survey in parallel; counts return via the `count` header so the
+  // payload is empty (head: true, count: 'exact').
+  const responseCounts = new Map<string, number>();
+  if (canReadResponses(role) && rows.length > 0) {
+    const surveyIds = rows.map((s: Record<string, unknown>) => s.id as string);
+    const countResults = await Promise.all(
+      surveyIds.map(async (surveyId) => {
+        const { count, error } = await supabase
+          .from('responses')
+          .select('id', { count: 'exact', head: true })
+          .eq('survey_id', surveyId);
+        if (error) {
+          throw new Error(
+            `dashboard: response count load failed for survey ${surveyId}: ${
+              error.code ?? 'unknown'
+            }: ${error.message}${error.hint ? ` (hint: ${error.hint})` : ''}`,
+          );
+        }
+        return [surveyId, count ?? 0] as const;
+      }),
+    );
+    for (const [id, count] of countResults) {
+      responseCounts.set(id, count);
+    }
+  }
+
+  const activeSurveyRow = rows.find(
     (s: Record<string, unknown>) => s.status === 'active',
   );
-  const closedSurveyRows = (surveys ?? []).filter(
+  const closedSurveyRows = rows.filter(
     (s: Record<string, unknown>) => s.status === 'closed',
   );
 
@@ -72,12 +144,17 @@ async function fetchDashboardData(organizationId: string): Promise<DashboardData
       | Record<string, unknown>[]
       | undefined;
     const deployment = deploymentRows?.[0] ?? null;
-    const responseCount = extractCount(activeSurveyRow);
+    const surveyId = activeSurveyRow.id as string;
+    const responseCount = canReadResponses(role)
+      ? responseCounts.get(surveyId) ?? 0
+      : null;
     // max_responses lives as a top-level column on deployments; there is no
     // deployments.settings JSON column in the current schema.
     const expectedCount = (deployment?.max_responses as number | null | undefined) ?? 0;
     const completionPercent =
-      expectedCount > 0 ? Math.round((responseCount / expectedCount) * 100) : 0;
+      responseCount !== null && expectedCount > 0
+        ? Math.round((responseCount / expectedCount) * 100)
+        : 0;
 
     let daysRemaining: number | null = null;
     if (activeSurveyRow.closes_at) {
@@ -96,22 +173,20 @@ async function fetchDashboardData(organizationId: string): Promise<DashboardData
   }
 
   const previousSurveys: PreviousSurvey[] = closedSurveyRows.map(
-    (row: Record<string, unknown>) => ({
-      survey: mapSurvey(row),
-      responseCount: extractCount(row),
-      closedAt: (row.closes_at as string) ?? null,
-    }),
+    (row: Record<string, unknown>) => {
+      const surveyId = row.id as string;
+      return {
+        survey: mapSurvey(row),
+        responseCount: canReadResponses(role) ? responseCounts.get(surveyId) ?? 0 : null,
+        closedAt: (row.closes_at as string) ?? null,
+      };
+    },
   );
 
   return { activeSurvey, previousSurveys };
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
-
-function extractCount(row: Record<string, unknown>): number {
-  const responses = row.responses as { count: number }[] | undefined;
-  return responses?.[0]?.count ?? 0;
-}
 
 /** Map snake_case DB row to camelCase Survey */
 function mapSurvey(row: Record<string, unknown>): Survey {
@@ -167,19 +242,26 @@ export interface UseDashboardDataResult {
   previousSurveys: PreviousSurvey[];
   isLoading: boolean;
   error: Error | null;
+  /** Manually re-run the underlying query (e.g. from an error-state retry button). */
+  refetch: () => void;
 }
 
 /**
  * Fetches all dashboard data for a client organization.
  * Returns the currently active survey (if any) and a list of previous (closed) surveys.
+ *
+ * `responseCount` on rows is `null` for client_* roles because RLS blocks
+ * them from the `responses` table; callers render a placeholder in that case.
  */
 export function useDashboardData({
   organizationId,
   enabled = true,
 }: UseDashboardDataOptions): UseDashboardDataResult {
+  const role = useAuthStore((s) => s.user?.role);
+
   const query: UseQueryResult<DashboardData> = useQuery({
-    queryKey: dashboardKeys.data(organizationId ?? ''),
-    queryFn: () => fetchDashboardData(organizationId!),
+    queryKey: dashboardKeys.data(organizationId ?? '', role ?? 'anonymous'),
+    queryFn: () => fetchDashboardData(organizationId!, role),
     enabled: enabled && !!organizationId,
     // Dashboard data rarely changes mid-session — hold the cache fresh for
     // 5 minutes (STALE_TIMES.results) and keep it in memory for 10 minutes
@@ -193,5 +275,8 @@ export function useDashboardData({
     previousSurveys: query.data?.previousSurveys ?? [],
     isLoading: query.isLoading,
     error: query.error,
+    refetch: () => {
+      void query.refetch();
+    },
   };
 }

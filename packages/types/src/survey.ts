@@ -402,7 +402,7 @@ export const DEFAULT_METADATA_CONFIG: MetadataConfig = {
  */
 export type DeploymentResolution =
   | { status: 'valid'; deployment: Deployment; survey: Survey }
-  | { status: 'expired'; message: string }
+  | { status: 'expired'; message: string; closesAt: string | null }
   | { status: 'not_yet_open'; message: string; opensAt: string | null }
   | { status: 'closed'; message: string; closesAt: string | null }
   | { status: 'not_found'; message: string }

@@ -44,6 +44,8 @@ export function OrgSettingsPage(): ReactElement {
   const org = useOrganization(orgId ?? '');
   const {
     settings,
+    needsCreate,
+    isLoading,
     metadataUsage,
     saveStatus,
     updateMetadata,
@@ -59,10 +61,19 @@ export function OrgSettingsPage(): ReactElement {
     );
   }
 
-  if (!settings) {
+  // While the query is in flight, show a lightweight skeleton. Once it settles,
+  // `settings` is always defined — missing DB rows are hydrated with defaults
+  // (flagged via `needsCreate`) so the form always renders.
+  if (isLoading || !settings) {
     return (
-      <div className="text-sm text-[var(--text-secondary)]">
-        Loading organization settings...
+      <div className="mx-auto max-w-3xl space-y-6" aria-busy="true">
+        <div className="mb-2">
+          <div className="h-7 w-64 rounded bg-[var(--grey-100)]" />
+          <div className="mt-2 h-4 w-96 rounded bg-[var(--grey-100)]" />
+        </div>
+        <div className="h-40 rounded-lg bg-[var(--grey-100)]" />
+        <div className="h-40 rounded-lg bg-[var(--grey-100)]" />
+        <div className="h-40 rounded-lg bg-[var(--grey-100)]" />
       </div>
     );
   }
@@ -76,6 +87,11 @@ export function OrgSettingsPage(): ReactElement {
         <p className="mt-1 text-sm text-[var(--text-secondary)]">
           Configure metadata options, branding, and access controls for this organization.
         </p>
+        {needsCreate ? (
+          <p className="mt-2 text-xs text-[var(--text-secondary)]">
+            This organization doesn&apos;t have saved settings yet — defaults shown. Saving any field will create them.
+          </p>
+        ) : null}
       </header>
 
       {/* Branding */}
