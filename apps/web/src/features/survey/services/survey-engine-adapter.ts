@@ -99,18 +99,17 @@ export function createSurveyEngineAdapter(): Pick<
         return { status: 'not_found', message: 'The survey associated with this link could not be found.' };
       }
 
-      // Check if deployment has expired
-      const deploymentClosesAt = row.closes_at;
-      if (deploymentClosesAt && new Date(deploymentClosesAt) < new Date()) {
-        return { status: 'expired', message: 'This survey link has expired.' };
-      }
-
-      // Check survey status
+      // Status evaluation order matters — a closed survey must always resolve
+      // to `closed` even if its deployment also has `closes_at` in the past,
+      // otherwise an orphaned/expired-looking row would mask the real reason.
+      // See QA flows 2.7 and 2.8.
       const surveyStatus = survey.status;
-      const closesAt = survey.closes_at;
-      const opensAt = survey.opens_at;
+      const deploymentClosesAt = row.closes_at;
+      const deploymentOpensAt = row.opens_at;
 
+      // 1. Survey administratively closed or archived.
       if (surveyStatus === 'closed' || surveyStatus === 'archived') {
+        const closesAt = deploymentClosesAt ?? survey.closes_at ?? null;
         return {
           status: 'closed',
           message: `This survey closed on ${formatDisplayDate(closesAt, 'long', { nullFallback: 'an unknown date' })}.`,
@@ -118,15 +117,29 @@ export function createSurveyEngineAdapter(): Pick<
         };
       }
 
-      // Check if survey has not opened yet
-      if (opensAt && new Date(opensAt) > new Date()) {
+      // 2. Deployment window has closed.
+      if (deploymentClosesAt && new Date(deploymentClosesAt) < new Date()) {
         return {
-          status: 'not_yet_open',
-          message: `This survey opens on ${formatDisplayDate(opensAt, 'long', { nullFallback: 'an unknown date' })}.`,
-          opensAt,
+          status: 'expired',
+          message: `This survey link expired on ${formatDisplayDate(deploymentClosesAt, 'long', { nullFallback: 'an unknown date' })}.`,
+          closesAt: deploymentClosesAt,
         };
       }
 
+      // 3. Deployment window has not opened yet.
+      if (deploymentOpensAt && new Date(deploymentOpensAt) > new Date()) {
+        return {
+          status: 'not_yet_open',
+          message: `This survey opens on ${formatDisplayDate(deploymentOpensAt, 'long', { nullFallback: 'an unknown date' })}.`,
+          opensAt: deploymentOpensAt,
+        };
+      }
+
+      // 4. already_completed cookie check happens inside SurveyLayoutInner
+      // once the deployment is known to be valid — the adapter does not have
+      // access to request cookies.
+
+      // 5. Default → valid deployment.
       return {
         status: 'valid',
         deployment: mapDeploymentRow(row),
