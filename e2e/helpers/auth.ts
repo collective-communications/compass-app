@@ -17,9 +17,20 @@ export async function ensureTestUser(
 ): Promise<TestUser> {
   const supabase = createAdminClient();
 
-  // Try to find existing user
-  const { data: existing } = await supabase.auth.admin.listUsers();
-  const found = existing?.users?.find((u) => u.email === email);
+  // Paginated lookup — listUsers() defaults to 50 per page, which is now
+  // smaller than the dev seed's user count. Walk pages until we find the
+  // email or exhaust the list.
+  let found: { id: string; email?: string } | undefined;
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage: 200 });
+    if (error) throw new Error(`listUsers page ${page} failed: ${error.message}`);
+    const match = data?.users?.find((u) => u.email === email);
+    if (match) {
+      found = match;
+      break;
+    }
+    if (!data?.users || data.users.length < 200) break;
+  }
 
   let userId: string;
 
