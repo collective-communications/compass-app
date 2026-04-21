@@ -8,7 +8,8 @@
 import { useCallback, useMemo, useState, type ReactElement } from 'react';
 import { FileText, Plus } from 'lucide-react';
 import { useReports } from '../hooks/use-reports';
-import { SurveyPicker, type ReportSurveyOption } from '../components/survey-picker';
+import { type ReportSurveyOption } from '../components/survey-picker';
+import { SurveySelector } from '../components/survey-selector';
 import { ReportCard } from '../components/report-card';
 import { ReportPreview } from '../components/report-preview';
 import { ExportModal } from '../components/export-modal';
@@ -75,18 +76,37 @@ export function ReportsPage({
     void refresh();
   }, [refresh]);
 
-  // Determine if the currently selected survey is active
+  // `initialSurveyId` comes from the URL route param (`/reports/$surveyId`).
+  // When the URL pins a survey, reports for that survey will still render
+  // below — we must not drop the person into a "No surveys available"
+  // dead-end just because the active-survey list happens to be empty.
+  const surveyIdFromRoute = initialSurveyId;
+
+  // Determine if the currently selected survey is active. When the URL
+  // pins a survey that isn't in the active list (e.g. completed/closed),
+  // treat it as non-active so the "Previous Surveys" heading renders —
+  // the report list below still shows, which is the desired outcome.
   const isActiveSurvey = activeSurveys.some((s) => s.id === activeSurveyId);
+
+  // Only render the "No surveys available" banner when there are no
+  // active surveys AND the URL has not pinned a specific survey id.
+  const selectorEmptyState =
+    !surveyIdFromRoute && activeSurveys.length === 0 ? (
+      <div className="h-10 w-64 rounded-md border border-[var(--grey-100)] bg-[var(--grey-50)] px-3 py-2 text-sm text-[var(--text-tertiary)]">
+        No surveys available
+      </div>
+    ) : null;
 
   return (
     <div className="flex flex-col gap-6">
       {/* Header row */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <SurveyPicker
+        <SurveySelector
           surveys={surveys}
-          activeSurveyId={activeSurveyId}
+          selectedId={activeSurveyId}
           onSelect={handleSurveyChange}
           isLoading={isSurveysLoading}
+          emptyState={selectorEmptyState}
         />
 
         {canGenerate && activeSurveyId !== null && (
