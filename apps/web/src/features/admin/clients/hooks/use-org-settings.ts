@@ -97,19 +97,56 @@ function toOrgSettings(row: OrgSettingsRow): OrgSettings {
   };
 }
 
-async function fetchOrgSettings(orgId: string): Promise<OrgSettings> {
+/**
+ * Produces a default `OrgSettings` shape for organizations that have no row in
+ * `organization_settings` yet. Matches the table defaults defined in
+ * `supabase/migrations/00000000000007_platform_features.sql`. The first save
+ * will upsert this into a real row, so `id` and `updatedAt` are placeholders
+ * that get replaced on the round-trip.
+ */
+function defaultOrgSettings(orgId: string): OrgSettings {
+  return {
+    id: '',
+    orgId,
+    metadata: {
+      departments: [],
+      roles: [],
+      locations: [],
+      tenureBands: [],
+    },
+    branding: {
+      displayName: '',
+      logoUrl: null,
+    },
+    clientAccessEnabled: false,
+    updatedAt: new Date(0).toISOString(),
+  };
+}
+
+/** Result of the row fetch — carries whether the row is synthetic (no DB row yet). */
+interface OrgSettingsFetchResult {
+  settings: OrgSettings;
+  needsCreate: boolean;
+}
+
+async function fetchOrgSettings(orgId: string): Promise<OrgSettingsFetchResult> {
   const { data, error } = await supabase
     .from('organization_settings')
     .select('*')
     .eq('organization_id', orgId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     logger.error({ err: error, fn: 'fetchOrgSettings', orgId }, 'Failed to fetch organization settings');
     throw new Error(`Failed to fetch organization settings: ${error.message}`);
   }
 
-  return toOrgSettings(data);
+  if (data === null) {
+    // Row doesn't exist yet — return synthetic defaults; first save will upsert.
+    return { settings: defaultOrgSettings(orgId), needsCreate: true };
+  }
+
+  return { settings: toOrgSettings(data), needsCreate: false };
 }
 
 /**
@@ -130,12 +167,16 @@ async function updateOrgSettings(
   orgId: string,
   updates: OrgSettingsUpdatePayload,
 ): Promise<OrgSettings> {
-  // The generated Update type widens metadata columns to Json; MetadataListItem[]
-  // is a structural subtype but TS cannot prove it, so cast via OrgSettingsUpdate.
+  // Upsert so the first save on an org with no existing row creates it.
+  // `organization_id` has a UNIQUE constraint — conflicting on it merges into
+  // the existing row when present. The generated Update type widens metadata
+  // columns to Json; MetadataListItem[] is a structural subtype but TS cannot
+  // prove it, so cast via the generated Update type.
+  const payload = { organization_id: orgId, ...updates } as OrgSettingsUpdate & { organization_id: string };
+
   const { data, error } = await supabase
     .from('organization_settings')
-    .update(updates as OrgSettingsUpdate)
-    .eq('organization_id', orgId)
+    .upsert(payload, { onConflict: 'organization_id' })
     .select('*')
     .single();
 
@@ -209,8 +250,17 @@ async function fetchMetadataUsage(orgId: string): Promise<Record<MetadataCategor
 }
 
 export interface UseOrgSettingsReturn {
-  query: UseQueryResult<OrgSettings>;
+  query: UseQueryResult<OrgSettingsFetchResult>;
+  /**
+   * Current settings. While `isLoading` is true, this is `undefined`; once the
+   * query has resolved it is always defined — missing rows yield defaults,
+   * flagged via `needsCreate`.
+   */
   settings: OrgSettings | undefined;
+  /** True when the DB row does not exist yet; first save will create it. */
+  needsCreate: boolean;
+  isLoading: boolean;
+  error: Error | null;
   metadataUsage: Record<MetadataCategory, Set<string>>;
   saveStatus: SaveStatus;
   updateMetadata: (category: MetadataCategory, items: MetadataListItem[]) => void;
@@ -246,7 +296,11 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
       setSaveStatus('saving');
     },
     onSuccess: (data) => {
-      queryClient.setQueryData(orgSettingsKeys.detail(orgId), data);
+      // After a successful save the row exists, so `needsCreate` is false.
+      queryClient.setQueryData<OrgSettingsFetchResult>(
+        orgSettingsKeys.detail(orgId),
+        { settings: data, needsCreate: false },
+      );
       setSaveStatus('saved');
     },
     onError: () => {
@@ -275,9 +329,12 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
 
   const updateMetadata = useCallback(
     (category: MetadataCategory, items: MetadataListItem[]): void => {
-      queryClient.setQueryData<OrgSettings>(
+      queryClient.setQueryData<OrgSettingsFetchResult>(
         orgSettingsKeys.detail(orgId),
-        (prev) => prev ? { ...prev, metadata: { ...prev.metadata, [category]: items } } : prev,
+        (prev) =>
+          prev
+            ? { ...prev, settings: { ...prev.settings, metadata: { ...prev.settings.metadata, [category]: items } } }
+            : prev,
       );
       debouncedMutate({ [DB_CATEGORY_MAP[category]]: items } as OrgSettingsUpdatePayload);
     },
@@ -286,9 +343,12 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
 
   const updateBranding = useCallback(
     (branding: Partial<OrgBranding>): void => {
-      queryClient.setQueryData<OrgSettings>(
+      queryClient.setQueryData<OrgSettingsFetchResult>(
         orgSettingsKeys.detail(orgId),
-        (prev) => prev ? { ...prev, branding: { ...prev.branding, ...branding } } : prev,
+        (prev) =>
+          prev
+            ? { ...prev, settings: { ...prev.settings, branding: { ...prev.settings.branding, ...branding } } }
+            : prev,
       );
       const dbUpdates: OrgSettingsUpdatePayload = {};
       if (branding.displayName !== undefined) dbUpdates.display_name = branding.displayName;
@@ -300,9 +360,12 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
 
   const updateClientAccess = useCallback(
     (enabled: boolean): void => {
-      queryClient.setQueryData<OrgSettings>(
+      queryClient.setQueryData<OrgSettingsFetchResult>(
         orgSettingsKeys.detail(orgId),
-        (prev) => prev ? { ...prev, clientAccessEnabled: enabled } : prev,
+        (prev) =>
+          prev
+            ? { ...prev, settings: { ...prev.settings, clientAccessEnabled: enabled } }
+            : prev,
       );
       debouncedMutate({ client_access_enabled: enabled });
     },
@@ -311,7 +374,10 @@ export function useOrgSettings(orgId: string): UseOrgSettingsReturn {
 
   return {
     query,
-    settings: query.data,
+    settings: query.data?.settings,
+    needsCreate: query.data?.needsCreate ?? false,
+    isLoading: query.isLoading,
+    error: query.error,
     metadataUsage: usageQuery.data ?? {
       departments: new Set(),
       roles: new Set(),
