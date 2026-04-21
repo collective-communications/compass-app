@@ -41,7 +41,7 @@ describe('getHomeForRole', () => {
 // ─── checkRouteAccess — per-tier coverage ───────────────────────────────────
 
 describe('checkRouteAccess (tier 1 admin/member)', () => {
-  it.each(['/clients', '/surveys', '/insights'])('ccc_admin allowed on %s', (path) => {
+  it.each(['/clients', '/surveys'])('ccc_admin allowed on %s', (path) => {
     expect(checkRouteAccess(UserRole.CCC_ADMIN, path)).toBeUndefined();
   });
 
@@ -78,7 +78,7 @@ describe('checkRouteAccess (tier 2 client)', () => {
     expect(checkRouteAccess(UserRole.CLIENT_USER, '/reports')).toBe('/dashboard');
   });
 
-  it.each(['/clients', '/users', '/surveys', '/insights'])(
+  it.each(['/clients', '/users', '/surveys'])(
     'client_director denied on %s → /dashboard',
     (path) => {
       expect(checkRouteAccess(UserRole.CLIENT_DIRECTOR, path)).toBe('/dashboard');

@@ -82,27 +82,6 @@ const surveyBuilderHelp: HelpEntry = {
   ],
 };
 
-const insightsHelp: HelpEntry = {
-  title: 'Cross-organization insights',
-  sections: [
-    {
-      heading: 'Comparison cards',
-      content:
-        "Each card shows one organization's overall score and dimension breakdown. Trend arrows indicate whether scores improved or declined versus the previous survey period.",
-    },
-    {
-      heading: 'Leaderboard',
-      content:
-        'Shows the highest and lowest scoring organization per dimension. Useful for identifying which clients need the most attention and which are strong examples.',
-    },
-    {
-      heading: 'Limitations',
-      content:
-        'Comparisons across organizations are directional, not definitive. Different industries, organization sizes, and survey periods affect comparability. Use for prioritization, not ranking.',
-    },
-  ],
-};
-
 const usersHelp: HelpEntry = {
   title: 'Team management',
   sections: [
@@ -154,7 +133,6 @@ export function registerTier1Content(): void {
   registerHelpContent('/clients/:id', clientDetailHelp);
   registerHelpContent('/clients/:id/surveys', surveyManagementHelp);
   registerHelpContent('/clients/:id/surveys/:id/builder', surveyBuilderHelp);
-  registerHelpContent('/insights', insightsHelp);
   registerHelpContent('/settings/users', usersHelp);
   registerHelpContent('/settings', settingsHelp);
 }
