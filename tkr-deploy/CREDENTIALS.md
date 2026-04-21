@@ -13,6 +13,13 @@ Personal access token for the Supabase Management API (migrations, edge function
 2. Click **Generate new token**
 3. Name it `tkr-deploy` and copy the token
 
+### DEV_APP_URL (optional)
+Local dev base URL (e.g. `http://localhost:42333`) whitelisted alongside `APP_URL`
+in Supabase's auth redirect allow-list by the `configureAuth` deploy step. Only
+needed if you want password-recovery / OAuth callback links to return to a local
+dev server (required to un-skip `apps/e2e/tests/auth/password-reset.spec.ts`).
+Skipped automatically when unset or when it equals `APP_URL`.
+
 ---
 
 ## Vercel
