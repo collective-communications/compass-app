@@ -109,17 +109,47 @@ export function createSupabasePlugin(
               return 'Skipped — APP_URL not set in vault';
             }
 
-            // Set site_url for email links
+            // Set site_url for email links (this is the prod/canonical URL;
+            // dev URLs go in the allow-list only, not site_url).
             await adapter.updateAuthConfig({ site_url: appUrl });
 
-            // Ensure callback URL is in the allow-list
-            const callbackUrl = `${appUrl}/auth/callback`;
-            const { added, allowList } = await adapter.addRedirectUrl(callbackUrl);
+            // Every destination Supabase Auth may redirect back to must be in
+            // the allow-list — both production and any dev URLs that hit the
+            // same Supabase project. Supabase's uri_allow_list supports N
+            // entries, so we push for each known base URL.
+            const redirectPaths = [
+              '/auth/callback',       // OAuth + magic-link return
+              '/auth/reset-password', // Password recovery email link
+            ];
 
-            if (added) {
-              return `Set site_url=${appUrl}, added ${callbackUrl} to redirect allow-list (${allowList.length} total)`;
+            const baseUrls = [appUrl];
+            const devAppUrl = await getSecret('DEV_APP_URL');
+            if (devAppUrl && devAppUrl !== appUrl) {
+              baseUrls.push(devAppUrl);
             }
-            return `Set site_url=${appUrl}, redirect ${callbackUrl} already in allow-list`;
+
+            const redirectUrls = baseUrls.flatMap((base) =>
+              redirectPaths.map((p) => `${base}${p}`),
+            );
+
+            let lastTotal = 0;
+            const added: string[] = [];
+            const existing: string[] = [];
+            for (const url of redirectUrls) {
+              const result = await adapter.addRedirectUrl(url);
+              lastTotal = result.allowList.length;
+              (result.added ? added : existing).push(url);
+            }
+
+            const parts = [`Set site_url=${appUrl}`];
+            if (added.length > 0) {
+              parts.push(`added ${added.length} URL(s) to redirect allow-list: ${added.join(', ')}`);
+            }
+            if (existing.length > 0) {
+              parts.push(`${existing.length} already present`);
+            }
+            parts.push(`(${lastTotal} total)`);
+            return parts.join(', ');
           },
         },
         {
