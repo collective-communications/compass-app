@@ -170,22 +170,10 @@ jobs:
   visual-regression:
     name: Visual Regression
     runs-on: ubuntu-latest
-    # Disabled until baselines are generated.
-    #
-    # TODO(post-Wave-2 integrator): once Wave 2 lands and a dev Supabase
-    # instance is reachable from the runner, regenerate baselines by either:
-    #   (a) running the `update-visual-baselines.yml` workflow via
-    #       `gh workflow run update-visual-baselines.yml` (preferred — it
-    #       auto-commits the PNG set under `apps/storybook/__snapshots__/`
-    #       and requires no local browser), or
-    #   (b) locally: `bun run --filter @compass/storybook build-storybook`
-    #       then `bun run --filter @compass/storybook test:visual --
-    #       --update-snapshots`, committing the resulting snapshots.
-    # Then remove the `if: false` line below to re-enable this job on
-    # every push / PR. Tracked in the plan at
-    # `/.claude/plans/fully-implement-all-identified-floofy-muffin.md`
-    # (Wave 2.10).
-    if: false
+    # Baselines live in `apps/storybook/__snapshots__/` — regenerate via the
+    # `update-visual-baselines.yml` workflow (`workflow_dispatch`) when the
+    # UI changes: it builds Storybook, runs `playwright test
+    # --update-snapshots`, and auto-commits the new PNG set to the branch.
     steps:
       - uses: actions/checkout@v4
 
