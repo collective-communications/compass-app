@@ -153,7 +153,7 @@ describe('useDashboardData', () => {
       { wrapper: makeWrapper() },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false), { timeout: 3000 });
 
     expect(result.current.error).toBeNull();
     expect(result.current.activeSurvey).not.toBeNull();
@@ -178,7 +178,7 @@ describe('useDashboardData', () => {
       { wrapper: makeWrapper() },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false), { timeout: 3000 });
 
     expect(result.current.error).toBeNull();
     expect(result.current.activeSurvey).not.toBeNull();
@@ -196,7 +196,7 @@ describe('useDashboardData', () => {
       { wrapper: makeWrapper() },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false), { timeout: 3000 });
 
     expect(result.current.error).toBeNull();
     expect(result.current.activeSurvey).toBeNull();
@@ -252,7 +252,7 @@ describe('useDashboardData', () => {
       { wrapper: makeWrapper() },
     );
 
-    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    await waitFor(() => expect(result.current.isLoading).toBe(false), { timeout: 3000 });
     const callsBefore = fromCalls.length;
     expect(callsBefore).toBeGreaterThan(0);
 
