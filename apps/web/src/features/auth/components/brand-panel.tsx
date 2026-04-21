@@ -1,5 +1,3 @@
-import { CompassLogo } from '../../../components/brand/compass-logo';
-
 /**
  * Desktop-only brand panel shown on the left half of the login screen.
  * Displays the compass logo with gradient headline, COLLECTIVE wordmark,
@@ -9,7 +7,11 @@ export function BrandPanel(): React.ReactElement {
   return (
     <div className="hidden lg:flex lg:w-1/2 lg:flex-col lg:justify-between bg-[var(--color-navy-teal)]">
       <div className="flex flex-1 flex-col items-center justify-center text-center">
-        <CompassLogo size="lg" variant="on-dark" className="mb-6" />
+        <img
+          src="/compass-brand-panel.svg"
+          alt="The Collective Culture Compass"
+          className="mb-6 h-28 w-28"
+        />
 
         <h1
           className="text-[26px] font-[800] tracking-wide"
