@@ -8,7 +8,7 @@
 
 import type { ReactElement } from 'react';
 import type { ReportPayload } from '@compass/types';
-import { dimensions, severity } from '@compass/tokens';
+import { dimensions, severity, greyscale, textColors } from '@compass/tokens';
 import { ReportPageHeader } from './report-layout';
 
 interface DimensionDeepDiveProps {
@@ -52,7 +52,7 @@ function ScoreBar({
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`Score: ${Math.round(clamped)}%`}>
-      <rect x={0} y={2} width={width} height={12} rx={6} fill="#E5E4E0" />
+      <rect x={0} y={2} width={width} height={12} rx={6} fill={greyscale[100]} />
       <rect x={0} y={2} width={fillWidth} height={12} rx={6} fill={color} />
     </svg>
   );
@@ -119,7 +119,7 @@ export function DimensionDeepDive({ payload }: DimensionDeepDiveProps): ReactEle
                 gap: '6px',
                 padding: '4px 12px',
                 borderRadius: '12px',
-                background: '#F5F5F5',
+                background: greyscale[50],
                 fontSize: '8pt',
                 fontWeight: 500,
                 marginBottom: '16px',
@@ -140,10 +140,10 @@ export function DimensionDeepDive({ payload }: DimensionDeepDiveProps): ReactEle
             {/* Overall dimension score bar */}
             <div className="report-card" style={{ borderLeft: `4px solid ${meta.color}` }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ fontWeight: 600, fontSize: '10pt', color: '#212121' }}>
+                <span style={{ fontWeight: 600, fontSize: '10pt', color: greyscale[900] }}>
                   Overall {meta.label} Score
                 </span>
-                <span style={{ fontWeight: 600, fontSize: '10pt', color: '#424242' }}>
+                <span style={{ fontWeight: 600, fontSize: '10pt', color: greyscale[700] }}>
                   {Math.round(dimScore)}%
                 </span>
               </div>
@@ -166,14 +166,14 @@ export function DimensionDeepDive({ payload }: DimensionDeepDiveProps): ReactEle
                         alignItems: 'center',
                         gap: '8px',
                         padding: '6px 0',
-                        borderBottom: '1px solid #F5F5F5',
+                        borderBottom: `1px solid ${greyscale[50]}`,
                       }}
                     >
-                      <span style={{ fontSize: '9pt', color: '#616161', width: '100px', flexShrink: 0 }}>
+                      <span style={{ fontSize: '9pt', color: textColors.tertiary.light, width: '100px', flexShrink: 0 }}>
                         {segmentKey}
                       </span>
                       <ScoreBar score={segScore} color={meta.color} width={200} />
-                      <span style={{ fontSize: '9pt', fontWeight: 600, color: '#424242', width: '36px', textAlign: 'right' }}>
+                      <span style={{ fontSize: '9pt', fontWeight: 600, color: greyscale[700], width: '36px', textAlign: 'right' }}>
                         {Math.round(segScore)}%
                       </span>
                     </div>
@@ -194,14 +194,14 @@ export function DimensionDeepDive({ payload }: DimensionDeepDiveProps): ReactEle
                       borderLeft: `4px solid ${SEVERITY_COLORS[rec.severity] ?? SEVERITY_COLORS.medium}`,
                     }}
                   >
-                    <p style={{ fontWeight: 600, fontSize: '10pt', color: '#212121', marginBottom: '4px' }}>
+                    <p style={{ fontWeight: 600, fontSize: '10pt', color: greyscale[900], marginBottom: '4px' }}>
                       {rec.title}
                     </p>
-                    <p style={{ fontSize: '9pt', color: '#616161', marginBottom: '8px' }}>
+                    <p style={{ fontSize: '9pt', color: textColors.tertiary.light, marginBottom: '8px' }}>
                       {rec.description}
                     </p>
                     {rec.actions.length > 0 && (
-                      <ul style={{ paddingLeft: '14px', fontSize: '9pt', color: '#424242' }}>
+                      <ul style={{ paddingLeft: '14px', fontSize: '9pt', color: greyscale[700] }}>
                         {rec.actions.map((action, i) => (
                           <li key={i} style={{ marginBottom: '2px' }}>{action}</li>
                         ))}

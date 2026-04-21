@@ -185,16 +185,32 @@ export class SupabaseAdapter implements ProviderAdapter {
   }
 
   /**
-   * Update auth configuration (site_url, redirect allow-list, etc.).
+   * Update auth configuration (site_url, redirect allow-list, OAuth providers).
    * Uses: PATCH /v1/projects/{ref}/config/auth
    *
-   * @param config - Partial auth config to merge. Common fields:
+   * @param config - Partial auth config to merge. Any field omitted is left
+   *   untouched by Supabase. Common fields:
    *   - site_url: Base URL for email links (e.g. "https://app.collectiveculturecompass.com")
    *   - uri_allow_list: Comma-separated redirect URLs
+   *   - external_google_enabled / external_google_client_id / external_google_secret:
+   *       Google OAuth provider credentials. Enabled + credentials must all be
+   *       set together the first time; after that you can flip enabled without
+   *       re-supplying the secret.
+   *   - external_azure_enabled / external_azure_client_id / external_azure_secret /
+   *       external_azure_url: Microsoft (Azure AD / Entra) OAuth provider.
+   *       `external_azure_url` defaults to `https://login.microsoftonline.com/common/v2.0`
+   *       for multi-tenant apps; override with a tenant-specific URL for single-tenant.
    */
   async updateAuthConfig(config: {
     site_url?: string;
     uri_allow_list?: string;
+    external_google_enabled?: boolean;
+    external_google_client_id?: string;
+    external_google_secret?: string;
+    external_azure_enabled?: boolean;
+    external_azure_client_id?: string;
+    external_azure_secret?: string;
+    external_azure_url?: string;
   }): Promise<void> {
     const projectRef = await this.getProjectRef();
     await this.mgmtRequest('PATCH', `/v1/projects/${projectRef}/config/auth`, config);
@@ -281,7 +297,7 @@ export class SupabaseAdapter implements ProviderAdapter {
     }
 
     // 2. Get remote deployed functions from Management API
-    let remoteMap = new Map<string, { status: string; updatedAt: string | null }>();
+    const remoteMap = new Map<string, { status: string; updatedAt: string | null }>();
     try {
       const remote = await this.mgmtRequest<Array<{
         slug: string;

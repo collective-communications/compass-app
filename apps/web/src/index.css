@@ -38,6 +38,15 @@
   --grey-800: #303030;
   --grey-900: #212121;
 
+  /* ── NEUTRAL CHARCOAL ─────────────────────────────────────────────────── */
+  --neutral-charcoal: #323130;
+
+  /* ── CHART ACCENTS ──────────────────────────────────────────────────── */
+  --chart-neutral: #6B7280;
+  --chart-warning: #FBBF24;
+  --chart-success: #34D399;
+  --chart-error: #F87171;
+
   /* ── 4. SEMANTIC TEXT ──────────────────────────────────────────────────── */
   --text-primary: var(--grey-900);
   --text-secondary: var(--grey-700);
@@ -110,7 +119,7 @@
   --font-display: 'DM Sans', 'Calibri', Arial, sans-serif;
   --font-headings: 'DM Sans', 'Calibri', Arial, sans-serif;
   --font-body: 'DM Sans', 'Calibri', Arial, sans-serif;
-  --font-mono: 'Consolas', 'Monaco', ui-monospace, monospace;
+  --font-mono: 'Consolas', 'Monaco', monospace;
 
   /* Type scale (px) */
   --text-xs: 12px;

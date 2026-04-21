@@ -10,8 +10,8 @@ const headerBase: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: '12px 24px',
-  borderBottom: '1px solid var(--grey-200)',
-  backgroundColor: 'var(--grey-0, #ffffff)',
+  borderBottom: '1px solid var(--grey-100)',
+  backgroundColor: 'var(--surface-card)',
   fontFamily: 'var(--font-body)',
 };
 
@@ -20,8 +20,8 @@ const footerBase: React.CSSProperties = {
   alignItems: 'center',
   justifyContent: 'space-between',
   padding: '12px 24px',
-  borderTop: '1px solid var(--grey-200)',
-  backgroundColor: 'var(--grey-0, #ffffff)',
+  borderTop: '1px solid var(--grey-100)',
+  backgroundColor: 'var(--surface-card)',
   fontFamily: 'var(--font-body)',
   fontSize: '13px',
   color: 'var(--text-secondary, #424242)',
@@ -48,7 +48,7 @@ export const PublicShellDecorator: Decorator = (Story) => (
           fontFamily: 'var(--font-headings)',
           fontSize: '16px',
           fontWeight: 400,
-          color: '#0C3D50',
+          color: 'var(--color-core)',
           letterSpacing: '0.02em',
         }}
       >
@@ -131,7 +131,7 @@ const pillStyle = (isActive: boolean): React.CSSProperties => ({
   fontSize: '13px',
   fontWeight: 500,
   cursor: 'default',
-  backgroundColor: isActive ? '#424242' : 'transparent',
+  backgroundColor: isActive ? 'var(--grey-700)' : 'transparent',
   color: isActive ? '#ffffff' : 'var(--text-secondary, #424242)',
   border: 'none',
   fontFamily: 'var(--font-body)',
@@ -146,7 +146,7 @@ export const AppShellDecorator: Decorator = (Story) => (
           fontFamily: 'var(--font-headings)',
           fontSize: '14px',
           fontWeight: 400,
-          color: '#0C3D50',
+          color: 'var(--color-core)',
         }}
       >
         <strong style={{ textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -173,8 +173,8 @@ export const AppShellDecorator: Decorator = (Story) => (
         display: 'flex',
         gap: '8px',
         padding: '8px 24px',
-        borderBottom: '1px solid var(--grey-200)',
-        backgroundColor: 'var(--grey-0, #ffffff)',
+        borderBottom: '1px solid var(--grey-100)',
+        backgroundColor: 'var(--surface-card)',
       }}
     >
       {pillNavItems.map((item) => (
@@ -202,7 +202,7 @@ export const AppShellDecorator: Decorator = (Story) => (
           key={tab}
           style={{
             fontSize: '11px',
-            color: tab === 'Home' ? '#0C3D50' : 'var(--text-secondary, #424242)',
+            color: tab === 'Home' ? 'var(--color-core)' : 'var(--text-secondary, #424242)',
             fontWeight: tab === 'Home' ? 600 : 400,
             textAlign: 'center',
           }}

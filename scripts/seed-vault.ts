@@ -141,6 +141,24 @@ const groups: GroupDef[] = [
       { name: "E2E_SUPABASE_SERVICE_KEY", value: "" },
     ],
   },
+  // OAuth provider credentials — pushed to Supabase Auth config via the
+  // `configureOAuthProviders` deploy step (maps to `external_<p>_client_id`
+  // / `external_<p>_secret` fields on the project's auth config).
+  {
+    name: "Google OAuth",
+    secrets: [
+      { name: "GOOGLE_OAUTH_CLIENT_ID", value: "", source: "GCP → APIs & Services → Credentials" },
+      { name: "GOOGLE_OAUTH_CLIENT_SECRET", value: "", source: "GCP → APIs & Services → Credentials" },
+    ],
+  },
+  {
+    name: "Microsoft OAuth",
+    secrets: [
+      { name: "AZURE_OAUTH_CLIENT_ID", value: "", source: "Entra ID → App registrations → Overview" },
+      { name: "AZURE_OAUTH_CLIENT_SECRET", value: "", source: "Entra ID → App registrations → Certificates & secrets" },
+      { name: "AZURE_OAUTH_TENANT", value: "common", source: "default (multi-tenant); set to tenant GUID for single-tenant" },
+    ],
+  },
   {
     name: "Deploy",
     secrets: [
