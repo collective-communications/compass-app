@@ -16,9 +16,9 @@ import { createRoute, Link, Outlet, useNavigate } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { type UserRole, getTierFromRole, getTierHomeRoute } from '@compass/types';
 import { PublicShell } from '../../components/shells/public-shell';
-import { BrandPanel, LoginForm, ForgotPasswordForm, SocialSignOnButtons } from './components';
+import { BrandPanel, LoginForm, ForgotPasswordForm, ResetPasswordForm, SocialSignOnButtons } from './components';
 import { RouteLoading } from '../../components/app/route-loading';
-import { useAuth, usePasswordReset } from './hooks';
+import { useAuth, usePasswordReset, useResetPassword } from './hooks';
 import { ArrowLeft, Lock, CheckCircle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -29,6 +29,8 @@ const AcceptInvitePage = lazy(() =>
 export interface LoginSearch {
   returnTo?: string;
   error?: string;
+  /** 1 when the user just reset their password — shows a success banner. */
+  passwordReset?: number;
 }
 
 export interface ForgotPasswordSentSearch {
@@ -54,9 +56,11 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
     validateSearch: (search: Record<string, unknown>): LoginSearch => ({
       returnTo: typeof search.returnTo === 'string' ? search.returnTo : undefined,
       error: typeof search.error === 'string' ? search.error : undefined,
+      passwordReset: search.passwordReset === 1 || search.passwordReset === '1' ? 1 : undefined,
     }),
     component: function LoginPage(): React.ReactElement {
       const { isLoading, error, signInWithEmail, signInWithOAuth } = useAuth();
+      const { passwordReset } = loginRoute.useSearch() as LoginSearch;
 
       return (
         <PublicShell>
@@ -71,6 +75,16 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
                 >
                   Sign in
                 </h1>
+
+                {passwordReset === 1 && (
+                  <div
+                    role="status"
+                    className="mb-4 flex items-start gap-2 rounded-lg border border-[var(--feedback-success-border,#a7d3a7)] bg-[var(--feedback-success-bg,#ecf7ec)] p-3 text-sm text-[var(--feedback-success-text,#1f5f1f)]"
+                  >
+                    <CheckCircle size={16} className="mt-0.5 shrink-0" aria-hidden="true" />
+                    <span>Password updated. Sign in with your new credentials.</span>
+                  </div>
+                )}
 
                 <LoginForm onSubmit={signInWithEmail} isLoading={isLoading} error={error} />
                 <SocialSignOnButtons onSignIn={signInWithOAuth} isLoading={isLoading} />
@@ -283,6 +297,74 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
     },
   });
 
+  const resetPasswordRoute = createRoute({
+    getParentRoute: () => authRoute,
+    path: '/reset-password',
+    component: function ResetPasswordPage(): React.ReactElement {
+      const { isCheckingSession, hasRecoverySession, submit, isLoading, error } = useResetPassword();
+
+      return (
+        <PublicShell>
+          <div className="flex flex-1">
+            <BrandPanel />
+
+            <div className="flex w-full items-center justify-center bg-[var(--surface-card)] px-6 lg:w-1/2">
+              <div className="w-full max-w-sm">
+                <div className="mb-2 flex justify-center">
+                  <Lock size={32} className="text-[var(--color-interactive)]" />
+                </div>
+
+                <h1
+                  className="mb-2 text-center text-2xl font-bold text-[var(--grey-900)]"
+                  style={{ fontFamily: 'var(--font-headings)' }}
+                >
+                  Choose a new password
+                </h1>
+
+                {isCheckingSession ? (
+                  <p className="mt-6 text-center text-sm text-[var(--text-secondary)]">
+                    Verifying reset link…
+                  </p>
+                ) : hasRecoverySession ? (
+                  <>
+                    <p className="mb-8 text-center text-sm text-[var(--text-secondary)]">
+                      Enter a new password for your account.
+                    </p>
+                    <ResetPasswordForm onSubmit={submit} isLoading={isLoading} error={error} />
+                  </>
+                ) : (
+                  <>
+                    <p className="mb-6 text-center text-sm text-[var(--feedback-error-text)]">
+                      This reset link has expired.
+                    </p>
+                    <p className="mb-6 text-center text-sm text-[var(--text-secondary)]">
+                      Reset links are valid for a limited time. Request a new link to continue.
+                    </p>
+                    <div className="flex flex-col gap-3 text-center">
+                      <Link
+                        to="/auth/forgot-password"
+                        className="rounded-lg bg-[var(--color-navy-teal)] px-4 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-navy-teal)]/90"
+                      >
+                        Request a new reset link
+                      </Link>
+                      <Link
+                        to="/auth/login"
+                        className="inline-flex items-center justify-center gap-1 text-sm text-[var(--color-interactive)] hover:underline"
+                      >
+                        <ArrowLeft size={16} />
+                        Back to sign in
+                      </Link>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </PublicShell>
+      );
+    },
+  });
+
   const acceptInviteRoute = createRoute({
     getParentRoute: () => authRoute,
     path: '/accept-invite',
@@ -299,5 +381,5 @@ export function createAuthRoutes<TParent extends AnyRoute>(parentRoute: TParent)
     },
   });
 
-  return authRoute.addChildren([loginRoute, callbackRoute, forgotPasswordSentRoute, forgotPasswordRoute, acceptInviteRoute]);
+  return authRoute.addChildren([loginRoute, callbackRoute, forgotPasswordSentRoute, forgotPasswordRoute, resetPasswordRoute, acceptInviteRoute]);
 }
