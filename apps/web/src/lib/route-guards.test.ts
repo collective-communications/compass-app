@@ -34,28 +34,18 @@ function makeUser(role: UserRoleType, organizationId: string | null = 'org-1'): 
 }
 
 function setUser(user: AuthUser | null): void {
+  const store = useAuthStore.getState();
   if (user === null) {
-    useAuthStore.setState({
-      session: null,
-      user: null,
-      isLoading: false,
-      error: null,
-      isInitialized: true,
-    });
+    store.clearSession();
   } else {
-    useAuthStore.setState({
-      session: {
-        accessToken: 'at',
-        refreshToken: 'rt',
-        expiresAt: Date.now() + 3_600_000,
-        user,
-      },
+    store.setSession({
+      accessToken: 'at',
+      refreshToken: 'rt',
+      expiresAt: Date.now() + 3_600_000,
       user,
-      isLoading: false,
-      error: null,
-      isInitialized: true,
     });
   }
+  store.setInitialized();
 }
 
 /** Capture whatever `guardRoute` throws; return undefined on clean return. */

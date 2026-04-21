@@ -72,7 +72,7 @@ const { useAuthStore } = await import('../../../stores/auth-store');
 
 function setRole(role: UserRoleType | undefined): void {
   if (role === undefined) {
-    useAuthStore.setState({ user: null, session: null });
+    useAuthStore.getState().clearSession();
     return;
   }
   const user: AuthUser = {
@@ -84,9 +84,11 @@ function setRole(role: UserRoleType | undefined): void {
     organizationId: 'org-1',
     tier: role === UserRole.CCC_ADMIN || role === UserRole.CCC_MEMBER ? 'tier_1' : 'tier_2',
   };
-  useAuthStore.setState({
+  useAuthStore.getState().setSession({
+    accessToken: 'at',
+    refreshToken: 'rt',
+    expiresAt: Date.now() + 1e7,
     user,
-    session: { accessToken: 'at', refreshToken: 'rt', expiresAt: Date.now() + 1e7, user },
   });
 }
 
