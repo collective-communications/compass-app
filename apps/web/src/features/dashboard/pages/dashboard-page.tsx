@@ -4,7 +4,7 @@
  * quick actions, and previous surveys list.
  */
 
-import type { ReactElement } from 'react';
+import { type ReactElement } from 'react';
 import { useAppNavigate } from '../../../hooks/use-app-navigate';
 import { useAuthStore } from '../../../stores/auth-store';
 import { useDashboardData } from '../hooks/use-dashboard-data';
@@ -12,6 +12,7 @@ import { useClientAccess } from '../hooks/use-client-access';
 import { ActiveSurveyCard } from '../components/active-survey-card';
 import { QuickActions } from '../components/quick-actions';
 import { PreviousSurveys } from '../components/previous-surveys';
+import { AppErrorFallback } from '../../../components/ui/app-error-fallback';
 
 /** Extract first name from a full name string */
 function getFirstName(fullName: string | null): string {
@@ -21,7 +22,7 @@ function getFirstName(fullName: string | null): string {
 
 export function DashboardPage(): ReactElement {
   const user = useAuthStore((s) => s.user);
-  const { activeSurvey, previousSurveys, isLoading, error } = useDashboardData({
+  const { activeSurvey, previousSurveys, isLoading, error, refetch } = useDashboardData({
     organizationId: user?.organizationId ?? null,
   });
 
@@ -60,11 +61,7 @@ export function DashboardPage(): ReactElement {
 
       {/* Error state */}
       {error && !isLoading && (
-        <div className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] p-4">
-          <p className="text-sm text-[var(--feedback-error-text)]">
-            Something went wrong loading your dashboard. Please refresh to try again.
-          </p>
-        </div>
+        <AppErrorFallback error={error} onRetry={refetch} title="Dashboard" />
       )}
 
       {/* Empty state — no surveys at all */}
@@ -123,7 +120,10 @@ export function DashboardPage(): ReactElement {
           {/* Previous surveys — full width, horizontal scroll on desktop */}
           {previousSurveys.length > 0 && (
             <div className="md:col-span-2">
-              <PreviousSurveys surveys={previousSurveys} onSelectSurvey={handleSelectSurvey} />
+              <PreviousSurveys
+                surveys={previousSurveys}
+                onSelectSurvey={handleSelectSurvey}
+              />
             </div>
           )}
         </div>

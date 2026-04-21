@@ -37,7 +37,7 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
             Responses
           </p>
           <p className="mt-1 text-lg font-semibold text-[var(--grey-900)]">
-            {responseCount} / {expectedCount}
+            {responseCount ?? '—'} / {expectedCount}
           </p>
         </div>
         <div>
@@ -60,10 +60,10 @@ export function ActiveSurveyCard({ data }: ActiveSurveyCardProps): ReactElement 
       <div className="mt-4">
         <div
           role="progressbar"
-          aria-valuenow={responseCount}
+          aria-valuenow={responseCount ?? undefined}
           aria-valuemin={0}
           aria-valuemax={expectedCount}
-          aria-label={`${responseCount} of ${expectedCount} responses`}
+          aria-label={responseCount === null ? `Responses hidden for your role; ${expectedCount} expected` : `${responseCount} of ${expectedCount} responses`}
           className="h-2 w-full overflow-hidden rounded-full bg-[var(--grey-100)]"
         >
           <div

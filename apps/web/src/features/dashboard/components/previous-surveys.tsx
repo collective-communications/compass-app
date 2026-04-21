@@ -34,7 +34,7 @@ export function PreviousSurveys({ surveys, onSelectSurvey }: PreviousSurveysProp
                 {item.survey.title}
               </p>
               <p className="mt-0.5 text-xs text-[var(--text-secondary)]">
-                {item.responseCount} responses &middot; Closed {formatDisplayDate(item.closedAt, 'long')}
+                {item.responseCount ?? '—'} responses &middot; Closed {formatDisplayDate(item.closedAt, 'long')}
               </p>
             </div>
             <ChevronRight className="h-5 w-5 shrink-0 text-[var(--text-tertiary)]" aria-hidden="true" />

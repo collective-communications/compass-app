@@ -19,8 +19,12 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-/** Resolve full AuthUser from org_members lookup */
-async function resolveUser(userId: string, email: string): Promise<AuthUser> {
+/** Resolve full AuthUser from org_members lookup + Supabase user metadata. */
+async function resolveUser(
+  userId: string,
+  email: string,
+  metadata: Record<string, unknown> | null | undefined,
+): Promise<AuthUser> {
   const { data: member } = await supabase
     .from('org_members')
     .select('role, organization_id')
@@ -30,11 +34,14 @@ async function resolveUser(userId: string, email: string): Promise<AuthUser> {
   const role = (member?.role as UserRole) ?? UserRole.CLIENT_USER;
   const tier = getTierFromRole(role);
 
+  const metaFullName = typeof metadata?.full_name === 'string' ? metadata.full_name : null;
+  const metaAvatar = typeof metadata?.avatar_url === 'string' ? metadata.avatar_url : null;
+
   return {
     id: userId,
     email,
-    fullName: null,
-    avatarUrl: null,
+    fullName: metaFullName,
+    avatarUrl: metaAvatar,
     role,
     organizationId: member?.organization_id ?? null,
     tier,
@@ -100,8 +107,9 @@ export function AuthProvider({ children }: AuthProviderProps): React.ReactElemen
 
     const userId = supabaseSession.user.id;
     const email = supabaseSession.user.email ?? '';
+    const metadata = supabaseSession.user.user_metadata as Record<string, unknown> | null | undefined;
 
-    resolveUser(userId, email)
+    resolveUser(userId, email, metadata)
       .then((user) => {
         setSession(buildSessionContext(supabaseSession, user));
       })
