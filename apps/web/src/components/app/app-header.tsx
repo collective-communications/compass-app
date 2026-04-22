@@ -1,6 +1,5 @@
 import type { ReactElement } from 'react';
 import type { AuthUser } from '@compass/types';
-import { CompassLogo } from '../brand/compass-logo';
 import { ProfileMenu } from './profile-menu';
 import { TopTabBar } from '../navigation/top-tab-bar';
 import { AppLink } from '../navigation/app-link';
@@ -33,13 +32,17 @@ export function AppHeader({
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <AppLink to={config.logoHref} className="flex items-center gap-3">
-        <CompassLogo size="sm" />
+        <img
+          src="/compass-brand-panel-dark.svg"
+          alt="The Collective Culture Compass"
+          className="h-8 w-8"
+        />
         <div className="hidden flex-col sm:flex">
           <span
             className="text-sm font-semibold text-[var(--grey-900)]"
             style={{ fontFamily: 'var(--font-headings)' }}
           >
-            Collective Culture Compass
+            The Collective Culture Compass&#8482;
           </span>
           <span className="text-xs text-[var(--text-secondary)]">
             culture + communication
