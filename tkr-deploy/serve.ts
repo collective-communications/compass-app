@@ -6,6 +6,8 @@ import { PluginRegistry } from './src/core/plugin-registry.js';
 import { SecretsSyncEngine } from './src/core/secrets-sync-engine.js';
 import { DeployOrchestrator } from './src/core/deploy-orchestrator.js';
 import { HealthAggregator } from './src/core/health-aggregator.js';
+import { EventBus } from './src/core/event-bus.js';
+import { migrateActivityLog } from './src/core/activity-migrate.js';
 import { createServer } from './src/api/server.js';
 
 // ---------------------------------------------------------------------------
@@ -107,15 +109,35 @@ const coreSteps = [
 
 const allSteps = [...coreSteps, ...registry.allDeploySteps()].sort((a, b) => a.order - b.order);
 
+const eventBus = new EventBus();
+
 const orchestrator = new DeployOrchestrator({
   vaultClient,
   steps: allSteps,
+  eventBus,
 });
 
 const healthAggregator = new HealthAggregator({
   adapters: registry.allAdapters(),
   vaultClient,
 });
+
+// ---------------------------------------------------------------------------
+// 4.5. One-shot activity log migration (v1 → v2 with runIds)
+// ---------------------------------------------------------------------------
+
+try {
+  const migration = await migrateActivityLog(orchestrator.activityLogPath);
+  if (migration.migrated > 0) {
+    console.log(
+      `[tkr-deploy] activity log: migrated ${migration.migrated} entries into ${migration.runs} runs`,
+    );
+  }
+} catch (err) {
+  console.warn(
+    `[tkr-deploy] activity log migration failed: ${err instanceof Error ? err.message : String(err)}`,
+  );
+}
 
 // ---------------------------------------------------------------------------
 // 5. Create and start HTTP server
@@ -132,6 +154,7 @@ const server = createServer({
   orchestrator,
   registry,
   vaultClient,
+  eventBus,
 });
 
 console.log(`[tkr-deploy] listening on http://localhost:${server.port}`);

@@ -4,6 +4,7 @@ import type { SecretsSyncEngine } from '../core/secrets-sync-engine.js';
 import type { DeployOrchestrator } from '../core/deploy-orchestrator.js';
 import type { PluginRegistry } from '../core/plugin-registry.js';
 import type { VaultClient } from '../types/vault.js';
+import { EventBus } from '../core/event-bus.js';
 import { VaultLockedError } from '../core/secrets-sync-engine.js';
 import { Router, jsonError } from './router.js';
 import { registerHealthRoutes } from './routes/health.js';
@@ -11,6 +12,8 @@ import { registerSecretsRoutes } from './routes/secrets.js';
 import { registerActivityRoutes } from './routes/activity.js';
 import { registerEventRoutes } from './routes/events.js';
 import { registerManifestRoutes } from './routes/manifest.js';
+import { registerDeployRoutes } from './routes/deploy.js';
+import { registerProviderRoutes } from './routes/providers.js';
 
 export interface ServerConfig {
   port: number;
@@ -21,6 +24,8 @@ export interface ServerConfig {
   orchestrator: DeployOrchestrator;
   registry: PluginRegistry;
   vaultClient: VaultClient;
+  /** Optional — a bus is created on demand so tests can omit it. */
+  eventBus?: EventBus;
 }
 
 const MIME_TYPES: Record<string, string> = {
@@ -41,12 +46,16 @@ function getMimeType(path: string): string {
 export function createServer(config: ServerConfig): ReturnType<typeof Bun.serve> {
   const router = new Router();
 
+  const eventBus = config.eventBus ?? new EventBus();
+
   // Core routes
   registerHealthRoutes(router, config.healthAggregator);
   registerSecretsRoutes(router, config.syncEngine, config.vaultClient, config.registry);
   registerActivityRoutes(router, config.orchestrator);
-  registerEventRoutes(router);
+  registerEventRoutes(router, eventBus);
   registerManifestRoutes(router, config.registry, config.dashboardName);
+  registerDeployRoutes(router, config.orchestrator);
+  registerProviderRoutes(router, config.registry);
 
   // Provider routes — each plugin registers its own
   const routeCtx = {

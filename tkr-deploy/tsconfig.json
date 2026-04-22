@@ -11,8 +11,18 @@
     "rootDir": ".",
     "declaration": true,
     "noEmit": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "preact",
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "types": ["bun-types"]
   },
-  "include": ["src/**/*.ts", "providers/**/*.ts", "serve.ts", "deploy.config.ts"],
-  "exclude": ["node_modules", "dist"]
+  "include": [
+    "src/**/*.ts",
+    "providers/**/*.ts",
+    "serve.ts",
+    "deploy.config.ts",
+    "ui/src/**/*.ts",
+    "ui/src/**/*.tsx"
+  ],
+  "exclude": ["node_modules", "dist", "ui/dist", "ui/dist-next"]
 }

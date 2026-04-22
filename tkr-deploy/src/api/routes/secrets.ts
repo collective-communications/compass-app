@@ -63,7 +63,7 @@ export function registerSecretsRoutes(
   });
 
   router.post('/api/secrets/sync', async (req) => {
-    let body: { names?: string[]; targets?: string[] } | undefined;
+    let body: { names?: string[]; targets?: string[]; dryRun?: boolean } | undefined;
     try {
       const text = await req.text();
       if (text) body = JSON.parse(text);
@@ -71,8 +71,11 @@ export function registerSecretsRoutes(
       return jsonError('Invalid JSON body', 400);
     }
 
+    const url = new URL(req.url);
+    const dryRun = parseDryRun(url, body?.dryRun);
+
     if (!body?.names) {
-      const report = await syncEngine.syncAll();
+      const report = await syncEngine.syncAll({ dryRun });
       return jsonSuccess(report);
     }
 
@@ -83,17 +86,57 @@ export function registerSecretsRoutes(
     const results = [];
     for (const name of body.names) {
       const targets = body.targets ?? allTargetIds;
-      const syncResults = await syncEngine.syncSecret(name, targets);
+      const syncResults = await syncEngine.syncSecret(name, targets, { dryRun });
       results.push({ name, results: syncResults });
     }
-    return jsonSuccess(results);
+    return jsonSuccess({
+      dryRun,
+      wouldSync: results
+        .flatMap((r) => r.results)
+        .filter((s) => s.wouldSync).length,
+      results,
+    });
   });
 
-  router.post('/api/secrets/:name/sync', async (_req, params) => {
-    const allTargetIds = registry
-      ? registry.getAll().filter((p) => p.syncTarget).map((p) => p.id)
-      : [];
-    const results = await syncEngine.syncSecret(params.name, allTargetIds);
-    return jsonSuccess({ name: params.name, results });
+  router.post('/api/secrets/:name/sync', async (req, params) => {
+    const url = new URL(req.url);
+
+    let body: { targetIds?: string[]; targets?: string[]; dryRun?: boolean } | undefined;
+    try {
+      const text = await req.text();
+      if (text) body = JSON.parse(text);
+    } catch {
+      return jsonError('Invalid JSON body', 400);
+    }
+
+    const dryRun = parseDryRun(url, body?.dryRun);
+
+    const queryTargetIds = url.searchParams.get('targetIds');
+    const bodyTargetIds = body?.targetIds ?? body?.targets;
+    const explicitTargetIds = bodyTargetIds
+      ?? (queryTargetIds ? queryTargetIds.split(',').filter(Boolean) : undefined);
+
+    const targets = explicitTargetIds
+      ?? (registry
+        ? registry.getAll().filter((p) => p.syncTarget).map((p) => p.id)
+        : []);
+
+    const results = await syncEngine.syncSecret(params.name, targets, { dryRun });
+    return jsonSuccess({
+      name: params.name,
+      dryRun,
+      wouldSync: results.filter((s) => s.wouldSync).length,
+      results,
+    });
   });
+}
+
+/** Parse `?dryRun=1` (or `true`/`yes`) with body override — explicit body wins. */
+function parseDryRun(url: URL, bodyValue: boolean | undefined): boolean {
+  if (bodyValue === true) return true;
+  if (bodyValue === false) return false;
+  const q = url.searchParams.get('dryRun');
+  if (!q) return false;
+  const v = q.toLowerCase();
+  return v === '1' || v === 'true' || v === 'yes';
 }

@@ -1,5 +1,5 @@
 import type { ProviderAdapter } from '../types/provider.js';
-import type { ProviderPlugin, PluginDeployStep, SecretMapping, SyncTargetAdapter } from '../types/plugin.js';
+import type { DetailSection, ProviderPlugin, PluginDeployStep, SyncTargetAdapter } from '../types/plugin.js';
 
 /** Aggregated secret-to-target mapping entry. */
 export interface SecretTargetEntry {
@@ -68,6 +68,22 @@ export class PluginRegistry {
       }
     }
     return entries;
+  }
+
+  /**
+   * Resolve a provider's detail sections lazily. Called by the API layer when the
+   * Deploy screen expands a provider card — kept out of {@link manifest} so the
+   * manifest payload stays cheap.
+   */
+  async getDetailSections(providerId: string): Promise<DetailSection[]> {
+    const plugin = this.plugins.get(providerId);
+    if (!plugin) {
+      throw new Error(`Unknown provider: ${providerId}`);
+    }
+    if (!plugin.screen.detailSections) {
+      return [];
+    }
+    return plugin.screen.detailSections();
   }
 
   /** Build manifest data for the frontend. */

@@ -1,6 +1,6 @@
 import { SupabaseAdapter } from './adapter.js';
 import type { SupabaseAdapterConfig } from './adapter.js';
-import type { ProviderPluginFactory } from '../../src/types/plugin.js';
+import type { DetailSection, ProviderPluginFactory } from '../../src/types/plugin.js';
 import { jsonSuccess, jsonError } from '../../src/api/router.js';
 import { registerDatabaseRoutes } from './routes.js';
 
@@ -165,6 +165,7 @@ export function createSupabasePlugin(
         label: 'Database',
         path: '/database',
         modulePath: 'provider-screens/database.js',
+        detailSections: buildSupabaseDetailSections,
       },
 
       registerRoutes(router) {
@@ -182,6 +183,101 @@ export function createSupabasePlugin(
         });
       },
     };
+
+    /**
+     * Build Deploy-screen detail sections from live adapter data. Each
+     * adapter call is isolated — a failure skips that section rather than
+     * taking down the whole response. Returns an empty array when the
+     * adapter is not yet configured (no project ref).
+     */
+    async function buildSupabaseDetailSections(): Promise<DetailSection[]> {
+      let accessToken = '';
+      try {
+        accessToken = await getSecret('SUPABASE_ACCESS_TOKEN');
+      } catch {
+        // Vault offline/locked — treat as not configured.
+      }
+      if (!accessToken) {
+        return [];
+      }
+
+      const sections: DetailSection[] = [];
+
+      // 1. Connection (kv) — derived from healthCheck details.
+      try {
+        const health = await adapter.healthCheck();
+        const details = (health.details ?? {}) as Record<string, string>;
+        sections.push({
+          kind: 'kv',
+          title: 'Connection',
+          items: [
+            { label: 'Project Ref', value: details.projectRef || null },
+            { label: 'Region', value: details.region || null },
+            { label: 'DB Version', value: details.version || null },
+          ],
+        });
+      } catch (err) {
+        console.warn('[supabase.detailSections] connection skipped:', err);
+      }
+
+      // 2. Migrations (progress) — local files only; status field tells us
+      // whether they've been applied. Adapter does not return a pushed-count
+      // diff against remote, so we report total and use applied count as
+      // current.
+      try {
+        const migrations = await adapter.getMigrations();
+        const applied = migrations.filter((m) => m.status === 'applied').length;
+        const latest = migrations[migrations.length - 1]?.filename;
+        sections.push({
+          kind: 'progress',
+          title: 'Migrations',
+          current: applied,
+          total: migrations.length,
+          meta: latest ? `Latest: ${latest}` : undefined,
+        });
+      } catch (err) {
+        console.warn('[supabase.detailSections] migrations skipped:', err);
+      }
+
+      // 3. Edge Functions (list) — name + deploy status.
+      try {
+        const functions = await adapter.getEdgeFunctions();
+        sections.push({
+          kind: 'list',
+          title: 'Edge Functions',
+          items: functions.map((fn) => ({
+            label: fn.name,
+            meta: fn.deployed ? 'deployed' : 'undeployed',
+            status: fn.deployed ? 'healthy' : 'warning',
+          })),
+        });
+      } catch (err) {
+        console.warn('[supabase.detailSections] functions skipped:', err);
+      }
+
+      // 4. Extensions (kv) — pgvector only.
+      try {
+        const pgvector = await adapter.getExtensionStatus('vector');
+        sections.push({
+          kind: 'kv',
+          title: 'Extensions',
+          items: [
+            {
+              label: 'pgvector',
+              value: pgvector.installed
+                ? `enabled${pgvector.version ? ` (${pgvector.version})` : ''}`
+                : pgvector.version
+                ? `available (${pgvector.version})`
+                : 'unavailable',
+            },
+          ],
+        });
+      } catch (err) {
+        console.warn('[supabase.detailSections] extensions skipped:', err);
+      }
+
+      return sections;
+    }
 
     /**
      * Read OAuth credentials from the vault and push the configured

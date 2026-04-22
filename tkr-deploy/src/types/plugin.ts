@@ -24,6 +24,22 @@ export interface PluginDeployStep {
   execute: () => Promise<string>;
 }
 
+/** Status dot colour for detail-section items. */
+export type DotStatus = 'healthy' | 'warning' | 'error' | 'unknown';
+
+/**
+ * Typed descriptor for a detail section on a provider's Deploy-screen card.
+ * Discriminated by `kind`; the UI renders each variant via a single `SectionRenderer`.
+ * Use `custom-module` as an escape hatch when no built-in kind fits.
+ */
+export type DetailSection =
+  | { kind: 'kv'; title: string; items: { label: string; value: string | null }[] }
+  | { kind: 'metric-grid'; title: string; metrics: { label: string; value: string; status?: DotStatus }[] }
+  | { kind: 'list'; title: string; items: { label: string; meta?: string; status?: DotStatus }[] }
+  | { kind: 'progress'; title: string; current: number; total: number; meta?: string }
+  | { kind: 'table'; title: string; columns: string[]; rows: string[][] }
+  | { kind: 'custom-module'; title: string; modulePath: string };
+
 /** Frontend screen descriptor — tells the shell and router what to render. */
 export interface PluginScreen {
   /** Nav pill label. */
@@ -32,6 +48,8 @@ export interface PluginScreen {
   path: string;
   /** Module path relative to ui root for dynamic import (e.g. "provider-screens/database.js"). */
   modulePath: string;
+  /** Lazy detail sections — called when the Deploy screen expands this provider's card. */
+  detailSections?: () => Promise<DetailSection[]>;
 }
 
 /** Adapter for pushing secrets to a sync target. */

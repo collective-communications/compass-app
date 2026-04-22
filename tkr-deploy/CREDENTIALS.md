@@ -102,9 +102,6 @@ Required for each screen:
 
 | Screen | Secrets Needed |
 |--------|---------------|
-| Overview | All (aggregated health) |
+| Deploy | All (aggregated health + provider status) |
 | Secrets | Vault connected (already working) |
-| Database | `SUPABASE_ACCESS_TOKEN` |
-| Frontend | `VERCEL_TOKEN`, `VERCEL_PROJECT_ID` |
-| Email | `RESEND_API_KEY` |
-| CI/CD | `GITHUB_CLIENT_ID` + device flow auth |
+| History | None (reads local deploy log) |
