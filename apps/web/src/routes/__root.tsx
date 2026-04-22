@@ -9,7 +9,6 @@ import { createSettingsRoutes } from '../features/settings/routes';
 import { createHelpRoutes } from '../features/help/routes';
 import { createProfileRoutes } from '../features/profile/routes';
 import { PublicShell } from '../components/shells/public-shell';
-import { CompassLogo } from '../components/brand/compass-logo';
 
 
 const rootRoute = createRootRoute({
@@ -26,7 +25,11 @@ const indexRoute = createRoute({
       <PublicShell>
         <div className="flex flex-1 items-center justify-center px-6 py-12">
           <div className="flex w-full max-w-xl flex-col items-center text-center">
-            <CompassLogo size="lg" className="mb-6 hidden lg:block" />
+            <img
+          src="/compass-brand-panel-dark.svg"
+          alt="The Collective Culture Compass"
+          className="mb-6 h-28 w-28"
+        />
             <h1
               className="mb-3 text-3xl font-bold text-[var(--grey-900)] sm:text-4xl"
               style={{ fontFamily: 'var(--font-headings)' }}
