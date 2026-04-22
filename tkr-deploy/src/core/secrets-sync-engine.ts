@@ -18,6 +18,8 @@ export interface SyncResult {
   target: string;
   success: boolean;
   error?: string;
+  /** True when a dry-run would have written this target (state was 'missing' or 'differs'). */
+  wouldSync?: boolean;
 }
 
 export interface SyncAllReport {
@@ -25,8 +27,12 @@ export interface SyncAllReport {
   synced: number;
   failed: number;
   skipped: number;
+  /** Count of target writes that would have occurred in a dry-run. 0 when not a dry-run. */
+  wouldSync: number;
   errors: string[];
   rows: Array<{ name: string; results: SyncResult[] }>;
+  /** True when the entire run was executed in dry-run mode (no `setSecret` calls). */
+  dryRun?: boolean;
 }
 
 export interface SecretsSyncEngineConfig {
@@ -177,10 +183,19 @@ export class SecretsSyncEngine {
 
   /**
    * Pushes a single vault secret to specified targets.
+   *
+   * When `opts.dryRun` is true, no `setSecret` calls are made — each target that
+   * would otherwise be written is marked with `wouldSync: true` instead. Empty
+   * vault values and unknown targets still produce failure entries unchanged.
    */
-  async syncSecret(name: string, targetIds: string[]): Promise<SyncResult[]> {
+  async syncSecret(
+    name: string,
+    targetIds: string[],
+    opts?: { dryRun?: boolean },
+  ): Promise<SyncResult[]> {
     await this.assertVaultUnlocked();
 
+    const dryRun = opts?.dryRun === true;
     const vaultValue = await this.vault.getSecret(name);
     const results: SyncResult[] = [];
 
@@ -200,6 +215,11 @@ export class SecretsSyncEngine {
         const mapping = this.mappings.find((m) => m.vaultKey === name && m.targetId === targetId);
         const remoteKey = mapping?.targetKey ?? name;
 
+        if (dryRun) {
+          results.push({ target: targetId, success: true, wouldSync: true });
+          continue;
+        }
+
         await target.setSecret(remoteKey, vaultValue);
         results.push({ target: targetId, success: true });
       } catch (err) {
@@ -216,8 +236,14 @@ export class SecretsSyncEngine {
 
   /**
    * Computes status for all secrets, syncs anything missing or differs.
+   *
+   * When `opts.dryRun` is true, no `setSecret` calls are made. Every target that
+   * would otherwise be written is reported with `wouldSync: true` and counted in
+   * `report.wouldSync`. Empty-vault skips still count toward `report.skipped`.
+   * The returned `report.dryRun` flag reflects the mode the run was executed in.
    */
-  async syncAll(): Promise<SyncAllReport> {
+  async syncAll(opts?: { dryRun?: boolean }): Promise<SyncAllReport> {
+    const dryRun = opts?.dryRun === true;
     const statusRows = await this.computeSyncStatus();
     const vaultSecrets = await this.vault.getAll();
 
@@ -226,8 +252,10 @@ export class SecretsSyncEngine {
       synced: 0,
       failed: 0,
       skipped: 0,
+      wouldSync: 0,
       errors: [],
       rows: [],
+      dryRun,
     };
 
     for (const row of statusRows) {
@@ -263,6 +291,12 @@ export class SecretsSyncEngine {
 
           const mapping = this.mappings.find((m) => m.vaultKey === row.name && m.targetId === targetId);
           const remoteKey = mapping?.targetKey ?? row.name;
+
+          if (dryRun) {
+            results.push({ target: targetId, success: true, wouldSync: true });
+            report.wouldSync++;
+            continue;
+          }
 
           await target.setSecret(remoteKey, vaultValue);
           results.push({ target: targetId, success: true });

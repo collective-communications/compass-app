@@ -2,7 +2,6 @@ import { describe, test, expect, mock } from 'bun:test';
 import {
   SecretsSyncEngine,
   VaultLockedError,
-  type SecretsSyncEngineConfig,
 } from '../secrets-sync-engine.js';
 import type { SyncTargetAdapter } from '../../types/plugin.js';
 import type { SecretTargetEntry } from '../plugin-registry.js';
@@ -33,7 +32,7 @@ function createMockVault(overrides: Partial<VaultClient> = {}): VaultClient {
   };
 }
 
-function hashValue(value: string): string {
+function _hashValue(value: string): string {
   const hasher = new Bun.CryptoHasher('sha256');
   hasher.update(value);
   return hasher.digest('hex');
@@ -315,7 +314,7 @@ describe('SecretsSyncEngine', () => {
 
   // 9. syncAll — filters correctly (only syncs missing/differs)
   test('syncAll only syncs missing and differs targets', async () => {
-    const { targets, vercel } = createMockTargets({
+    const { targets, vercel: _vercel } = createMockTargets({
       vercel: {
         // SUPABASE_URL matches, SUPABASE_ANON_KEY differs
         getSecrets: mock(() => Promise.resolve(new Map<string, string>([
@@ -383,7 +382,99 @@ describe('SecretsSyncEngine', () => {
     expect(report.rows.length).toBeGreaterThan(0);
   });
 
-  // 11. Rate limit / retry — errors are caught and reported
+  // 11a. Dry-run — syncAll skips setSecret and marks wouldSync
+  test('syncAll with dryRun=true skips setSecret and reports wouldSync', async () => {
+    const { targets, vercel, github } = createMockTargets({
+      vercel: {
+        getSecrets: mock(() => Promise.resolve(new Map<string, string>())), // all missing
+        setSecret: mock(() => Promise.resolve()),
+      },
+      github: {
+        listSecrets: mock(() => Promise.resolve([])), // all missing
+        setSecret: mock(() => Promise.resolve()),
+      },
+    });
+
+    const engine = new SecretsSyncEngine({
+      vaultClient: createMockVault(),
+      targets,
+      mappings: STANDARD_MAPPINGS,
+    });
+
+    const report = await engine.syncAll({ dryRun: true });
+
+    expect(report.dryRun).toBe(true);
+    expect(report.wouldSync).toBeGreaterThan(0);
+    expect(report.synced).toBe(0);
+    expect(report.failed).toBe(0);
+
+    // No writes should have been attempted
+    expect(vercel.setSecret).not.toHaveBeenCalled();
+    expect(github.setSecret).not.toHaveBeenCalled();
+
+    // Every result for a would-sync target should carry wouldSync: true
+    const allResults = report.rows.flatMap((r) => r.results);
+    expect(allResults.length).toBeGreaterThan(0);
+    for (const r of allResults) {
+      if (r.success) {
+        expect(r.wouldSync).toBe(true);
+      }
+    }
+  });
+
+  // 11b. Dry-run — default behavior unchanged
+  test('syncAll without dryRun defaults to wouldSync=0 and dryRun=false', async () => {
+    const { targets } = createMockTargets({
+      vercel: {
+        getSecrets: mock(() => Promise.resolve(new Map<string, string>())),
+        setSecret: mock(() => Promise.resolve()),
+      },
+      github: {
+        listSecrets: mock(() => Promise.resolve([])),
+        setSecret: mock(() => Promise.resolve()),
+      },
+    });
+
+    const engine = new SecretsSyncEngine({
+      vaultClient: createMockVault(),
+      targets,
+      mappings: STANDARD_MAPPINGS,
+    });
+
+    const report = await engine.syncAll();
+
+    expect(report.dryRun).toBe(false);
+    expect(report.wouldSync).toBe(0);
+    expect(report.synced).toBeGreaterThan(0);
+  });
+
+  // 11c. Dry-run — syncSecret skips setSecret and marks wouldSync
+  test('syncSecret with dryRun=true skips setSecret and marks wouldSync', async () => {
+    const { targets, supabase, vercel, github } = createMockTargets();
+    const engine = new SecretsSyncEngine({
+      vaultClient: createMockVault(),
+      targets,
+      mappings: STANDARD_MAPPINGS,
+    });
+
+    const results = await engine.syncSecret(
+      'RESEND_API_KEY',
+      ['supabase', 'vercel', 'github'],
+      { dryRun: true },
+    );
+
+    expect(results).toHaveLength(3);
+    for (const r of results) {
+      expect(r.success).toBe(true);
+      expect(r.wouldSync).toBe(true);
+    }
+
+    expect(supabase.setSecret).not.toHaveBeenCalled();
+    expect(vercel.setSecret).not.toHaveBeenCalled();
+    expect(github.setSecret).not.toHaveBeenCalled();
+  });
+
+  // 12. Rate limit / retry — errors are caught and reported
   test('syncAll catches adapter errors and reports them without aborting', async () => {
     let callCount = 0;
     const { targets } = createMockTargets({
