@@ -5,11 +5,12 @@
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { SurveyListPage } from '../../surveys';
-import { SurveyConfigModal } from '../../surveys/components/survey-config-modal';
+import { SurveyConfigModal, type SurveyConfigFormData } from '../../surveys/components/survey-config-modal';
 import { useArchiveSurvey } from '../../surveys/hooks/use-archive-survey';
-import { useSurveys } from '../../surveys/hooks/use-surveys';
+import { useDeploymentManagement } from '../../surveys/hooks/use-deployment-management';
+import { useSurveys, surveyListKeys } from '../../surveys/hooks/use-surveys';
 import { getSurveyBuilderData } from '../../surveys/services/admin-survey-service';
 
 export interface ClientDetailSurveysTabProps {
@@ -37,9 +38,15 @@ export function ClientDetailSurveysTab({
 }: ClientDetailSurveysTabProps): ReactElement {
   const [configSurveyId, setConfigSurveyId] = useState<string | null>(null);
   const archiveSurvey = useArchiveSurvey();
+  const queryClient = useQueryClient();
 
   // Fetch surveys list for copy-link token lookup
   const { data: surveys } = useSurveys({ organizationId });
+
+  const { saveConfig, publish, isPending: deploymentPending } = useDeploymentManagement({
+    surveyId: configSurveyId ?? '',
+    enabled: !!configSurveyId,
+  });
 
   // Fetch full survey data when config modal is open
   const { data: configSurveyData } = useQuery({
@@ -59,13 +66,26 @@ export function ClientDetailSurveysTab({
     [surveys],
   );
 
-  const handleConfigSave = useCallback((): void => {
-    setConfigSurveyId(null);
-  }, []);
+  const handleConfigSave = useCallback(
+    async (config: SurveyConfigFormData): Promise<void> => {
+      const { reminderSchedule: _rs, ...params } = config;
+      await saveConfig(params);
+      void queryClient.invalidateQueries({ queryKey: surveyListKeys.all });
+      setConfigSurveyId(null);
+    },
+    [saveConfig, queryClient],
+  );
 
-  const handleConfigPublish = useCallback((): void => {
-    setConfigSurveyId(null);
-  }, []);
+  const handleConfigPublish = useCallback(
+    async (config: SurveyConfigFormData): Promise<void> => {
+      const { reminderSchedule: _rs, ...params } = config;
+      await saveConfig(params);
+      await publish();
+      void queryClient.invalidateQueries({ queryKey: surveyListKeys.all });
+      setConfigSurveyId(null);
+    },
+    [saveConfig, publish, queryClient],
+  );
 
   const handleArchive = useCallback(
     (surveyId: string): void => {
@@ -101,7 +121,7 @@ export function ClientDetailSurveysTab({
           hasQuestions={configSurveyData.questions.length > 0}
           onSave={handleConfigSave}
           onDeploy={handleConfigPublish}
-          isPending={false}
+          isPending={deploymentPending}
         />
       )}
     </>
