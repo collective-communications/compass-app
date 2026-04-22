@@ -27,13 +27,6 @@ export function BrandPanel(): React.ReactElement {
         </h1>
 
         <p
-          className="mt-2 text-sm font-light tracking-wide"
-          style={{ fontFamily: 'var(--font-body)', color: 'var(--text-tertiary)' }}
-        >
-          by COLLECTIVE culture + communication
-        </p>
-
-        <p
           className="mt-6 max-w-xs text-base font-light leading-relaxed text-[var(--grey-100)]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
@@ -49,9 +42,6 @@ export function BrandPanel(): React.ReactElement {
           alt="COLLECTIVE culture + communication"
           className="h-10 w-auto opacity-80"
         />
-        <p className="mt-3 text-[8px] font-semibold tracking-[1.5px] text-white/25">
-          YOUR PEOPLE. YOUR STORY.
-        </p>
       </div>
     </div>
   );
