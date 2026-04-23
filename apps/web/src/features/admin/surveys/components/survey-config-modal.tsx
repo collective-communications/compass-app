@@ -19,9 +19,9 @@ export interface SurveyConfigModalProps {
   /** Whether the survey has at least one question (required for deployment) */
   hasQuestions: boolean;
   /** Save as draft callback */
-  onSave: (config: SurveyConfigFormData) => void;
+  onSave: (config: SurveyConfigFormData) => Promise<void>;
   /** Deploy now callback */
-  onDeploy: (config: SurveyConfigFormData) => void;
+  onDeploy: (config: SurveyConfigFormData) => Promise<void>;
   /** Whether a mutation is in progress */
   isPending: boolean;
 }
@@ -56,11 +56,10 @@ export function SurveyConfigModal({
   const [opensAt, setOpensAt] = useState(toDateInputValue(survey.opensAt));
   const [closesAt, setClosesAt] = useState(toDateInputValue(survey.closesAt));
   const [anonymityThreshold, setAnonymityThreshold] = useState(
-    survey.settings?.allowAnonymous
-      ? DEFAULT_SURVEY_ENGINE_CONFIG.anonymityThreshold
-      : DEFAULT_SURVEY_ENGINE_CONFIG.anonymityThreshold,
+    survey.settings?.anonymityThreshold ?? DEFAULT_SURVEY_ENGINE_CONFIG.anonymityThreshold,
   );
-  const [reminderSchedule, setReminderSchedule] = useState<number[]>([]);
+  const [reminderSchedule, setReminderSchedule] = useState<number[]>(survey.reminderSchedule ?? []);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // Validation
   const dateError =
@@ -88,6 +87,11 @@ export function SurveyConfigModal({
     setDescription(survey.description ?? '');
     setOpensAt(toDateInputValue(survey.opensAt));
     setClosesAt(toDateInputValue(survey.closesAt));
+    setReminderSchedule(survey.reminderSchedule ?? []);
+    setAnonymityThreshold(
+      survey.settings?.anonymityThreshold ?? DEFAULT_SURVEY_ENGINE_CONFIG.anonymityThreshold,
+    );
+    setSubmitError(null);
   }, [survey]);
 
   function getFormData(): SurveyConfigFormData {
@@ -97,25 +101,45 @@ export function SurveyConfigModal({
       opensAt: new Date(opensAt).toISOString(),
       closesAt: new Date(closesAt).toISOString(),
       settings: {
-        allowAnonymous: true,
-        requireMetadata: true,
-        showProgressBar: true,
-        welcomeMessage: null,
-        completionMessage: null,
+        anonymityThreshold,
       },
       reminderSchedule,
     };
   }
 
-  function handleSave(e: FormEvent): void {
-    e.preventDefault();
-    if (!isValid) return;
-    onSave(getFormData());
+  /**
+   * Coerce thrown values into a user-facing string. Supabase's PostgrestError
+   * is a plain object — not an `Error` subclass — so an `instanceof Error`
+   * check would always fall through to the generic fallback for DB failures.
+   */
+  function describeError(err: unknown, fallback: string): string {
+    if (err instanceof Error) return err.message;
+    if (typeof err === 'object' && err !== null && 'message' in err) {
+      const m = (err as { message?: unknown }).message;
+      if (typeof m === 'string' && m.length > 0) return m;
+    }
+    return fallback;
   }
 
-  function handleDeploy(): void {
+  async function handleSave(e: FormEvent): Promise<void> {
+    e.preventDefault();
+    if (!isValid) return;
+    setSubmitError(null);
+    try {
+      await onSave(getFormData());
+    } catch (err) {
+      setSubmitError(describeError(err, 'Failed to save survey configuration.'));
+    }
+  }
+
+  async function handleDeploy(): Promise<void> {
     if (!canDeploy) return;
-    onDeploy(getFormData());
+    setSubmitError(null);
+    try {
+      await onDeploy(getFormData());
+    } catch (err) {
+      setSubmitError(describeError(err, 'Failed to publish survey.'));
+    }
   }
 
   return (
@@ -125,7 +149,12 @@ export function SurveyConfigModal({
       aria-labelledby="survey-config-title"
       className="w-full max-w-lg rounded-lg border border-[var(--grey-100)] bg-[var(--grey-50)] p-0 shadow-lg backdrop:bg-black/40"
     >
-      <form onSubmit={handleSave} className="flex flex-col gap-6 p-6">
+      <form
+        onSubmit={(e) => {
+          void handleSave(e);
+        }}
+        className="flex flex-col gap-6 p-6"
+      >
         <div className="flex items-center justify-between">
           <h2 id="survey-config-title" className="text-lg font-semibold text-[var(--grey-900)]">Survey Configuration</h2>
           <button
@@ -235,6 +264,16 @@ export function SurveyConfigModal({
         {/* Reminder Schedule */}
         <ReminderConfig value={reminderSchedule} onChange={setReminderSchedule} />
 
+        {/* Submit error */}
+        {submitError && (
+          <div
+            role="alert"
+            className="rounded-lg border border-[var(--feedback-error-border)] bg-[var(--feedback-error-bg)] px-3 py-2 text-sm text-[var(--feedback-error-text)]"
+          >
+            {submitError}
+          </div>
+        )}
+
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 border-t border-[var(--grey-100)] pt-4">
           <button
@@ -253,7 +292,9 @@ export function SurveyConfigModal({
           </button>
           <button
             type="button"
-            onClick={handleDeploy}
+            onClick={() => {
+              void handleDeploy();
+            }}
             disabled={!canDeploy || isPending}
             title={!hasQuestions ? 'Add at least one question before publishing' : undefined}
             className="rounded-lg bg-[var(--grey-900)] px-4 py-2 text-sm font-medium text-[var(--grey-50)] hover:bg-[var(--grey-800)] disabled:cursor-not-allowed disabled:opacity-50"

@@ -23,7 +23,10 @@ export interface SaveSurveyConfigParams {
   description: string | null;
   opensAt: string;
   closesAt: string;
+  /** Partial settings — merged into the existing JSONB blob, not overwritten. */
   settings: Partial<SurveySettings>;
+  /** Days after invitation when reminder emails fire. Empty = no reminders. */
+  reminderSchedule: number[];
 }
 
 /** Parameters for publishing (activating) a survey */
@@ -56,9 +59,32 @@ export interface ResponseMetrics {
 
 // ─── Survey Config ──────────────────────────────────────────────────────────
 
-/** Save survey configuration (title, dates, settings) without deploying */
+/**
+ * Save survey configuration (title, dates, settings, reminders) without deploying.
+ *
+ * Settings are merged into the existing JSONB blob so per-survey keys we don't
+ * surface in the config modal (e.g. `likertSize`) survive the round trip.
+ */
 export async function saveSurveyConfig(params: SaveSurveyConfigParams): Promise<Survey> {
-  const { surveyId, title, description, opensAt, closesAt, settings } = params;
+  const { surveyId, title, description, opensAt, closesAt, settings, reminderSchedule } = params;
+
+  // Read current settings so the JSONB merge preserves keys not edited here.
+  const { data: existing, error: readError } = await supabase
+    .from('surveys')
+    .select('settings')
+    .eq('id', surveyId)
+    .single();
+
+  if (readError) {
+    logger.error({ err: readError, fn: 'saveSurveyConfig.read', surveyId }, 'Failed to read existing survey settings');
+    throw readError;
+  }
+
+  const existingSettings =
+    existing.settings && typeof existing.settings === 'object' && !Array.isArray(existing.settings)
+      ? (existing.settings as Partial<SurveySettings>)
+      : {};
+  const mergedSettings = { ...existingSettings, ...settings };
 
   const { data, error } = await supabase
     .from('surveys')
@@ -67,7 +93,8 @@ export async function saveSurveyConfig(params: SaveSurveyConfigParams): Promise<
       description,
       opens_at: opensAt,
       closes_at: closesAt,
-      settings,
+      settings: mergedSettings,
+      reminder_schedule: reminderSchedule,
     })
     .eq('id', surveyId)
     .select('*')
@@ -87,9 +114,6 @@ export async function saveSurveyConfig(params: SaveSurveyConfigParams): Promise<
 export async function publishSurvey(params: PublishSurveyParams): Promise<Deployment> {
   const { surveyId, deploymentType } = params;
 
-  // Generate a URL-safe token
-  const token = crypto.randomUUID().replace(/-/g, '').slice(0, 16);
-
   // Update survey status to active
   const { error: statusError } = await supabase
     .from('surveys')
@@ -101,13 +125,14 @@ export async function publishSurvey(params: PublishSurveyParams): Promise<Deploy
     throw statusError;
   }
 
-  // Create deployment record
+  // Create deployment record. The `token` column has a `gen_random_uuid()`
+  // default, so we omit it and let Postgres assign one — the column is typed
+  // UUID, not TEXT, so client-side string generation would 22P02.
   const { data, error } = await supabase
     .from('deployments')
     .insert({
       survey_id: surveyId,
       type: deploymentType,
-      token,
     })
     .select('*')
     .single();

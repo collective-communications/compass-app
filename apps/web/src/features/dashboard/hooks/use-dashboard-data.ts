@@ -199,6 +199,9 @@ function mapSurvey(row: Record<string, unknown>): Survey {
     opensAt: (row.opens_at as string) ?? null,
     closesAt: (row.closes_at as string) ?? null,
     settings: (row.settings as Survey['settings']) ?? null,
+    reminderSchedule: Array.isArray(row.reminder_schedule)
+      ? (row.reminder_schedule as number[])
+      : [],
     scoresCalculated: (row.scores_calculated as boolean) ?? false,
     scoresCalculatedAt: (row.scores_calculated_at as string) ?? null,
     createdAt: row.created_at as string,

@@ -51,6 +51,9 @@ export function mapSurveyRow(
     opensAt: (r['opens_at'] as string) ?? null,
     closesAt: (r['closes_at'] as string) ?? null,
     settings: (r['settings'] as Survey['settings']) ?? null,
+    reminderSchedule: Array.isArray(r['reminder_schedule'])
+      ? (r['reminder_schedule'] as number[])
+      : [],
     scoresCalculated: (r['scores_calculated'] as boolean) ?? false,
     scoresCalculatedAt: (r['scores_calculated_at'] as string) ?? null,
     createdAt: r['created_at'] as string,

@@ -243,6 +243,8 @@ export interface SurveySettings {
   completionMessage: string | null;
   /** Number of points on the Likert scale. Default 5 for new surveys, 4 for legacy. */
   likertSize: number;
+  /** Minimum responses required before segment-level data is exposed. */
+  anonymityThreshold?: number;
 }
 
 /** Survey definition */
@@ -255,6 +257,8 @@ export interface Survey {
   opensAt: string | null;
   closesAt: string | null;
   settings: SurveySettings | null;
+  /** Days after invitation when reminder emails fire. Empty = no reminders. */
+  reminderSchedule: number[];
   scoresCalculated: boolean;
   scoresCalculatedAt: string | null;
   createdAt: string;

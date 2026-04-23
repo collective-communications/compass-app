@@ -71,8 +71,7 @@ export function ClientDetailSurveysTab({
 
   const handleConfigSave = useCallback(
     async (config: SurveyConfigFormData): Promise<void> => {
-      const { reminderSchedule: _rs, ...params } = config;
-      await saveConfig(params);
+      await saveConfig(config);
       void queryClient.invalidateQueries({ queryKey: surveyListKeys.all });
       setConfigSurveyId(null);
     },
@@ -81,13 +80,15 @@ export function ClientDetailSurveysTab({
 
   const handleConfigPublish = useCallback(
     async (config: SurveyConfigFormData): Promise<void> => {
-      const { reminderSchedule: _rs, ...params } = config;
-      await saveConfig(params);
+      const surveyId = configSurveyId;
+      if (!surveyId) return;
+      await saveConfig(config);
       await publish();
       void queryClient.invalidateQueries({ queryKey: surveyListKeys.all });
       setConfigSurveyId(null);
+      onNavigateToTracking(surveyId);
     },
-    [saveConfig, publish, queryClient],
+    [configSurveyId, saveConfig, publish, queryClient, onNavigateToTracking],
   );
 
   const handleArchive = useCallback(
