@@ -1,0 +1,94 @@
+{
+  "generatedAt": "2026-04-23T03:39:25.576Z",
+  "baseUrl": "http://localhost:42333",
+  "password": "TestPass123!",
+  "tokens": {
+    "valid_active": "b3b000ca-e712-4900-b405-31bc50832aa7",
+    "expired": "5fdbe658-8458-4b5f-8979-74bcb068b21f",
+    "not_yet_open": "1791e4fc-5711-4a85-bde3-246d1bf3b8c8",
+    "closed": "8c21802b-c121-40b5-ad2c-c7a7a035c7e6"
+  },
+  "orgs": {
+    "ccc": {
+      "id": "00000000-0000-0000-0000-000000000001",
+      "name": "COLLECTIVE culture + communication",
+      "client_access_enabled": false
+    },
+    "client": {
+      "id": "00000000-0000-0000-0000-000000000002",
+      "name": "River Valley Health",
+      "client_access_enabled": true
+    },
+    "clientB": {
+      "id": "00000000-0000-0000-0000-000000000003",
+      "name": "Lakeside Community Clinic",
+      "client_access_enabled": true
+    },
+    "noAccess": {
+      "id": "00000000-0000-0000-0000-000000000004",
+      "name": "River Valley Ops",
+      "client_access_enabled": false
+    },
+    "noSettings": {
+      "id": "00000000-0000-0000-0000-000000000005",
+      "name": "Summit Analytics",
+      "client_access_enabled": true
+    }
+  },
+  "surveyIds": {
+    "active": "00000000-0000-0000-0000-000000000100",
+    "lakeside": "00000000-0000-0000-0000-000000000101",
+    "closed": "00000000-0000-0000-0000-000000000102"
+  },
+  "users": {
+    "ccc_admin": {
+      "email": "admin@collectivecommunication.ca",
+      "password": "TestPass123!",
+      "userId": "ecb588d4-5e43-43ed-949d-c73d726f386a",
+      "orgId": "00000000-0000-0000-0000-000000000001",
+      "role": "ccc_admin"
+    },
+    "ccc_member": {
+      "email": "member@collectivecommunication.ca",
+      "password": "TestPass123!",
+      "userId": "abc21fef-0f93-4e9f-b47a-e3b3f9adac38",
+      "orgId": "00000000-0000-0000-0000-000000000001",
+      "role": "ccc_member"
+    },
+    "client_exec": {
+      "email": "exec@rivervalleyhealth.ca",
+      "password": "TestPass123!",
+      "userId": "de8f89d3-2169-4842-b10d-68270224a70a",
+      "orgId": "00000000-0000-0000-0000-000000000002",
+      "role": "client_exec"
+    },
+    "client_director": {
+      "email": "director@rivervalleyhealth.ca",
+      "password": "TestPass123!",
+      "userId": "348e98db-fd39-4fee-b7f8-57f7a5f9b79a",
+      "orgId": "00000000-0000-0000-0000-000000000002",
+      "role": "client_director"
+    },
+    "client_manager": {
+      "email": "manager@rivervalleyhealth.ca",
+      "password": "TestPass123!",
+      "userId": "eab210e5-fe66-4e17-87dd-9dc4259ec593",
+      "orgId": "00000000-0000-0000-0000-000000000002",
+      "role": "client_manager"
+    },
+    "client_user": {
+      "email": "user@rivervalleyhealth.ca",
+      "password": "TestPass123!",
+      "userId": "19ae6d47-9496-4a03-8958-bddec566c228",
+      "orgId": "00000000-0000-0000-0000-000000000002",
+      "role": "client_user"
+    },
+    "client_exec_lakeside": {
+      "email": "exec@lakesideclinic.ca",
+      "password": "TestPass123!",
+      "userId": "9b4b84de-1e19-43f2-94af-8cacff69d3e8",
+      "orgId": "00000000-0000-0000-0000-000000000003",
+      "role": "client_exec"
+    }
+  }
+}

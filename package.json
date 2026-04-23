@@ -16,6 +16,7 @@
     "db:gen-types": "supabase gen types typescript --project-id gscaczmrruzymzdpzohr > packages/types/src/database.ts",
     "db:seed": "bun run scripts/seed-dev.ts",
     "db:clean": "bun run scripts/seed-dev.ts --clean",
+    "seed:export": "bun run scripts/export-seed.ts",
     "vault:seed": "bun run scripts/seed-vault.ts",
     "setup:vercel": "bun run scripts/setup-vercel.ts",
     "build": "bun run --filter @compass/web build",
