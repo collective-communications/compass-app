@@ -16,9 +16,12 @@ import { getSurveyBuilderData } from '../../surveys/services/admin-survey-servic
 export interface ClientDetailSurveysTabProps {
   organizationId: string;
   userId: string;
-  onSelectSurvey: (surveyId: string) => void;
-  onEditQuestions: (surveyId: string) => void;
-  onViewResults: (surveyId: string) => void;
+  /** Navigate to the question builder (`/surveys/$surveyId`). */
+  onNavigateToBuilder: (surveyId: string) => void;
+  /** Navigate to the live deployment tracker (`/surveys/$surveyId/publish`). */
+  onNavigateToTracking: (surveyId: string) => void;
+  /** Navigate to the results compass (`/results/$surveyId/compass`). */
+  onNavigateToResults: (surveyId: string) => void;
   onArchive?: (surveyId: string) => void;
 }
 
@@ -31,9 +34,9 @@ export interface ClientDetailSurveysTabProps {
 export function ClientDetailSurveysTab({
   organizationId,
   userId,
-  onSelectSurvey,
-  onEditQuestions,
-  onViewResults,
+  onNavigateToBuilder,
+  onNavigateToTracking,
+  onNavigateToResults,
   onArchive,
 }: ClientDetailSurveysTabProps): ReactElement {
   const [configSurveyId, setConfigSurveyId] = useState<string | null>(null);
@@ -97,17 +100,42 @@ export function ClientDetailSurveysTab({
     [archiveSurvey, onArchive],
   );
 
+  // Status-aware default action for the card's primary click target.
+  // Drafts open the config modal (next step is setup); active/paused go to the
+  // live tracker; closed/archived go to results. Newly-created surveys aren't
+  // in the cached list yet — they're drafts, so default to the config modal.
+  const handleSelectSurvey = useCallback(
+    (surveyId: string): void => {
+      const survey = surveys?.find((s) => s.id === surveyId);
+      const status = survey?.status ?? 'draft';
+      switch (status) {
+        case 'active':
+        case 'paused':
+          onNavigateToTracking(surveyId);
+          return;
+        case 'closed':
+        case 'archived':
+          onNavigateToResults(surveyId);
+          return;
+        case 'draft':
+        default:
+          setConfigSurveyId(surveyId);
+      }
+    },
+    [surveys, onNavigateToTracking, onNavigateToResults],
+  );
+
   return (
     <>
       <div role="tabpanel" id="client-detail-panel-surveys" aria-labelledby="client-detail-surveys">
         <SurveyListPage
           organizationId={organizationId}
           userId={userId}
-          onSelectSurvey={onSelectSurvey}
+          onSelectSurvey={handleSelectSurvey}
           onConfigure={(surveyId) => setConfigSurveyId(surveyId)}
-          onEditQuestions={onEditQuestions}
+          onEditQuestions={onNavigateToBuilder}
           onCopyLink={handleCopyLink}
-          onViewResults={onViewResults}
+          onViewResults={onNavigateToResults}
           onArchive={handleArchive}
         />
       </div>

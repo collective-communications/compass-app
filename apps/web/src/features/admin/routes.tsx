@@ -149,13 +149,13 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
           <ClientDetailSurveysTab
             organizationId={orgId}
             userId={user?.id ?? ''}
-            onSelectSurvey={(surveyId) => {
+            onNavigateToBuilder={(surveyId) => {
               void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
             }}
-            onEditQuestions={(surveyId) => {
-              void navigate({ to: '/surveys/$surveyId', params: { surveyId } });
+            onNavigateToTracking={(surveyId) => {
+              void navigate({ to: '/surveys/$surveyId/publish', params: { surveyId } });
             }}
-            onViewResults={(surveyId) => {
+            onNavigateToResults={(surveyId) => {
               void navigate({ to: '/results/$surveyId/compass', params: { surveyId } });
             }}
           />
