@@ -64,11 +64,12 @@ export const useAnswerStore = create<AnswerState>((set, get) => ({
     for (const item of pendingQueue) {
       try {
         await upsertFn(item.questionId, item.value);
-      } catch {
+      } catch (err) {
         if (item.retryCount < 3) {
           remaining.push({ ...item, retryCount: item.retryCount + 1 });
         } else {
-          set({ lastError: `Failed to save answer for question after 3 retries.` });
+          const detail = err instanceof Error ? err.message : String(err);
+          set({ lastError: `Failed to save answer after 3 retries: ${detail}` });
         }
       }
     }

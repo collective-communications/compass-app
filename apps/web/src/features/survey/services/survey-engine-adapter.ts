@@ -59,7 +59,7 @@ type ResponseWithAnswersRow = ResponseRow & {
 
 import { DEFAULT_METADATA_CONFIG } from '@compass/types';
 import { formatDisplayDate } from '@compass/utils';
-import { supabase } from '../../../lib/supabase';
+import { supabase, surveySessionClient } from '../../../lib/supabase';
 import { logger } from '../../../lib/logger';
 import { mapSurveyRow, mapDeploymentRow, mapQuestionRow } from '../../../lib/mappers/survey-mappers';
 
@@ -151,7 +151,12 @@ export function createSurveyEngineAdapter(): Pick<
       deploymentId: string,
       sessionToken: string,
     ): Promise<SurveyResponse | null> {
-      const { data, error } = await supabase
+      // Anon SELECT on `responses` and `answers` requires an `x-session-token`
+      // header matching the row's `session_token` (migration 39). The module-
+      // level `supabase` client doesn't send it, so we build a short-lived
+      // client scoped to this respondent session.
+      const client = surveySessionClient(sessionToken);
+      const { data, error } = await client
         .from('responses')
         .select('*, answers(question_id, likert_value, open_text_value)')
         .eq('deployment_id', deploymentId)
@@ -231,7 +236,11 @@ export function createSurveyEngineAdapter(): Pick<
         : {};
 
       if (params.responseId) {
-        const { error } = await supabase
+        // Anon UPDATE on `responses` returns representation by default, which
+        // runs the SELECT policy that requires `x-session-token` (migration
+        // 39). responseId === sessionToken, so use the scoped client.
+        const client = surveySessionClient(params.responseId);
+        const { error } = await client
           .from('responses')
           .update(metadataColumns)
           .eq('id', params.responseId);
@@ -318,7 +327,10 @@ export function createSurveyEngineAdapter(): Pick<
     },
 
     async submitResponse(responseId: string): Promise<void> {
-      const { error } = await supabase
+      // responseId === session_token; use the scoped client so the update's
+      // returning SELECT can pass the session-token RLS check.
+      const client = surveySessionClient(responseId);
+      const { error } = await client
         .from('responses')
         .update({ is_complete: true, submitted_at: new Date().toISOString() })
         .eq('id', responseId)
@@ -348,7 +360,15 @@ export function createSurveyEngineAdapter(): Pick<
           : { likert_value: null, open_text_value: value }),
       };
 
-      const { error } = await supabase
+      // responseId === session_token. The module-level `supabase` client
+      // persists auth sessions, so a stale admin/client login in the same
+      // browser tab sends `Authorization: Bearer …`, flipping auth.role() to
+      // `authenticated` and routing writes through the authenticated SELECT
+      // policy — which requires `x-session-token` per migration 39. Use the
+      // scoped client (no persisted auth, session-token header set) so the
+      // upsert's returning SELECT passes RLS regardless of tab state.
+      const client = surveySessionClient(responseId);
+      const { error } = await client
         .from('answers')
         .upsert(row, { onConflict: 'response_id,question_id' });
 

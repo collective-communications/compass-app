@@ -20,19 +20,27 @@ interface MockResult {
 }
 
 let queryResult: MockResult = { data: null, error: null };
+let sessionQueryResult: MockResult = { data: null, error: null };
 
-function makeChain(): Record<string, unknown> {
+/** Captured arguments for surveySessionClient() — one entry per call. */
+const sessionClientCalls: string[] = [];
+
+function makeChain(resultRef: () => MockResult): Record<string, unknown> {
   const chain: Record<string, (...args: unknown[]) => unknown> = {};
   const self = (): Record<string, unknown> => chain;
   chain.select = self;
   chain.eq = self;
-  chain.single = (): Promise<MockResult> => Promise.resolve(queryResult);
-  chain.maybeSingle = (): Promise<MockResult> => Promise.resolve(queryResult);
+  chain.single = (): Promise<MockResult> => Promise.resolve(resultRef());
+  chain.maybeSingle = (): Promise<MockResult> => Promise.resolve(resultRef());
   return chain;
 }
 
 mock.module('../../../lib/supabase', () => ({
-  supabase: { from: () => makeChain() },
+  supabase: { from: () => makeChain(() => queryResult) },
+  surveySessionClient: (sessionToken: string) => {
+    sessionClientCalls.push(sessionToken);
+    return { from: () => makeChain(() => sessionQueryResult) };
+  },
 }));
 
 mock.module('../../../lib/logger', () => ({
@@ -267,5 +275,92 @@ describe('resolveDeployment — status ordering grid', () => {
     if (result.status === 'closed') {
       expect(result.closesAt).toBeNull();
     }
+  });
+});
+
+describe('resumeResponse — session-token binding', () => {
+  // Regression: migration 39 requires anon SELECT on responses/answers to
+  // carry an `x-session-token` header. resumeResponse must build a session-
+  // scoped client via surveySessionClient() rather than using the module-
+  // level anon client, otherwise RLS returns zero rows and resume silently
+  // fails.
+
+  beforeEach(() => {
+    queryResult = { data: null, error: null };
+    sessionQueryResult = { data: null, error: null };
+    sessionClientCalls.length = 0;
+  });
+
+  test('resume with no matching response returns null', async () => {
+    sessionQueryResult = { data: null, error: null };
+    const result = await adapter.resumeResponse('deployment-1', 'session-token-1');
+    expect(result).toBeNull();
+    // Contract: the adapter must scope the query to the given session token.
+    expect(sessionClientCalls).toEqual(['session-token-1']);
+  });
+
+  test('resume with matching response returns mapped SurveyResponse', async () => {
+    sessionQueryResult = {
+      data: {
+        id: 'resp-1',
+        deployment_id: 'deployment-1',
+        session_token: 'session-token-1',
+        is_complete: false,
+        submitted_at: null,
+        metadata_department: null,
+        metadata_role: null,
+        metadata_location: null,
+        metadata_tenure: null,
+        user_agent: null,
+        created_at: '2026-04-22T00:00:00Z',
+        updated_at: '2026-04-22T00:00:00Z',
+        answers: [{ question_id: 'q-1', likert_value: 3, open_text_value: null }],
+      },
+      error: null,
+    };
+    const result = await adapter.resumeResponse('deployment-1', 'session-token-1');
+    expect(result).not.toBeNull();
+    expect(result?.id).toBe('resp-1');
+    expect(result?.deploymentId).toBe('deployment-1');
+    expect(result?.answers['q-1']).toBe(3);
+    // Confirm the session-scoped client was used (sends x-session-token).
+    expect(sessionClientCalls).toEqual(['session-token-1']);
+  });
+
+  test('resume with DB error returns null (fail-closed)', async () => {
+    sessionQueryResult = { data: null, error: { message: 'rls denied' } };
+    const result = await adapter.resumeResponse('deployment-1', 'session-token-1');
+    expect(result).toBeNull();
+    expect(sessionClientCalls).toEqual(['session-token-1']);
+  });
+
+  test('resume never uses the module-level supabase client', async () => {
+    // If the adapter regresses to using `supabase` (no header), it would
+    // read from queryResult. Set a decoy row there that, if read, would
+    // obviously leak: different deployment id. Assert the adapter ignored it.
+    queryResult = {
+      data: {
+        id: 'decoy-resp',
+        deployment_id: 'WRONG',
+        session_token: 'session-token-1',
+        is_complete: false,
+        submitted_at: null,
+        metadata_department: null,
+        metadata_role: null,
+        metadata_location: null,
+        metadata_tenure: null,
+        user_agent: null,
+        created_at: '2026-04-22T00:00:00Z',
+        updated_at: '2026-04-22T00:00:00Z',
+        answers: [],
+      },
+      error: null,
+    };
+    sessionQueryResult = { data: null, error: null };
+
+    const result = await adapter.resumeResponse('deployment-1', 'session-token-1');
+    expect(result).toBeNull();
+    // Confirms the adapter went through the session client, not the module client.
+    expect(sessionClientCalls).toEqual(['session-token-1']);
   });
 });
