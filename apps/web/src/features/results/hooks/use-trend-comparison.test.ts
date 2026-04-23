@@ -46,6 +46,7 @@ function makeChain(): Record<string, unknown> {
 }
 
 mock.module('../../../lib/supabase', () => ({
+  surveySessionClient: () => ({ from: () => ({}) }),
   supabase: {
     from: (table: string) => {
       callLog.push({ table });

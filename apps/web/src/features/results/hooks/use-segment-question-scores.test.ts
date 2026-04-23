@@ -19,6 +19,7 @@ let rpcCalls: RpcCall[] = [];
 let rpcResult: { data: unknown; error: null | Error } = { data: [], error: null };
 
 mock.module('../../../lib/supabase', () => ({
+  surveySessionClient: () => ({ from: () => ({}) }),
   supabase: {
     rpc: (fn: string, args: Record<string, unknown>) => {
       rpcCalls.push({ fn, args });

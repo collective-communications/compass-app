@@ -44,6 +44,7 @@ function makeChain(resultIndex: number): Record<string, unknown> {
 }
 
 mock.module('../../../lib/supabase', () => ({
+  surveySessionClient: () => ({ from: () => ({}) }),
   supabase: {
     from: (_table: string) => {
       const idx = fromCallIndex++;

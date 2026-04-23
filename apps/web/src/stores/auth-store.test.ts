@@ -6,6 +6,7 @@ import type { SessionContext, AuthUser } from '@compass/types';
 let signOutResult = { error: null as null | { message: string } };
 
 mock.module('../lib/supabase', () => ({
+  surveySessionClient: () => ({ from: () => ({}) }),
   supabase: {
     auth: {
       signOut: () => Promise.resolve(signOutResult),

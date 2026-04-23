@@ -30,6 +30,7 @@ const subscriptionUnsubscribe = mock(() => undefined);
 let lastAuthStateListener: ((event: string) => void) | null = null;
 
 mock.module('../../../lib/supabase', () => ({
+  surveySessionClient: () => ({ from: () => ({}) }),
   supabase: {
     auth: {
       updateUser: (args: { password: string }) => updateUserMock(args),
