@@ -811,7 +811,20 @@ async function seedUser(
   let userId = existing?.users?.find((u) => u.email === email)?.id ?? null;
 
   if (userId) {
-    console.log(`  exists: ${email} (${userId})`);
+    // Reassert password + metadata so the seed is idempotent even if the
+    // cloud user drifted (manual password change, rotated secret, etc.).
+    // Without this, CI/E2E silently breaks when a seed user's password is
+    // altered out-of-band.
+    const { error: updErr } = await client.auth.admin.updateUserById(userId, {
+      password: TEST_PASSWORD,
+      email_confirm: true,
+      user_metadata: { full_name: name },
+    });
+    if (updErr) {
+      console.error(`  seedUser password reset FAILED: ${email} — ${updErr.message}`);
+    } else {
+      console.log(`  exists: ${email} (${userId}) — password reasserted`);
+    }
   } else {
     const { data, error } = await client.auth.admin.createUser({
       email,
