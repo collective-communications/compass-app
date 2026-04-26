@@ -1,4 +1,8 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@compass/types';
+import { configureSdk } from '@compass/sdk';
+import { createSurveyEngineAdapter } from './survey-engine-adapter';
 
 /**
  * Tests for createSurveyEngineAdapter.resolveDeployment.
@@ -35,19 +39,14 @@ function makeChain(resultRef: () => MockResult): Record<string, unknown> {
   return chain;
 }
 
-mock.module('../../../lib/supabase', () => ({
-  supabase: { from: () => makeChain(() => queryResult) },
+configureSdk({
+  client: { from: () => makeChain(() => queryResult) } as unknown as SupabaseClient<Database>,
   surveySessionClient: (sessionToken: string) => {
     sessionClientCalls.push(sessionToken);
-    return { from: () => makeChain(() => sessionQueryResult) };
+    return { from: () => makeChain(() => sessionQueryResult) } as unknown as SupabaseClient<Database>;
   },
-}));
-
-mock.module('../../../lib/logger', () => ({
-  logger: { error: () => {}, warn: () => {}, info: () => {} },
-}));
-
-const { createSurveyEngineAdapter } = await import('./survey-engine-adapter.js');
+  logger: { error: () => undefined, warn: () => undefined, info: () => undefined, debug: () => undefined },
+});
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 

@@ -1,4 +1,14 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@compass/types';
+import { configureSdk } from '@compass/sdk';
+import {
+  listSurveys,
+  createSurvey,
+  updateSurveyStatus,
+  reorderQuestions,
+  updateQuestion,
+} from './admin-survey-service';
 
 /**
  * Tests for the admin survey service — exercises CRUD and question
@@ -59,24 +69,16 @@ function makeChain(table: string): Record<string, unknown> {
   return chain;
 }
 
-mock.module('../../../../lib/supabase', () => ({
-  surveySessionClient: () => ({ from: () => ({}) }),
-  supabase: {
+configureSdk({
+  client: {
     from: (table: string) => makeChain(table),
     rpc: (fn: string, args: Record<string, unknown>) => {
       rpcCalls.push({ fn, args });
       return Promise.resolve(nextRpcResult);
     },
-  },
-}));
-
-const {
-  listSurveys,
-  createSurvey,
-  updateSurveyStatus,
-  reorderQuestions,
-  updateQuestion,
-} = await import('./admin-survey-service.js');
+  } as unknown as SupabaseClient<Database>,
+  surveySessionClient: () => ({ from: () => ({}) }) as unknown as SupabaseClient<Database>,
+});
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 

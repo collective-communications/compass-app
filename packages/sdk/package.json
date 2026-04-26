@@ -1,0 +1,14 @@
+{
+  "name": "@compass/sdk",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@compass/types": "workspace:*",
+    "@compass/utils": "workspace:*",
+    "@supabase/supabase-js": "^2.98.0"
+  }
+}

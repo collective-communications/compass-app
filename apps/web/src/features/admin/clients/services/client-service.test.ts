@@ -1,4 +1,8 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@compass/types';
+import { configureSdk } from '@compass/sdk';
+import { listOrganizations, createOrganization } from './client-service';
 
 /**
  * Tests for the admin client service — exercises listOrganizations (with
@@ -42,12 +46,10 @@ function makeChain(): Record<string, unknown> {
   return chain;
 }
 
-mock.module('../../../../lib/supabase', () => ({
-  surveySessionClient: () => ({ from: () => ({}) }),
-  supabase: { from: () => makeChain() },
-}));
-
-const { listOrganizations, createOrganization } = await import('./client-service.js');
+configureSdk({
+  client: { from: () => makeChain() } as unknown as SupabaseClient<Database>,
+  surveySessionClient: () => ({ from: () => ({}) }) as unknown as SupabaseClient<Database>,
+});
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 

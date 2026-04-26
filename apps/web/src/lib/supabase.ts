@@ -1,6 +1,8 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { optionalEnv } from '@compass/utils';
+import { configureSdk } from '@compass/sdk';
 import type { Database } from './database.types';
+import { logger } from './logger';
 
 let _client: SupabaseClient<Database> | null = null;
 
@@ -52,3 +54,9 @@ export function surveySessionClient(sessionToken: string): SupabaseClient<Databa
     auth: { persistSession: false, autoRefreshToken: false },
   });
 }
+
+// Wire the SDK so every service module reads the same client + session-token
+// factory + logger as the rest of the web app. This runs once per module
+// load — every consumer of `@compass/sdk` in the app has imported through
+// the shim service files, which import this module.
+configureSdk({ client: supabase, surveySessionClient, logger });

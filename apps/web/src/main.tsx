@@ -2,6 +2,10 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+// Side-effect import: registers the web app's Supabase client + logger with
+// @compass/sdk so service functions imported by the React tree resolve their
+// dependencies. Must run before any feature module that calls SDK functions.
+import './lib/supabase';
 import { AuthProvider } from './features/auth/components';
 import { routeTree } from './routes/__root';
 import { registerTier3Content } from './components/help/content/tier-3-survey';

@@ -14,6 +14,7 @@
     { "path": "../../packages/tokens" },
     { "path": "../../packages/ui" },
     { "path": "../../packages/compass" },
-    { "path": "../../packages/scoring" }
+    { "path": "../../packages/scoring" },
+    { "path": "../../packages/sdk" }
   ]
 }

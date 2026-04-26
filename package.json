@@ -36,11 +36,14 @@
     "compass:status": "scripts/app-manager.sh status",
     "ci:watch": "scripts/ci-watch.sh",
     "push": "git push && scripts/ci-watch.sh",
-    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules"
+    "clean": "rm -rf node_modules apps/*/node_modules packages/*/node_modules tooling/*/node_modules",
+    "headless-smoke": "bun run scripts/headless-smoke.ts"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
+    "@compass/sdk": "workspace:*",
+    "@compass/types": "workspace:*",
     "@happy-dom/global-registrator": "20.8.4",
     "@supabase/supabase-js": "^2.98.0",
     "@testing-library/react": "^16.3.2",

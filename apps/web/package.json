@@ -13,6 +13,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@compass/compass": "workspace:*",
     "@compass/scoring": "workspace:*",
+    "@compass/sdk": "workspace:*",
     "@compass/tokens": "workspace:*",
     "@compass/types": "workspace:*",
     "@compass/ui": "workspace:*",

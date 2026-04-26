@@ -1,4 +1,14 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@compass/types';
+import { configureSdk } from '@compass/sdk';
+import {
+  listTeamMembers,
+  listInvitations,
+  createInvitation,
+  revokeInvitation,
+  updateUserRole,
+} from './user-service';
 
 /**
  * Tests for the admin user service — covers team-member listing,
@@ -47,9 +57,8 @@ function makeChain(): Record<string, unknown> {
   return chain;
 }
 
-mock.module('../../../../lib/supabase', () => ({
-  surveySessionClient: () => ({ from: () => ({}) }),
-  supabase: {
+configureSdk({
+  client: {
     from: () => makeChain(),
     functions: {
       invoke: (fn: string, opts: { body: unknown }) => {
@@ -57,16 +66,9 @@ mock.module('../../../../lib/supabase', () => ({
         return Promise.resolve({ data: null, error: null });
       },
     },
-  },
-}));
-
-const {
-  listTeamMembers,
-  listInvitations,
-  createInvitation,
-  revokeInvitation,
-  updateUserRole,
-} = await import('./user-service.js');
+  } as unknown as SupabaseClient<Database>,
+  surveySessionClient: () => ({ from: () => ({}) }) as unknown as SupabaseClient<Database>,
+});
 
 // ─── Tests ──────────────────────────────────────────────────────────────────
 

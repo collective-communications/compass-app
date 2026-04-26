@@ -1,4 +1,8 @@
-import { describe, test, expect, mock, beforeEach } from 'bun:test';
+import { describe, test, expect, beforeEach } from 'bun:test';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import type { Database } from '@compass/types';
+import { configureSdk } from '@compass/sdk';
+import { assembleReportPayload } from './report-assembler';
 
 /**
  * Tests for assembleReportPayload.
@@ -43,17 +47,15 @@ function makeChain(resultIndex: number): Record<string, unknown> {
   return chain;
 }
 
-mock.module('../../../lib/supabase', () => ({
-  surveySessionClient: () => ({ from: () => ({}) }),
-  supabase: {
+configureSdk({
+  client: {
     from: (_table: string) => {
       const idx = fromCallIndex++;
       return makeChain(idx);
     },
-  },
-}));
-
-const { assembleReportPayload } = await import('./report-assembler.js');
+  } as unknown as SupabaseClient<Database>,
+  surveySessionClient: () => ({ from: () => ({}) }) as unknown as SupabaseClient<Database>,
+});
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
 
