@@ -12,6 +12,8 @@
 
 import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { Survey, Deployment, SurveyStatus, UserRole } from '@compass/types';
+import type { DimensionScoreMap, DimensionScore } from '@compass/scoring';
+import type { DimensionCode } from '@compass/types';
 import { supabase } from '../../../lib/supabase';
 import { STALE_TIMES } from '../../../lib/query-config';
 import { useAuthStore } from '../../../stores/auth-store';
@@ -60,6 +62,8 @@ export const dashboardKeys = {
    */
   data: (orgId: string, role: UserRole | 'anonymous') =>
     [...dashboardKeys.all, 'data', orgId, role] as const,
+  scores: (surveyId: string) =>
+    [...dashboardKeys.all, 'scores', surveyId] as const,
 };
 
 // ─── Fetcher ────────────────────────────────────────────────────────────────
@@ -233,6 +237,50 @@ function mapDeployment(row: Record<string, unknown>): Deployment {
   };
 }
 
+// ─── Scores Fetcher ─────────────────────────────────────────────────────────
+
+interface SafeSegmentScoreRow {
+  survey_id: string;
+  segment_type: string;
+  segment_value: string;
+  dimension_code: string;
+  score: number;
+  raw_score: number;
+  response_count: number;
+}
+
+function transformToScoreMap(rows: SafeSegmentScoreRow[]): DimensionScoreMap {
+  const map = {} as Record<string, DimensionScore>;
+  for (const row of rows) {
+    map[row.dimension_code] = {
+      dimensionId: row.dimension_code,
+      dimensionCode: row.dimension_code as DimensionCode,
+      score: row.score,
+      rawScore: row.raw_score,
+      responseCount: row.response_count,
+    };
+  }
+  return map as DimensionScoreMap;
+}
+
+async function fetchDashboardScores(surveyId: string): Promise<DimensionScoreMap> {
+  const { data, error } = await supabase
+    .from('safe_segment_scores')
+    .select('*')
+    .eq('survey_id', surveyId)
+    .eq('segment_type', 'overall');
+
+  if (error) {
+    throw new Error(
+      `dashboard: scores load failed: ${error.code ?? 'unknown'}: ${error.message}${
+        error.hint ? ` (hint: ${error.hint})` : ''
+      }`,
+    );
+  }
+
+  return transformToScoreMap(data as SafeSegmentScoreRow[]);
+}
+
 // ─── Hook ───────────────────────────────────────────────────────────────────
 
 export interface UseDashboardDataOptions {
@@ -245,6 +293,8 @@ export interface UseDashboardDataResult {
   previousSurveys: PreviousSurvey[];
   isLoading: boolean;
   error: Error | null;
+  scores: DimensionScoreMap | null;
+  scoresLoading: boolean;
   /** Manually re-run the underlying query (e.g. from an error-state retry button). */
   refetch: () => void;
 }
@@ -252,6 +302,7 @@ export interface UseDashboardDataResult {
 /**
  * Fetches all dashboard data for a client organization.
  * Returns the currently active survey (if any) and a list of previous (closed) surveys.
+ * When the active survey has `scoresCalculated === true`, also fetches dimension scores.
  *
  * `responseCount` on rows is `null` for client_* roles because RLS blocks
  * them from the `responses` table; callers render a placeholder in that case.
@@ -273,11 +324,25 @@ export function useDashboardData({
     gcTime: 10 * 60 * 1000,
   });
 
+  const activeSurvey = query.data?.activeSurvey ?? null;
+  const scoresEnabled =
+    enabled && (activeSurvey?.survey.scoresCalculated ?? false) && !!activeSurvey?.survey.id;
+
+  const scoresQuery: UseQueryResult<DimensionScoreMap> = useQuery({
+    queryKey: dashboardKeys.scores(activeSurvey?.survey.id ?? ''),
+    queryFn: () => fetchDashboardScores(activeSurvey!.survey.id),
+    enabled: scoresEnabled,
+    staleTime: STALE_TIMES.results,
+    gcTime: 10 * 60 * 1000,
+  });
+
   return {
-    activeSurvey: query.data?.activeSurvey ?? null,
+    activeSurvey,
     previousSurveys: query.data?.previousSurveys ?? [],
     isLoading: query.isLoading,
     error: query.error,
+    scores: scoresQuery.data ?? null,
+    scoresLoading: scoresQuery.isLoading,
     refetch: () => {
       void query.refetch();
     },

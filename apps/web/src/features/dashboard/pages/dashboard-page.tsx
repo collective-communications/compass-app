@@ -12,6 +12,7 @@ import { useClientAccess } from '../hooks/use-client-access';
 import { ActiveSurveyCard } from '../components/active-survey-card';
 import { QuickActions } from '../components/quick-actions';
 import { PreviousSurveys } from '../components/previous-surveys';
+import { DashboardCompassPreview } from '../components/dashboard-compass-preview';
 import { AppErrorFallback } from '../../../components/ui/app-error-fallback';
 
 /** Extract first name from a full name string */
@@ -22,9 +23,10 @@ function getFirstName(fullName: string | null): string {
 
 export function DashboardPage(): ReactElement {
   const user = useAuthStore((s) => s.user);
-  const { activeSurvey, previousSurveys, isLoading, error, refetch } = useDashboardData({
-    organizationId: user?.organizationId ?? null,
-  });
+  const { activeSurvey, previousSurveys, isLoading, error, refetch, scores, scoresLoading } =
+    useDashboardData({
+      organizationId: user?.organizationId ?? null,
+    });
 
   const navigate = useAppNavigate();
   const firstName = getFirstName(user?.fullName ?? null);
@@ -101,10 +103,13 @@ export function DashboardPage(): ReactElement {
               <h2 className="mb-4 text-base font-semibold text-[var(--grey-900)]">
                 Latest Results
               </h2>
-              {/* Mini compass preview placeholder */}
-              <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-100)] bg-[var(--surface-card)]">
-                <p className="text-xs text-[var(--text-tertiary)]">Compass Preview</p>
-              </div>
+              {activeSurvey?.survey.scoresCalculated === true ? (
+                <DashboardCompassPreview scores={scores} isLoading={scoresLoading} />
+              ) : (
+                <div className="flex aspect-square w-full items-center justify-center rounded-lg border border-dashed border-[var(--grey-100)] bg-[var(--surface-card)]">
+                  <p className="text-xs text-[var(--text-tertiary)]">Compass Preview</p>
+                </div>
+              )}
               {resultsEnabled && activeSurvey && (
                 <button
                   type="button"
