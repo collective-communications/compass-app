@@ -1447,6 +1447,44 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          id: string
+          reminder_enabled: boolean
+          report_ready_enabled: boolean
+          survey_invitation_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reminder_enabled?: boolean
+          report_ready_enabled?: boolean
+          survey_invitation_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reminder_enabled?: boolean
+          report_ready_enabled?: boolean
+          survey_invitation_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           assigned_clients: string[]
