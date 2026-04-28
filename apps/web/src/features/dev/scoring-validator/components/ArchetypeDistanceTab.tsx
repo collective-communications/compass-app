@@ -1,0 +1,260 @@
+/**
+ * ArchetypeDistanceTab — Archetypes analysis panel for the Scoring Validator.
+ *
+ * Shows the matched archetype card and a full distance table covering all 6
+ * archetype vectors, sorted by distance (closest first).
+ */
+
+import React from 'react';
+import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
+
+export interface ArchetypeDistanceTabProps {
+  /** Full pipeline outputs from the root ScoringValidator. */
+  outputs: ScoringValidatorOutputs;
+}
+
+type Confidence = 'strong' | 'moderate' | 'weak';
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Returns inline style tokens for a confidence level. */
+function confidenceStyle(confidence: Confidence): React.CSSProperties {
+  switch (confidence) {
+    case 'strong':
+      return {
+        background: 'var(--severity-healthy-bg, #E8F5E9)',
+        color: 'var(--severity-healthy-text, #2E7D32)',
+      };
+    case 'moderate':
+      return {
+        background: 'var(--severity-medium-bg, #FFF8E1)',
+        color: 'var(--severity-medium-text, #F57F17)',
+      };
+    case 'weak':
+      return {
+        background: 'var(--grey-100, #F5F5F5)',
+        color: 'var(--text-tertiary, #757575)',
+      };
+  }
+}
+
+/** Badge component for confidence level. */
+function ConfidenceBadge({ confidence }: { confidence: Confidence }): React.ReactElement {
+  return (
+    <span
+      style={{
+        ...confidenceStyle(confidence),
+        fontSize: 11,
+        fontWeight: 700,
+        fontFamily: 'monospace',
+        padding: '2px 7px',
+        borderRadius: 4,
+        letterSpacing: '0.04em',
+      }}
+    >
+      {confidence.toUpperCase()}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
+/**
+ * Renders the Archetypes analysis tab:
+ * - Matched archetype card with confidence and distance.
+ * - Threshold reference annotations.
+ * - Full 6-row distance table, winner highlighted.
+ */
+export function ArchetypeDistanceTab({ outputs }: ArchetypeDistanceTabProps): React.ReactElement {
+  const { archetypeMatch, allArchetypeDistances } = outputs;
+  const winnerId = archetypeMatch.archetype.id;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      {/* ── Matched archetype card ─────────────────────────────────────── */}
+      <div
+        style={{
+          background: 'var(--surface-card, #FFFFFF)',
+          border: '1px solid var(--grey-200, #E5E4E0)',
+          borderRadius: 8,
+          padding: '16px 20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 8,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span
+            style={{
+              fontSize: 18,
+              fontWeight: 700,
+              color: 'var(--text-primary, #212121)',
+            }}
+          >
+            {archetypeMatch.archetype.name}
+          </span>
+          <ConfidenceBadge confidence={archetypeMatch.confidence} />
+        </div>
+        <p
+          style={{
+            margin: 0,
+            fontSize: 13,
+            color: 'var(--text-secondary, #616161)',
+            lineHeight: 1.5,
+          }}
+        >
+          {archetypeMatch.archetype.description}
+        </p>
+        <span
+          style={{
+            fontSize: 12,
+            color: 'var(--text-tertiary, #757575)',
+            fontFamily: 'monospace',
+          }}
+        >
+          Distance: {archetypeMatch.distance.toFixed(1)}
+        </span>
+      </div>
+
+      {/* ── Threshold reference ───────────────────────────────────────── */}
+      <p
+        style={{
+          margin: 0,
+          fontSize: 11,
+          color: 'var(--text-tertiary, #757575)',
+          fontFamily: 'monospace',
+          letterSpacing: '0.02em',
+        }}
+      >
+        ◆ STRONG: distance &lt; 15&nbsp;&nbsp;&nbsp;◆ MODERATE: distance &lt; 25&nbsp;&nbsp;&nbsp;◆ WEAK: distance ≥ 25
+      </p>
+
+      {/* ── Distance table ───────────────────────────────────────────── */}
+      <div
+        style={{
+          background: 'var(--surface-card, #FFFFFF)',
+          border: '1px solid var(--grey-200, #E5E4E0)',
+          borderRadius: 8,
+          overflow: 'hidden',
+        }}
+      >
+        <table
+          style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            fontSize: 12,
+          }}
+        >
+          <thead>
+            <tr
+              style={{
+                background: 'var(--grey-50, #FAFAFA)',
+                borderBottom: '1px solid var(--grey-200, #E5E4E0)',
+              }}
+            >
+              {['Archetype', 'Core', 'Clarity', 'Connection', 'Collab.', 'Distance', 'Confidence'].map(
+                (col) => (
+                  <th
+                    key={col}
+                    style={{
+                      padding: '8px 12px',
+                      textAlign: col === 'Archetype' ? 'left' : 'center',
+                      fontWeight: 600,
+                      color: 'var(--text-secondary, #616161)',
+                      fontSize: 11,
+                      letterSpacing: '0.03em',
+                      textTransform: 'uppercase',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {col}
+                  </th>
+                ),
+              )}
+            </tr>
+          </thead>
+          <tbody>
+            {allArchetypeDistances.map((row, i) => {
+              const isWinner = row.archetype.id === winnerId;
+              return (
+                <tr
+                  key={row.archetype.id}
+                  style={{
+                    background: isWinner
+                      ? 'var(--grey-50, #F5F5F5)'
+                      : i % 2 === 0
+                        ? 'transparent'
+                        : 'var(--grey-25, #FAFAFA)',
+                    borderBottom: '1px solid var(--grey-100, #F5F5F5)',
+                  }}
+                >
+                  {/* Archetype name */}
+                  <td
+                    style={{
+                      padding: '9px 12px',
+                      fontWeight: isWinner ? 600 : 400,
+                      color: 'var(--text-primary, #212121)',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {isWinner && (
+                      <span
+                        style={{
+                          marginRight: 6,
+                          color: 'var(--severity-healthy-text, #2E7D32)',
+                        }}
+                      >
+                        ✓
+                      </span>
+                    )}
+                    {row.archetype.name}
+                  </td>
+                  {/* Target scores */}
+                  {(['core', 'clarity', 'connection', 'collaboration'] as const).map((dim) => (
+                    <td
+                      key={dim}
+                      style={{
+                        padding: '9px 12px',
+                        textAlign: 'center',
+                        fontFamily: 'monospace',
+                        color: 'var(--text-secondary, #616161)',
+                      }}
+                    >
+                      {row.archetype.targetScores[dim] ?? '—'}
+                    </td>
+                  ))}
+                  {/* Distance */}
+                  <td
+                    style={{
+                      padding: '9px 12px',
+                      textAlign: 'center',
+                      fontFamily: 'monospace',
+                      fontWeight: isWinner ? 600 : 400,
+                      color: 'var(--text-primary, #212121)',
+                    }}
+                  >
+                    {row.distance.toFixed(1)}
+                  </td>
+                  {/* Confidence badge */}
+                  <td
+                    style={{ padding: '9px 12px', textAlign: 'center' }}
+                  >
+                    <ConfidenceBadge confidence={row.confidence} />
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

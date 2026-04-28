@@ -17,6 +17,7 @@
     "db:seed": "bun run scripts/seed-dev.ts",
     "db:clean": "bun run scripts/seed-dev.ts --clean",
     "seed:export": "bun run scripts/export-seed.ts",
+    "export-seed-answers": "bun run scripts/export-seed-answers.ts",
     "vault:seed": "bun run scripts/seed-vault.ts",
     "setup:vercel": "bun run scripts/setup-vercel.ts",
     "build": "bun run --filter @compass/web build",

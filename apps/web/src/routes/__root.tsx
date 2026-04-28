@@ -8,6 +8,7 @@ import { createAuthRoutes } from '../features/auth/routes';
 import { createSettingsRoutes } from '../features/settings/routes';
 import { createHelpRoutes } from '../features/help/routes';
 import { createProfileRoutes } from '../features/profile/routes';
+import { createScoringValidatorRoutes } from '../features/dev/scoring-validator/index.js';
 import { PublicShell } from '../components/shells/public-shell';
 
 
@@ -67,6 +68,12 @@ const settingsRoutes = createSettingsRoutes(rootRoute);
 const helpRoutes = createHelpRoutes(rootRoute);
 const profileRoutes = createProfileRoutes(rootRoute);
 
+/* ── Dev routes (excluded from production builds) ─────────────── */
+
+const devRoutes = import.meta.env.DEV
+  ? [createScoringValidatorRoutes(rootRoute)]
+  : [];
+
 /* ── Not Found ─────────────────────────────────────────────────── */
 
 const notFoundRoute = createRoute({
@@ -95,5 +102,6 @@ export const routeTree = rootRoute.addChildren([
   settingsRoutes,
   helpRoutes,
   profileRoutes,
+  ...devRoutes,
   notFoundRoute,
 ]);
