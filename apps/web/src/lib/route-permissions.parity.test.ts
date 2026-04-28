@@ -18,7 +18,7 @@
  * The list below mirrors the path strings that the feature route modules pass
  * to `createRoute({ path })`. Extracted from:
  *   - apps/web/src/routes/__root.tsx               (`/`, `*` not-found)
- *   - apps/web/src/features/admin/routes.tsx       (`/clients`, `/clients/$orgId`, `/clients/$orgId/settings`, `/surveys/$surveyId`, `/surveys/$surveyId/publish`, `/users`, `/recommendations`)
+ *   - apps/web/src/features/admin/routes.tsx       (`/clients`, `/clients/$orgId`, `/clients/$orgId/settings`, `/surveys/$surveyId`, `/surveys/$surveyId/publish`, `/users`, `/recommendations`, `/email-log`, `/email-templates`)
  *   - apps/web/src/features/dashboard/routes.tsx   (`/dashboard`)
  *   - apps/web/src/features/results/routes.tsx     (`/results/$surveyId/*`)
  *   - apps/web/src/features/reports/routes.tsx     (`/reports/$surveyId`)
@@ -80,6 +80,9 @@ const REGISTERED_ROUTES = [
 
   // Admin — /email-log
   '/email-log',
+
+  // Admin — /email-templates
+  '/email-templates',
 
   // Client dashboard
   '/dashboard',

@@ -77,13 +77,16 @@ const RecommendationsPage = lazy(() =>
 const EmailLogPage = lazy(() =>
   import('./email/pages/email-log-page').then((m) => ({ default: m.EmailLogPage })),
 );
+const EmailTemplatesPage = lazy(() =>
+  import('./email/pages/email-templates-page').then((m) => ({ default: m.EmailTemplatesPage })),
+);
 
 /**
  * Creates the flat set of admin-owned routes. Each is a top-level child of
  * `rootRoute`, not nested under an `/admin` layout. The caller spreads the
  * returned array into `rootRoute.addChildren(...)`.
  */
-export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent) {
+export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent): AnyRoute[] {
   // ── /clients (list) ──────────────────────────────────────────────────────
   const clientsListRoute = createRoute({
     getParentRoute: () => parentRoute,
@@ -333,6 +336,22 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
+  // ── /email-templates (CCC_ADMIN + CCC_MEMBER — enforced by ROUTE_ACCESS) ─
+  const emailTemplatesRoute = createRoute({
+    getParentRoute: () => parentRoute,
+    path: '/email-templates',
+    beforeLoad: () => guardRoute('/email-templates'),
+    component: function EmailTemplatesLayout(): ReactElement {
+      return (
+        <AppShell>
+          <Suspense fallback={<RouteLoading />}>
+            <EmailTemplatesPage />
+          </Suspense>
+        </AppShell>
+      );
+    },
+  });
+
   return [
     clientsListRoute,
     clientDetailRoute.addChildren([
@@ -346,5 +365,6 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     usersRoute,
     recommendationsRoute,
     emailLogRoute,
+    emailTemplatesRoute,
   ];
 }
