@@ -8,6 +8,10 @@ interface UsePasswordResetReturn {
   error: string | null;
 }
 
+function isConnectivityError(message: string): boolean {
+  return /fetch|network|failed to fetch|load failed/i.test(message);
+}
+
 /**
  * Wraps `supabase.auth.resetPasswordForEmail` with anti-enumeration behavior:
  * always navigates to the sent page regardless of whether the email exists.
@@ -24,19 +28,13 @@ export function usePasswordReset(): UsePasswordResetReturn {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
-      if (resetError) {
-        // Surface only rate-limit or network errors — never "email not found"
-        if (resetError.message.includes('rate') || resetError.message.includes('limit')) {
-          setError('Too many requests. Please wait a moment.');
-        } else if (resetError.message.includes('fetch') || resetError.message.includes('network')) {
-          setError('Unable to connect. Please try again.');
-        } else {
-          setError('Something went wrong. Please try again.');
-        }
+      if (resetError && isConnectivityError(resetError.message)) {
+        setError('Unable to connect. Please try again.');
         setIsLoading(false);
         return;
       }
-      // Always navigate to sent page — regardless of whether email exists
+      // Always navigate to sent page for Auth API responses — regardless of
+      // whether the email exists or the provider suppressed the send.
       await navigate({ to: '/auth/forgot-password/sent', search: { email } });
     } catch {
       setError('Unable to connect. Please try again.');
