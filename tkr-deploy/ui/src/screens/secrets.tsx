@@ -14,10 +14,14 @@ import { Button } from '../components/Button.js';
 import { Card } from '../components/Card.js';
 import { StatusDot } from '../components/StatusDot.js';
 import { Skeleton } from '../components/Skeleton.js';
+import { effect } from '@preact/signals';
 import { syncState$, loadSync } from '../stores/sync.js';
 import type { SyncSecretsResponse } from '../stores/sync.js';
+import { deployState$ } from '../stores/deploy.js';
 import { apiFetch } from '../api.js';
-import type { DotStatus } from '../types.js';
+import { Annotation } from '../components/Annotation.js';
+import { FacetChip } from '../components/FacetChip.js';
+import type { DotStatus, RunSummary } from '../types.js';
 
 // -- Constants ----------------------------------------------------------------
 
@@ -314,6 +318,94 @@ function LockedState(): JSX.Element {
   );
 }
 
+// -- Run anchor + facet strip (Direction D) ----------------------------------
+
+function shortRun(runId: string): string {
+  return `#${runId.length >= 4 ? runId.slice(-4) : runId}`;
+}
+
+/** "~ last sync run #X" annotation. Shows the most recent overall run. */
+function RunAnchor(_props: { secrets: SecretEntry[] | null }): JSX.Element | null {
+  const [run, setRun] = useState<RunSummary | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    async function load(): Promise<void> {
+      try {
+        const data = await apiFetch<{ runs: RunSummary[] }>('/api/deploy/runs', { query: { limit: 1 } });
+        if (!cancelled) setRun(data.runs?.[0] ?? null);
+      } catch { if (!cancelled) setRun(null); }
+    }
+    void load();
+    const dispose = effect(() => {
+      const r = deployState$.value.currentRun;
+      if (r && !r.frozen) void load();
+    });
+    return () => { cancelled = true; dispose(); };
+  }, []);
+  if (!run) return null;
+  return (
+    <Annotation size="md">
+      ~ last sync in run{' '}
+      <a
+        href="/"
+        style={{ color: 'inherit', textDecoration: 'underline' }}
+        onClick={(e: MouseEvent) => {
+          e.preventDefault();
+          window.history.pushState(null, '', '/');
+          window.dispatchEvent(new PopStateEvent('popstate'));
+        }}
+      >
+        {shortRun(run.runId)}
+      </a>
+    </Annotation>
+  );
+}
+
+/** FacetChip strip across the per-target sync state for Vault → Supabase → Vercel → GitHub. */
+function SecretsFacetStrip({ secrets }: { secrets: SecretEntry[] | null }): JSX.Element | null {
+  if (!secrets) return null;
+
+  // Aggregate per-target state across all secrets: any "missing" → down,
+  // any "differs" → running (≈ pending), else ok.
+  const buckets: Record<'Supabase' | 'Vercel' | 'GitHub', { ok: number; warn: number; down: number }> = {
+    Supabase: { ok: 0, warn: 0, down: 0 },
+    Vercel: { ok: 0, warn: 0, down: 0 },
+    GitHub: { ok: 0, warn: 0, down: 0 },
+  };
+  for (const s of secrets) {
+    for (const t of s.targets) {
+      const name = t.name as 'Supabase' | 'Vercel' | 'GitHub';
+      if (!(name in buckets)) continue;
+      if (t.state === 'synced') buckets[name].ok += 1;
+      else if (t.state === 'differs' || t.state === 'unverifiable') buckets[name].warn += 1;
+      else if (t.state === 'missing') buckets[name].down += 1;
+    }
+  }
+
+  const chips: Array<{ provider: 'Vault' | 'Supabase' | 'Vercel' | 'GitHub'; status: 'ok' | 'down' | 'running'; change: string }> = [
+    { provider: 'Vault', status: 'ok', change: `${secrets.length} secret${secrets.length === 1 ? '' : 's'}` },
+  ];
+  (['Supabase', 'Vercel', 'GitHub'] as const).forEach((name) => {
+    const b = buckets[name];
+    const total = b.ok + b.warn + b.down;
+    if (total === 0) return;
+    const status = b.down > 0 ? 'down' : b.warn > 0 ? 'running' : 'ok';
+    const change =
+      status === 'down' ? `${b.down} missing` :
+      status === 'running' ? `${b.warn} differs` :
+      `${b.ok} synced`;
+    chips.push({ provider: name, status, change });
+  });
+
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, margin: '0 0 var(--space-md)' }}>
+      {chips.map((c) => (
+        <FacetChip key={c.provider} provider={c.provider} status={c.status} change={c.change} />
+      ))}
+    </div>
+  );
+}
+
 // -- Main screen --------------------------------------------------------------
 
 export function SecretsScreen(): JSX.Element {
@@ -360,7 +452,11 @@ export function SecretsScreen(): JSX.Element {
   return (
     <div class="screen screen--secrets">
       <Styles />
-      <h1 class="screen-heading">Secrets</h1>
+      <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, flexWrap: 'wrap' }}>
+        <h1 class="screen-heading" style={{ margin: 0 }}>Secrets</h1>
+        <RunAnchor secrets={secrets} />
+      </div>
+      <SecretsFacetStrip secrets={secrets} />
       {error && <Card severity="error"><p style={{ margin: 0, fontSize: 'var(--font-size-sm)' }}>{error}</p></Card>}
       <div class="s-layout">
         <VaultBanner vault={vault} />
