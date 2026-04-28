@@ -20,12 +20,13 @@
  *     "surveyId": string,
  *     "status":   "completed",
  *     "metrics": {
- *       "responsesProcessed": number,
- *       "segmentsScored":     number,
- *       "scoreRowsInserted":  number,
- *       "skippedAnswers":     number,
- *       "calculatedAt":       string,  // ISO 8601 timestamp
- *       "likertSize":         number
+ *       "responsesProcessed":   number,
+ *       "segmentsScored":       number,
+ *       "scoreRowsInserted":    number,
+ *       "skippedAnswers":       number,
+ *       "calculatedAt":         string,  // ISO 8601 timestamp
+ *       "likertSize":           number,
+ *       "recommendationsWritten": number
  *     },
  *     "coreHealth":          "healthy" | "fragile" | "broken" | undefined,
  *     "archetype":           { code: string, name: string, distance: number, confidence: string } | undefined,
@@ -47,6 +48,8 @@ import {
   loadQuestionMetadata,
   loadArchetypes,
   loadSurveySettings,
+  loadRecommendationTemplates,
+  upsertMatchedRecommendations,
   checkConcurrency,
   insertRecalculation,
   completeRecalculation,
@@ -55,6 +58,7 @@ import {
   surveyExists,
 } from './db.ts';
 import type { ArchetypeRow } from './db.ts';
+import { matchRecommendations } from './recommendations.ts';
 import { DIMENSION_CODES, type AnswerWithMeta, type SegmentScoreResult } from './types.ts';
 import {
   calculateAllDimensionScores,
@@ -249,6 +253,28 @@ Deno.serve(async (req: Request) => {
     await upsertScores(client, surveyId, scoreRows);
     await markSurveyScored(client, surveyId);
 
+    // Match and persist recommendations from active templates
+    let recommendationsWritten = 0;
+    const templates = await loadRecommendationTemplates(client);
+    if (templates.length > 0 && overallResult) {
+      const { data: dimRows } = await client
+        .from('dimensions')
+        .select('id, code');
+      const dimensionIdMap: Record<string, string> = {};
+      for (const d of dimRows ?? []) {
+        dimensionIdMap[d.code] = d.id;
+      }
+
+      const overallScores: Record<string, number> = {};
+      for (const code of DIMENSION_CODES) {
+        overallScores[code] = overallResult.scores[code].score;
+      }
+
+      const recRows = matchRecommendations(surveyId, overallScores, templates, dimensionIdMap);
+      await upsertMatchedRecommendations(client, surveyId, recRows);
+      recommendationsWritten = recRows.length;
+    }
+
     // Complete recalculation
     await completeRecalculation(client, recalcId, 'completed');
 
@@ -262,6 +288,7 @@ Deno.serve(async (req: Request) => {
         skippedAnswers,
         calculatedAt,
         likertSize,
+        recommendationsWritten,
       },
       coreHealth,
       archetype: archetypeMatch,

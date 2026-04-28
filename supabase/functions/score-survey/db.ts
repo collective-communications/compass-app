@@ -267,3 +267,74 @@ export async function surveyExists(
   if (error) throw new Error(`Failed to check survey: ${error.message}`);
   return !!data;
 }
+
+// ─── Recommendations ───────────────────────────────────────────────────────
+
+/** Template row from recommendation_templates. */
+export interface RecommendationTemplateRow {
+  id: string;
+  dimension_code: string;
+  severity: string;
+  priority: number;
+  title: string;
+  body: string;
+  actions: unknown;
+  trust_ladder_link: string | null;
+  ccc_service_link: string | null;
+}
+
+/** Recommendation row for batch insert. */
+export interface RecommendationInsert {
+  survey_id: string;
+  dimension_id: string;
+  severity: string;
+  priority: number;
+  title: string;
+  body: string;
+  actions: unknown;
+  trust_ladder_link: string | null;
+  ccc_service_link: string | null;
+}
+
+/** Load all active recommendation templates. */
+export async function loadRecommendationTemplates(
+  client: SupabaseClient,
+): Promise<RecommendationTemplateRow[]> {
+  const { data, error } = await client
+    .from('recommendation_templates')
+    .select('id, dimension_code, severity, priority, title, body, actions, trust_ladder_link, ccc_service_link')
+    .eq('is_active', true)
+    .order('dimension_code')
+    .order('priority');
+
+  if (error) throw new Error(`Failed to load recommendation templates: ${error.message}`);
+  return (data ?? []) as RecommendationTemplateRow[];
+}
+
+/**
+ * Replace all recommendations for a survey with freshly-matched ones.
+ *
+ * Delete-then-insert mirrors the pattern used by upsertScores — PostgREST
+ * lacks transaction support, and the score_recalculations concurrency guard
+ * prevents interleaved writes.
+ */
+export async function upsertMatchedRecommendations(
+  client: SupabaseClient,
+  surveyId: string,
+  rows: RecommendationInsert[],
+): Promise<void> {
+  const { error: deleteError } = await client
+    .from('recommendations')
+    .delete()
+    .eq('survey_id', surveyId);
+
+  if (deleteError) throw new Error(`Failed to delete existing recommendations: ${deleteError.message}`);
+
+  if (rows.length > 0) {
+    const { error: insertError } = await client
+      .from('recommendations')
+      .insert(rows);
+
+    if (insertError) throw new Error(`Failed to insert recommendations: ${insertError.message}`);
+  }
+}

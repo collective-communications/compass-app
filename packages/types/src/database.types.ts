@@ -956,6 +956,51 @@ export type Database = {
           },
         ]
       }
+      recommendation_templates: {
+        Row: {
+          actions: Json
+          body: string
+          ccc_service_link: string | null
+          created_at: string
+          dimension_code: string
+          id: string
+          is_active: boolean
+          priority: number
+          severity: string
+          title: string
+          trust_ladder_link: string | null
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          body: string
+          ccc_service_link?: string | null
+          created_at?: string
+          dimension_code: string
+          id?: string
+          is_active?: boolean
+          priority?: number
+          severity: string
+          title: string
+          trust_ladder_link?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          body?: string
+          ccc_service_link?: string | null
+          created_at?: string
+          dimension_code?: string
+          id?: string
+          is_active?: boolean
+          priority?: number
+          severity?: string
+          title?: string
+          trust_ladder_link?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           client_visible: boolean

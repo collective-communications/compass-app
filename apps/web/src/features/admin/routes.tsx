@@ -69,6 +69,11 @@ const OrgSettingsPage = lazy(() =>
 const UsersPage = lazy(() =>
   import('./users/pages/users-page').then((m) => ({ default: m.UsersPage })),
 );
+const RecommendationsPage = lazy(() =>
+  import('./recommendations/pages/recommendations-page').then((m) => ({
+    default: m.RecommendationsPage,
+  })),
+);
 
 /**
  * Creates the flat set of admin-owned routes. Each is a top-level child of
@@ -293,6 +298,22 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
+  // ── /recommendations (CCC_ADMIN only — enforced by ROUTE_ACCESS) ─────────
+  const recommendationsRoute = createRoute({
+    getParentRoute: () => parentRoute,
+    path: '/recommendations',
+    beforeLoad: () => guardRoute('/recommendations'),
+    component: function RecommendationsLayout(): ReactElement {
+      return (
+        <AppShell>
+          <Suspense fallback={<RouteLoading />}>
+            <RecommendationsPage />
+          </Suspense>
+        </AppShell>
+      );
+    },
+  });
+
   return [
     clientsListRoute,
     clientDetailRoute.addChildren([
@@ -304,5 +325,6 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     surveyBuilderRoute,
     surveyPublishRoute,
     usersRoute,
+    recommendationsRoute,
   ];
 }

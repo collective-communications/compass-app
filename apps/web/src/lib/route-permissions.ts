@@ -24,9 +24,10 @@ export type RouteAccess = readonly UserRole[] | AllRoles;
  */
 export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   // Tier 1 — CC+C team
-  '/clients':  [Roles.CCC_ADMIN, Roles.CCC_MEMBER],
-  '/users':    [Roles.CCC_ADMIN],
-  '/surveys':  [Roles.CCC_ADMIN, Roles.CCC_MEMBER],
+  '/clients':          [Roles.CCC_ADMIN, Roles.CCC_MEMBER],
+  '/users':            [Roles.CCC_ADMIN],
+  '/surveys':          [Roles.CCC_ADMIN, Roles.CCC_MEMBER],
+  '/recommendations':  [Roles.CCC_ADMIN],
   // /insights route removed 2026-04-20 — feature not yet built; re-add to access matrix + create route when shipping.
 
   // Tier 2 — client dashboard (tier 1 have their own /clients home)
