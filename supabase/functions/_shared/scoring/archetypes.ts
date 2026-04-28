@@ -1,67 +1,61 @@
 /**
- * Hardcoded archetype vectors for the Culture Compass framework.
+ * Archetype vectors for the Culture Compass framework.
  *
- * These define the ideal dimension score profiles (0–100 scale) used by
- * {@link identifyArchetype} to classify an organization's culture. Keeping
- * them alongside the scoring primitives means the edge function and the web
- * app both reach for a single source of truth instead of duplicating the
- * ~60-line data constant.
+ * Synced from packages/scoring/src/archetypes.ts via scripts/sync-scoring.sh.
+ * These match the `archetypes` table in the database exactly — same codes,
+ * names, descriptions, and target score vectors.
  *
- * Edit this file to update archetype definitions; run `scripts/sync-scoring.sh`
- * to propagate changes into the edge function's `_shared/scoring/` copy.
+ * NOTE: The score-survey edge function reads archetypes from the database
+ * at runtime, so this file is used only by other edge functions that call
+ * identifyArchetype directly. Keep in sync with the database migration.
  */
 import type { ArchetypeVector } from './archetype-types.ts';
 
-/** Culture Compass archetype vectors. Order matches `displayOrder` for tiebreaks. */
+/** Culture Compass archetype vectors. Order matches `display_order` in the database. */
 export const ARCHETYPE_VECTORS: ArchetypeVector[] = [
   {
-    id: 'balanced',
-    code: 'balanced',
-    name: 'Balanced',
-    description: 'Consistently strong across all dimensions — a well-rounded culture.',
-    targetScores: { core: 80, clarity: 80, connection: 80, collaboration: 80 },
+    id: 'aligned',
+    code: 'aligned',
+    name: 'Aligned & Thriving',
+    description:
+      'High scores across all dimensions. The organization demonstrates strong cultural alignment with clear communication, genuine connection, and effective collaboration.',
+    targetScores: { core: 85, clarity: 80, connection: 80, collaboration: 80 },
     displayOrder: 0,
   },
   {
-    id: 'clarity-driven',
-    code: 'clarity-driven',
-    name: 'Clarity-Driven',
-    description: 'Strong sense of direction and purpose, with clear roles and expectations.',
-    targetScores: { core: 70, clarity: 90, connection: 60, collaboration: 65 },
+    id: 'over_collaborated',
+    code: 'over_collaborated',
+    name: 'Over-Collaborated',
+    description:
+      'Strong connection and collaboration but lower clarity. Teams work well together but may lack clear direction, leading to consensus-seeking over decisive action.',
+    targetScores: { core: 60, clarity: 40, connection: 80, collaboration: 85 },
     displayOrder: 1,
   },
   {
-    id: 'connection-driven',
-    code: 'connection-driven',
-    name: 'Connection-Driven',
-    description: 'Deep interpersonal bonds and belonging, sometimes at the expense of structure.',
-    targetScores: { core: 70, clarity: 60, connection: 90, collaboration: 65 },
+    id: 'well_intentioned',
+    code: 'well_intentioned',
+    name: 'Well-Intentioned but Disconnected',
+    description:
+      'Moderate scores with a gap between intent and impact. Leadership means well but communication gaps create misalignment between stated values and lived experience.',
+    targetScores: { core: 55, clarity: 55, connection: 45, collaboration: 50 },
     displayOrder: 2,
   },
   {
-    id: 'collaboration-driven',
-    code: 'collaboration-driven',
-    name: 'Collaboration-Driven',
-    description: 'Highly cooperative teams with strong cross-functional alignment.',
-    targetScores: { core: 70, clarity: 65, connection: 65, collaboration: 90 },
+    id: 'command_and_control',
+    code: 'command_and_control',
+    name: 'Command & Control',
+    description:
+      'High clarity but low connection and collaboration. Communication flows top-down with clear directives but limited feedback loops or peer collaboration.',
+    targetScores: { core: 50, clarity: 75, connection: 30, collaboration: 35 },
     displayOrder: 3,
   },
   {
-    id: 'core-fragile',
-    code: 'core-fragile',
-    name: 'Core-Fragile',
+    id: 'busy_but_burned',
+    code: 'busy_but_burned',
+    name: 'Busy but Burned Out',
     description:
-      'Outer dimensions may appear functional, but foundational trust and safety are weak.',
-    targetScores: { core: 40, clarity: 65, connection: 65, collaboration: 65 },
+      'Low scores across dimensions, especially connection. High activity masks cultural dysfunction — people are working hard but not working well together.',
+    targetScores: { core: 30, clarity: 35, connection: 25, collaboration: 40 },
     displayOrder: 4,
-  },
-  {
-    id: 'disconnected',
-    code: 'disconnected',
-    name: 'Disconnected',
-    description:
-      'Low scores across the board — significant cultural challenges requiring intervention.',
-    targetScores: { core: 35, clarity: 35, connection: 35, collaboration: 35 },
-    displayOrder: 5,
   },
 ];
