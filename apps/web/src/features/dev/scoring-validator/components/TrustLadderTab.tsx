@@ -9,6 +9,7 @@ import React from 'react';
 import type { TrustRungScore, TrustRungStatus } from '@compass/scoring';
 import type { DimensionCode } from '@compass/scoring';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -332,6 +333,36 @@ export function TrustLadderTab({ outputs }: TrustLadderTabProps): React.ReactEle
           />
         ))}
       </div>
+
+      {/* ── Formula callout ───────────────────────────────────────────── */}
+      <FormulaCallout>
+        <FormulaSection title="Rung status — based on rawScore (unormalized 1–4 mean)">
+          <FormulaRow expr="rawScore ≥ 3.0"              note="→ achieved" />
+          <FormulaRow expr="2.0 ≤ rawScore < 3.0"        note="→ in progress" />
+          <FormulaRow expr="rawScore < 2.0"              note="→ not started" />
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary, #757575)', fontFamily: 'monospace' }}>
+            rawScore = mean Likert value across all questions in the rung&apos;s dimension
+          </span>
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Current level">
+          <FormulaRow
+            expr="currentLevel = max rung where status = achieved"
+            note="highest achieved rung; gaps are allowed (rungs need not be consecutive)"
+          />
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Next actions">
+          <FormulaRow
+            expr="nextActions = first 1–2 non-achieved rungs above currentLevel"
+            note="surface the immediate focus areas"
+          />
+        </FormulaSection>
+      </FormulaCallout>
     </div>
   );
 }

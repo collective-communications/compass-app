@@ -7,6 +7,7 @@
 
 import React from 'react';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -124,18 +125,34 @@ export function ArchetypeDistanceTab({ outputs }: ArchetypeDistanceTabProps): Re
         </span>
       </div>
 
-      {/* ── Threshold reference ───────────────────────────────────────── */}
-      <p
-        style={{
-          margin: 0,
-          fontSize: 11,
-          color: 'var(--text-tertiary, #757575)',
-          fontFamily: 'monospace',
-          letterSpacing: '0.02em',
-        }}
-      >
-        ◆ STRONG: distance &lt; 15&nbsp;&nbsp;&nbsp;◆ MODERATE: distance &lt; 25&nbsp;&nbsp;&nbsp;◆ WEAK: distance ≥ 25
-      </p>
+      {/* ── Formula callout ────────────────────────────���─────────────── */}
+      <FormulaCallout>
+        <FormulaSection title="Euclidean distance">
+          <FormulaRow
+            expr={<>d = &radic;((s<sub>core</sub>&minus;t<sub>core</sub>)&sup2; + (s<sub>clarity</sub>&minus;t<sub>clarity</sub>)&sup2; + (s<sub>conn.</sub>&minus;t<sub>conn.</sub>)&sup2; + (s<sub>collab.</sub>&minus;t<sub>collab.</sub>)&sup2;)</>}
+          />
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary, #757575)', fontFamily: 'monospace' }}>
+            s = survey scores (%), t = archetype target scores (%)
+          </span>
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Best match">
+          <FormulaRow
+            expr="archetype = argmin d(s, archetype.targets)"
+            note="archetype with the smallest distance wins"
+          />
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Confidence">
+          <FormulaRow expr="d < 15"  note="→ STRONG" />
+          <FormulaRow expr="d < 25"  note="→ MODERATE" />
+          <FormulaRow expr="d ≥ 25"  note="→ WEAK" />
+        </FormulaSection>
+      </FormulaCallout>
 
       {/* ── Distance table ───────────────────────────────────────────── */}
       <div

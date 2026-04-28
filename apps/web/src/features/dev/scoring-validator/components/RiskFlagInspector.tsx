@@ -9,6 +9,7 @@ import React from 'react';
 import type { RiskFlag, RiskThresholds } from '@compass/scoring';
 import { DEFAULT_RISK_THRESHOLDS } from '@compass/scoring';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -284,6 +285,41 @@ export function RiskFlagInspector({
         riskThresholds={riskThresholds}
         onThresholdChange={onThresholdChange}
       />
+
+      {/* ── Formula callout ───────────────────────────────────────────── */}
+      <FormulaCallout>
+        <FormulaSection title="Flag conditions">
+          <FormulaRow
+            expr={<>core &lt; coreCritical</>}
+            note="→ CRITICAL — address before all other dimensions"
+          />
+          <FormulaRow
+            expr={<>coreCritical &le; core &le; coreMedium</>}
+            note="→ MEDIUM — core is fragile, monitor closely"
+          />
+          <FormulaRow
+            expr={<>any dimension &lt; dimensionHigh</>}
+            note="→ HIGH — dimension requires immediate attention"
+          />
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Priority rule">
+          <span style={{ fontSize: 12, color: 'var(--text-secondary, #616161)', lineHeight: 1.6 }}>
+            If Core fires CRITICAL, the HIGH flag for Core is suppressed — only one flag per dimension.
+            All other dimensions are checked independently for HIGH.
+          </span>
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Default thresholds">
+          <FormulaRow expr="coreCritical = 50"  note="core score below this triggers CRITICAL" />
+          <FormulaRow expr="coreMedium   = 70"  note="core score 50–70 triggers MEDIUM" />
+          <FormulaRow expr="dimensionHigh = 40" note="any dimension below this triggers HIGH" />
+        </FormulaSection>
+      </FormulaCallout>
     </div>
   );
 }

@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import type { DimensionCode } from '@compass/scoring';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -270,17 +271,40 @@ export function ScoreBreakdownTab({ outputs, scaleSize }: ScoreBreakdownTabProps
         </tbody>
       </table>
 
-      {/* Formula footnote */}
-      <p
-        style={{
-          margin: 0,
-          fontSize: 11,
-          fontFamily: 'monospace',
-          color: 'var(--text-tertiary, #9E9E9E)',
-        }}
-      >
-        score = ((rawScore &minus; 1) / ({scaleSize} &minus; 1)) &times; 100
-      </p>
+      {/* Formula callout */}
+      <FormulaCallout>
+        <FormulaSection title="Normalization — per question">
+          <FormulaRow
+            expr={<>score = (v &minus; 1) / (scale &minus; 1) &times; 100</>}
+            note="forward-scored questions"
+          />
+          <FormulaRow
+            expr={<>score = (scale &minus; v) / (scale &minus; 1) &times; 100</>}
+            note="reverse-scored questions"
+          />
+          <span style={{ fontSize: 11, color: 'var(--text-tertiary, #757575)', fontFamily: 'monospace' }}>
+            v = answer value (1&ndash;{scaleSize}), scale = {scaleSize}
+          </span>
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Dimension score">
+          <FormulaRow
+            expr="dimension = mean(question scores)"
+            note={`equal-weight average across all questions in the dimension, expressed as %`}
+          />
+        </FormulaSection>
+
+        <FormulaDivider />
+
+        <FormulaSection title="Raw score">
+          <FormulaRow
+            expr="rawScore = mean(question values)"
+            note={`unormalized average of raw Likert values (1–${scaleSize}); used by the Trust Ladder`}
+          />
+        </FormulaSection>
+      </FormulaCallout>
     </div>
   );
 }
