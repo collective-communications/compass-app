@@ -7,52 +7,16 @@
 import { useState, useMemo, useCallback, type ReactElement } from 'react';
 import type { DimensionCode } from '@compass/types';
 import { useDialogueResponses } from '../../hooks/use-dialogue-responses';
+import { useDialogueKeywords } from '../../hooks/use-dialogue-keywords';
 import { useQuestionScores } from '../../hooks/use-question-scores';
 import { useDialogueFilter } from '../../context/dialogue-filter-context';
-import type { DialogueResponse } from '../../types';
 import { KeywordBubbles, type Keyword } from './keyword-bubbles';
 import { DialogueSearch } from './dialogue-search';
 import { DimensionFilterPills, type DimensionFilter } from './dimension-filter-pills';
 import { ResponseList } from './response-list';
 
-/** Stop words excluded from keyword extraction. Hoisted to module scope to avoid re-creation per call. */
-const STOP_WORDS = new Set([
-  'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for',
-  'of', 'with', 'by', 'from', 'is', 'it', 'as', 'be', 'was', 'are',
-  'been', 'has', 'have', 'had', 'do', 'does', 'did', 'will', 'would',
-  'could', 'should', 'may', 'might', 'can', 'that', 'this', 'these',
-  'those', 'i', 'we', 'you', 'they', 'he', 'she', 'my', 'our', 'your',
-  'their', 'its', 'not', 'no', 'so', 'if', 'all', 'more', 'some', 'any',
-  'very', 'just', 'about', 'up', 'out', 'when', 'what', 'how', 'which',
-  'who', 'there', 'than', 'also', 'into', 'only', 'other', 'then',
-  'them', 'me', 'him', 'her', 'us', 'like', 'get', 'make', 'one',
-  'much', 'many', 'well', 'being', 'don', 'really', 'think', 'know',
-]);
-
 interface DialogueTabProps {
   surveyId: string;
-}
-
-/** Extract keyword frequencies from response texts. */
-function extractKeywords(responses: DialogueResponse[]): Keyword[] {
-  const counts = new Map<string, number>();
-
-  for (const response of responses) {
-    const words = response.responseText
-      .toLowerCase()
-      .replace(/[^a-z0-9\s'-]/g, '')
-      .split(/\s+/)
-      .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
-
-    for (const word of words) {
-      counts.set(word, (counts.get(word) ?? 0) + 1);
-    }
-  }
-
-  return Array.from(counts.entries())
-    .filter(([, count]) => count >= 2)
-    .map(([text, count]) => ({ text, count }))
-    .sort((a, b) => b.count - a.count);
 }
 
 /** Dialogue tab — open-ended response explorer. */
@@ -63,6 +27,7 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
   const [searchText, setSearchText] = useState('');
 
   const { data: allResponses, isLoading: responsesLoading, hasMore: responsesTruncated, cap: responsesCap } = useDialogueResponses({ surveyId });
+  const { data: keywordData, isLoading: keywordsLoading } = useDialogueKeywords(surveyId);
   const { data: questionScores } = useQuestionScores({ surveyId });
 
   /** Map questionId → dimensionCode for filtering. */
@@ -76,7 +41,10 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
     return map;
   }, [questionScores]);
 
-  const keywords = useMemo(() => extractKeywords(allResponses ?? []), [allResponses]);
+  const keywords: Keyword[] = useMemo(
+    () => (keywordData ?? []).map((k) => ({ text: k.keyword, count: k.frequency })),
+    [keywordData],
+  );
 
   const filteredResponses = useMemo(() => {
     if (!allResponses) return [];
@@ -118,7 +86,7 @@ export function DialogueTab({ surveyId }: DialogueTabProps): ReactElement {
     setSearchText('');
   }, [setActiveTopicId]);
 
-  if (responsesLoading) return <LoadingSkeleton />;
+  if (responsesLoading || (keywordsLoading && !allResponses)) return <LoadingSkeleton />;
 
   return (
     <div className="flex flex-col gap-4">

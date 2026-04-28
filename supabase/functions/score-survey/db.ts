@@ -311,6 +311,66 @@ export async function loadRecommendationTemplates(
   return (data ?? []) as RecommendationTemplateRow[];
 }
 
+// ─── Dialogue Keywords ─────────────────────────────────────────────────────
+
+/** Raw open-ended text row loaded from the dialogue_responses view. */
+export interface DialogueTextRow {
+  questionId: string;
+  text: string;
+}
+
+/** Keyword row for batch insert into dialogue_keywords. */
+export interface KeywordInsert {
+  survey_id: string;
+  dimension_id: string | null;
+  keyword: string;
+  frequency: number;
+  sentiment: string | null;
+}
+
+/** Load all non-null open-ended texts for a survey from the dialogue_responses view. */
+export async function loadDialogueTexts(
+  client: SupabaseClient,
+  surveyId: string,
+): Promise<DialogueTextRow[]> {
+  const { data, error } = await client
+    .from('dialogue_responses')
+    .select('question_id, response_text')
+    .eq('survey_id', surveyId);
+
+  if (error) throw new Error(`Failed to load dialogue texts: ${error.message}`);
+  return ((data ?? []) as Array<{ question_id: string; response_text: string }>).map((row) => ({
+    questionId: row.question_id,
+    text: row.response_text,
+  }));
+}
+
+/**
+ * Replace all keywords for a survey with freshly-extracted ones.
+ *
+ * Delete-then-insert — same pattern as upsertScores.
+ */
+export async function upsertDialogueKeywords(
+  client: SupabaseClient,
+  surveyId: string,
+  keywords: KeywordInsert[],
+): Promise<void> {
+  const { error: deleteError } = await client
+    .from('dialogue_keywords')
+    .delete()
+    .eq('survey_id', surveyId);
+
+  if (deleteError) throw new Error(`Failed to delete existing dialogue keywords: ${deleteError.message}`);
+
+  if (keywords.length > 0) {
+    const { error: insertError } = await client
+      .from('dialogue_keywords')
+      .insert(keywords);
+
+    if (insertError) throw new Error(`Failed to insert dialogue keywords: ${insertError.message}`);
+  }
+}
+
 /**
  * Replace all recommendations for a survey with freshly-matched ones.
  *

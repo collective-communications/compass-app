@@ -26,7 +26,8 @@
  *       "skippedAnswers":       number,
  *       "calculatedAt":         string,  // ISO 8601 timestamp
  *       "likertSize":           number,
- *       "recommendationsWritten": number
+ *       "recommendationsWritten": number,
+ *       "keywordsWritten":       number
  *     },
  *     "coreHealth":          "healthy" | "fragile" | "broken" | undefined,
  *     "archetype":           { code: string, name: string, distance: number, confidence: string } | undefined,
@@ -49,7 +50,9 @@ import {
   loadArchetypes,
   loadSurveySettings,
   loadRecommendationTemplates,
+  loadDialogueTexts,
   upsertMatchedRecommendations,
+  upsertDialogueKeywords,
   checkConcurrency,
   insertRecalculation,
   completeRecalculation,
@@ -57,8 +60,9 @@ import {
   markSurveyScored,
   surveyExists,
 } from './db.ts';
-import type { ArchetypeRow } from './db.ts';
+import type { ArchetypeRow, KeywordInsert } from './db.ts';
 import { matchRecommendations } from './recommendations.ts';
+import { extractKeywords } from './keywords.ts';
 import { DIMENSION_CODES, type AnswerWithMeta, type SegmentScoreResult } from './types.ts';
 import {
   calculateAllDimensionScores,
@@ -275,6 +279,33 @@ Deno.serve(async (req: Request) => {
       recommendationsWritten = recRows.length;
     }
 
+    // Extract keyword themes from open-ended responses
+    let keywordsWritten = 0;
+    const dialogueTexts = await loadDialogueTexts(client, surveyId);
+    if (dialogueTexts.length > 0) {
+      const questionDimMap = new Map<string, string>();
+      for (const q of questions) {
+        questionDimMap.set(q.questionId, q.dimensionId);
+      }
+
+      const entries = dialogueTexts.map((d) => ({
+        text: d.text,
+        dimensionId: questionDimMap.get(d.questionId) ?? null,
+      }));
+
+      const keywords = extractKeywords(entries);
+      const keywordRows: KeywordInsert[] = keywords.map((kw) => ({
+        survey_id: surveyId,
+        dimension_id: kw.dimensionId,
+        keyword: kw.keyword,
+        frequency: kw.frequency,
+        sentiment: kw.sentiment,
+      }));
+
+      await upsertDialogueKeywords(client, surveyId, keywordRows);
+      keywordsWritten = keywordRows.length;
+    }
+
     // Complete recalculation
     await completeRecalculation(client, recalcId, 'completed');
 
@@ -289,6 +320,7 @@ Deno.serve(async (req: Request) => {
         calculatedAt,
         likertSize,
         recommendationsWritten,
+        keywordsWritten,
       },
       coreHealth,
       archetype: archetypeMatch,
