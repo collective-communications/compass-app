@@ -78,6 +78,9 @@ const REGISTERED_ROUTES = [
   // Admin — /recommendations
   '/recommendations',
 
+  // Admin — /email-log
+  '/email-log',
+
   // Client dashboard
   '/dashboard',
 

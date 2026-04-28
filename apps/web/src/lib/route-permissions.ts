@@ -28,6 +28,7 @@ export const ROUTE_ACCESS: Readonly<Record<string, RouteAccess>> = {
   '/users':            [Roles.CCC_ADMIN],
   '/surveys':          [Roles.CCC_ADMIN, Roles.CCC_MEMBER],
   '/recommendations':  [Roles.CCC_ADMIN],
+  '/email-log':        [Roles.CCC_ADMIN],
   // /insights route removed 2026-04-20 — feature not yet built; re-add to access matrix + create route when shipping.
 
   // Tier 2 — client dashboard (tier 1 have their own /clients home)

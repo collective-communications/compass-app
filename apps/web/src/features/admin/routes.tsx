@@ -74,6 +74,9 @@ const RecommendationsPage = lazy(() =>
     default: m.RecommendationsPage,
   })),
 );
+const EmailLogPage = lazy(() =>
+  import('./email/pages/email-log-page').then((m) => ({ default: m.EmailLogPage })),
+);
 
 /**
  * Creates the flat set of admin-owned routes. Each is a top-level child of
@@ -314,6 +317,22 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
+  // ── /email-log (CCC_ADMIN only — enforced by ROUTE_ACCESS) ───────────────
+  const emailLogRoute = createRoute({
+    getParentRoute: () => parentRoute,
+    path: '/email-log',
+    beforeLoad: () => guardRoute('/email-log'),
+    component: function EmailLogLayout(): ReactElement {
+      return (
+        <AppShell>
+          <Suspense fallback={<RouteLoading />}>
+            <EmailLogPage />
+          </Suspense>
+        </AppShell>
+      );
+    },
+  });
+
   return [
     clientsListRoute,
     clientDetailRoute.addChildren([
@@ -326,5 +345,6 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     surveyPublishRoute,
     usersRoute,
     recommendationsRoute,
+    emailLogRoute,
   ];
 }
