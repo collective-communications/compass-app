@@ -14,8 +14,23 @@
 
 import { VaultHttpClient } from '../tkr-deploy/src/adapters/vault-client.js';
 import { SupabaseAdapter } from '../tkr-deploy/providers/supabase/adapter.js';
+import { readFileSync } from 'node:fs';
 
-const VAULT_URL = process.env.VAULT_URL ?? 'http://localhost:42042';
+function envFileValue(key: string): string | null {
+  try {
+    const lines = readFileSync('.env.local', 'utf8').split(/\r?\n/);
+    for (const line of lines) {
+      const [rawKey, ...valueParts] = line.split('=');
+      if (rawKey === key) return valueParts.join('=').trim();
+    }
+  } catch {
+    return null;
+  }
+  return null;
+}
+
+const secretsPort = process.env.SECRETS_PORT ?? envFileValue('SECRETS_PORT') ?? '42042';
+const VAULT_URL = process.env.VAULT_URL ?? `http://localhost:${secretsPort}`;
 const VAULT_NAME = process.env.VAULT_NAME ?? 'compass';
 
 function extractProjectRef(url: string): string {
