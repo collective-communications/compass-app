@@ -9,7 +9,7 @@ import React from 'react';
 import type { RiskFlag, RiskThresholds } from '@compass/scoring';
 import { DEFAULT_RISK_THRESHOLDS } from '@compass/scoring';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
-import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider, FormulaExplanation } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -301,6 +301,9 @@ export function RiskFlagInspector({
             expr={<>any dimension &lt; dimensionHigh</>}
             note="→ HIGH — dimension requires immediate attention"
           />
+          <FormulaExplanation>
+            Core is evaluated on two separate thresholds because a broken foundation undermines the reliability of every other dimension score — it earns its own severity tier. Non-core dimensions share a single HIGH threshold since they represent parallel concerns, not a prerequisite.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -310,6 +313,9 @@ export function RiskFlagInspector({
             If Core fires CRITICAL, the HIGH flag for Core is suppressed — only one flag per dimension.
             All other dimensions are checked independently for HIGH.
           </span>
+          <FormulaExplanation>
+            Suppressing HIGH when CRITICAL fires prevents double-counting and keeps the flag list focused. A CRITICAL Core already communicates the most urgent call to action; a redundant HIGH alongside it would dilute the signal.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -318,6 +324,9 @@ export function RiskFlagInspector({
           <FormulaRow expr="coreCritical = 50"  note="core score below this triggers CRITICAL" />
           <FormulaRow expr="coreMedium   = 70"  note="core score 50–70 triggers MEDIUM" />
           <FormulaRow expr="dimensionHigh = 40" note="any dimension below this triggers HIGH" />
+          <FormulaExplanation>
+            These values reflect CC+C's consulting calibration across client engagements — they represent the score ranges where practitioners have observed meaningful organizational risk. The thresholds are adjustable here so you can explore sensitivity without changing production defaults.
+          </FormulaExplanation>
         </FormulaSection>
       </FormulaCallout>
     </div>

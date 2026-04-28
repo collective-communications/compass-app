@@ -9,7 +9,7 @@ import React from 'react';
 import type { TrustRungScore, TrustRungStatus } from '@compass/scoring';
 import type { DimensionCode } from '@compass/scoring';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
-import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider, FormulaExplanation } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -343,6 +343,9 @@ export function TrustLadderTab({ outputs }: TrustLadderTabProps): React.ReactEle
           <span style={{ fontSize: 11, color: 'var(--text-tertiary, #757575)', fontFamily: 'monospace' }}>
             rawScore = mean Likert value across all questions in the rung&apos;s dimension
           </span>
+          <FormulaExplanation>
+            Raw Likert values (not percentages) are used here because the Trust Ladder thresholds were calibrated against the 1–4 scale directly. Converting to percentages first would shift the boundary positions and break the original calibration.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -352,6 +355,9 @@ export function TrustLadderTab({ outputs }: TrustLadderTabProps): React.ReactEle
             expr="currentLevel = max rung where status = achieved"
             note="highest achieved rung; gaps are allowed (rungs need not be consecutive)"
           />
+          <FormulaExplanation>
+            Gaps are intentional — an organization can achieve strong connection (rung 7) even while clarity (rung 4) is still in progress. The ladder describes a developmental arc, not a strict unlock sequence.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -361,6 +367,9 @@ export function TrustLadderTab({ outputs }: TrustLadderTabProps): React.ReactEle
             expr="nextActions = first 1–2 non-achieved rungs above currentLevel"
             note="surface the immediate focus areas"
           />
+          <FormulaExplanation>
+            Surfacing only 1–2 next rungs keeps the guidance actionable — showing all unachieved rungs at once creates a wall of work. The intent is to focus attention on the closest reachable steps.
+          </FormulaExplanation>
         </FormulaSection>
       </FormulaCallout>
     </div>

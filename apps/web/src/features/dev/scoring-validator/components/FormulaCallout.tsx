@@ -143,6 +143,22 @@ export function FormulaRow({
   );
 }
 
+/** 1–2 sentence plain-English explanation that follows the formula rows. */
+export function FormulaExplanation({ children }: { children: React.ReactNode }): React.ReactElement {
+  return (
+    <p
+      style={{
+        margin: '6px 0 0',
+        fontSize: 12,
+        lineHeight: 1.6,
+        color: 'var(--text-secondary, #616161)',
+      }}
+    >
+      {children}
+    </p>
+  );
+}
+
 /** Separator between formula sections. */
 export function FormulaDivider(): React.ReactElement {
   return (

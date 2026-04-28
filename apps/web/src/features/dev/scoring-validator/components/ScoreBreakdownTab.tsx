@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import type { DimensionCode } from '@compass/scoring';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
-import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider, FormulaExplanation } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -285,6 +285,10 @@ export function ScoreBreakdownTab({ outputs, scaleSize }: ScoreBreakdownTabProps
           <span style={{ fontSize: 11, color: 'var(--text-tertiary, #757575)', fontFamily: 'monospace' }}>
             v = answer value (1&ndash;{scaleSize}), scale = {scaleSize}
           </span>
+          <FormulaExplanation>
+            Each response is mapped to a 0–100% scale so all questions are comparable regardless of direction.
+            Reverse-scored questions are flipped so that low agreement on a negatively-worded statement (e.g. "I often feel burned out") still produces a low score.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -292,8 +296,12 @@ export function ScoreBreakdownTab({ outputs, scaleSize }: ScoreBreakdownTabProps
         <FormulaSection title="Dimension score">
           <FormulaRow
             expr="dimension = mean(question scores)"
-            note={`equal-weight average across all questions in the dimension, expressed as %`}
+            note="equal-weight average across all questions in the dimension, expressed as %"
           />
+          <FormulaExplanation>
+            All questions within a dimension contribute equally — no single question carries more weight than another.
+            The dimension score reflects the average normalized response across every question assigned to that dimension.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -303,6 +311,10 @@ export function ScoreBreakdownTab({ outputs, scaleSize }: ScoreBreakdownTabProps
             expr="rawScore = mean(question values)"
             note={`unormalized average of raw Likert values (1–${scaleSize}); used by the Trust Ladder`}
           />
+          <FormulaExplanation>
+            The raw score preserves the original Likert scale values before normalization.
+            The Trust Ladder uses this directly because its rung thresholds were calibrated against the 1–4 scale, not percentages.
+          </FormulaExplanation>
         </FormulaSection>
       </FormulaCallout>
     </div>

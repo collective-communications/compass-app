@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { ScoringValidatorOutputs } from '../ScoringValidator.js';
-import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider } from './FormulaCallout.js';
+import { FormulaCallout, FormulaSection, FormulaRow, FormulaDivider, FormulaExplanation } from './FormulaCallout.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -134,6 +134,9 @@ export function ArchetypeDistanceTab({ outputs }: ArchetypeDistanceTabProps): Re
           <span style={{ fontSize: 11, color: 'var(--text-tertiary, #757575)', fontFamily: 'monospace' }}>
             s = survey scores (%), t = archetype target scores (%)
           </span>
+          <FormulaExplanation>
+            Each archetype defines target scores for all four dimensions. The distance formula measures how far the current score profile sits from each archetype in four-dimensional space — it captures the overall shape of the profile, not just which individual dimension is highest.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -143,6 +146,9 @@ export function ArchetypeDistanceTab({ outputs }: ArchetypeDistanceTabProps): Re
             expr="archetype = argmin d(s, archetype.targets)"
             note="archetype with the smallest distance wins"
           />
+          <FormulaExplanation>
+            The archetype closest in Euclidean distance is selected as the match. Because all four dimensions contribute equally to the distance, the result reflects the full pattern of scores rather than any single outlier dimension.
+          </FormulaExplanation>
         </FormulaSection>
 
         <FormulaDivider />
@@ -151,6 +157,9 @@ export function ArchetypeDistanceTab({ outputs }: ArchetypeDistanceTabProps): Re
           <FormulaRow expr="d < 15"  note="→ STRONG" />
           <FormulaRow expr="d < 25"  note="→ MODERATE" />
           <FormulaRow expr="d ≥ 25"  note="→ WEAK" />
+          <FormulaExplanation>
+            Confidence reflects how clearly the scores align with one archetype versus the others. A weak match means the profile sits roughly equidistant from multiple archetypes — the organization may be in transition or exhibit mixed characteristics.
+          </FormulaExplanation>
         </FormulaSection>
       </FormulaCallout>
 
