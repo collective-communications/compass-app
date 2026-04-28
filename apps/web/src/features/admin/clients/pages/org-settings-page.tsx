@@ -96,6 +96,7 @@ export function OrgSettingsPage(): ReactElement {
 
       {/* Branding */}
       <ClientBranding
+        orgId={orgId}
         branding={settings.branding}
         saveStatus={saveStatus}
         onUpdate={updateBranding}

@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { fn } from 'storybook/test';
 import { BrandingCard } from './branding-card';
 import type { SystemSettings } from '../hooks/use-system-settings';
 
@@ -24,6 +25,7 @@ const meta = {
   component: BrandingCard,
   args: {
     settings: defaultSettings,
+    onUpdateField: fn(),
   },
 } satisfies Meta<typeof BrandingCard>;
 

@@ -59,7 +59,7 @@ export function SystemSettingsPage(): ReactElement {
             saveStatus={saveStatus}
             onUpdateField={updateField}
           />
-          <BrandingCard settings={settings} />
+          <BrandingCard settings={settings} onUpdateField={updateField} />
         </div>
 
         {/* Right column */}

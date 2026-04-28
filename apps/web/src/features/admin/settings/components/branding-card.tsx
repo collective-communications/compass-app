@@ -1,14 +1,16 @@
 /**
  * Branding settings card.
- * Displays logo upload placeholder and read-only brand color swatches.
+ * Platform logo upload and read-only brand color swatches.
  */
 
-import type { ReactElement } from 'react';
+import { useCallback, useRef, type ReactElement, type ChangeEvent } from 'react';
 import type { SystemSettings } from '../hooks/use-system-settings';
+import { useLogoUpload } from '../../clients/hooks/use-logo-upload';
 import { Card } from '../../../../components/ui/card';
 
 interface BrandingCardProps {
   settings: SystemSettings;
+  onUpdateField: <K extends keyof SystemSettings>(field: K, value: SystemSettings[K]) => void;
 }
 
 const COLOR_LABELS: { key: keyof SystemSettings['brand_colors']; label: string }[] = [
@@ -18,7 +20,31 @@ const COLOR_LABELS: { key: keyof SystemSettings['brand_colors']; label: string }
   { key: 'collaboration', label: 'Collaboration' },
 ];
 
-export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
+export function BrandingCard({ settings, onUpdateField }: BrandingCardProps): ReactElement {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadLogo, isUploading, error: uploadError } = useLogoUpload('platform');
+
+  const handleFileChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      e.target.value = '';
+      const url = await uploadLogo(file);
+      if (url) {
+        onUpdateField('logo_url', url);
+      }
+    },
+    [uploadLogo, onUpdateField],
+  );
+
+  const handleUploadZoneClick = useCallback((): void => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleRemoveLogo = useCallback((): void => {
+    onUpdateField('logo_url', null);
+  }, [onUpdateField]);
+
   return (
     <Card className="rounded-lg">
       <fieldset>
@@ -26,28 +52,69 @@ export function BrandingCard({ settings }: BrandingCardProps): ReactElement {
           Branding
         </legend>
 
-        {/* Logo upload placeholder */}
+        {/* Logo */}
         <div className="mb-5">
           <span className="mb-1 block text-sm font-medium text-[var(--grey-700)]">Logo</span>
-          <div className="flex h-28 items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50)]">
-            <div className="text-center">
-              <svg
-                className="mx-auto mb-1 h-6 w-6 text-[var(--text-tertiary)]"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
+
+          {settings.logo_url ? (
+            <div className="flex items-center gap-4">
+              <img
+                src={settings.logo_url}
+                alt="Platform logo"
+                style={{ maxHeight: '64px', maxWidth: '200px' }}
+                className="rounded-lg border border-[var(--grey-100)] object-contain"
+              />
+              <button
+                type="button"
+                onClick={handleRemoveLogo}
+                className="text-xs text-[var(--text-secondary)] hover:text-[var(--grey-900)]"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                />
-              </svg>
-              <span className="text-xs text-[var(--text-secondary)]">Upload logo</span>
+                Remove
+              </button>
             </div>
-          </div>
+          ) : (
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                onChange={handleFileChange}
+                className="sr-only"
+                aria-label="Upload platform logo"
+              />
+              <button
+                type="button"
+                onClick={handleUploadZoneClick}
+                disabled={isUploading}
+                className="flex h-28 w-full cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50)] hover:border-[var(--color-interactive)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-interactive)] disabled:cursor-default disabled:opacity-60"
+              >
+                <div className="text-center">
+                  <svg
+                    className="mx-auto mb-1 h-6 w-6 text-[var(--text-tertiary)]"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={1.5}
+                      d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                    />
+                  </svg>
+                  <span className="text-xs text-[var(--text-secondary)]">
+                    {isUploading ? 'Uploading…' : 'Click to upload logo'}
+                  </span>
+                </div>
+              </button>
+              {uploadError ? (
+                <p className="mt-1 text-xs text-[var(--feedback-error-text,#B91C1C)]" role="alert">
+                  {uploadError}
+                </p>
+              ) : null}
+            </>
+          )}
         </div>
 
         {/* Brand color swatches (read-only) */}

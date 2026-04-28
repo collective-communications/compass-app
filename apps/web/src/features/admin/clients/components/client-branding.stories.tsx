@@ -6,6 +6,7 @@ const meta = {
   title: 'Features/Admin/Clients/ClientBranding',
   component: ClientBranding,
   args: {
+    orgId: 'story-org-id',
     branding: {
       displayName: 'Acme Corporation',
       logoUrl: null,

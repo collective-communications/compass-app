@@ -1,13 +1,14 @@
 /**
  * Client branding card for per-organization display name and logo.
- * Logo upload is a placeholder — file upload integration is deferred.
  */
 
-import { useCallback, type ReactElement, type ChangeEvent } from 'react';
+import { useCallback, useRef, type ReactElement, type ChangeEvent } from 'react';
 import type { OrgBranding, SaveStatus } from '../hooks/use-org-settings';
+import { useLogoUpload } from '../hooks/use-logo-upload';
 import { AutoSaveIndicator, type AutoSaveStatus } from '../../surveys/components/auto-save-indicator';
 
 interface ClientBrandingProps {
+  orgId: string;
   branding: OrgBranding;
   saveStatus: SaveStatus;
   onUpdate: (branding: Partial<OrgBranding>) => void;
@@ -20,16 +21,41 @@ const SAVE_TO_AUTOSAVE: Record<SaveStatus, AutoSaveStatus> = {
 };
 
 export function ClientBranding({
+  orgId,
   branding,
   saveStatus,
   onUpdate,
 }: ClientBrandingProps): ReactElement {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadLogo, isUploading, error: uploadError } = useLogoUpload(orgId);
+
   const handleDisplayNameChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>): void => {
       onUpdate({ displayName: e.target.value });
     },
     [onUpdate],
   );
+
+  const handleFileChange = useCallback(
+    async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      e.target.value = '';
+      const url = await uploadLogo(file);
+      if (url) {
+        onUpdate({ logoUrl: url });
+      }
+    },
+    [uploadLogo, onUpdate],
+  );
+
+  const handleUploadZoneClick = useCallback((): void => {
+    fileInputRef.current?.click();
+  }, []);
+
+  const handleRemoveLogo = useCallback((): void => {
+    onUpdate({ logoUrl: null });
+  }, [onUpdate]);
 
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">
@@ -64,28 +90,52 @@ export function ClientBranding({
           </p>
         </div>
 
-        {/* Logo placeholder */}
+        {/* Logo */}
         <div>
-          <span className="mb-1 block text-sm font-medium text-[var(--grey-700)]">
-            Logo
-          </span>
+          <span className="mb-1 block text-sm font-medium text-[var(--grey-700)]">Logo</span>
+
           {branding.logoUrl ? (
             <div className="flex items-center gap-4">
               <img
                 src={branding.logoUrl}
                 alt="Organization logo"
-                className="h-12 w-12 rounded-lg border border-[var(--grey-100)] object-contain"
+                style={{ maxHeight: '64px', maxWidth: '200px' }}
+                className="rounded-lg border border-[var(--grey-100)] object-contain"
               />
-              <span className="text-xs text-[var(--text-secondary)]">
-                Logo upload management coming soon.
-              </span>
+              <button
+                type="button"
+                onClick={handleRemoveLogo}
+                className="text-xs text-[var(--text-secondary)] hover:text-[var(--grey-900)]"
+              >
+                Remove
+              </button>
             </div>
           ) : (
-            <div className="flex h-24 w-full max-w-md items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50,#F5F5F5)]">
-              <span className="text-sm text-[var(--text-tertiary)]">
-                Logo upload coming soon
-              </span>
-            </div>
+            <>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                onChange={handleFileChange}
+                className="sr-only"
+                aria-label="Upload organization logo"
+              />
+              <button
+                type="button"
+                onClick={handleUploadZoneClick}
+                disabled={isUploading}
+                className="flex h-24 w-full max-w-md cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-[var(--grey-100)] bg-[var(--grey-50,#F5F5F5)] hover:border-[var(--color-interactive)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-interactive)] disabled:cursor-default disabled:opacity-60"
+              >
+                <span className="text-sm text-[var(--text-tertiary)]">
+                  {isUploading ? 'Uploading…' : 'Click to upload logo'}
+                </span>
+              </button>
+              {uploadError ? (
+                <p className="mt-1 text-xs text-[var(--feedback-error-text,#B91C1C)]" role="alert">
+                  {uploadError}
+                </p>
+              ) : null}
+            </>
           )}
         </div>
       </fieldset>
