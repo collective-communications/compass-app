@@ -49,12 +49,22 @@ Your Vercel team/org ID (optional for personal accounts).
 
 ## Resend
 
-### RESEND_API_KEY
-API key for domain verification, sending stats, and DNS records.
+### RESEND_CCC_ADMIN
+Full-access API key for domain verification, sending stats, DNS records, and
+other Resend management operations in the deploy dashboard.
 
 1. Go to https://resend.com/api-keys
-2. Click **Create API Key** → name it `tkr-deploy`, permission: **Full Access**
+2. Click **Create API Key** → name it `ccc-admin`, permission: **Full Access**
 3. Copy the key (starts with `re_`)
+
+### RESEND_CCC_SEND
+Send-only API key used by Supabase edge functions to send application emails.
+It must be allowed to send from the domain in `RESEND_FROM_ADDRESS`.
+
+1. Go to https://resend.com/api-keys
+2. Click **Create API Key** → name it `ccc-send`, permission: **Sending Access**
+3. Restrict it to the verified sending domain used by `RESEND_FROM_ADDRESS`
+4. Copy the key (starts with `re_`)
 
 ---
 

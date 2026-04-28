@@ -38,7 +38,7 @@ function buildEngine(opts?: {
   ]);
 
   const mappings: SecretTargetEntry[] = [
-    { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_API_KEY', targetId: 'supabase' },
+    { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_CCC_SEND', targetId: 'supabase' },
     { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_CCC_SEND', targetId: 'vercel' },
     { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_CCC_SEND', targetId: 'github' },
     { vaultKey: 'VITE_SUPABASE_ANON_KEY', targetKey: 'VITE_SUPABASE_ANON_KEY', targetId: 'vercel' },

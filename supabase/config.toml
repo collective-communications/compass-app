@@ -314,6 +314,18 @@ enabled = false
 # default JWT verifier rejects with UNAUTHORIZED_INVALID_JWT_FORMAT.
 verify_jwt = false
 
+[functions.send-team-invitation]
+# Supabase Auth access tokens are currently ES256 in this project, while the
+# edge verifier rejects them with UNAUTHORIZED_UNSUPPORTED_TOKEN_ALGORITHM.
+# The function performs its own app-level auth in index.ts.
+verify_jwt = false
+
+[functions.send-email]
+# Invoked only server-side and guarded in index.ts by exact service-role secret
+# comparison. New `sb_secret_*` keys are not JWTs, so the edge verifier rejects
+# them before the function can run.
+verify_jwt = false
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

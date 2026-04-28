@@ -48,7 +48,7 @@ export function createSupabasePlugin(
       adapter,
 
       secretMappings: [
-        { vaultKey: 'RESEND_CCC_SEND', targetKey: 'RESEND_API_KEY' },
+        { vaultKey: 'RESEND_CCC_SEND' },
         { vaultKey: 'RESEND_FROM_ADDRESS' },
         { vaultKey: 'OPENAI_API_KEY' },
         { vaultKey: 'APP_URL' },

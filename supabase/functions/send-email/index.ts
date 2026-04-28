@@ -2,7 +2,8 @@
  * Edge function for sending emails via Resend API.
  * Accepts service_role requests only. Logs all sends to email_log table.
  *
- * Uses the RESEND_CCC_SEND (send-only) API key stored as RESEND_API_KEY.
+ * Uses the RESEND_CCC_SEND send-only API key. RESEND_API_KEY is retained as a
+ * legacy fallback for deployments that have not synced the explicit key yet.
  *
  * Orchestration lives in `handler.ts` so the flow is testable under Bun.
  * This entry preserves the legacy 500 SEND_FAILED envelope on provider
@@ -62,7 +63,7 @@ Deno.serve(async (req: Request) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
   const client = createClient(supabaseUrl, serviceRoleKey);
 
-  const apiKey = Deno.env.get('RESEND_API_KEY') ?? '';
+  const apiKey = Deno.env.get('RESEND_CCC_SEND') ?? Deno.env.get('RESEND_API_KEY') ?? '';
   const provider = makeResendProvider(apiKey, FROM_ADDRESS);
 
   const result = await sendEmail(client, body, provider, { errorMapping: 'legacy' });
