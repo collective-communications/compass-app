@@ -25,19 +25,23 @@ interface MockResult {
 }
 
 let nextResult: MockResult = { data: [], error: null };
+let nextInvokeResult: { data: unknown; error: null | Error; response?: Response } = {
+  data: null,
+  error: null,
+};
 let lastUpdate: unknown = null;
 let invokeCalls: Array<{ fn: string; body: unknown }> = [];
 
 function makeChain(): Record<string, unknown> {
   const chain: Record<string, (...args: unknown[]) => unknown> = {};
-  const self = () => chain;
+  const self = (): Record<string, unknown> => chain;
 
   chain.select = self;
-  chain.insert = (payload: unknown) => {
+  chain.insert = (payload: unknown): Record<string, unknown> => {
     (chain as Record<string, unknown>).__insertPayload = payload;
     return chain;
   };
-  chain.update = (payload: unknown) => {
+  chain.update = (payload: unknown): Record<string, unknown> => {
     lastUpdate = payload;
     return chain;
   };
@@ -47,12 +51,12 @@ function makeChain(): Record<string, unknown> {
   chain.is = self;
   chain.contains = self;
   chain.order = self;
-  chain.single = () => Promise.resolve(nextResult);
+  chain.single = (): Promise<MockResult> => Promise.resolve(nextResult);
 
   (chain as Record<string, unknown>).then = (
     onFulfilled?: (value: unknown) => unknown,
     onRejected?: (reason: unknown) => unknown,
-  ) => Promise.resolve(nextResult).then(onFulfilled, onRejected);
+  ): Promise<unknown> => Promise.resolve(nextResult).then(onFulfilled, onRejected);
 
   return chain;
 }
@@ -63,7 +67,7 @@ configureSdk({
     functions: {
       invoke: (fn: string, opts: { body: unknown }) => {
         invokeCalls.push({ fn, body: opts.body });
-        return Promise.resolve({ data: null, error: null });
+        return Promise.resolve(nextInvokeResult);
       },
     },
   } as unknown as SupabaseClient<Database>,
@@ -204,6 +208,7 @@ describe('listInvitations', () => {
 describe('createInvitation', () => {
   beforeEach(() => {
     nextResult = { data: [], error: null };
+    nextInvokeResult = { data: null, error: null };
     invokeCalls = [];
   });
 
@@ -237,6 +242,33 @@ describe('createInvitation', () => {
     await expect(
       createInvitation({ email: 'a@b.com', role: 'client_manager' }),
     ).rejects.toThrow('email already invited');
+  });
+
+  test('throws with the edge-function response message when email send fails', async () => {
+    nextResult = {
+      data: {
+        id: 'inv-new',
+        email: 'a@b.com',
+        role: 'client_manager',
+        organization_id: 'org-1',
+        expires_at: '2026-04-22',
+        created_at: '2026-04-15',
+        invited_by: 'u-1',
+      },
+      error: null,
+    };
+    nextInvokeResult = {
+      data: null,
+      error: new Error('Edge Function returned a non-2xx status code'),
+      response: new Response(
+        JSON.stringify({ error: 'UNAUTHORIZED', message: 'User org membership not found' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } },
+      ),
+    };
+
+    await expect(
+      createInvitation({ email: 'a@b.com', role: 'client_manager', organizationId: 'org-1' }),
+    ).rejects.toThrow('User org membership not found');
   });
 });
 

@@ -39,6 +39,32 @@ export interface UpdateRoleParams {
   role: CccRole | ClientRole;
 }
 
+async function edgeFunctionErrorMessage(
+  error: Error,
+  response: Response | undefined,
+  fallback: string,
+): Promise<string> {
+  if (!response) return error.message || fallback;
+
+  try {
+    const body = await response.clone().json() as {
+      error?: unknown;
+      message?: unknown;
+    };
+
+    if (typeof body.message === 'string' && body.message.trim() !== '') {
+      return body.message;
+    }
+    if (typeof body.error === 'string' && body.error.trim() !== '') {
+      return body.error;
+    }
+  } catch {
+    // Fall through to the Supabase client error message below.
+  }
+
+  return error.message || fallback;
+}
+
 export async function listTeamMembers(): Promise<TeamMember[]> {
   const supabase = getClient();
   const { data, error } = await supabase
@@ -129,9 +155,17 @@ export async function createInvitation(params: InviteParams): Promise<Invitation
 
   if (error) throw error;
 
-  await supabase.functions.invoke('send-team-invitation', {
+  const { error: invokeError, response } = await supabase.functions.invoke('send-team-invitation', {
     body: { invitationId: data.id },
   });
+
+  if (invokeError) {
+    throw new Error(await edgeFunctionErrorMessage(
+      invokeError,
+      response,
+      'Failed to send invitation email',
+    ));
+  }
 
   return {
     id: data.id,

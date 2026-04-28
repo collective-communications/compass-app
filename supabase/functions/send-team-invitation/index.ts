@@ -80,17 +80,18 @@ Deno.serve(async (req: Request) => {
       return errorResponse(req, 'UNAUTHORIZED', 'Invalid or expired token', 401);
     }
 
-    const { data: profile, error: profileError } = await client
-      .from('user_profiles')
+    const { data: membership, error: memberError } = await client
+      .from('org_members')
       .select('role')
-      .eq('id', user.id)
+      .eq('user_id', user.id)
+      .limit(1)
       .single();
 
-    if (profileError || !profile) {
-      return errorResponse(req, 'UNAUTHORIZED', 'User profile not found', 401);
+    if (memberError || !membership) {
+      return errorResponse(req, 'UNAUTHORIZED', 'User org membership not found', 401);
     }
 
-    if (!['ccc_admin', 'ccc_member'].includes(profile.role)) {
+    if (!['ccc_admin', 'ccc_member'].includes(membership.role)) {
       return errorResponse(req, 'FORBIDDEN', 'Only CC+C users can send team invitations', 403);
     }
   }

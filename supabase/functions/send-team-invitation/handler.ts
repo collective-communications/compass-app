@@ -45,6 +45,31 @@ export interface SendTeamInvitationOptions {
   now?: Date;
 }
 
+export async function functionInvokeErrorMessage(
+  error: unknown,
+  response: Response | undefined,
+): Promise<string> {
+  if (response) {
+    try {
+      const body = await response.clone().json() as {
+        error?: unknown;
+        message?: unknown;
+      };
+
+      if (typeof body.message === 'string' && body.message.trim() !== '') {
+        return body.message;
+      }
+      if (typeof body.error === 'string' && body.error.trim() !== '') {
+        return body.error;
+      }
+    } catch {
+      // Fall through to the client error below.
+    }
+  }
+
+  return error instanceof Error ? error.message : String(error);
+}
+
 /**
  * Execute the send-team-invitation flow for a single invitation id.
  *
@@ -209,7 +234,7 @@ export async function sendTeamInvitation(
  */
 function defaultSendViaEdge(client: SupabaseClient): SendFn {
   return async (args) => {
-    const { data, error } = await client.functions.invoke('send-email', {
+    const { data, error, response } = await client.functions.invoke('send-email', {
       body: {
         to: args.to,
         subject: args.subject,
@@ -218,7 +243,7 @@ function defaultSendViaEdge(client: SupabaseClient): SendFn {
       },
     });
     if (error) {
-      return { id: null, error: error.message };
+      return { id: null, error: await functionInvokeErrorMessage(error, response) };
     }
     const id = (data as { emailLogId?: string; id?: string } | null)?.emailLogId
       ?? (data as { id?: string } | null)?.id

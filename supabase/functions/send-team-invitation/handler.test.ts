@@ -26,6 +26,7 @@ import { describe, test, expect, beforeEach } from 'bun:test';
 globalThis.Deno = globalThis.Deno ?? { env: { get: () => '' }, serve: () => {} };
 
 import {
+  functionInvokeErrorMessage,
   sendTeamInvitation,
   type SendFn,
   type SendEmailArgs,
@@ -87,6 +88,23 @@ beforeEach(() => {
   fromResults = [];
   fromIndex = 0;
   fromTables = [];
+});
+
+describe('functionInvokeErrorMessage', () => {
+  test('prefers downstream JSON message over generic client error', async () => {
+    const message = await functionInvokeErrorMessage(
+      new Error('Edge Function returned a non-2xx status code'),
+      new Response(
+        JSON.stringify({
+          error: 'SEND_FAILED',
+          message: 'Resend 400: domain is not verified',
+        }),
+        { status: 500, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+
+    expect(message).toBe('Resend 400: domain is not verified');
+  });
 });
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
