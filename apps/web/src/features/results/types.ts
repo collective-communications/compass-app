@@ -102,7 +102,8 @@ export type ResultsTabId =
   | 'groups'
   | 'dialogue'
   | 'reports'
-  | 'recommendations';
+  | 'recommendations'
+  | 'history';
 
 export interface ResultsTab {
   id: ResultsTabId;
@@ -122,4 +123,5 @@ export const RESULTS_TABS: ResultsTab[] = [
   { id: 'dialogue', label: 'Dialogue' },
   { id: 'reports', label: 'Reports' },
   { id: 'recommendations', label: 'Recommendations' },
+  { id: 'history', label: 'Trends' },
 ] as const;

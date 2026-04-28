@@ -31,4 +31,7 @@ export const resultKeys = {
 
   segmentQuestionScores: (surveyId: string, segmentType: string, segmentValue: string) =>
     [...resultKeys.all, 'segmentQuestionScores', surveyId, segmentType, segmentValue] as const,
+
+  historyTab: (surveyId: string) =>
+    [...resultKeys.all, 'historyTab', surveyId] as const,
 };

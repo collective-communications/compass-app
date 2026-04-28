@@ -64,6 +64,9 @@ const ReportsRoute = lazy(() =>
 const RecommendationsRoute = lazy(() =>
   import('./route-components').then((m) => ({ default: m.RecommendationsRoute })),
 );
+const HistoryRoute = lazy(() =>
+  import('./route-components').then((m) => ({ default: m.HistoryRoute })),
+);
 
 /** Wrap a lazy route component in a Suspense boundary with the shared loader. */
 function withSuspense(Component: ComponentType): () => ReactElement {
@@ -150,6 +153,12 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
     component: withSuspense(RecommendationsRoute),
   });
 
+  const historyRoute = createRoute({
+    getParentRoute: () => resultsLayoutRoute,
+    path: '/history',
+    component: withSuspense(HistoryRoute),
+  });
+
   return resultsLayoutRoute.addChildren([
     resultsIndexRoute,
     compassRoute,
@@ -158,5 +167,6 @@ export function createResultsRoutes<TParent extends AnyRoute>(parentRoute: TPare
     dialogueRoute,
     reportsRoute,
     recommendationsRoute,
+    historyRoute,
   ]);
 }

@@ -41,6 +41,7 @@ import { GroupsTab } from './tabs/groups';
 import { DialogueTab } from './tabs/dialogue';
 import { RecommendationsTab } from './tabs/recommendations';
 import { ReportsTab } from './tabs/reports';
+import { HistoryTab } from './tabs/history';
 import { useOverallScores } from './hooks/use-overall-scores';
 import { useArchetype } from './hooks/use-archetype';
 import { useRiskFlags } from './hooks/use-risk-flags';
@@ -57,6 +58,7 @@ const PATH_TO_TAB: Record<string, ResultsTabId> = {
   dialogue: 'dialogue',
   reports: 'reports',
   recommendations: 'recommendations',
+  history: 'history',
 };
 
 /**
@@ -210,4 +212,10 @@ export function ReportsRoute(): ReactElement {
 /** Recommendations tab route component. */
 export function RecommendationsRoute(): ReactElement {
   return <RecommendationsTab />;
+}
+
+/** History (Trends) tab route component. */
+export function HistoryRoute(): ReactElement {
+  const { surveyId } = useParams({ strict: false }) as { surveyId: string };
+  return <HistoryTab surveyId={surveyId} />;
 }

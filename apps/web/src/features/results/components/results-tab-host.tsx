@@ -114,6 +114,8 @@ export function ResultsTabHost({
             onSelect={setActiveRecIndex}
           />
         );
+      case 'history':
+        return undefined;
       default:
         return undefined;
     }
@@ -167,6 +169,8 @@ export function ResultsTabHost({
             onSelect={setActiveRecIndex}
           />
         );
+      case 'history':
+        return undefined;
       default:
         return undefined;
     }
@@ -182,6 +186,8 @@ export function ResultsTabHost({
         return 240;
       case 'recommendations':
         return 280;
+      case 'history':
+        return 200;
       default:
         return 200;
     }
@@ -234,6 +240,16 @@ export function ResultsTabHost({
         return <DialogueInsightsContent />;
       case 'recommendations':
         return <RecommendationsInsightsContent surveyId={surveyId} />;
+      case 'history':
+        return (
+          <div className="flex flex-col gap-4 py-4">
+            <h3 className="text-sm font-semibold text-[var(--grey-900)]">About Trends</h3>
+            <p className="text-sm leading-relaxed text-[var(--text-secondary)]">
+              Track how dimension scores have changed across surveys. Each point represents a
+              completed survey for this organisation, plotted in chronological order.
+            </p>
+          </div>
+        );
       default:
         return undefined;
     }
