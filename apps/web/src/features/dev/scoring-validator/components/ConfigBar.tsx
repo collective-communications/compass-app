@@ -63,12 +63,16 @@ export function ConfigBar({
       {/* Scale toggle */}
       <div style={{ display: 'flex', gap: 4 }}>
         <button
+          type="button"
+          aria-pressed={scaleSize === 4}
           style={scaleSize === 4 ? pillActive : pillInactive}
           onClick={() => onScaleChange(4)}
         >
           4pt
         </button>
         <button
+          type="button"
+          aria-pressed={scaleSize === 5}
           style={scaleSize === 5 ? pillActive : pillInactive}
           onClick={() => onScaleChange(5)}
         >
@@ -102,6 +106,7 @@ export function ConfigBar({
 
       {/* Reset */}
       <button
+        type="button"
         style={pillInactive}
         onClick={onReset}
       >
@@ -110,6 +115,8 @@ export function ConfigBar({
 
       {/* Compare toggle */}
       <button
+        type="button"
+        aria-pressed={compareMode}
         style={compareMode ? pillActive : pillInactive}
         onClick={onCompareToggle}
       >
