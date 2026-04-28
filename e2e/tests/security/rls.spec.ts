@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { createAdminClient } from '../../helpers/db';
 
 /**
  * RLS perimeter assertions.
@@ -90,6 +91,39 @@ async function signInAs(client: SupabaseClient, email: string): Promise<void> {
   });
   if (error) {
     throw new Error(`signInAs(${email}) failed: ${error.message}`);
+  }
+}
+
+async function seedHiddenReportForRls(): Promise<string> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('reports')
+    .insert({
+      survey_id: SURVEY_IDS.lakesideQ1_2026,
+      format: 'pdf',
+      status: 'completed',
+      progress: 100,
+      file_size: 12_345,
+      page_count: 7,
+      sections: ['rls-perimeter'],
+      client_visible: false,
+      storage_path: `fixtures/rls-hidden/${Date.now()}.pdf`,
+    })
+    .select('id')
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to seed hidden RLS report: ${error?.message ?? 'no data'}`);
+  }
+
+  return data.id as string;
+}
+
+async function deleteReport(reportId: string): Promise<void> {
+  const supabase = createAdminClient();
+  const { error } = await supabase.from('reports').delete().eq('id', reportId);
+  if (error) {
+    throw new Error(`Failed to delete RLS report ${reportId}: ${error.message}`);
   }
 }
 
@@ -188,6 +222,7 @@ test.describe('RLS perimeter', () => {
   });
 
   test('ccc_admin — responses readable; reports visible regardless of client_visible', async () => {
+    const hiddenReportId = await seedHiddenReportForRls();
     const client = makeAnonClient();
     try {
       await signInAs(client, EMAILS.cccAdmin);
@@ -198,19 +233,19 @@ test.describe('RLS perimeter', () => {
       expect(responsesResp.data).not.toBeNull();
       expect(responsesResp.data!.length).toBeGreaterThan(0);
 
-      // Reports: both client_visible=true AND client_visible=false rows must be
-      // visible to ccc_admin (policy `ccc_admin_all_reports`). Rather than pin
-      // to specific seed UUIDs (which are stale — see the note in the
-      // River Valley test), we assert the distribution: the unrestricted query
-      // returns rows, and at least one row has `client_visible=false` — proving
-      // the ccc_admin policy bypasses the client-visibility filter.
-      const allReportsResp = await client.from('reports').select('id, client_visible');
-      expect(allReportsResp.error).toBeNull();
-      expect(allReportsResp.data).not.toBeNull();
-      expect(allReportsResp.data!.length).toBeGreaterThan(0);
-      const hasHidden = allReportsResp.data!.some((r) => r.client_visible === false);
-      expect(hasHidden).toBe(true);
+      // Reports: ccc_admin must be able to read a hidden report. This test
+      // owns the hidden fixture so sibling report-list specs cannot delete
+      // the row out from under the assertion.
+      const hiddenReportResp = await client
+        .from('reports')
+        .select('id, client_visible')
+        .eq('id', hiddenReportId)
+        .maybeSingle();
+      expect(hiddenReportResp.error).toBeNull();
+      expect(hiddenReportResp.data).not.toBeNull();
+      expect(hiddenReportResp.data!.client_visible).toBe(false);
     } finally {
+      await deleteReport(hiddenReportId);
       await client.auth.signOut();
     }
   });

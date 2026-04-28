@@ -9,12 +9,9 @@ import { createAdminClient } from '../../helpers/db';
  * row exists, and the first save must upsert the row.
  *
  * Seed orgs relied on:
- *  - Aligned Health Systems — id `10000000-0000-0001-0001-000000000000`. This
- *    org genuinely has NO `organization_settings` row in the seeded database
- *    (Wave 0.3 adds a dedicated "Summit Analytics" org for this purpose at
- *    `00000000-0000-0000-0000-000000000005`, but that row is not yet in the
- *    shared E2E database until the seed is re-run — Aligned Health is the
- *    canonical real-world case of an existing org without a settings row).
+ *  - Summit Analytics — id `00000000-0000-0000-0000-000000000005`. This org
+ *    exists in the seeded database and intentionally has NO
+ *    `organization_settings` row.
  *  - River Valley Health — id `00000000-0000-0000-0000-000000000002`, has a
  *    row with `client_access_enabled: true` (see scripts/seed-dev.ts:930).
  *
@@ -23,7 +20,7 @@ import { createAdminClient } from '../../helpers/db';
  * missing-row test and this test remain re-runnable.
  */
 
-const NO_SETTINGS_ORG_ID = '10000000-0000-0001-0001-000000000000';
+const NO_SETTINGS_ORG_ID = '00000000-0000-0000-0000-000000000005';
 const RIVER_VALLEY_ORG_ID = '00000000-0000-0000-0000-000000000002';
 
 /** Resolve the client-access switch (aria role=switch, label "Enable client access to results"). */
@@ -40,6 +37,21 @@ async function deleteOrgSettingsRow(organizationId: string): Promise<void> {
   if (error) {
     throw new Error(`Failed to delete organization_settings for ${organizationId}: ${error.message}`);
   }
+}
+
+async function getClientAccessEnabled(organizationId: string): Promise<boolean | null> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('organization_settings')
+    .select('client_access_enabled')
+    .eq('organization_id', organizationId)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Failed to fetch organization_settings for ${organizationId}: ${error.message}`);
+  }
+
+  return (data?.client_access_enabled as boolean | undefined) ?? null;
 }
 
 test.describe('Admin org settings', () => {
@@ -88,42 +100,33 @@ test.describe('Admin org settings', () => {
     // upsert path.
     await deleteOrgSettingsRow(NO_SETTINGS_ORG_ID);
 
-    await page.goto(`/clients/${NO_SETTINGS_ORG_ID}/settings`);
+    try {
+      await page.goto(`/clients/${NO_SETTINGS_ORG_ID}/settings`);
 
-    const toggle = clientAccessToggle(page);
-    await expect(toggle).toBeVisible({ timeout: 2000 });
-    await expect(toggle).toHaveAttribute('aria-checked', 'false');
+      const toggle = clientAccessToggle(page);
+      await expect(toggle).toBeVisible({ timeout: 2000 });
+      await expect(toggle).toHaveAttribute('aria-checked', 'false');
 
-    // Flip the switch. Saving is auto (500ms debounce) — there is no Save
-    // button. The AccessControlToggle card hosts an AutoSaveIndicator, but
-    // its initial state is already 'saved' (see use-org-settings.ts:278), so
-    // asserting on "All changes saved" text is not a reliable signal.
-    // Instead, wait for the upsert network round-trip to complete.
-    const upsertResponse = page.waitForResponse(
-      (res) =>
-        res.url().includes('organization_settings') &&
-        ['POST', 'PATCH'].includes(res.request().method()) &&
-        res.status() >= 200 &&
-        res.status() < 300,
-      { timeout: 10_000 },
-    );
-    await toggle.click();
-    await expect(toggle).toHaveAttribute('aria-checked', 'true');
-    await upsertResponse;
+      await toggle.click();
+      await expect(toggle).toHaveAttribute('aria-checked', 'true');
+      await expect
+        .poll(() => getClientAccessEnabled(NO_SETTINGS_ORG_ID), { timeout: 10_000 })
+        .toBe(true);
 
-    // Reload. If the upsert worked, the row now exists and the toggle stays on,
-    // and the `needsCreate` hint goes away.
-    await page.reload();
+      // Reload. If the upsert worked, the row now exists and the toggle stays on,
+      // and the `needsCreate` hint goes away.
+      await page.reload();
 
-    const toggleAfter = clientAccessToggle(page);
-    await expect(toggleAfter).toBeVisible({ timeout: 5000 });
-    await expect(toggleAfter).toHaveAttribute('aria-checked', 'true');
-    await expect(page.getByText(/defaults shown/i)).toHaveCount(0);
-
-    // Teardown: delete the row we just created so the DB returns to its
-    // canonical "no settings row" state. This is cleaner than toggling back
-    // via the UI — a `client_access_enabled=false` row is semantically
-    // different from "no row" and would break the first test on a rerun.
-    await deleteOrgSettingsRow(NO_SETTINGS_ORG_ID);
+      const toggleAfter = clientAccessToggle(page);
+      await expect(toggleAfter).toBeVisible({ timeout: 5000 });
+      await expect(toggleAfter).toHaveAttribute('aria-checked', 'true');
+      await expect(page.getByText(/defaults shown/i)).toHaveCount(0);
+    } finally {
+      // Teardown: delete the row we just created so the DB returns to its
+      // canonical "no settings row" state. This is cleaner than toggling back
+      // via the UI — a `client_access_enabled=false` row is semantically
+      // different from "no row" and would break the first test on a rerun.
+      await deleteOrgSettingsRow(NO_SETTINGS_ORG_ID);
+    }
   });
 });

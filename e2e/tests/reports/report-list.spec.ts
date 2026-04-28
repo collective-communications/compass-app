@@ -3,6 +3,8 @@ import { createAdminClient } from '../../helpers/db';
 import { SEED_SURVEY_ID, SEED_ORG_ID } from '../../helpers/survey';
 import { deleteAllReports, seedCompletedReport } from '../../helpers/reports';
 
+test.describe.configure({ mode: 'serial' });
+
 /**
  * Report list E2E tests.
  *

@@ -39,6 +39,10 @@ mock.module('../../hooks/use-question-scores', () => ({
   useQuestionScores: () => ({ data: questionScores, isLoading: false }),
 }));
 
+mock.module('../../hooks/use-dialogue-keywords', () => ({
+  useDialogueKeywords: () => ({ data: [], isLoading: false }),
+}));
+
 const { DialogueTab } = await import('./dialogue-tab.js');
 
 // ─── Fixtures ───────────────────────────────────────────────────────────────
