@@ -443,7 +443,7 @@ export interface SurveyEngineService {
   resolveDeployment(token: string): Promise<DeploymentResolution>;
 
   /** Load all questions for a survey, joined with dimension mappings */
-  getQuestions(surveyId: string): Promise<QuestionWithDimension[]>;
+  getQuestions(surveyId: string, deploymentToken?: string): Promise<QuestionWithDimension[]>;
 
   /** Load metadata configuration for the survey's organization */
   getMetadataConfig(organizationId: string): Promise<MetadataConfig>;

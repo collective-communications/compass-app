@@ -38,6 +38,7 @@ const SEED_PASSWORD = 'TestPass123!';
 
 const EMAILS = {
   cccAdmin: 'admin@collectivecommunication.ca',
+  cccMember: 'member@collectivecommunication.ca',
   clientExecRiverValley: 'exec@rivervalleyhealth.ca',
   clientExecLakeside: 'exec@lakesideclinic.ca',
 } as const;
@@ -50,6 +51,10 @@ const ORG_IDS = {
 const SURVEY_IDS = {
   riverValleyQ1_2026: '00000000-0000-0000-0000-000000000100',
   lakesideQ1_2026: '00000000-0000-0000-0000-000000000101',
+} as const;
+
+const DEPLOYMENT_IDS = {
+  riverValleyActive: '00000000-0000-0000-0000-000000000200',
 } as const;
 
 // --------------------------------------------------------------------------
@@ -127,11 +132,197 @@ async function deleteReport(reportId: string): Promise<void> {
   }
 }
 
+async function getUserProfileByEmail(email: string): Promise<{ id: string; role: string }> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('id, role')
+    .eq('email', email)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to resolve profile for ${email}: ${error?.message ?? 'no data'}`);
+  }
+
+  return { id: data.id as string, role: data.role as string };
+}
+
+async function getSeedDeploymentToken(): Promise<string> {
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from('deployments')
+    .select('token')
+    .eq('id', DEPLOYMENT_IDS.riverValleyActive)
+    .single();
+
+  if (error || !data) {
+    throw new Error(`Failed to resolve seed deployment token: ${error?.message ?? 'no data'}`);
+  }
+
+  return data.token as string;
+}
+
+interface ClientAccessSnapshot {
+  organizationEnabled: boolean;
+  settingsRowExisted: boolean;
+  settingsEnabled: boolean | null;
+}
+
+async function setClientAccess(
+  organizationId: string,
+  enabled: boolean,
+): Promise<ClientAccessSnapshot> {
+  const supabase = createAdminClient();
+  const { data: orgRow, error: orgError } = await supabase
+    .from('organizations')
+    .select('client_access_enabled')
+    .eq('id', organizationId)
+    .single();
+
+  if (orgError || !orgRow) {
+    throw new Error(`Failed to read organization access flag: ${orgError?.message ?? 'no data'}`);
+  }
+
+  const { data: settingsRow, error: settingsError } = await supabase
+    .from('organization_settings')
+    .select('client_access_enabled')
+    .eq('organization_id', organizationId)
+    .maybeSingle();
+
+  if (settingsError) {
+    throw new Error(`Failed to read organization_settings access flag: ${settingsError.message}`);
+  }
+
+  const { error: orgUpdateError } = await supabase
+    .from('organizations')
+    .update({ client_access_enabled: enabled })
+    .eq('id', organizationId);
+  if (orgUpdateError) {
+    throw new Error(`Failed to update organization access flag: ${orgUpdateError.message}`);
+  }
+
+  const { error: settingsUpdateError } = await supabase
+    .from('organization_settings')
+    .upsert(
+      { organization_id: organizationId, client_access_enabled: enabled },
+      { onConflict: 'organization_id' },
+    );
+  if (settingsUpdateError) {
+    throw new Error(`Failed to update organization_settings access flag: ${settingsUpdateError.message}`);
+  }
+
+  return {
+    organizationEnabled: Boolean(orgRow.client_access_enabled),
+    settingsRowExisted: settingsRow !== null,
+    settingsEnabled: settingsRow?.client_access_enabled ?? null,
+  };
+}
+
+async function restoreClientAccess(
+  organizationId: string,
+  snapshot: ClientAccessSnapshot,
+): Promise<void> {
+  const supabase = createAdminClient();
+  await supabase
+    .from('organizations')
+    .update({ client_access_enabled: snapshot.organizationEnabled })
+    .eq('id', organizationId);
+
+  if (snapshot.settingsRowExisted) {
+    await supabase
+      .from('organization_settings')
+      .update({ client_access_enabled: snapshot.settingsEnabled ?? false })
+      .eq('organization_id', organizationId);
+  } else {
+    await supabase
+      .from('organization_settings')
+      .delete()
+      .eq('organization_id', organizationId);
+  }
+}
+
 // --------------------------------------------------------------------------
 // Tests
 // --------------------------------------------------------------------------
 
 test.describe('RLS perimeter', () => {
+  test('ccc_member cannot mutate org membership or profile roles through the direct API', async () => {
+    const client = makeAnonClient();
+    let targetId: string | null = null;
+
+    try {
+      const target = await getUserProfileByEmail(EMAILS.clientExecRiverValley);
+      targetId = target.id;
+      await signInAs(client, EMAILS.cccMember);
+
+      await client
+        .from('org_members')
+        .update({ role: 'ccc_admin' })
+        .eq('organization_id', ORG_IDS.riverValley)
+        .eq('user_id', target.id);
+
+      await client
+        .from('user_profiles')
+        .update({ role: 'ccc_admin' })
+        .eq('id', target.id);
+
+      const supabase = createAdminClient();
+      const { data: membership, error: membershipError } = await supabase
+        .from('org_members')
+        .select('role')
+        .eq('organization_id', ORG_IDS.riverValley)
+        .eq('user_id', target.id)
+        .single();
+      expect(membershipError).toBeNull();
+      expect(membership?.role).toBe('client_exec');
+
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', target.id)
+        .single();
+      expect(profileError).toBeNull();
+      expect(profile?.role).toBe('client_exec');
+    } finally {
+      if (targetId) {
+        const supabase = createAdminClient();
+        await supabase
+          .from('org_members')
+          .update({ role: 'client_exec' })
+          .eq('organization_id', ORG_IDS.riverValley)
+          .eq('user_id', targetId);
+        await supabase.from('user_profiles').update({ role: 'client_exec' }).eq('id', targetId);
+      }
+      await client.auth.signOut();
+    }
+  });
+
+  test('client access disabled blocks result views and result RPCs below the route layer', async () => {
+    const snapshot = await setClientAccess(ORG_IDS.riverValley, false);
+    const client = makeAnonClient();
+
+    try {
+      await signInAs(client, EMAILS.clientExecRiverValley);
+
+      const scoresResp = await client
+        .from('safe_segment_scores')
+        .select('survey_id')
+        .eq('survey_id', SURVEY_IDS.riverValleyQ1_2026)
+        .limit(1);
+      expect(scoresResp.error).toBeNull();
+      expect(scoresResp.data ?? []).toEqual([]);
+
+      const metricsResp = await client.rpc('get_response_metrics', {
+        p_survey_id: SURVEY_IDS.riverValleyQ1_2026,
+      });
+      expect(metricsResp.error).not.toBeNull();
+      expect(metricsResp.error?.code).toBe('42501');
+    } finally {
+      await restoreClientAccess(ORG_IDS.riverValley, snapshot);
+      await client.auth.signOut();
+    }
+  });
+
   test('client_exec at River Valley — surveys/deployments/responses/reports scoped correctly', async () => {
     const client = makeAnonClient();
     try {
@@ -250,7 +441,7 @@ test.describe('RLS perimeter', () => {
     }
   });
 
-  test('anonymous (no sign-in) — responses blocked; surveys constrained to active/closed by anon policy', async () => {
+  test('anonymous (no sign-in) — survey content is token-bound and not enumerable', async () => {
     const client = makeAnonClient();
     try {
       // No sign-in — the request carries only the anon key, so `auth.role()`
@@ -267,21 +458,44 @@ test.describe('RLS perimeter', () => {
         expect(responsesResp.data ?? []).toEqual([]);
       }
 
-      // ----- surveys: anon may read rows with status IN ('active','closed') -----
-      // Migration 00000000000010 `anon_read_active_surveys` exists so that
-      // the public `/s/$token` survey landing page can resolve a survey row
-      // without a signed-in user. The perimeter assertion: anon must never
-      // see `draft` or `archived` surveys, even though it can see
-      // active/closed ones.
+      // ----- surveys/deployments/questions: no direct anon enumeration -----
+      const deploymentsResp = await client
+        .from('deployments')
+        .select('id, token')
+        .limit(10);
+      expect(deploymentsResp.error).toBeNull();
+      expect(deploymentsResp.data ?? []).toEqual([]);
+
       const surveysResp = await client
         .from('surveys')
         .select('id, status, organization_id')
-        .limit(100);
+        .limit(10);
       expect(surveysResp.error).toBeNull();
-      expect(surveysResp.data).not.toBeNull();
-      for (const row of surveysResp.data!) {
-        expect(['active', 'closed']).toContain(row.status);
-      }
+      expect(surveysResp.data ?? []).toEqual([]);
+
+      const questionsResp = await client
+        .from('questions')
+        .select('id, survey_id')
+        .limit(10);
+      expect(questionsResp.error).toBeNull();
+      expect(questionsResp.data ?? []).toEqual([]);
+
+      // ----- token-bound RPCs: valid shared link still renders the survey -----
+      const deploymentToken = await getSeedDeploymentToken();
+      const resolutionResp = await client.rpc('resolve_deployment_by_token', {
+        p_token: deploymentToken,
+      });
+      expect(resolutionResp.error).toBeNull();
+      expect(resolutionResp.data).toMatchObject({
+        survey: { id: SURVEY_IDS.riverValleyQ1_2026 },
+      });
+
+      const tokenQuestionsResp = await client.rpc('get_questions_for_deployment_token', {
+        p_token: deploymentToken,
+        p_survey_id: SURVEY_IDS.riverValleyQ1_2026,
+      });
+      expect(tokenQuestionsResp.error).toBeNull();
+      expect(tokenQuestionsResp.data?.length ?? 0).toBeGreaterThan(0);
     } finally {
       await client.auth.signOut();
     }

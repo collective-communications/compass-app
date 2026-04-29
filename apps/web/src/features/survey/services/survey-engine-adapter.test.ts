@@ -25,27 +25,44 @@ interface MockResult {
 
 let queryResult: MockResult = { data: null, error: null };
 let sessionQueryResult: MockResult = { data: null, error: null };
+let loggerErrors: unknown[] = [];
 
 /** Captured arguments for surveySessionClient() — one entry per call. */
 const sessionClientCalls: string[] = [];
+const rpcCalls: Array<{ fn: string; args: Record<string, unknown> | undefined }> = [];
 
 function makeChain(resultRef: () => MockResult): Record<string, unknown> {
   const chain: Record<string, (...args: unknown[]) => unknown> = {};
   const self = (): Record<string, unknown> => chain;
   chain.select = self;
   chain.eq = self;
+  chain.order = (): Promise<MockResult> => Promise.resolve(resultRef());
+  chain.upsert = (): Promise<MockResult> => Promise.resolve(resultRef());
   chain.single = (): Promise<MockResult> => Promise.resolve(resultRef());
   chain.maybeSingle = (): Promise<MockResult> => Promise.resolve(resultRef());
   return chain;
 }
 
 configureSdk({
-  client: { from: () => makeChain(() => queryResult) } as unknown as SupabaseClient<Database>,
+  client: {
+    from: () => makeChain(() => queryResult),
+    rpc: (fn: string, args?: Record<string, unknown>) => {
+      rpcCalls.push({ fn, args });
+      return Promise.resolve(queryResult);
+    },
+  } as unknown as SupabaseClient<Database>,
   surveySessionClient: (sessionToken: string) => {
     sessionClientCalls.push(sessionToken);
     return { from: () => makeChain(() => sessionQueryResult) } as unknown as SupabaseClient<Database>;
   },
-  logger: { error: () => undefined, warn: () => undefined, info: () => undefined, debug: () => undefined },
+  logger: {
+    error: (...args: unknown[]) => {
+      loggerErrors.push(args);
+    },
+    warn: () => undefined,
+    info: () => undefined,
+    debug: () => undefined,
+  },
 });
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -88,7 +105,7 @@ interface TokenRow {
 }
 
 function makeRow(row: TokenRow): unknown {
-  return { ...row.deployment, survey: row.survey };
+  return { deployment: row.deployment, survey: row.survey };
 }
 
 function baseDeployment(overrides: Partial<TokenRow['deployment']> = {}): TokenRow['deployment'] {
@@ -136,12 +153,26 @@ const adapter = createSurveyEngineAdapter();
 describe('resolveDeployment — status ordering grid', () => {
   beforeEach(() => {
     queryResult = { data: null, error: null };
+    loggerErrors = [];
+    rpcCalls.length = 0;
   });
 
   test('no row → not_found', async () => {
     queryResult = { data: null, error: { message: 'not found' } };
     const result = await adapter.resolveDeployment('missing');
     expect(result.status).toBe('not_found');
+  });
+
+  test('lookup failure logs only a token fingerprint, not the raw bearer token', async () => {
+    const rawToken = '12345678-aaaa-bbbb-cccc-abcdefabcdef';
+    queryResult = { data: null, error: { message: 'not found' } };
+
+    const result = await adapter.resolveDeployment(rawToken);
+
+    expect(result.status).toBe('not_found');
+    const serializedLogs = JSON.stringify(loggerErrors);
+    expect(serializedLogs).not.toContain(rawToken);
+    expect(serializedLogs).toContain('1234...cdef');
   });
 
   test('deployment with null survey → not_found (orphaned deployment)', async () => {
@@ -361,5 +392,55 @@ describe('resumeResponse — session-token binding', () => {
     expect(result).toBeNull();
     // Confirms the adapter went through the session client, not the module client.
     expect(sessionClientCalls).toEqual(['session-token-1']);
+  });
+});
+
+describe('getQuestions — token-bound survey surface', () => {
+  beforeEach(() => {
+    queryResult = { data: [], error: null };
+    loggerErrors = [];
+    rpcCalls.length = 0;
+  });
+
+  test('uses the token-bound RPC when a deployment token is supplied', async () => {
+    const result = await adapter.getQuestions('survey-1', 'deployment-token-1');
+
+    expect(result).toEqual([]);
+    expect(rpcCalls).toEqual([
+      {
+        fn: 'get_questions_for_deployment_token',
+        args: {
+          p_token: 'deployment-token-1',
+          p_survey_id: 'survey-1',
+        },
+      },
+    ]);
+  });
+
+  test('keeps the authenticated direct-query path for callers without a deployment token', async () => {
+    const result = await adapter.getQuestions('survey-1');
+
+    expect(result).toEqual([]);
+    expect(rpcCalls).toEqual([]);
+  });
+});
+
+describe('survey response logging — session-token redaction', () => {
+  beforeEach(() => {
+    sessionQueryResult = { data: null, error: null };
+    loggerErrors = [];
+  });
+
+  test('upsert failure logs only a response fingerprint, not the raw session token', async () => {
+    const rawSessionToken = 'session-token-abcdef987654';
+    sessionQueryResult = { data: null, error: { message: 'rls denied' } };
+
+    await expect(adapter.upsertAnswer(rawSessionToken, 'question-1', 3)).rejects.toThrow(
+      'Failed to save answer',
+    );
+
+    const serializedLogs = JSON.stringify(loggerErrors);
+    expect(serializedLogs).not.toContain(rawSessionToken);
+    expect(serializedLogs).toContain('sess...7654');
   });
 });

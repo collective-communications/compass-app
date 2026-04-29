@@ -11,7 +11,6 @@ const ALLOWED_MIME_TYPES = new Set([
   'image/png',
   'image/jpeg',
   'image/webp',
-  'image/svg+xml',
 ]);
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -20,7 +19,6 @@ const MIME_TO_EXT: Record<string, string> = {
   'image/png': 'png',
   'image/jpeg': 'jpg',
   'image/webp': 'webp',
-  'image/svg+xml': 'svg',
 };
 
 export interface UseLogoUploadReturn {
@@ -38,7 +36,7 @@ export function useLogoUpload(orgId: string): UseLogoUploadReturn {
       setError(null);
 
       if (!ALLOWED_MIME_TYPES.has(file.type)) {
-        setError('File must be a PNG, JPEG, WebP, or SVG image.');
+        setError('File must be a PNG, JPEG, or WebP image.');
         return null;
       }
 

@@ -151,7 +151,7 @@ export function useRemoveUser(
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: removeUser,
+    mutationFn: (userId: string) => removeUser(organizationId ? { userId, organizationId } : userId),
     onSuccess: () => {
       if (organizationId) {
         void queryClient.invalidateQueries({

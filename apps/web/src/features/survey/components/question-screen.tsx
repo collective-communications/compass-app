@@ -25,8 +25,8 @@ interface QuestionScreenProps {
 
 /** Question-by-question survey flow with autosave and keyboard shortcuts. */
 export function QuestionScreen({ onComplete }: QuestionScreenProps): React.ReactNode {
-  const { survey, sessionToken } = useSurveyContext();
-  const { data: allQuestions, isLoading, error } = useQuestions(survey.id);
+  const { survey, deployment, sessionToken } = useSurveyContext();
+  const { data: allQuestions, isLoading, error } = useQuestions(survey.id, deployment.token);
   const params = useParams({ strict: false }) as { index?: string };
   const initialIndex = params.index ? Math.max(0, parseInt(params.index, 10) - 1) : 0;
   const [currentIndex, setCurrentIndex] = useState(initialIndex);

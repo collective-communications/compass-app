@@ -104,7 +104,7 @@ export async function getReportDownloadUrl(storagePath: string): Promise<string>
   const supabase = getClient();
   const { data, error } = await supabase.storage
     .from('reports')
-    .createSignedUrl(storagePath, 3600);
+    .createSignedUrl(storagePath, 300);
 
   if (error) throw error;
   return data.signedUrl;

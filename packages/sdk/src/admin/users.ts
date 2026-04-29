@@ -37,6 +37,25 @@ export interface InviteParams {
 export interface UpdateRoleParams {
   userId: string;
   role: CccRole | ClientRole;
+  organizationId?: string;
+}
+
+type RemoveUserParams = string | { userId: string; organizationId?: string };
+
+interface OrgMemberRow {
+  organization_id: string;
+  user_id: string;
+  role: CccRole | ClientRole;
+  created_at: string;
+}
+
+interface UserProfileRow {
+  id: string;
+  email: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  last_active_at: string | null;
+  created_at: string;
 }
 
 async function edgeFunctionErrorMessage(
@@ -67,47 +86,29 @@ async function edgeFunctionErrorMessage(
 
 export async function listTeamMembers(): Promise<TeamMember[]> {
   const supabase = getClient();
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
+  const { data: memberships, error } = await supabase
+    .from('org_members')
+    .select('organization_id, user_id, role, created_at')
     .in('role', ['ccc_admin', 'ccc_member'])
-    .order('full_name');
+    .order('created_at');
 
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    email: row.email,
-    fullName: row.full_name,
-    avatarUrl: row.avatar_url,
-    role: row.role as CccRole,
-    assignedClients: row.assigned_clients ?? [],
-    lastActiveAt: row.last_active_at,
-    createdAt: row.created_at,
-  }));
+  return hydrateMembers((memberships ?? []) as OrgMemberRow[]);
 }
 
 export async function listClientUsers(organizationId: string): Promise<TeamMember[]> {
   const supabase = getClient();
-  const { data, error } = await supabase
-    .from('user_profiles')
-    .select('*')
+  const { data: memberships, error } = await supabase
+    .from('org_members')
+    .select('organization_id, user_id, role, created_at')
+    .eq('organization_id', organizationId)
     .in('role', ['client_exec', 'client_director', 'client_manager'])
-    .contains('assigned_clients', [organizationId])
-    .order('full_name');
+    .order('created_at');
 
   if (error) throw error;
 
-  return (data ?? []).map((row) => ({
-    id: row.id,
-    email: row.email,
-    fullName: row.full_name,
-    avatarUrl: row.avatar_url,
-    role: row.role as ClientRole,
-    assignedClients: row.assigned_clients ?? [],
-    lastActiveAt: row.last_active_at,
-    createdAt: row.created_at,
-  }));
+  return hydrateMembers((memberships ?? []) as OrgMemberRow[]);
 }
 
 export async function listInvitations(organizationId?: string): Promise<Invitation[]> {
@@ -212,22 +213,75 @@ export async function revokeInvitation(invitationId: string): Promise<void> {
   if (error) throw error;
 }
 
-export async function updateUserRole({ userId, role }: UpdateRoleParams): Promise<void> {
+export async function updateUserRole({ userId, role, organizationId }: UpdateRoleParams): Promise<void> {
   const supabase = getClient();
-  const { error } = await supabase
-    .from('user_profiles')
+  let query = supabase
+    .from('org_members')
     .update({ role })
-    .eq('id', userId);
+    .eq('user_id', userId);
+
+  if (organizationId) {
+    query = query.eq('organization_id', organizationId);
+  }
+
+  const { error } = await query;
 
   if (error) throw error;
 }
 
-export async function removeUser(userId: string): Promise<void> {
+export async function removeUser(params: RemoveUserParams): Promise<void> {
   const supabase = getClient();
-  const { error } = await supabase
-    .from('user_profiles')
+  const userId = typeof params === 'string' ? params : params.userId;
+  const organizationId = typeof params === 'string' ? undefined : params.organizationId;
+  let query = supabase
+    .from('org_members')
     .delete()
-    .eq('id', userId);
+    .eq('user_id', userId);
+
+  if (organizationId) {
+    query = query.eq('organization_id', organizationId);
+  }
+
+  const { error } = await query;
 
   if (error) throw error;
+}
+
+async function hydrateMembers(memberships: OrgMemberRow[]): Promise<TeamMember[]> {
+  if (memberships.length === 0) return [];
+
+  const supabase = getClient();
+  const profileIds = [...new Set(memberships.map((row) => row.user_id))];
+  const { data: profiles, error } = await supabase
+    .from('user_profiles')
+    .select('id, email, full_name, avatar_url, last_active_at, created_at')
+    .in('id', profileIds);
+
+  if (error) throw error;
+
+  const profilesById = new Map(
+    ((profiles ?? []) as UserProfileRow[]).map((profile) => [profile.id, profile]),
+  );
+  const assignedClientsByUser = new Map<string, string[]>();
+
+  for (const membership of memberships) {
+    const assigned = assignedClientsByUser.get(membership.user_id) ?? [];
+    assigned.push(membership.organization_id);
+    assignedClientsByUser.set(membership.user_id, assigned);
+  }
+
+  return memberships.map((membership) => {
+    const profile = profilesById.get(membership.user_id);
+
+    return {
+      id: membership.user_id,
+      email: profile?.email ?? '',
+      fullName: profile?.full_name ?? null,
+      avatarUrl: profile?.avatar_url ?? null,
+      role: membership.role,
+      assignedClients: assignedClientsByUser.get(membership.user_id) ?? [],
+      lastActiveAt: profile?.last_active_at ?? null,
+      createdAt: profile?.created_at ?? membership.created_at,
+    };
+  });
 }

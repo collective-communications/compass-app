@@ -52,7 +52,7 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
     (userId: string, role: CccRole | ClientRole): void => {
       setRoleErrors((prev) => ({ ...prev, [userId]: '' }));
       updateRole.mutate(
-        { userId, role },
+        { userId, role, organizationId },
         {
           onError: (err) => {
             setRoleErrors((prev) => ({
@@ -63,7 +63,7 @@ export function ClientUsersTab({ organizationId }: ClientUsersTabProps): ReactEl
         },
       );
     },
-    [updateRole],
+    [organizationId, updateRole],
   );
 
   const handleRemove = useCallback(

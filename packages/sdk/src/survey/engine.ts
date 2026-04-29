@@ -11,6 +11,10 @@ import type {
   QuestionWithDimension,
   LikertValue,
 } from '@compass/types';
+import { DEFAULT_METADATA_CONFIG } from '@compass/types';
+import { formatDisplayDate } from '@compass/utils';
+import { getClient, getSessionClient, getLogger } from '../runtime';
+import { mapSurveyRow, mapDeploymentRow, mapQuestionRow } from '../lib/mappers';
 
 type ResponseInsert = Database['public']['Tables']['responses']['Insert'];
 type SurveyRow = Database['public']['Tables']['surveys']['Row'];
@@ -41,18 +45,21 @@ type QuestionRowWithDimensions = QuestionRowWithDrift & {
   } | null;
 };
 
-type DeploymentWithSurveyRow = DeploymentRow & {
-  survey: SurveyRow | null;
-};
-
 type ResponseWithAnswersRow = ResponseRow & {
   answers: Array<Pick<AnswerRow, 'question_id' | 'likert_value' | 'open_text_value'>>;
 };
 
-import { DEFAULT_METADATA_CONFIG } from '@compass/types';
-import { formatDisplayDate } from '@compass/utils';
-import { getClient, getSessionClient, getLogger } from '../runtime';
-import { mapSurveyRow, mapDeploymentRow, mapQuestionRow } from '../lib/mappers';
+type DeploymentResolutionRpc = {
+  deployment?: DeploymentRow | null;
+  survey?: SurveyRow | null;
+} | null;
+
+type RpcClient = {
+  rpc: <TData>(
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: TData | null; error: { message: string } | null }>;
+};
 
 /**
  * Create a partial SurveyEngineService backed by Supabase.
@@ -68,33 +75,32 @@ export function createSurveyEngineAdapter(): Pick<
   return {
     async resolveDeployment(token: string): Promise<DeploymentResolution> {
       const supabase = getClient();
+      const rpcClient = supabase as unknown as RpcClient;
       const logger = getLogger();
-      const { data: deployment, error: deploymentError } = await supabase
-        .from('deployments')
-        .select('*, survey:surveys(*)')
-        .eq('token', token)
-        .single();
+      const { data: resolution, error: deploymentError } = await rpcClient
+        .rpc('resolve_deployment_by_token', { p_token: token });
+
+      const resolved = resolution as DeploymentResolutionRpc;
+      const deployment = resolved?.deployment;
+      const survey = resolved?.survey;
 
       if (deploymentError || !deployment) {
         if (deploymentError) {
           logger.error(
-            { err: deploymentError, fn: 'resolveDeployment', token },
+            { err: deploymentError, fn: 'resolveDeployment', tokenFingerprint: fingerprintToken(token) },
             'Failed to resolve deployment token',
           );
         }
         return { status: 'not_found', message: 'This survey link is not valid.' };
       }
 
-      const row = deployment as DeploymentWithSurveyRow;
-      const survey = row.survey;
-
       if (!survey) {
         return { status: 'not_found', message: 'The survey associated with this link could not be found.' };
       }
 
       const surveyStatus = survey.status;
-      const deploymentClosesAt = row.closes_at;
-      const deploymentOpensAt = row.opens_at;
+      const deploymentClosesAt = deployment.closes_at;
+      const deploymentOpensAt = deployment.opens_at;
 
       if (surveyStatus === 'closed' || surveyStatus === 'archived') {
         const closesAt = deploymentClosesAt ?? survey.closes_at ?? null;
@@ -123,7 +129,7 @@ export function createSurveyEngineAdapter(): Pick<
 
       return {
         status: 'valid',
-        deployment: mapDeploymentRow(row),
+        deployment: mapDeploymentRow(deployment),
         survey: mapSurveyRow(survey),
       };
     },
@@ -223,7 +229,11 @@ export function createSurveyEngineAdapter(): Pick<
 
         if (error) {
           logger.error(
-            { err: error, fn: 'saveResponse.update', responseId: params.responseId },
+            {
+              err: error,
+              fn: 'saveResponse.update',
+              responseFingerprint: fingerprintToken(params.responseId),
+            },
             'Failed to update existing survey response',
           );
           throw new Error(`Failed to update response: ${error.message}`);
@@ -250,7 +260,12 @@ export function createSurveyEngineAdapter(): Pick<
 
       if (error) {
         logger.error(
-          { err: error, fn: 'saveResponse.insert', responseId, deploymentId: params.deploymentId },
+          {
+            err: error,
+            fn: 'saveResponse.insert',
+            responseFingerprint: fingerprintToken(responseId),
+            deploymentId: params.deploymentId,
+          },
           'Failed to create new survey response',
         );
         throw new Error(`Failed to create response: ${error.message}`);
@@ -259,18 +274,29 @@ export function createSurveyEngineAdapter(): Pick<
       return { responseId };
     },
 
-    async getQuestions(surveyId: string): Promise<QuestionWithDimension[]> {
+    async getQuestions(surveyId: string, deploymentToken?: string): Promise<QuestionWithDimension[]> {
       const supabase = getClient();
+      const rpcClient = supabase as unknown as RpcClient;
       const logger = getLogger();
-      const { data, error } = await supabase
-        .from('questions')
-        .select('*, question_dimensions(question_id, dimension_id, weight)')
-        .eq('survey_id', surveyId)
-        .order('order_index', { ascending: true });
+      const { data, error } = deploymentToken
+        ? await rpcClient.rpc<QuestionRowWithDimensions[]>('get_questions_for_deployment_token', {
+          p_token: deploymentToken,
+          p_survey_id: surveyId,
+        })
+        : await supabase
+          .from('questions')
+          .select('*, question_dimensions(question_id, dimension_id, weight)')
+          .eq('survey_id', surveyId)
+          .order('order_index', { ascending: true });
 
       if (error) {
         logger.error(
-          { err: error, fn: 'getQuestions', surveyId },
+          {
+            err: error,
+            fn: 'getQuestions',
+            surveyId,
+            tokenFingerprint: deploymentToken ? fingerprintToken(deploymentToken) : undefined,
+          },
           'Failed to load survey questions',
         );
         throw new Error(`Failed to load questions: ${error.message}`);
@@ -311,7 +337,7 @@ export function createSurveyEngineAdapter(): Pick<
 
       if (error) {
         logger.error(
-          { err: error, fn: 'submitResponse', responseId },
+          { err: error, fn: 'submitResponse', responseFingerprint: fingerprintToken(responseId) },
           'Failed to mark survey response as complete',
         );
         throw new Error(`Failed to submit response: ${error.message}`);
@@ -341,13 +367,23 @@ export function createSurveyEngineAdapter(): Pick<
 
       if (error) {
         logger.error(
-          { err: error, fn: 'upsertAnswer', responseId, questionId },
+          {
+            err: error,
+            fn: 'upsertAnswer',
+            responseFingerprint: fingerprintToken(responseId),
+            questionId,
+          },
           'Failed to upsert survey answer',
         );
         throw new Error(`Failed to save answer: ${error.message}`);
       }
     },
   };
+}
+
+function fingerprintToken(token: string): string {
+  if (token.length <= 8) return '[redacted]';
+  return `${token.slice(0, 4)}...${token.slice(-4)}`;
 }
 
 function mapResponseWithAnswers(row: ResponseWithAnswersRow): SurveyResponse {

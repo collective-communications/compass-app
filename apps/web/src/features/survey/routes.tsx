@@ -30,7 +30,7 @@ import { SaveProgressScreen } from './components/save-progress-screen';
  */
 function SurveyLayoutInner(): React.ReactElement {
   const { deployment, survey } = useSurveyContext();
-  const { data: questions } = useQuestions(survey.id);
+  const { data: questions } = useQuestions(survey.id, deployment.token);
   const totalQuestions = questions?.length ?? 0;
 
   const resumeSession = useResumeSession(deployment.id, survey.id, totalQuestions);
@@ -78,6 +78,8 @@ function SurveyLayoutInner(): React.ReactElement {
   return <Outlet />;
 }
 
+// The route type is intentionally inferred so TanStack keeps exact parent/child generics.
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParent) {
   const surveyLayoutRoute = createRoute({
     getParentRoute: () => parentRoute,
@@ -197,7 +199,7 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
     path: '/',
     component: function SurveyWelcomePage(): React.ReactElement {
       const { deployment } = useSurveyContext();
-      const { data: questions } = useQuestions(deployment.surveyId);
+      const { data: questions } = useQuestions(deployment.surveyId, deployment.token);
       const navigate = useNavigate();
 
       const questionCount = questions?.length ?? 0;
@@ -239,7 +241,7 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
     path: '/open',
     component: function SurveyOpenEndedPage(): React.ReactElement {
       const { deployment, survey, sessionToken } = useSurveyContext();
-      const { data: questions } = useQuestions(survey.id);
+      const { data: questions } = useQuestions(survey.id, deployment.token);
       const { submit, isPending } = useSubmitResponse();
       const navigate = useNavigate();
 
@@ -308,7 +310,7 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
     path: '/saved',
     component: function SurveySavedPage(): React.ReactElement {
       const { deployment, survey } = useSurveyContext();
-      const { data: questions } = useQuestions(survey.id);
+      const { data: questions } = useQuestions(survey.id, deployment.token);
       const answers = useAnswerStore((s) => s.answers);
       const navigate = useNavigate();
 

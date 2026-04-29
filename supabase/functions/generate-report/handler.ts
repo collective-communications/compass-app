@@ -88,7 +88,7 @@ async function uploadReport(
 
   const { data: signedData, error: signedError } = await client.storage
     .from('reports')
-    .createSignedUrl(storagePath, 86400); // 24h expiry
+    .createSignedUrl(storagePath, 300); // 5m expiry; callers can request a fresh URL when needed.
   if (signedError) throw new Error(`Signed URL creation failed: ${signedError.message}`);
 
   return {

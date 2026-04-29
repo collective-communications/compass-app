@@ -11,14 +11,18 @@ import type { QuestionWithDimension } from '@compass/types';
 
 // ─── Mock Setup ─────────────────────────────────────────────────────────────
 
-let getQuestionsStub: (surveyId: string) => Promise<QuestionWithDimension[]> = async () => [];
+let getQuestionsStub: (
+  surveyId: string,
+  deploymentToken?: string,
+) => Promise<QuestionWithDimension[]> = async () => [];
 
 const adapterModule = await import('../services/survey-engine-adapter.js');
 const createAdapterSpy = spyOn(adapterModule, 'createSurveyEngineAdapter');
 createAdapterSpy.mockImplementation(
   () =>
     ({
-      getQuestions: (surveyId: string) => getQuestionsStub(surveyId),
+      getQuestions: (surveyId: string, deploymentToken?: string) =>
+        getQuestionsStub(surveyId, deploymentToken),
     }) as never,
 );
 
@@ -77,7 +81,7 @@ function makeQuestion(id: string, order: number): QuestionWithDimension {
 
 describe('useQuestions', () => {
   beforeEach(() => {
-    getQuestionsStub = async () => [];
+    getQuestionsStub = async (): Promise<QuestionWithDimension[]> => [];
   });
 
   test('is disabled (idle) when surveyId is undefined', () => {
@@ -99,7 +103,7 @@ describe('useQuestions', () => {
 
   test('passes through the adapter response preserving order', async () => {
     const questions = [makeQuestion('q-1', 1), makeQuestion('q-2', 2), makeQuestion('q-3', 3)];
-    getQuestionsStub = async () => questions;
+    getQuestionsStub = async (): Promise<QuestionWithDimension[]> => questions;
 
     const { result } = renderHook(() => useQuestions('survey-1'), {
       wrapper: makeWrapper(),
@@ -113,7 +117,7 @@ describe('useQuestions', () => {
 
   test('forwards the surveyId to the adapter', async () => {
     let receivedSurveyId = '';
-    getQuestionsStub = async (surveyId) => {
+    getQuestionsStub = async (surveyId): Promise<QuestionWithDimension[]> => {
       receivedSurveyId = surveyId;
       return [];
     };
@@ -125,8 +129,22 @@ describe('useQuestions', () => {
     expect(receivedSurveyId).toBe('survey-xyz');
   });
 
+  test('forwards the deployment token to the adapter when present', async () => {
+    let receivedToken: string | undefined;
+    getQuestionsStub = async (_surveyId, deploymentToken): Promise<QuestionWithDimension[]> => {
+      receivedToken = deploymentToken;
+      return [];
+    };
+
+    const { result } = renderHook(() => useQuestions('survey-xyz', 'deployment-token-123'), {
+      wrapper: makeWrapper(),
+    });
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(receivedToken).toBe('deployment-token-123');
+  });
+
   test('surfaces error state when the adapter throws', async () => {
-    getQuestionsStub = async () => {
+    getQuestionsStub = async (): Promise<QuestionWithDimension[]> => {
       throw new Error('Failed to load questions: RLS');
     };
 

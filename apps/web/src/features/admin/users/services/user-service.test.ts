@@ -25,6 +25,7 @@ interface MockResult {
 }
 
 let nextResult: MockResult = { data: [], error: null };
+let resultQueue: MockResult[] = [];
 let nextInvokeResult: { data: unknown; error: null | Error; response?: Response } = {
   data: null,
   error: null,
@@ -51,12 +52,13 @@ function makeChain(): Record<string, unknown> {
   chain.is = self;
   chain.contains = self;
   chain.order = self;
-  chain.single = (): Promise<MockResult> => Promise.resolve(nextResult);
+  const resolveResult = (): MockResult => resultQueue.shift() ?? nextResult;
+  chain.single = (): Promise<MockResult> => Promise.resolve(resolveResult());
 
   (chain as Record<string, unknown>).then = (
     onFulfilled?: (value: unknown) => unknown,
     onRejected?: (reason: unknown) => unknown,
-  ): Promise<unknown> => Promise.resolve(nextResult).then(onFulfilled, onRejected);
+  ): Promise<unknown> => Promise.resolve(resolveResult()).then(onFulfilled, onRejected);
 
   return chain;
 }
@@ -79,6 +81,7 @@ configureSdk({
 describe('listTeamMembers', () => {
   beforeEach(() => {
     nextResult = { data: [], error: null };
+    resultQueue = [];
     invokeCalls = [];
     lastUpdate = null;
   });
@@ -90,21 +93,32 @@ describe('listTeamMembers', () => {
   });
 
   test('maps user_profiles rows to TeamMember shape (camelCase)', async () => {
-    nextResult = {
-      data: [
-        {
-          id: 'u-1',
-          email: 'admin@ccc.com',
-          full_name: 'Jane Admin',
-          avatar_url: 'https://example.com/a.png',
-          role: 'ccc_admin',
-          assigned_clients: ['org-1', 'org-2'],
-          last_active_at: '2026-04-01T00:00:00Z',
-          created_at: '2026-01-01T00:00:00Z',
-        },
-      ],
-      error: null,
-    };
+    resultQueue = [
+      {
+        data: [
+          {
+            organization_id: 'org-ccc',
+            user_id: 'u-1',
+            role: 'ccc_admin',
+            created_at: '2026-01-01T00:00:00Z',
+          },
+        ],
+        error: null,
+      },
+      {
+        data: [
+          {
+            id: 'u-1',
+            email: 'admin@ccc.com',
+            full_name: 'Jane Admin',
+            avatar_url: 'https://example.com/a.png',
+            last_active_at: '2026-04-01T00:00:00Z',
+            created_at: '2026-01-01T00:00:00Z',
+          },
+        ],
+        error: null,
+      },
+    ];
     const members = await listTeamMembers();
     expect(members).toHaveLength(1);
     expect(members[0]).toEqual({
@@ -113,31 +127,42 @@ describe('listTeamMembers', () => {
       fullName: 'Jane Admin',
       avatarUrl: 'https://example.com/a.png',
       role: 'ccc_admin',
-      assignedClients: ['org-1', 'org-2'],
+      assignedClients: ['org-ccc'],
       lastActiveAt: '2026-04-01T00:00:00Z',
       createdAt: '2026-01-01T00:00:00Z',
     });
   });
 
   test('preserves fullName as null when profile has no display name (Wave 2.D)', async () => {
-    nextResult = {
-      data: [
-        {
-          id: 'u-2',
-          email: 'new@ccc.com',
-          full_name: null, // profile not yet set
-          avatar_url: null,
-          role: 'ccc_member',
-          assigned_clients: null,
-          last_active_at: null,
-          created_at: '2026-02-01',
-        },
-      ],
-      error: null,
-    };
+    resultQueue = [
+      {
+        data: [
+          {
+            organization_id: 'org-ccc',
+            user_id: 'u-2',
+            role: 'ccc_member',
+            created_at: '2026-02-01',
+          },
+        ],
+        error: null,
+      },
+      {
+        data: [
+          {
+            id: 'u-2',
+            email: 'new@ccc.com',
+            full_name: null, // profile not yet set
+            avatar_url: null,
+            last_active_at: null,
+            created_at: '2026-02-01',
+          },
+        ],
+        error: null,
+      },
+    ];
     const members = await listTeamMembers();
     expect(members[0]!.fullName).toBeNull();
-    expect(members[0]!.assignedClients).toEqual([]);
+    expect(members[0]!.assignedClients).toEqual(['org-ccc']);
   });
 
   test('throws when the query errors', async () => {
@@ -149,6 +174,7 @@ describe('listTeamMembers', () => {
 describe('listInvitations', () => {
   beforeEach(() => {
     nextResult = { data: [], error: null };
+    resultQueue = [];
   });
 
   test('maps invitations rows to camelCase Invitation objects', async () => {
@@ -208,6 +234,7 @@ describe('listInvitations', () => {
 describe('createInvitation', () => {
   beforeEach(() => {
     nextResult = { data: [], error: null };
+    resultQueue = [];
     nextInvokeResult = { data: null, error: null };
     invokeCalls = [];
   });
@@ -275,6 +302,7 @@ describe('createInvitation', () => {
 describe('updateUserRole', () => {
   beforeEach(() => {
     nextResult = { data: null, error: null };
+    resultQueue = [];
     lastUpdate = null;
   });
 
@@ -294,6 +322,7 @@ describe('updateUserRole', () => {
 describe('revokeInvitation', () => {
   beforeEach(() => {
     nextResult = { data: null, error: null };
+    resultQueue = [];
   });
 
   test('resolves successfully when delete returns no error', async () => {
