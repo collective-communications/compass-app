@@ -21,7 +21,6 @@ import {
 } from '@compass/types';
 import { useFocusTrap } from '../../../hooks/use-focus-trap';
 import { downloadFromUrl } from '../../../lib/download';
-import { fetchAndPrint } from '../../../lib/print-to-pdf';
 import { useReportGeneration } from '../hooks/use-report-generation';
 import type { ModalState } from './export-modal-utils';
 import { getCurrentStep, estimatePageCount, buildFilename } from './export-modal-utils';
@@ -126,7 +125,6 @@ export function ExportModal({
     }
   }, [generation.fileUrl]);
 
-  /** Download the completed report, using browser print for PDF output. */
   const handleDownload = useCallback(async (): Promise<void> => {
     if (generation.fileUrl === null) return;
 
@@ -134,11 +132,6 @@ export function ExportModal({
     setDownloadError(null);
 
     try {
-      if (format === ReportFormat.PDF) {
-        await fetchAndPrint(generation.fileUrl);
-        return;
-      }
-
       await downloadFromUrl(generation.fileUrl, filename);
     } catch (error) {
       const message =
