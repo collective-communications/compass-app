@@ -3,12 +3,20 @@
  * Creates the `/s/$token` route tree for survey respondents.
  */
 
+/* eslint-disable react-refresh/only-export-components */
+
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router';
 import type { AnyRoute } from '@tanstack/react-router';
 import { useQueryClient } from '@tanstack/react-query';
-import { QuestionType } from '@compass/types';
+import {
+  AnalyticsActionStatus,
+  AnalyticsEventName,
+  AnalyticsSurface,
+  QuestionType,
+} from '@compass/types';
 import { SurveyShell } from '../../shells/survey';
+import { captureProductEvent } from '../../lib/analytics';
 import { SurveyProvider, useSurveyContext } from './context/survey-context';
 import { useDeployment } from './hooks/use-deployment';
 import { useQuestions } from './hooks/use-questions';
@@ -60,6 +68,13 @@ function SurveyLayoutInner(): React.ReactElement {
         resumeIndex={resumeSession.resumeIndex}
         isLoading={false}
         onResume={() => {
+          captureProductEvent({
+            eventName: AnalyticsEventName.SURVEY_RESUMED,
+            surface: AnalyticsSurface.SURVEY,
+            surveyId: survey.id,
+            deploymentId: deployment.id,
+            actionStatus: AnalyticsActionStatus.SUCCEEDED,
+          });
           // Hydrate the answer store with previously saved answers
           if (resumeSession.response?.answers) {
             useAnswerStore.getState().hydrateFromResponse(resumeSession.response.answers);
@@ -107,8 +122,44 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
       const showContinueLater = pathname.includes('/q/') || pathname.endsWith('/open');
 
       const handleSave = useCallback(() => {
+        if (resolution?.status === 'valid') {
+          captureProductEvent({
+            eventName: AnalyticsEventName.SURVEY_PROGRESS_SAVED,
+            surface: AnalyticsSurface.SURVEY,
+            surveyId: resolution.survey.id,
+            deploymentId: resolution.deployment.id,
+            actionStatus: AnalyticsActionStatus.SUCCEEDED,
+          });
+        }
         navigate({ to: '/s/$token/saved', params: { token } });
-      }, [navigate, token]);
+      }, [navigate, resolution, token]);
+
+      useEffect(() => {
+        if (!resolution) return;
+
+        const basePayload = {
+          surface: AnalyticsSurface.SURVEY,
+          surveyResolutionStatus: resolution.status,
+          ...(resolution.status === 'valid'
+            ? {
+                surveyId: resolution.survey.id,
+                deploymentId: resolution.deployment.id,
+              }
+            : {}),
+        };
+
+        captureProductEvent({
+          eventName: AnalyticsEventName.SURVEY_DEPLOYMENT_RESOLVED,
+          ...basePayload,
+        });
+
+        if (resolution.status !== 'valid') {
+          captureProductEvent({
+            eventName: AnalyticsEventName.SURVEY_EDGE_STATE_VIEWED,
+            ...basePayload,
+          });
+        }
+      }, [resolution]);
 
       // While resolving the deployment token, show a loading spinner
       if (isLoading || !resolution) {
@@ -206,12 +257,19 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
 
       const handleStart = useCallback(
         () => {
+          captureProductEvent({
+            eventName: AnalyticsEventName.SURVEY_STARTED,
+            surface: AnalyticsSurface.SURVEY,
+            surveyId: deployment.surveyId,
+            deploymentId: deployment.id,
+            actionStatus: AnalyticsActionStatus.SUCCEEDED,
+          });
           void navigate({
             to: '/s/$token/q/$index',
             params: { token: deployment.token, index: '1' },
           });
         },
-        [navigate, deployment.token],
+        [navigate, deployment.id, deployment.surveyId, deployment.token],
       );
 
       return <WelcomeScreen questionCount={questionCount} onStart={handleStart} />;
@@ -261,13 +319,35 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
             openEndedText: text,
             openEndedQuestionId: openEndedQuestion?.id,
           }).then(() => {
+            captureProductEvent({
+              eventName: AnalyticsEventName.SURVEY_OPEN_TEXT_SUBMITTED,
+              surface: AnalyticsSurface.SURVEY,
+              surveyId: survey.id,
+              deploymentId: deployment.id,
+              actionStatus: AnalyticsActionStatus.SUCCEEDED,
+            });
+            captureProductEvent({
+              eventName: AnalyticsEventName.SURVEY_COMPLETED,
+              surface: AnalyticsSurface.SURVEY,
+              surveyId: survey.id,
+              deploymentId: deployment.id,
+              actionStatus: AnalyticsActionStatus.SUCCEEDED,
+            });
             void navigate({
               to: '/s/$token/complete',
               params: { token: deployment.token },
             });
           });
         },
-        [submit, responseId, deployment.id, deployment.token, openEndedQuestion?.id, navigate],
+        [
+          submit,
+          responseId,
+          deployment.id,
+          deployment.token,
+          openEndedQuestion?.id,
+          survey.id,
+          navigate,
+        ],
       );
 
       const handleSkip = useCallback(() => {
@@ -276,12 +356,26 @@ export function createSurveyRoutes<TParent extends AnyRoute>(parentRoute: TParen
           responseId,
           deploymentId: deployment.id,
         }).then(() => {
+          captureProductEvent({
+            eventName: AnalyticsEventName.SURVEY_OPEN_TEXT_SKIPPED,
+            surface: AnalyticsSurface.SURVEY,
+            surveyId: survey.id,
+            deploymentId: deployment.id,
+            actionStatus: AnalyticsActionStatus.SUCCEEDED,
+          });
+          captureProductEvent({
+            eventName: AnalyticsEventName.SURVEY_COMPLETED,
+            surface: AnalyticsSurface.SURVEY,
+            surveyId: survey.id,
+            deploymentId: deployment.id,
+            actionStatus: AnalyticsActionStatus.SUCCEEDED,
+          });
           void navigate({
             to: '/s/$token/complete',
             params: { token: deployment.token },
           });
         });
-      }, [submit, responseId, deployment.id, deployment.token, navigate]);
+      }, [submit, responseId, deployment.id, deployment.token, survey.id, navigate]);
 
       const prompt =
         "Is there anything else you'd like to share about your experience?";

@@ -4,7 +4,14 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { ReportConfig, ReportGenerationStatus } from '@compass/types';
+import {
+  AnalyticsActionStatus,
+  AnalyticsEventName,
+  AnalyticsSurface,
+  type ReportConfig,
+  type ReportGenerationStatus,
+} from '@compass/types';
+import { captureProductEvent } from '../../../lib/analytics';
 import { createReport, getReportStatus, triggerReportGeneration } from '../services/report-api';
 
 // ─── Constants ───────────────────────────────────────────────────────────────
@@ -104,6 +111,14 @@ export function useReportGeneration(): UseReportGenerationReturn {
       setPageCount(null);
       setError(null);
 
+      captureProductEvent({
+        eventName: AnalyticsEventName.REPORT_GENERATION_REQUESTED,
+        surface: AnalyticsSurface.REPORTS,
+        surveyId: config.surveyId,
+        reportFormat: config.format,
+        actionStatus: AnalyticsActionStatus.REQUESTED,
+      });
+
       try {
         const { reportId } = await createReport(config);
         reportIdRef.current = reportId;
@@ -121,11 +136,25 @@ export function useReportGeneration(): UseReportGenerationReturn {
 
           if (report.status === 'completed') {
             setFileUrl(generationResult.signedUrl);
+            captureProductEvent({
+              eventName: AnalyticsEventName.REPORT_GENERATION_REQUESTED,
+              surface: AnalyticsSurface.REPORTS,
+              surveyId: config.surveyId,
+              reportFormat: config.format,
+              actionStatus: AnalyticsActionStatus.SUCCEEDED,
+            });
             return;
           }
 
           if (report.status === 'failed') {
             setError(report.error ?? 'Report generation failed.');
+            captureProductEvent({
+              eventName: AnalyticsEventName.REPORT_GENERATION_REQUESTED,
+              surface: AnalyticsSurface.REPORTS,
+              surveyId: config.surveyId,
+              reportFormat: config.format,
+              actionStatus: AnalyticsActionStatus.FAILED,
+            });
             return;
           }
         } catch (invokeError) {
@@ -133,6 +162,13 @@ export function useReportGeneration(): UseReportGenerationReturn {
             invokeError instanceof Error ? invokeError.message : 'Failed to start report generation.';
           setStatus('failed');
           setError(message);
+          captureProductEvent({
+            eventName: AnalyticsEventName.REPORT_GENERATION_REQUESTED,
+            surface: AnalyticsSurface.REPORTS,
+            surveyId: config.surveyId,
+            reportFormat: config.format,
+            actionStatus: AnalyticsActionStatus.FAILED,
+          });
           return;
         }
 
@@ -143,6 +179,13 @@ export function useReportGeneration(): UseReportGenerationReturn {
           createError instanceof Error ? createError.message : 'Failed to create report.';
         setStatus('failed');
         setError(message);
+        captureProductEvent({
+          eventName: AnalyticsEventName.REPORT_GENERATION_REQUESTED,
+          surface: AnalyticsSurface.REPORTS,
+          surveyId: config.surveyId,
+          reportFormat: config.format,
+          actionStatus: AnalyticsActionStatus.FAILED,
+        });
       }
     },
     [startPolling, stopPolling],

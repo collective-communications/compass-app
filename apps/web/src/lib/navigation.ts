@@ -68,7 +68,11 @@ const SHARED_PROFILE_ITEMS: readonly ProfileMenuItem[] = [
 // ─── Per-tier configurations ────────────────────────────────────────────────
 
 const TIER_1_CONFIG: RoleNavConfig = {
-  primaryTabs: [],
+  primaryTabs: [
+    { id: 'clients', label: 'Clients', icon: 'building', href: '/clients' },
+    { id: 'analytics', label: 'Analytics', icon: 'activity', href: '/analytics' },
+    { id: 'settings', label: 'Settings', icon: 'settings', href: '/settings' },
+  ],
   logoHref: '/clients',
   profileMenuItems: [...SHARED_PROFILE_ITEMS],
 };

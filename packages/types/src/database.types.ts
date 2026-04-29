@@ -74,6 +74,101 @@ export type Database = {
           },
         ]
       }
+      analytics_daily_counts: {
+        Row: {
+          action_status: string | null
+          app_version: string | null
+          build_env: string | null
+          created_at: string
+          deployment_id: string | null
+          event_count: number
+          event_date: string
+          event_name: string
+          id: string
+          organization_id: string | null
+          report_format: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
+          route_template: string | null
+          results_tab: string | null
+          surface: string
+          survey_id: string | null
+          survey_resolution_status: string | null
+          tier: string | null
+          updated_at: string
+        }
+        Insert: {
+          action_status?: string | null
+          app_version?: string | null
+          build_env?: string | null
+          created_at?: string
+          deployment_id?: string | null
+          event_count?: number
+          event_date?: string
+          event_name: string
+          id?: string
+          organization_id?: string | null
+          report_format?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          route_template?: string | null
+          results_tab?: string | null
+          surface: string
+          survey_id?: string | null
+          survey_resolution_status?: string | null
+          tier?: string | null
+          updated_at?: string
+        }
+        Update: {
+          action_status?: string | null
+          app_version?: string | null
+          build_env?: string | null
+          created_at?: string
+          deployment_id?: string | null
+          event_count?: number
+          event_date?: string
+          event_name?: string
+          id?: string
+          organization_id?: string | null
+          report_format?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
+          route_template?: string | null
+          results_tab?: string | null
+          surface?: string
+          survey_id?: string | null
+          survey_resolution_status?: string | null
+          tier?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analytics_daily_counts_deployment_id_fkey"
+            columns: ["deployment_id"]
+            isOneToOne: false
+            referencedRelation: "deployments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_daily_counts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analytics_daily_counts_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "active_survey_per_org"
+            referencedColumns: ["survey_id"]
+          },
+          {
+            foreignKeyName: "analytics_daily_counts_survey_id_fkey"
+            columns: ["survey_id"]
+            isOneToOne: false
+            referencedRelation: "surveys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       answers: {
         Row: {
           created_at: string
@@ -1725,6 +1820,14 @@ export type Database = {
       }
     }
     Functions: {
+      analytics_forbidden_field_paths: {
+        Args: { p_payload: Json; p_prefix?: string }
+        Returns: string[]
+      }
+      analytics_normalize_field_name: {
+        Args: { p_field_name: string }
+        Returns: string
+      }
       auth_user_org_id: { Args: never; Returns: string }
       auth_user_role: {
         Args: never
@@ -1732,6 +1835,10 @@ export type Database = {
       }
       get_response_metrics: {
         Args: { p_survey_id: string }
+        Returns: Json
+      }
+      get_analytics_summary: {
+        Args: { p_end_date?: string; p_start_date?: string }
         Returns: Json
       }
       get_segment_question_scores: {
@@ -1769,6 +1876,10 @@ export type Database = {
       is_ccc_user: { Args: never; Returns: boolean }
       is_valid_deployment: { Args: { dep_id: string }; Returns: boolean }
       is_valid_response: { Args: { resp_id: string }; Returns: boolean }
+      record_analytics_event: {
+        Args: { p_event: Json; p_occurred_at?: string }
+        Returns: undefined
+      }
       reorder_questions: {
         Args: {
           p_new_orders: number[]

@@ -80,6 +80,11 @@ const EmailLogPage = lazy(() =>
 const EmailTemplatesPage = lazy(() =>
   import('./email/pages/email-templates-page').then((m) => ({ default: m.EmailTemplatesPage })),
 );
+const AnalyticsDashboardPage = lazy(() =>
+  import('./analytics/pages/analytics-dashboard-page').then((m) => ({
+    default: m.AnalyticsDashboardPage,
+  })),
+);
 
 /**
  * Creates the flat set of admin-owned routes. Each is a top-level child of
@@ -352,6 +357,22 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     },
   });
 
+  // ── /analytics (CC+C aggregate usage dashboard) ─────────────────────────
+  const analyticsRoute = createRoute({
+    getParentRoute: () => parentRoute,
+    path: '/analytics',
+    beforeLoad: () => guardRoute('/analytics'),
+    component: function AnalyticsLayout(): ReactElement {
+      return (
+        <AppShell>
+          <Suspense fallback={<RouteLoading />}>
+            <AnalyticsDashboardPage />
+          </Suspense>
+        </AppShell>
+      );
+    },
+  });
+
   return [
     clientsListRoute,
     clientDetailRoute.addChildren([
@@ -366,5 +387,6 @@ export function createAdminRoutes<TParent extends AnyRoute>(parentRoute: TParent
     recommendationsRoute,
     emailLogRoute,
     emailTemplatesRoute,
+    analyticsRoute,
   ];
 }

@@ -7,6 +7,8 @@ Shared TypeScript type definitions and domain constants for the Culture Compass 
 ### Enums and Constants
 
 - `UserRole` — User role enum (respondent, analyst, admin, super_admin)
+- `AnalyticsEventName`, `AnalyticsSurface`, `AnalyticsRouteTemplate` — Cookie-free analytics taxonomy
+- `ANALYTICS_COLLECTION_RULES`, `ANALYTICS_RETENTION_POLICY` — Privacy contract for first-party aggregate analytics
 - `SurveyStatus` — Survey lifecycle states
 - `QuestionType` — Question type discriminator (likert, open_ended)
 - `DeploymentType` — Deployment method (link, email)
@@ -22,6 +24,7 @@ Shared TypeScript type definitions and domain constants for the Culture Compass 
 
 - `getTierFromRole` — Map a role to its access tier
 - `getTierHomeRoute` — Get the home route for a tier
+- `isAnalyticsForbiddenField`, `findAnalyticsForbiddenFields`, `hasAnalyticsForbiddenFields` — Validate analytics payloads against the privacy contract
 - `buildLikertScale`, `buildLikertLabels` — Build scale items for a given scale size
 - `isValidLikertValue` — Validate a Likert response value
 - `reverseScore` — Reverse-score a Likert value
@@ -31,6 +34,7 @@ Shared TypeScript type definitions and domain constants for the Culture Compass 
 ### Types
 
 - `AppEnv`, `UserTier`, `AuthUser`, `SessionContext`
+- `AnalyticsEventPayload`, `AnalyticsSummary`, `AnalyticsAllowedPayloadKey`, `AnalyticsForbiddenField`
 - `Organization`, `OrganizationSummary`, `CreateOrganizationParams`
 - `LikertValue`, `LikertScaleItem`, `Dimension`, `SubDimension`, `SurveySettings`, `Survey`, `Question`, `QuestionDimension`, `QuestionWithDimension`
 - `DeploymentSettings`, `Deployment`, `RespondentMetadata`, `AnswerMap`, `SurveyResponse`, `SurveyTemplate`

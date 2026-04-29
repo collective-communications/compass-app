@@ -326,6 +326,12 @@ verify_jwt = false
 # them before the function can run.
 verify_jwt = false
 
+[functions.capture-analytics]
+# Public respondent and unauthenticated route views can emit aggregate analytics.
+# The function enforces CORS, payload allowlists, forbidden-field rejection, and
+# service-role aggregate writes internally.
+verify_jwt = false
+
 [edge_runtime]
 enabled = true
 # Supported request policies: `oneshot`, `per_worker`.

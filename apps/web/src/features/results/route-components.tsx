@@ -1,5 +1,3 @@
-/* eslint-disable react-refresh/only-export-components */
-
 /**
  * Route component definitions for the results feature.
  *
@@ -25,11 +23,13 @@
  * `ResultsLayoutRoute` now only handles data loading + layout composition.
  */
 
-import { type ReactElement } from 'react';
+import { useEffect, type ReactElement } from 'react';
 import { useNavigate, useParams, useSearch, useRouterState } from '@tanstack/react-router';
 import { useQuery } from '@tanstack/react-query';
 import type { SegmentType } from '@compass/scoring';
+import { AnalyticsEventName, AnalyticsSurface } from '@compass/types';
 import { supabase } from '../../lib/supabase';
+import { captureProductEvent } from '../../lib/analytics';
 import { STALE_TIMES } from '../../lib/query-config';
 import { AppShell } from '../../components/shells/app-shell';
 import { ResultsSkeleton } from './components/results-skeleton';
@@ -113,6 +113,17 @@ export function ResultsLayoutRoute(): ReactElement {
   const { data: riskFlags = [], isLoading: riskFlagsLoading } = useRiskFlags(surveyId);
 
   const isContentLoading = scoresLoading || archetypeLoading || riskFlagsLoading;
+
+  useEffect(() => {
+    if (!surveyId) return;
+    captureProductEvent({
+      eventName: AnalyticsEventName.RESULTS_TAB_VIEWED,
+      surface: AnalyticsSurface.RESULTS,
+      surveyId,
+      organizationId: surveyMeta?.organization_id,
+      resultsTab: activeTab,
+    });
+  }, [activeTab, surveyId, surveyMeta?.organization_id]);
 
   function handleTabChange(tabId: ResultsTabId): void {
     void navigate({ to: `/results/${surveyId}/${tabId}` });

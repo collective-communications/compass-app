@@ -4,7 +4,15 @@
  */
 
 import { useQuery, useMutation, useQueryClient, type UseQueryResult } from '@tanstack/react-query';
-import type { Survey, Deployment, DeploymentType } from '@compass/types';
+import {
+  AnalyticsActionStatus,
+  AnalyticsEventName,
+  AnalyticsSurface,
+  type Survey,
+  type Deployment,
+  type DeploymentType,
+} from '@compass/types';
+import { captureProductEvent } from '../../../../lib/analytics';
 import {
   saveSurveyConfig,
   publishSurvey,
@@ -58,16 +66,45 @@ export function useDeploymentManagement({
     mutationFn: (params: Omit<SaveSurveyConfigParams, 'surveyId'>) =>
       saveSurveyConfig({ ...params, surveyId }),
     onSuccess: () => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_CONFIG_SAVED,
+        surface: AnalyticsSurface.ADMIN,
+        surveyId,
+        actionStatus: AnalyticsActionStatus.SUCCEEDED,
+      });
       void queryClient.invalidateQueries({ queryKey: surveyBuilderKeys.detail(surveyId) });
+    },
+    onError: () => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_CONFIG_SAVED,
+        surface: AnalyticsSurface.ADMIN,
+        surveyId,
+        actionStatus: AnalyticsActionStatus.FAILED,
+      });
     },
   });
 
   const publishMutation = useMutation({
     mutationFn: (deploymentType: DeploymentType) =>
       publishSurvey({ surveyId, deploymentType }),
-    onSuccess: () => {
+    onSuccess: (publishedDeployment) => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_PUBLISHED,
+        surface: AnalyticsSurface.ADMIN,
+        surveyId,
+        deploymentId: publishedDeployment.id,
+        actionStatus: AnalyticsActionStatus.SUCCEEDED,
+      });
       void queryClient.invalidateQueries({ queryKey: deploymentKeys.active(surveyId) });
       void queryClient.invalidateQueries({ queryKey: surveyBuilderKeys.detail(surveyId) });
+    },
+    onError: () => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_PUBLISHED,
+        surface: AnalyticsSurface.ADMIN,
+        surveyId,
+        actionStatus: AnalyticsActionStatus.FAILED,
+      });
     },
   });
 
@@ -78,8 +115,24 @@ export function useDeploymentManagement({
       return unpublishSurvey(surveyId, current.id);
     },
     onSuccess: () => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_UNPUBLISHED,
+        surface: AnalyticsSurface.ADMIN,
+        surveyId,
+        deploymentId: deployment.data?.id,
+        actionStatus: AnalyticsActionStatus.SUCCEEDED,
+      });
       void queryClient.invalidateQueries({ queryKey: deploymentKeys.active(surveyId) });
       void queryClient.invalidateQueries({ queryKey: surveyBuilderKeys.detail(surveyId) });
+    },
+    onError: () => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_UNPUBLISHED,
+        surface: AnalyticsSurface.ADMIN,
+        surveyId,
+        deploymentId: deployment.data?.id,
+        actionStatus: AnalyticsActionStatus.FAILED,
+      });
     },
   });
 

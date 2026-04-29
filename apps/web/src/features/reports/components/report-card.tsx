@@ -6,7 +6,9 @@
 
 import type { MouseEvent, ReactElement } from 'react';
 import { Download, Loader2, AlertCircle } from 'lucide-react';
+import { AnalyticsActionStatus, AnalyticsEventName, AnalyticsSurface } from '@compass/types';
 import { formatDisplayDate } from '@compass/utils';
+import { captureProductEvent } from '../../../lib/analytics';
 import type { ReportRow } from '../services/report-api';
 import { useReportDownload } from '../hooks/use-report-download';
 
@@ -58,6 +60,14 @@ export function ReportCard({
   async function handleDownload(event: MouseEvent<HTMLButtonElement>): Promise<void> {
     event.stopPropagation();
     if (report.storagePath === null) return;
+
+    captureProductEvent({
+      eventName: AnalyticsEventName.REPORT_DOWNLOAD_REQUESTED,
+      surface: AnalyticsSurface.REPORTS,
+      surveyId: report.surveyId,
+      reportFormat: report.format,
+      actionStatus: AnalyticsActionStatus.REQUESTED,
+    });
 
     if (report.format === 'pdf') {
       await printPdf(report.storagePath);

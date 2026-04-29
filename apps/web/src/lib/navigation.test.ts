@@ -50,9 +50,10 @@ describe('logoHref matches getHomeForRole', () => {
 // ─── Primary tabs — per tier ────────────────────────────────────────────────
 
 describe('primaryTabs per tier', () => {
-  it('tier_1 roles have no primary tabs', () => {
+  it('tier_1 roles have clients, analytics, settings', () => {
     for (const role of [UserRole.CCC_ADMIN, UserRole.CCC_MEMBER]) {
-      expect(getNavConfigForRole(role).primaryTabs).toEqual([]);
+      const ids = getNavConfigForRole(role).primaryTabs.map((t) => t.id);
+      expect(ids).toEqual(['clients', 'analytics', 'settings']);
     }
   });
 
@@ -105,4 +106,3 @@ describe('menu-item invariants', () => {
     expect(byId.theme?.action).toBe('toggleTheme');
   });
 });
-

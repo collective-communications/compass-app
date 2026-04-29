@@ -4,7 +4,13 @@
  */
 
 import { useMutation, useQueryClient, type UseMutationResult } from '@tanstack/react-query';
-import type { Survey } from '@compass/types';
+import {
+  AnalyticsActionStatus,
+  AnalyticsEventName,
+  AnalyticsSurface,
+  type Survey,
+} from '@compass/types';
+import { captureProductEvent } from '../../../../lib/analytics';
 import { createSurvey, type CreateSurveyParams } from '../services/admin-survey-service';
 import { surveyListKeys } from './use-surveys';
 
@@ -17,7 +23,14 @@ export function useCreateSurvey(): UseMutationResult<Survey, Error, CreateSurvey
 
   return useMutation({
     mutationFn: createSurvey,
-    onSuccess: () => {
+    onSuccess: (survey) => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_CREATED,
+        surface: AnalyticsSurface.ADMIN,
+        organizationId: survey.organizationId,
+        surveyId: survey.id,
+        actionStatus: AnalyticsActionStatus.SUCCEEDED,
+      });
       void queryClient.invalidateQueries({ queryKey: surveyListKeys.all });
     },
   });

@@ -56,6 +56,10 @@ export type {
   ResponseMetrics,
 } from './admin/deployments';
 
+// Admin: analytics
+export { getAnalyticsSummary } from './admin/analytics';
+export type { AnalyticsSummaryParams } from './admin/analytics';
+
 // Admin: recipients
 export {
   listRecipients,

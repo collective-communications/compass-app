@@ -1,5 +1,5 @@
-import { lazy, Suspense } from 'react';
-import { createRootRoute, createRoute, Link, Outlet } from '@tanstack/react-router';
+import { lazy, Suspense, useEffect, useRef } from 'react';
+import { createRootRoute, createRoute, Link, Outlet, useRouterState } from '@tanstack/react-router';
 import { createResultsRoutes } from '../features/results/routes';
 import { createAdminRoutes } from '../features/admin/routes';
 import { createDashboardRoutes } from '../features/dashboard/routes';
@@ -10,10 +10,22 @@ import { createSettingsRoutes } from '../features/settings/routes';
 import { createHelpRoutes } from '../features/help/routes';
 import { createProfileRoutes } from '../features/profile/routes';
 import { PublicShell } from '../components/shells/public-shell';
+import { useAuthStore } from '../stores/auth-store';
+import { captureRouteView } from '../lib/analytics';
 
 
 const rootRoute = createRootRoute({
   component: function RootLayout(): React.ReactElement {
+    const pathname = useRouterState({ select: (state) => state.location.pathname });
+    const user = useAuthStore((state) => state.user);
+    const lastCapturedPathRef = useRef<string | null>(null);
+
+    useEffect(() => {
+      if (lastCapturedPathRef.current === pathname) return;
+      lastCapturedPathRef.current = pathname;
+      captureRouteView(pathname, user);
+    }, [pathname, user]);
+
     return <Outlet />;
   },
 });

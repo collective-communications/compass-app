@@ -55,6 +55,12 @@ The hook is installed into `.git/hooks/commit-msg` automatically by `bun install
 
 Project documentation lives in `_docs/`. The `.context-kit/_ref/` directory contains the distilled reference YAMLs — start with `_index.yaml` for routing to any topic.
 
+Privacy-sensitive implementation notes:
+
+- Cookie-free analytics contract: [`_docs/privacy/analytics.md`](_docs/privacy/analytics.md)
+- Analytics dashboard specs: [`_docs/analytics-dashboard/SPEC.md`](_docs/analytics-dashboard/SPEC.md)
+- Analytics ADR: [`_adrs/adr-007-cookie-free-analytics.md`](_adrs/adr-007-cookie-free-analytics.md)
+
 ## License
 
 Proprietary. All rights reserved by COLLECTIVE culture + communication.

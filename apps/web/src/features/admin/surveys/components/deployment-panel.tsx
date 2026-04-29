@@ -4,8 +4,15 @@
  */
 
 import { useState, useCallback, type ReactElement } from 'react';
-import type { Deployment, Survey } from '@compass/types';
+import {
+  AnalyticsActionStatus,
+  AnalyticsEventName,
+  AnalyticsSurface,
+  type Deployment,
+  type Survey,
+} from '@compass/types';
 import { formatDisplayDate } from '@compass/utils';
+import { captureProductEvent } from '../../../../lib/analytics';
 import { useRecipientStats, useSendInvitations } from '../hooks/use-recipients';
 
 export interface DeploymentPanelProps {
@@ -39,11 +46,27 @@ export function DeploymentPanel({
     try {
       await navigator.clipboard.writeText(surveyUrl);
       setCopied(true);
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_LINK_COPIED,
+        surface: AnalyticsSurface.ADMIN,
+        organizationId: survey.organizationId,
+        surveyId: survey.id,
+        deploymentId: deployment.id,
+        actionStatus: AnalyticsActionStatus.SUCCEEDED,
+      });
       setTimeout(() => setCopied(false), 2000);
     } catch {
+      captureProductEvent({
+        eventName: AnalyticsEventName.SURVEY_LINK_COPIED,
+        surface: AnalyticsSurface.ADMIN,
+        organizationId: survey.organizationId,
+        surveyId: survey.id,
+        deploymentId: deployment.id,
+        actionStatus: AnalyticsActionStatus.FAILED,
+      });
       // Clipboard API not available — select text as fallback
     }
-  }, [surveyUrl]);
+  }, [deployment.id, survey.id, survey.organizationId, surveyUrl]);
 
   return (
     <div className="rounded-lg border border-[var(--grey-100)] bg-[var(--surface-card)] p-6">

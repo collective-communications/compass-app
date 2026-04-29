@@ -7,6 +7,7 @@
  */
 
 import {
+  Activity,
   Building,
   Compass,
   FileDown,
@@ -22,6 +23,7 @@ import {
 
 export const ICON_MAP: Readonly<Record<string, LucideIcon>> = {
   // Tab icons
+  activity: Activity,
   building: Building,
   compass: Compass,
   'file-down': FileDown,

@@ -5,10 +5,13 @@
  */
 
 import { useState, useMemo, useCallback, type ReactElement } from 'react';
+import { AnalyticsEventName, AnalyticsSurface } from '@compass/types';
+import { captureProductEvent } from '../../../../lib/analytics';
 import { useOrganizations } from '../hooks/use-organizations';
 import { ClientCard } from '../components/client-card';
 import { ClientSearchBar } from '../components/client-search-bar';
 import { AddClientModal } from '../components/add-client-modal';
+import { AnalyticsSummaryPanel } from '../../analytics';
 
 export interface ClientListPageProps {
   onSelectClient: (orgId: string) => void;
@@ -38,6 +41,18 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
     [onSelectClient],
   );
 
+  const handleSelectClient = useCallback(
+    (orgId: string): void => {
+      captureProductEvent({
+        eventName: AnalyticsEventName.ADMIN_CLIENT_SELECTED,
+        surface: AnalyticsSurface.ADMIN,
+        organizationId: orgId,
+      });
+      onSelectClient(orgId);
+    },
+    [onSelectClient],
+  );
+
   return (
     <div>
       <div className="mb-6 flex items-center justify-between">
@@ -59,6 +74,8 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
           activeSurveys={activeSurveyCount}
         />
       </div>
+
+      <AnalyticsSummaryPanel />
 
       {isLoading && (
         <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
@@ -97,7 +114,7 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
             <ClientCard
               key={org.id}
               organization={org}
-              onClick={onSelectClient}
+              onClick={handleSelectClient}
             />
           ))}
         </div>
