@@ -9,7 +9,7 @@
 | Cloudflare Pages project | `validation` (`validation-b01.pages.dev`) |
 | Web dev path | `/dev/scoring` |
 | Web dev guard | `import.meta.env.DEV === true` only — not registered in production builds |
-| Auth | None — scoring exploration tool, no role check |
+| Auth | Microsoft 365 via Cloudflare Access on the Pages hostname; none on local dev |
 | Shell | No app shell (no topbar, no pill nav, no footer) |
 
 ### Route Registration
@@ -158,6 +158,7 @@ Zero new packages. All dependencies are already in the monorepo.
 - `apps/validation` builds as an independent Vite app with `bun run validation:build`
 - Static output is `apps/validation/dist`
 - Cloudflare Pages deploy command: `bun run deploy-validation`
+- Cloudflare Access setup command: `bun run setup-validation-access`
 - The web app still exposes `/dev/scoring` during `vite dev`
 - Production web builds do not include `@compass/scoring-validator` assets because the dynamic import only exists inside the `import.meta.env.DEV` branch
 - No `VITE_DEV_TOOLS` env variable required

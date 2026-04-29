@@ -35,6 +35,7 @@
     "build-storybook": "bun run --filter @compass/storybook build-storybook",
     "deploy-storybook": "scripts/deploy-storybook.sh",
     "deploy-validation": "scripts/deploy-validation.sh",
+    "setup-validation-access": "scripts/setup-validation-access.sh",
     "compass:start": "scripts/app-manager.sh start",
     "compass:stop": "scripts/app-manager.sh stop",
     "compass:restart": "scripts/app-manager.sh restart",

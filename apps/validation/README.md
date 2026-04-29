@@ -26,3 +26,11 @@ bun run deploy-validation
 
 By default this deploys to the Cloudflare Pages project `validation`, currently hosted at `validation-b01.pages.dev`.
 Set `VALIDATION_PAGES_PROJECT` and `VALIDATION_PAGES_DOMAIN` to use a different Pages project.
+
+## Access
+
+```bash
+bun run setup-validation-access
+```
+
+This protects both the production validation Pages hostname and preview deployment hostnames with the same Microsoft 365 Cloudflare Access flow used by `ccc-docs` and Storybook.
