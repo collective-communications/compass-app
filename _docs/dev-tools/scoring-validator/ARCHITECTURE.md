@@ -4,57 +4,56 @@
 
 | Property | Value |
 |---|---|
-| Path | `/dev/scoring` |
-| Guard | `import.meta.env.DEV === true` only — not registered in production builds |
-| Auth | None — dev tool, no role check |
-| Shell | No app shell (no topbar, no pill nav, no footer) — renders directly into `<Outlet />` |
+| Standalone app | `apps/validation` |
+| Standalone path | `/` |
+| Cloudflare Pages project | `validation` (`validation.pages.dev`) |
+| Web dev path | `/dev/scoring` |
+| Web dev guard | `import.meta.env.DEV === true` only — not registered in production builds |
+| Auth | None — scoring exploration tool, no role check |
+| Shell | No app shell (no topbar, no pill nav, no footer) |
 
 ### Route Registration
 
-In `apps/web/src/routes/__root.tsx`, mount the dev route conditionally so Vite tree-shakes the entire module from production bundles:
+In `apps/web/src/routes/__root.tsx`, mount the dev route conditionally and keep the validator import inside the `import.meta.env.DEV` branch. This prevents production web builds from retaining the validator chunk.
 
 ```typescript
 // __root.tsx
-import { createScoringValidatorRoutes } from '../features/dev/scoring-validator/index.js';
+import { lazy, Suspense } from 'react';
 
 const devRoutes = import.meta.env.DEV
-  ? [createScoringValidatorRoutes(rootRoute)]
+  ? (() => {
+      const LazyScoringValidator = lazy(async () => {
+        const { ScoringValidator } = await import('@compass/scoring-validator');
+        return { default: ScoringValidator };
+      });
+
+      return [
+        createRoute({
+          getParentRoute: () => rootRoute,
+          path: '/dev/scoring',
+          component: function ScoringValidatorDevRoute() {
+            return (
+              <Suspense fallback={<div>Loading scoring validator...</div>}>
+                <LazyScoringValidator />
+              </Suspense>
+            );
+          },
+        }),
+      ];
+    })()
   : [];
-
-export const routeTree = rootRoute.addChildren([
-  // ... existing routes
-  ...devRoutes,
-]);
 ```
 
-The conditional import (`import.meta.env.DEV`) is evaluated at build time by Vite. When `DEV` is `false`, the entire `features/dev/` module tree is excluded from the production bundle.
-
-### Route Factory
-
-```typescript
-// features/dev/scoring-validator/routes.tsx
-export function createScoringValidatorRoutes<TParent extends AnyRoute>(
-  parentRoute: TParent,
-) {
-  return createRoute({
-    getParentRoute: () => parentRoute,
-    path: '/dev/scoring',
-    component: ScoringValidator,
-  });
-}
-```
-
-No `beforeLoad` guard needed — the route is not registered in production.
+The standalone Pages app renders the same package directly from `apps/validation/src/main.tsx`.
 
 ---
 
 ## File Structure
 
 ```
-apps/web/src/features/dev/
+packages/
 └── scoring-validator/
-    ├── index.ts                          # re-exports createScoringValidatorRoutes
-    ├── routes.tsx                        # TanStack Router route factory
+    ├── index.ts                          # re-exports <ScoringValidator />
     ├── ScoringValidator.tsx              # Root component; owns all state
     ├── components/
     │   ├── ConfigBar.tsx                 # Scale toggle, preset selector, reset, compare toggle
@@ -68,7 +67,14 @@ apps/web/src/features/dev/
     │   └── ComparePanel.tsx              # Side-by-side Scenario A / Δ / Scenario B
     └── data/
         ├── questions.ts                  # Static fixture: all 55 QuestionAnswer defs
-        └── presets.ts                    # 8 named scenario presets
+        └── presets.ts                    # named scenario presets
+
+apps/
+└── validation/
+    ├── index.html
+    ├── package.json
+    ├── vite.config.ts
+    └── src/main.tsx                      # Renders <ScoringValidator /> directly
 ```
 
 ---
@@ -139,20 +145,22 @@ Zero new packages. All dependencies are already in the monorepo.
 
 | Package | Used for |
 |---|---|
+| `@compass/scoring-validator` | Standalone React validator UI package |
 | `@compass/scoring` | `computeSurveyScores`, `identifyArchetype`, `euclideanDistance`, `distanceToConfidence`, `evaluateRiskFlags`, `calculateTrustLadderPosition`, `ARCHETYPE_VECTORS`, `DEFAULT_RISK_THRESHOLDS` |
 | `@compass/compass` | `<Compass />` component |
-| `@compass/tokens` | CSS custom properties (injected at app boot via `injectTokens()`) |
+| `@compass/tokens` | Shared CSS custom properties via `@compass/tokens/theme.css` |
 | `@compass/types` | `DimensionCode`, `DimensionScoreMap`, shared interfaces |
 
 ---
 
 ## Build Behavior
 
-- `import.meta.env.DEV` is `true` during `vite dev` and `false` during `vite build`
-- Vite statically replaces `import.meta.env.DEV` at build time; the conditional branch for `devRoutes` evaluates to `[]` in production
-- Rollup tree-shakes the unreferenced `features/dev/` module tree from the production bundle
-- No separate build config, no `VITE_DEV_TOOLS` env variable required
-- Dev server: existing `bun run --filter @compass/web dev` on port 42333
+- `apps/validation` builds as an independent Vite app with `bun run validation:build`
+- Static output is `apps/validation/dist`
+- Cloudflare Pages deploy command: `bun run deploy-validation`
+- The web app still exposes `/dev/scoring` during `vite dev`
+- Production web builds do not include `@compass/scoring-validator` assets because the dynamic import only exists inside the `import.meta.env.DEV` branch
+- No `VITE_DEV_TOOLS` env variable required
 
 ---
 
@@ -171,4 +179,4 @@ Follows the same rules as the rest of the web app:
 
 - **Not a Storybook story.** Storybook is for isolated component testing. This tool needs full pipeline integration across multiple packages simultaneously.
 - **Not a test.** Unit tests in `packages/scoring` are authoritative. This tool aids exploration and visual validation.
-- **Not a production feature.** The entire module is excluded from production builds by the `import.meta.env.DEV` guard.
+- **Not a production feature in the main web app.** The validator is published as a separate internal tool through `apps/validation`.

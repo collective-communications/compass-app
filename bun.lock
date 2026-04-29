@@ -53,12 +53,32 @@
         "vite": "^6.0.0",
       },
     },
+    "apps/validation": {
+      "name": "@compass/validation",
+      "version": "0.0.0",
+      "dependencies": {
+        "@compass/scoring-validator": "workspace:*",
+        "@compass/tokens": "workspace:*",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "devDependencies": {
+        "@tailwindcss/vite": "^4.2.1",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "@vitejs/plugin-react": "^4.0.0",
+        "tailwindcss": "^4.0.0",
+        "typescript": "^5.9.3",
+        "vite": "^6.0.0",
+      },
+    },
     "apps/web": {
       "name": "@compass/web",
       "version": "0.0.0",
       "dependencies": {
         "@compass/compass": "workspace:*",
         "@compass/scoring": "workspace:*",
+        "@compass/scoring-validator": "workspace:*",
         "@compass/sdk": "workspace:*",
         "@compass/tokens": "workspace:*",
         "@compass/types": "workspace:*",
@@ -115,6 +135,27 @@
     "packages/scoring": {
       "name": "@compass/scoring",
       "version": "0.0.0",
+    },
+    "packages/scoring-validator": {
+      "name": "@compass/scoring-validator",
+      "version": "0.0.0",
+      "dependencies": {
+        "@compass/compass": "workspace:*",
+        "@compass/scoring": "workspace:*",
+        "@compass/types": "workspace:*",
+      },
+      "devDependencies": {
+        "@testing-library/react": "^16.3.2",
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "happy-dom": "20.8.4",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
+      "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+      },
     },
     "packages/sdk": {
       "name": "@compass/sdk",
@@ -298,6 +339,8 @@
 
     "@compass/scoring": ["@compass/scoring@workspace:packages/scoring"],
 
+    "@compass/scoring-validator": ["@compass/scoring-validator@workspace:packages/scoring-validator"],
+
     "@compass/sdk": ["@compass/sdk@workspace:packages/sdk"],
 
     "@compass/storybook": ["@compass/storybook@workspace:apps/storybook"],
@@ -313,6 +356,8 @@
     "@compass/ui": ["@compass/ui@workspace:packages/ui"],
 
     "@compass/utils": ["@compass/utils@workspace:packages/utils"],
+
+    "@compass/validation": ["@compass/validation@workspace:apps/validation"],
 
     "@compass/web": ["@compass/web@workspace:apps/web"],
 

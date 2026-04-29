@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { createRootRoute, createRoute, Link, Outlet } from '@tanstack/react-router';
 import { createResultsRoutes } from '../features/results/routes';
 import { createAdminRoutes } from '../features/admin/routes';
@@ -8,7 +9,6 @@ import { createAuthRoutes } from '../features/auth/routes';
 import { createSettingsRoutes } from '../features/settings/routes';
 import { createHelpRoutes } from '../features/help/routes';
 import { createProfileRoutes } from '../features/profile/routes';
-import { createScoringValidatorRoutes } from '../features/dev/scoring-validator/index.js';
 import { PublicShell } from '../components/shells/public-shell';
 
 
@@ -71,7 +71,36 @@ const profileRoutes = createProfileRoutes(rootRoute);
 /* ── Dev routes (excluded from production builds) ─────────────── */
 
 const devRoutes = import.meta.env.DEV
-  ? [createScoringValidatorRoutes(rootRoute)]
+  ? (
+    // The route type is intentionally inferred so TanStack keeps the exact
+    // parent/child generics for `routeTree.addChildren`.
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    () => {
+      const LazyScoringValidator = lazy(async () => {
+        const { ScoringValidator } = await import('@compass/scoring-validator');
+        return { default: ScoringValidator };
+      });
+
+      return [
+        createRoute({
+          getParentRoute: () => rootRoute,
+          path: '/dev/scoring',
+          component: function ScoringValidatorDevRoute(): React.ReactElement {
+            return (
+              <Suspense
+                fallback={
+                  <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center' }}>
+                    Loading scoring validator...
+                  </div>
+                }
+              >
+                <LazyScoringValidator />
+              </Suspense>
+            );
+          },
+        }),
+      ];
+    })()
   : [];
 
 /* ── Not Found ─────────────────────────────────────────────────── */

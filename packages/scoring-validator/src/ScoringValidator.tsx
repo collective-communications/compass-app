@@ -4,7 +4,8 @@
  * Owns all state and derives pipeline outputs via useMemo. Renders a
  * two-column layout wiring all child components.
  *
- * Route: `/dev/scoring` — only registered in development builds.
+ * Used by the standalone validation app and the web app's `/dev/scoring`
+ * route during development.
  */
 
 import React, { useState, useMemo } from 'react';

@@ -15,6 +15,7 @@
     { "path": "../../packages/ui" },
     { "path": "../../packages/compass" },
     { "path": "../../packages/scoring" },
+    { "path": "../../packages/scoring-validator" },
     { "path": "../../packages/sdk" }
   ]
 }
