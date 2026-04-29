@@ -10,8 +10,8 @@
 
 import type { ReportPayload } from './assemble.ts';
 import type { ReportRow } from './db.ts';
-import { HtmlRenderer } from './render-html.ts';
 import { DocxRenderer } from './render-docx.ts';
+import { PdfRenderer } from './render-pdf.ts';
 import { PptxRenderer } from './render-pptx.ts';
 
 // ─── Interface ──────────────────────────────────────────────────────────────
@@ -33,13 +33,8 @@ export interface Renderer {
 
 // ─── Registry ───────────────────────────────────────────────────────────────
 
-/**
- * Map of format strings to renderer instances.
- * 'pdf' currently uses HtmlRenderer (true PDF conversion via headless
- * Chromium is a future infra task).
- */
 const renderers: Record<string, Renderer> = {
-  pdf: new HtmlRenderer(),
+  pdf: new PdfRenderer(),
   docx: new DocxRenderer(),
   pptx: new PptxRenderer(),
 };

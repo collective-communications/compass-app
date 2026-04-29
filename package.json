@@ -57,6 +57,7 @@
     "@types/react-dom": "^19.2.3",
     "eslint": "^10.0.3",
     "happy-dom": "20.8.4",
+    "pdf-lib": "^1.17.1",
     "typescript": "^5.9.3"
   },
   "overrides": {
