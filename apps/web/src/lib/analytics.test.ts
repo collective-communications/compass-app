@@ -26,6 +26,15 @@ function makeTransport(): {
   return { calls, transport };
 }
 
+function restoreGlobalProperty(key: keyof typeof globalThis, descriptor?: PropertyDescriptor): void {
+  if (descriptor) {
+    Object.defineProperty(globalThis, key, descriptor);
+    return;
+  }
+
+  Reflect.deleteProperty(globalThis, key);
+}
+
 describe('resolveAnalyticsRoute', () => {
   test('maps admin analytics to a safe route template', () => {
     expect(resolveAnalyticsRoute('/analytics')).toEqual({
@@ -115,6 +124,65 @@ describe('captureProductEvent', () => {
       endpoint: 'https://supabase.test/functions/v1/capture-analytics',
       transport,
     })).not.toThrow();
+  });
+
+  test('uses credentialless fetch for cross-origin endpoints even when sendBeacon exists', async () => {
+    const windowDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'window');
+    const navigatorDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'navigator');
+    const fetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch');
+    const beaconCalls: string[] = [];
+    const fetchCalls: Array<{ endpoint: string; credentials?: RequestCredentials }> = [];
+
+    try {
+      Object.defineProperty(globalThis, 'window', {
+        configurable: true,
+        value: {
+          location: {
+            href: 'http://localhost:42333/auth/callback',
+            origin: 'http://localhost:42333',
+          },
+        },
+      });
+      Object.defineProperty(globalThis, 'navigator', {
+        configurable: true,
+        value: {
+          sendBeacon: (endpoint: string): boolean => {
+            beaconCalls.push(endpoint);
+            return true;
+          },
+        },
+      });
+      Object.defineProperty(globalThis, 'fetch', {
+        configurable: true,
+        value: (endpoint: string | URL | Request, init?: RequestInit): Promise<Response> => {
+          fetchCalls.push({
+            endpoint: endpoint.toString(),
+            credentials: init?.credentials,
+          });
+          return Promise.resolve(new Response(null, { status: 204 }));
+        },
+      });
+
+      captureProductEvent({
+        eventName: AnalyticsEventName.ROUTE_VIEWED,
+        surface: AnalyticsSurface.AUTH,
+        routeTemplate: AnalyticsRouteTemplate.AUTH_CALLBACK,
+      }, {
+        endpoint: 'https://supabase.test/functions/v1/capture-analytics',
+      });
+
+      await Promise.resolve();
+
+      expect(beaconCalls).toHaveLength(0);
+      expect(fetchCalls).toEqual([{
+        endpoint: 'https://supabase.test/functions/v1/capture-analytics',
+        credentials: 'omit',
+      }]);
+    } finally {
+      restoreGlobalProperty('window', windowDescriptor);
+      restoreGlobalProperty('navigator', navigatorDescriptor);
+      restoreGlobalProperty('fetch', fetchDescriptor);
+    }
   });
 });
 

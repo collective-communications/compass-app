@@ -105,11 +105,25 @@ function getAnalyticsEndpoint(): string | null {
   return supabaseUrl ? `${supabaseUrl}/functions/v1/capture-analytics` : null;
 }
 
+function isSameOriginEndpoint(endpoint: string): boolean {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    return new URL(endpoint, window.location.href).origin === window.location.origin;
+  } catch {
+    return false;
+  }
+}
+
 function defaultTransport(): AnalyticsTransport {
   return {
     send(endpoint, payload): boolean | Promise<boolean> {
       const body = JSON.stringify(payload);
-      if (typeof navigator !== 'undefined' && 'sendBeacon' in navigator) {
+      if (
+        isSameOriginEndpoint(endpoint)
+        && typeof navigator !== 'undefined'
+        && 'sendBeacon' in navigator
+      ) {
         const blob = new Blob([body], { type: 'application/json' });
         const queued = navigator.sendBeacon(endpoint, blob);
         if (queued) return true;
