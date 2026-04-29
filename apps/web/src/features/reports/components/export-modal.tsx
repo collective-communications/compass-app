@@ -140,7 +140,7 @@ export function ExportModal({
     } finally {
       setIsDownloading(false);
     }
-  }, [filename, format, generation.fileUrl]);
+  }, [filename, generation.fileUrl]);
 
   /** Toggle a section's included state */
   const toggleSection = useCallback((sectionId: string): void => {
