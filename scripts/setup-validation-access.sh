@@ -19,8 +19,7 @@ for envfile in "${PROJECT_ROOT}/../.env" "${PROJECT_ROOT}/.env" "${PROJECT_ROOT}
 done
 
 CF_API="https://api.cloudflare.com/client/v4"
-PAGES_DOMAIN="${VALIDATION_PAGES_DOMAIN:-validation-b01.pages.dev}"
-PREVIEW_DOMAIN="${VALIDATION_PREVIEW_PAGES_DOMAIN:-*.${PAGES_DOMAIN}}"
+PAGES_DOMAIN="${VALIDATION_PAGES_DOMAIN:-compass-calculations.pages.dev}"
 APP_NAME="${VALIDATION_ACCESS_APP_NAME:-CC+C Scoring Validation}"
 
 for var in CLOUDFLARE_ACCOUNT_ID CLOUDFLARE_API_TOKEN ALLOWED_DOMAIN; do
@@ -131,10 +130,8 @@ ensure_access_app() {
 echo ""
 echo "=== Step 2: Ensure Access Applications and Policies ==="
 ensure_access_app "${PAGES_DOMAIN}" "${APP_NAME}"
-ensure_access_app "${PREVIEW_DOMAIN}" "${APP_NAME} Previews"
 
 echo ""
 echo "=== Done ==="
 echo "Validation at https://${PAGES_DOMAIN} now requires Microsoft 365 login."
-echo "Validation previews at https://${PREVIEW_DOMAIN} now require Microsoft 365 login."
 echo "Only users with @${ALLOWED_DOMAIN} email addresses can access it."

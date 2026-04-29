@@ -6,10 +6,11 @@
 |---|---|
 | Standalone app | `apps/validation` |
 | Standalone path | `/` |
-| Cloudflare Pages project | `validation` (`validation-b01.pages.dev`) |
+| Cloudflare Pages project | `compass-calculations` (`compass-calculations.pages.dev`) |
 | Web dev path | `/dev/scoring` |
 | Web dev guard | `import.meta.env.DEV === true` only — not registered in production builds |
 | Auth | Microsoft 365 via Cloudflare Access on the Pages hostname; none on local dev |
+| Host guard | Pages middleware only serves `compass-calculations.pages.dev`; aliases and preview URLs return 404 |
 | Shell | No app shell (no topbar, no pill nav, no footer) |
 
 ### Route Registration

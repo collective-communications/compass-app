@@ -13,7 +13,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
-PROJECT_NAME="${VALIDATION_PAGES_PROJECT:-validation}"
+APP_DIR="${PROJECT_ROOT}/apps/validation"
 BUILD_DIR="${PROJECT_ROOT}/apps/validation/dist"
 
 # Load env from known local stores if available. Later files can provide
@@ -26,7 +26,8 @@ for envfile in "${PROJECT_ROOT}/../.env" "${PROJECT_ROOT}/.env" "${PROJECT_ROOT}
   fi
 done
 
-DISPLAY_DOMAIN="${VALIDATION_PAGES_DOMAIN:-validation-b01.pages.dev}"
+PROJECT_NAME="${VALIDATION_PAGES_PROJECT:-compass-calculations}"
+DISPLAY_DOMAIN="${VALIDATION_PAGES_DOMAIN:-compass-calculations.pages.dev}"
 
 if ! command -v wrangler &>/dev/null; then
   echo "ERROR: wrangler not installed. Run: npm install -g wrangler"
@@ -52,4 +53,4 @@ fi
 
 echo ""
 echo "Deploying ${BUILD_DIR} -> ${DISPLAY_DOMAIN}"
-wrangler pages deploy "${BUILD_DIR}" --project-name="${PROJECT_NAME}"
+(cd "${APP_DIR}" && wrangler pages deploy "${BUILD_DIR}" --project-name="${PROJECT_NAME}" --commit-dirty=true)

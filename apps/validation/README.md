@@ -24,7 +24,7 @@ The static output is written to `apps/validation/dist`.
 bun run deploy-validation
 ```
 
-By default this deploys to the Cloudflare Pages project `validation`, currently hosted at `validation-b01.pages.dev`.
+By default this deploys to the Cloudflare Pages project `compass-calculations`, currently hosted at `compass-calculations.pages.dev`.
 Set `VALIDATION_PAGES_PROJECT` and `VALIDATION_PAGES_DOMAIN` to use a different Pages project.
 
 ## Access
@@ -33,4 +33,4 @@ Set `VALIDATION_PAGES_PROJECT` and `VALIDATION_PAGES_DOMAIN` to use a different 
 bun run setup-validation-access
 ```
 
-This protects both the production validation Pages hostname and preview deployment hostnames with the same Microsoft 365 Cloudflare Access flow used by `ccc-docs` and Storybook.
+This protects the validation Pages hostname with the same Microsoft 365 Cloudflare Access flow used by `ccc-docs` and Storybook. The deployed Pages middleware only serves `compass-calculations.pages.dev`; deployment aliases and branch preview URLs return 404.
