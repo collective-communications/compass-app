@@ -1,4 +1,4 @@
-import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 /** Result of authorization check. */
 export interface AuthResult {
@@ -52,24 +52,24 @@ export async function authorize(
     };
   }
 
-  // Look up the user's role from the users table
-  const { data: profile, error: profileError } = await client
-    .from('user_profiles')
+  // Look up the user's roles from org_members.
+  const { data: memberships, error: memberError } = await client
+    .from('org_members')
     .select('role')
-    .eq('id', user.id)
-    .single();
+    .eq('user_id', user.id);
 
-  if (profileError || !profile) {
+  if (memberError || !memberships || memberships.length === 0) {
     return {
       error: new Response(
-        JSON.stringify({ error: 'UNAUTHORIZED', message: 'User profile not found' }),
+        JSON.stringify({ error: 'UNAUTHORIZED', message: 'User org membership not found' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } },
       ),
     };
   }
 
   const allowedRoles = ['ccc_admin', 'ccc_member'];
-  if (!allowedRoles.includes(profile.role)) {
+  const authorizedRole = memberships.find((membership) => allowedRoles.includes(membership.role))?.role;
+  if (!authorizedRole) {
     return {
       error: new Response(
         JSON.stringify({ error: 'FORBIDDEN', message: 'Only CC+C users can generate embeddings' }),
@@ -79,6 +79,6 @@ export async function authorize(
   }
 
   return {
-    result: { authorized: true, userId: user.id, role: profile.role },
+    result: { authorized: true, userId: user.id, role: authorizedRole },
   };
 }

@@ -27,12 +27,16 @@ SELECT plan(7);
 -- Fixture setup
 -- ---------------------------------------------------------------------------
 SELECT tests.create_test_org('threshold-org')    AS org_id    \gset
+SELECT tests.create_test_user(:'org_id'::uuid, 'client_manager') AS user_id \gset
 SELECT tests.create_test_survey(:'org_id'::uuid) AS survey_id \gset
 
 -- Resolve the 'clarity' dimension id — seeded in migration 00000000000001.
 SELECT id AS dim_id FROM public.dimensions WHERE code = 'clarity' \gset
 
 SET LOCAL ROLE postgres;
+
+INSERT INTO public.organization_settings (organization_id, client_access_enabled)
+VALUES (:'org_id'::uuid, true);
 
 -- Segment A: department='Engineering', 4 responses (below threshold 5).
 INSERT INTO public.scores (
@@ -60,6 +64,9 @@ INSERT INTO public.scores (
   :'survey_id'::uuid, :'dim_id'::uuid, NULL, NULL,
   70.00, 3.80, 25
 );
+
+SET LOCAL ROLE authenticated;
+SELECT tests.set_auth_uid(:'user_id'::uuid);
 
 -- ===========================================================================
 -- Assertion 1: masked segment has is_masked=true.

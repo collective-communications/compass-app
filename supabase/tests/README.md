@@ -16,6 +16,17 @@ This directory contains pgTAP tests that verify the "structural anonymity" guara
 | `rls_authenticated_cross_org.sql` | A signed-in user in org A cannot read any data (responses, answers, surveys, deployments) belonging to org B. |
 | `safe_segment_scores_threshold.sql` | The `safe_segment_scores` view masks segments with fewer than `anonymityThreshold` (default 5) responses and surfaces segments at or above the threshold. |
 | `reorder_questions_ownership.sql` | The `reorder_questions` RPC rejects cross-org callers with SQLSTATE `42501` (verifies migration `039` ownership guard). |
+| `security_authz_boundaries.sql` | CCC members cannot mutate authorization state, including org memberships or profile roles. |
+| `security_result_access.sql` | Result views and result RPCs enforce org membership, role, and client access toggles at the database boundary. |
+| `security_anon_survey_boundary.sql` | Anonymous survey access is token-bound and active deployments, surveys, and questions are not enumerable. |
+| `security_answer_write_session.sql` | Anonymous answer writes require the matching respondent session token. |
+| `security_answer_question_survey_ownership.sql` | Answer writes are rejected when the question belongs to a different survey than the response deployment. |
+| `security_survey_threshold_resolution.sql` | Anonymity thresholds resolve from `surveys.settings.anonymityThreshold` before falling back to org/platform defaults. |
+| `security_segment_question_scores_masking.sql` | The segment-question RPC nulls low-n metrics and distributions when a segment is masked. |
+| `security_response_metrics_threshold.sql` | The response metrics RPC redacts low-n department and daily buckets while preserving aggregate totals. |
+| `security_reports_storage_visibility.sql` | Report storage object reads mirror report row visibility, status, and client access settings. |
+| `security_logo_storage.sql` | Logo storage writes and deletes are constrained to the caller's organization path and allowed object types. |
+| `security_cookie_free_analytics.sql` | Cookie-free analytics writes aggregate counters only, rejects forbidden fields, denies direct table reads, and exposes summaries only through the CC+C read RPC. |
 
 ## Running locally
 
@@ -32,6 +43,16 @@ supabase test db --local
 supabase test db --local supabase/tests/rls_anon_responses.sql
 ```
 
+From the repository root, the database security suite is also exposed as:
+
+```bash
+bun run test:security:db
+```
+
+That command runs the same pgTAP suite through the Supabase CLI. Use
+`bun run test:security` to combine security unit tests, database tests, and
+direct security E2E probes.
+
 > **Note:** this project's local development does not use Docker — the app connects directly to Supabase Cloud. To execute these tests you must either
 > 1. start the local stack explicitly (`supabase start`, which does bring up a Docker container for Postgres + pgTAP), or
 > 2. point at a disposable database via `--db-url <connection-string>`.
@@ -40,7 +61,7 @@ supabase test db --local supabase/tests/rls_anon_responses.sql
 
 ## CI integration
 
-In CI, the Supabase Action (`supabase/setup-cli@v1`) bootstraps the CLI, then `supabase db start && supabase test db --local` runs the suite. Failures are surfaced via pgTAP's TAP output, which the Action parses into step annotations. No additional test runner is required.
+In CI, the Supabase Action (`supabase/setup-cli@v1`) bootstraps the CLI, then `supabase start`, `supabase db reset --local`, and `supabase test db --local` run the suite. Failures are surfaced via pgTAP's TAP output, which the Action parses into step annotations. No additional test runner is required.
 
 ## Writing new tests
 

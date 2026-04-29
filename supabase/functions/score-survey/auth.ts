@@ -1,4 +1,4 @@
-import { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import type { SupabaseClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 /** Result of authorization check. */
 export interface AuthResult {
@@ -52,25 +52,23 @@ export async function authorize(
     };
   }
 
-  // Look up the user's role from user_profiles.
-  // (The table is `user_profiles` — not `users`. The previous lookup always
-  // failed with a "relation does not exist" error, making the JWT path dead.)
-  const { data: profile, error: profileError } = await client
-    .from('user_profiles')
+  // Look up the user's roles from org_members.
+  const { data: memberships, error: memberError } = await client
+    .from('org_members')
     .select('role')
-    .eq('id', user.id)
-    .single();
+    .eq('user_id', user.id);
 
-  if (profileError || !profile) {
+  if (memberError || !memberships || memberships.length === 0) {
     return {
       error: new Response(
-        JSON.stringify({ error: 'UNAUTHORIZED', message: 'User profile not found' }),
+        JSON.stringify({ error: 'UNAUTHORIZED', message: 'User org membership not found' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } },
       ),
     };
   }
 
-  if (profile.role !== 'ccc_admin') {
+  const authorizedRole = memberships.find((membership) => membership.role === 'ccc_admin')?.role;
+  if (!authorizedRole) {
     return {
       error: new Response(
         JSON.stringify({ error: 'FORBIDDEN', message: 'Only ccc_admin users can trigger scoring' }),
@@ -80,6 +78,6 @@ export async function authorize(
   }
 
   return {
-    result: { authorized: true, userId: user.id, role: profile.role },
+    result: { authorized: true, userId: user.id, role: authorizedRole },
   };
 }

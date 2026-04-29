@@ -68,9 +68,61 @@ jobs:
         if: always()
         run: supabase stop
 
+  e2e-db-migrate:
+    name: Prepare E2E Database
+    runs-on: ubuntu-latest
+    env:
+      HAS_E2E_SECRETS: ${{ secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
+      HAS_SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN != '' }}
+      HAS_SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD != '' }}
+    steps:
+      - name: Skip E2E database preparation
+        if: env.HAS_E2E_SECRETS != 'true'
+        run: echo "E2E Supabase secrets are not configured; skipping database preparation."
+
+      - name: Require Supabase migration credentials
+        if: env.HAS_E2E_SECRETS == 'true' && (env.HAS_SUPABASE_ACCESS_TOKEN != 'true' || env.HAS_SUPABASE_DB_PASSWORD != 'true')
+        run: |
+          echo "E2E Supabase secrets are configured, but CI cannot apply migrations."
+          echo "Set SUPABASE_ACCESS_TOKEN and SUPABASE_DB_PASSWORD so E2E runs against the current schema."
+          exit 1
+
+      - uses: actions/checkout@v4
+        if: env.HAS_E2E_SECRETS == 'true' && env.HAS_SUPABASE_ACCESS_TOKEN == 'true' && env.HAS_SUPABASE_DB_PASSWORD == 'true'
+
+      - uses: supabase/setup-cli@v1
+        if: env.HAS_E2E_SECRETS == 'true' && env.HAS_SUPABASE_ACCESS_TOKEN == 'true' && env.HAS_SUPABASE_DB_PASSWORD == 'true'
+        with:
+          version: 2.75.0
+
+      - name: Apply migrations to E2E Supabase project
+        if: env.HAS_E2E_SECRETS == 'true' && env.HAS_SUPABASE_ACCESS_TOKEN == 'true' && env.HAS_SUPABASE_DB_PASSWORD == 'true'
+        run: |
+          if [ -z "${E2E_SUPABASE_URL:-}" ]; then
+            echo "E2E_SUPABASE_URL is required to derive the Supabase project ref."
+            exit 1
+          fi
+
+          project_host="${E2E_SUPABASE_URL#https://}"
+          project_host="${project_host#http://}"
+          project_ref="${project_host%%.*}"
+
+          if [ -z "$project_ref" ] || [ "$project_ref" = "$project_host" ]; then
+            echo "Could not derive Supabase project ref from E2E_SUPABASE_URL."
+            exit 1
+          fi
+
+          supabase link --project-ref "$project_ref"
+          supabase db push
+        env:
+          E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
   e2e:
     name: E2E (shard ${{ matrix.shard }}/3)
     runs-on: ubuntu-latest
+    needs: [e2e-db-migrate]
     env:
       HAS_E2E_SECRETS: ${{ secrets.E2E_SUPABASE_SERVICE_KEY != '' }}
     strategy:
@@ -123,6 +175,7 @@ jobs:
         env:
           E2E_SUPABASE_URL: ${{ secrets.E2E_SUPABASE_URL }}
           E2E_SUPABASE_SERVICE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_KEY }}
+          E2E_SUPABASE_ANON_JWT: ${{ secrets.E2E_SUPABASE_ANON_JWT }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
 

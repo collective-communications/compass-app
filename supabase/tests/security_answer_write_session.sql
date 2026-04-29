@@ -53,6 +53,8 @@ UPDATE public.answers
    SET likert_value = 2
  WHERE id = 'cccccccc-1111-1111-1111-cccccccccccc'::uuid;
 
+SET LOCAL ROLE postgres;
+
 SELECT is(
   (SELECT likert_value FROM public.answers WHERE id = 'cccccccc-1111-1111-1111-cccccccccccc'::uuid),
   4,

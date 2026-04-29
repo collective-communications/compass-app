@@ -132,19 +132,49 @@ async function deleteReport(reportId: string): Promise<void> {
   }
 }
 
-async function getUserProfileByEmail(email: string): Promise<{ id: string; role: string }> {
+async function getUserProfileByEmail(
+  email: string,
+  organizationId?: string,
+): Promise<{ id: string; role: string }> {
   const supabase = createAdminClient();
-  const { data, error } = await supabase
+  const { data: profiles, error } = await supabase
     .from('user_profiles')
-    .select('id, role')
+    .select('id, role, created_at')
     .eq('email', email)
-    .single();
+    .order('created_at', { ascending: true })
+    .limit(10);
 
-  if (error || !data) {
+  if (error || !profiles || profiles.length === 0) {
     throw new Error(`Failed to resolve profile for ${email}: ${error?.message ?? 'no data'}`);
   }
 
-  return { id: data.id as string, role: data.role as string };
+  if (organizationId) {
+    const profileIds = profiles.map((profile) => profile.id as string);
+    const { data: memberships, error: membershipError } = await supabase
+      .from('org_members')
+      .select('user_id')
+      .eq('organization_id', organizationId)
+      .in('user_id', profileIds);
+
+    if (membershipError) {
+      throw new Error(`Failed to resolve membership for ${email}: ${membershipError.message}`);
+    }
+
+    const membershipIds = new Set(
+      (memberships ?? []).map((membership) => membership.user_id as string),
+    );
+    const matchedProfile = profiles.find((profile) => membershipIds.has(profile.id as string));
+    if (matchedProfile) {
+      return { id: matchedProfile.id as string, role: matchedProfile.role as string };
+    }
+  }
+
+  const profile = profiles[0];
+  if (!profile) {
+    throw new Error(`Failed to resolve profile for ${email}: no data`);
+  }
+
+  return { id: profile.id as string, role: profile.role as string };
 }
 
 async function getSeedDeploymentToken(): Promise<string> {
@@ -166,6 +196,11 @@ interface ClientAccessSnapshot {
   organizationEnabled: boolean;
   settingsRowExisted: boolean;
   settingsEnabled: boolean | null;
+}
+
+interface ReportStorageFixture {
+  reportId: string;
+  storagePath: string;
 }
 
 async function setClientAccess(
@@ -241,17 +276,122 @@ async function restoreClientAccess(
   }
 }
 
+async function seedReportStorageFixture(params: {
+  clientVisible: boolean;
+  status: 'completed' | 'generating';
+}): Promise<ReportStorageFixture> {
+  const supabase = createAdminClient();
+  const reportId = crypto.randomUUID();
+  const storagePath = `${ORG_IDS.riverValley}/e2e-report-storage-${reportId}.pdf`;
+
+  const { error: uploadError } = await supabase.storage.from('reports').upload(
+    storagePath,
+    new Blob([new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x0a])], {
+      type: 'application/pdf',
+    }),
+    { contentType: 'application/pdf', upsert: true },
+  );
+  if (uploadError) {
+    throw new Error(`Failed to upload report storage fixture: ${uploadError.message}`);
+  }
+
+  const { error: reportError } = await supabase.from('reports').insert({
+    id: reportId,
+    survey_id: SURVEY_IDS.riverValleyQ1_2026,
+    organization_id: ORG_IDS.riverValley,
+    title: `E2E report storage ${reportId}`,
+    status: params.status,
+    progress: params.status === 'completed' ? 100 : 20,
+    format: 'pdf',
+    storage_path: storagePath,
+    client_visible: params.clientVisible,
+    triggered_by: 'e2e',
+  });
+  if (reportError) {
+    await supabase.storage.from('reports').remove([storagePath]);
+    throw new Error(`Failed to seed report row fixture: ${reportError.message}`);
+  }
+
+  return { reportId, storagePath };
+}
+
+async function deleteReportStorageFixture(fixture: ReportStorageFixture): Promise<void> {
+  const supabase = createAdminClient();
+  await supabase.storage.from('reports').remove([fixture.storagePath]);
+  await supabase.from('reports').delete().eq('id', fixture.reportId);
+}
+
+async function seedResponseMetricsSurvey(): Promise<string> {
+  const supabase = createAdminClient();
+  const { data: survey, error: surveyError } = await supabase
+    .from('surveys')
+    .insert({
+      organization_id: ORG_IDS.riverValley,
+      title: `E2E response metrics ${Date.now()}`,
+      status: 'active',
+      settings: { anonymityThreshold: 3 },
+    })
+    .select('id')
+    .single();
+  if (surveyError || !survey) {
+    throw new Error(`Failed to seed response metrics survey: ${surveyError?.message ?? 'no data'}`);
+  }
+
+  const surveyId = survey.id as string;
+  const { data: deployment, error: deploymentError } = await supabase
+    .from('deployments')
+    .insert({
+      survey_id: surveyId,
+      is_active: true,
+      type: 'anonymous_link',
+    })
+    .select('id')
+    .single();
+  if (deploymentError || !deployment) {
+    await supabase.from('surveys').delete().eq('id', surveyId);
+    throw new Error(`Failed to seed response metrics deployment: ${deploymentError?.message ?? 'no data'}`);
+  }
+
+  const deploymentId = deployment.id as string;
+  const rows = [
+    ...Array.from({ length: 2 }, (_, index) => ({
+      deployment_id: deploymentId,
+      session_token: `e2e-engineering-${index}-${crypto.randomUUID()}`,
+      metadata_department: 'Engineering',
+      is_complete: true,
+      created_at: '2026-04-01T09:00:00.000Z',
+      submitted_at: '2026-04-01T09:05:00.000Z',
+    })),
+    ...Array.from({ length: 3 }, (_, index) => ({
+      deployment_id: deploymentId,
+      session_token: `e2e-operations-${index}-${crypto.randomUUID()}`,
+      metadata_department: 'Operations',
+      is_complete: true,
+      created_at: '2026-04-02T09:00:00.000Z',
+      submitted_at: '2026-04-02T09:05:00.000Z',
+    })),
+  ];
+
+  const { error: responsesError } = await supabase.from('responses').insert(rows);
+  if (responsesError) {
+    await supabase.from('surveys').delete().eq('id', surveyId);
+    throw new Error(`Failed to seed response metrics rows: ${responsesError.message}`);
+  }
+
+  return surveyId;
+}
+
 // --------------------------------------------------------------------------
 // Tests
 // --------------------------------------------------------------------------
 
-test.describe('RLS perimeter', () => {
+test.describe('@security RLS perimeter', () => {
   test('ccc_member cannot mutate org membership or profile roles through the direct API', async () => {
     const client = makeAnonClient();
     let targetId: string | null = null;
 
     try {
-      const target = await getUserProfileByEmail(EMAILS.clientExecRiverValley);
+      const target = await getUserProfileByEmail(EMAILS.clientExecRiverValley, ORG_IDS.riverValley);
       targetId = target.id;
       await signInAs(client, EMAILS.cccMember);
 
@@ -318,6 +458,87 @@ test.describe('RLS perimeter', () => {
       expect(metricsResp.error).not.toBeNull();
       expect(metricsResp.error?.code).toBe('42501');
     } finally {
+      await restoreClientAccess(ORG_IDS.riverValley, snapshot);
+      await client.auth.signOut();
+    }
+  });
+
+  test('response metrics RPC redacts low-n department and daily buckets', async () => {
+    const snapshot = await setClientAccess(ORG_IDS.riverValley, true);
+    const surveyId = await seedResponseMetricsSurvey();
+    const client = makeAnonClient();
+
+    try {
+      await signInAs(client, EMAILS.clientExecRiverValley);
+
+      const metricsResp = await client.rpc('get_response_metrics', {
+        p_survey_id: surveyId,
+      });
+      expect(metricsResp.error).toBeNull();
+      const metrics = metricsResp.data as {
+        completedResponses: number;
+        departmentBreakdown: Array<{ department: string; count: number }>;
+        dailyCompletions: Array<{ date: string; count: number }>;
+        hasMaskedDepartmentBreakdown: boolean;
+        hasMaskedDailyCompletions: boolean;
+      };
+
+      expect(metrics.completedResponses).toBe(5);
+      expect(metrics.departmentBreakdown).toContainEqual({ department: 'Operations', count: 3 });
+      expect(metrics.departmentBreakdown).not.toContainEqual({ department: 'Engineering', count: 2 });
+      expect(metrics.hasMaskedDepartmentBreakdown).toBe(true);
+      expect(metrics.dailyCompletions).toContainEqual({ date: '2026-04-02', count: 3 });
+      expect(metrics.dailyCompletions).not.toContainEqual({ date: '2026-04-01', count: 2 });
+      expect(metrics.hasMaskedDailyCompletions).toBe(true);
+    } finally {
+      const supabase = createAdminClient();
+      await supabase.from('surveys').delete().eq('id', surveyId);
+      await restoreClientAccess(ORG_IDS.riverValley, snapshot);
+      await client.auth.signOut();
+    }
+  });
+
+  test('report storage signed URLs follow report visibility and client access', async () => {
+    const snapshot = await setClientAccess(ORG_IDS.riverValley, true);
+    const fixtures: ReportStorageFixture[] = [];
+    const client = makeAnonClient();
+
+    try {
+      fixtures.push(
+        await seedReportStorageFixture({ clientVisible: true, status: 'completed' }),
+        await seedReportStorageFixture({ clientVisible: false, status: 'completed' }),
+        await seedReportStorageFixture({ clientVisible: true, status: 'generating' }),
+      );
+
+      await signInAs(client, EMAILS.clientExecRiverValley);
+
+      const visibleResp = await client.storage
+        .from('reports')
+        .createSignedUrl(fixtures[0].storagePath, 60);
+      expect(visibleResp.error).toBeNull();
+      expect(visibleResp.data?.signedUrl).toContain('/storage/v1/object/sign/reports/');
+
+      const hiddenResp = await client.storage
+        .from('reports')
+        .createSignedUrl(fixtures[1].storagePath, 60);
+      expect(hiddenResp.error).not.toBeNull();
+
+      const generatingResp = await client.storage
+        .from('reports')
+        .createSignedUrl(fixtures[2].storagePath, 60);
+      expect(generatingResp.error).not.toBeNull();
+
+      const disabledSnapshot = await setClientAccess(ORG_IDS.riverValley, false);
+      try {
+        const disabledResp = await client.storage
+          .from('reports')
+          .createSignedUrl(fixtures[0].storagePath, 60);
+        expect(disabledResp.error).not.toBeNull();
+      } finally {
+        await restoreClientAccess(ORG_IDS.riverValley, disabledSnapshot);
+      }
+    } finally {
+      await Promise.all(fixtures.map((fixture) => deleteReportStorageFixture(fixture)));
       await restoreClientAccess(ORG_IDS.riverValley, snapshot);
       await client.auth.signOut();
     }

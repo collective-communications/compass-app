@@ -45,6 +45,9 @@ export interface ResponseMetrics {
   averageCompletionTimeMs: number | null;
   departmentBreakdown: DepartmentBreakdown[];
   dailyCompletions: DailyCompletion[];
+  anonymityThreshold?: number;
+  hasMaskedDepartmentBreakdown?: boolean;
+  hasMaskedDailyCompletions?: boolean;
 }
 
 export async function saveSurveyConfig(params: SaveSurveyConfigParams): Promise<Survey> {
@@ -205,6 +208,9 @@ interface ResponseMetricsRpcPayload {
   averageCompletionTimeMs: number | null;
   departmentBreakdown: DepartmentBreakdown[];
   dailyCompletions: DailyCompletion[];
+  anonymityThreshold?: number;
+  hasMaskedDepartmentBreakdown?: boolean;
+  hasMaskedDailyCompletions?: boolean;
 }
 
 interface ResponseMetricsRow {
@@ -231,6 +237,9 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
       averageCompletionTimeMs: payload.averageCompletionTimeMs ?? null,
       departmentBreakdown: payload.departmentBreakdown ?? [],
       dailyCompletions: payload.dailyCompletions ?? [],
+      anonymityThreshold: payload.anonymityThreshold,
+      hasMaskedDepartmentBreakdown: payload.hasMaskedDepartmentBreakdown ?? false,
+      hasMaskedDailyCompletions: payload.hasMaskedDailyCompletions ?? false,
     };
   }
 
@@ -255,6 +264,8 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
       averageCompletionTimeMs: null,
       departmentBreakdown: [],
       dailyCompletions: [],
+      hasMaskedDepartmentBreakdown: false,
+      hasMaskedDailyCompletions: false,
     };
   }
 
@@ -311,6 +322,8 @@ export async function getResponseMetrics(surveyId: string): Promise<ResponseMetr
     averageCompletionTimeMs,
     departmentBreakdown,
     dailyCompletions,
+    hasMaskedDepartmentBreakdown: false,
+    hasMaskedDailyCompletions: false,
   };
 }
 
@@ -332,6 +345,7 @@ export function subscribeToResponses(
   onInsert: () => void,
 ): { unsubscribe: () => void } {
   const supabase = getClient();
+  const logger = getLogger();
   const channel = supabase
     .channel(`responses:deployment_id=eq.${deploymentId}`)
     .on(
@@ -349,8 +363,13 @@ export function subscribeToResponses(
     .subscribe();
 
   return {
-    unsubscribe: () => {
-      supabase.removeChannel(channel);
+    unsubscribe: (): void => {
+      void supabase.removeChannel(channel).catch((err: unknown) => {
+        logger.warn(
+          { err, deploymentId, fn: 'subscribeToResponses.unsubscribe' },
+          'Failed to remove responses subscription channel',
+        );
+      });
     },
   };
 }

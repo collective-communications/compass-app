@@ -70,7 +70,7 @@ async function probeGatewayReachable(): Promise<{ reachable: boolean; reason: st
   }
 }
 
-test.describe('Edge function: accept-invitation perimeter', () => {
+test.describe('@security Edge function: accept-invitation perimeter', () => {
   let validInvitationId: string | null = null;
   let gatewayReachable = false;
   let gatewaySkipReason = '';

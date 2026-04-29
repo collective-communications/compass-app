@@ -1828,6 +1828,14 @@ export type Database = {
         Args: { p_field_name: string }
         Returns: string
       }
+      anonymity_threshold_for_survey: {
+        Args: { p_survey_id: string }
+        Returns: number
+      }
+      answer_matches_response_survey: {
+        Args: { p_question_id: string; p_response_id: string }
+        Returns: boolean
+      }
       auth_user_org_id: { Args: never; Returns: string }
       auth_user_role: {
         Args: never
@@ -1852,23 +1860,23 @@ export type Database = {
           dimension_color: string
           dimension_id: string
           dimension_name: string
-          dist_1: number
-          dist_10: number
-          dist_2: number
-          dist_3: number
-          dist_4: number
-          dist_5: number
-          dist_6: number
-          dist_7: number
-          dist_8: number
-          dist_9: number
+          dist_1: number | null
+          dist_10: number | null
+          dist_2: number | null
+          dist_3: number | null
+          dist_4: number | null
+          dist_5: number | null
+          dist_6: number | null
+          dist_7: number | null
+          dist_8: number | null
+          dist_9: number | null
           is_masked: boolean
           is_reverse_scored: boolean
-          mean_score: number
+          mean_score: number | null
           order_index: number
           question_id: string
           question_text: string
-          response_count: number
+          response_count: number | null
           sub_dimension_code: string
           sub_dimension_name: string
         }[]

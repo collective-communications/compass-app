@@ -3,7 +3,7 @@
 BEGIN;
 \set TAP_HELPERS_INCLUDED 1
 \ir helpers/fixtures.sql
-SELECT plan(5);
+SELECT plan(6);
 
 SELECT tests.create_test_org('security-logos-a') AS org_a_id \gset
 SELECT tests.create_test_org('security-logos-b') AS org_b_id \gset
@@ -66,8 +66,13 @@ SELECT throws_ok(
   'logo upload path must start with a valid organization UUID'
 );
 
-DELETE FROM storage.objects
- WHERE id = 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa'::uuid;
+SELECT throws_ok(
+  $sql$DELETE FROM storage.objects
+         WHERE id = 'aaaaaaaa-3333-3333-3333-aaaaaaaaaaaa'::uuid$sql$,
+  '42501',
+  NULL,
+  'direct storage delete is blocked before object removal'
+);
 
 SET LOCAL ROLE postgres;
 SELECT is(
