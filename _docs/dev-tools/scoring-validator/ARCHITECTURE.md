@@ -6,7 +6,7 @@
 |---|---|
 | Standalone app | `apps/validation` |
 | Standalone path | `/` |
-| Cloudflare Pages project | `validation` (`validation.pages.dev`) |
+| Cloudflare Pages project | `validation` (`validation-b01.pages.dev`) |
 | Web dev path | `/dev/scoring` |
 | Web dev guard | `import.meta.env.DEV === true` only — not registered in production builds |
 | Auth | None — scoring exploration tool, no role check |

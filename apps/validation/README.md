@@ -24,5 +24,5 @@ The static output is written to `apps/validation/dist`.
 bun run deploy-validation
 ```
 
-By default this deploys to the Cloudflare Pages project `validation`, producing `validation.pages.dev`.
-Set `VALIDATION_PAGES_PROJECT` to use a different Pages project name.
+By default this deploys to the Cloudflare Pages project `validation`, currently hosted at `validation-b01.pages.dev`.
+Set `VALIDATION_PAGES_PROJECT` and `VALIDATION_PAGES_DOMAIN` to use a different Pages project.

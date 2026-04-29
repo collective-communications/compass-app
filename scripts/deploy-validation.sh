@@ -4,7 +4,7 @@
 # Prerequisites:
 #   - wrangler CLI installed (npm install -g wrangler)
 #   - CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN set in environment
-#     (or in ../.env at the ccc_app root)
+#     (or in ../.env, .env, or ../tkr-document-hosting/.env)
 #
 # Usage:
 #   ./scripts/deploy-validation.sh
@@ -16,15 +16,17 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 PROJECT_NAME="${VALIDATION_PAGES_PROJECT:-validation}"
 BUILD_DIR="${PROJECT_ROOT}/apps/validation/dist"
 
-# Load env from parent directory if available.
-for envfile in "${PROJECT_ROOT}/../.env" "${PROJECT_ROOT}/.env"; do
+# Load env from known local stores if available. Later files can provide
+# credentials not present in earlier generic app env files.
+for envfile in "${PROJECT_ROOT}/../.env" "${PROJECT_ROOT}/.env" "${PROJECT_ROOT}/../tkr-document-hosting/.env"; do
   if [[ -f "${envfile}" ]]; then
     set -a
     source "${envfile}"
     set +a
-    break
   fi
 done
+
+DISPLAY_DOMAIN="${VALIDATION_PAGES_DOMAIN:-validation-b01.pages.dev}"
 
 if ! command -v wrangler &>/dev/null; then
   echo "ERROR: wrangler not installed. Run: npm install -g wrangler"
@@ -49,5 +51,5 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
 fi
 
 echo ""
-echo "Deploying ${BUILD_DIR} -> ${PROJECT_NAME}.pages.dev"
+echo "Deploying ${BUILD_DIR} -> ${DISPLAY_DOMAIN}"
 wrangler pages deploy "${BUILD_DIR}" --project-name="${PROJECT_NAME}"
