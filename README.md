@@ -19,7 +19,7 @@ Digitizes CC+C's proprietary Collective Culture Compass framework: survey admini
 
 ```
 apps/web          — Main web application
-apps/storybook    — Component library + visual tests
+apps/storybook    — Component library
 packages/types    — Shared TypeScript types
 packages/scoring  — Scoring algorithm pipeline
 packages/compass  — SVG compass visualization

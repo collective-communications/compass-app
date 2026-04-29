@@ -25,7 +25,7 @@ struct:
     hooks: {n: 4, d: "focus-trap, theme, and shared hooks"}
     stores: {n: 3}
     shells: {n: 3, d: "survey shell layout"}
-  apps/storybook: {n: 16, d: "Storybook visual testing, templates, test-utils"}
+  apps/storybook: {n: 16, d: "Storybook component library, templates, test-utils"}
   packages:
     compass: {n: 11, d: "SVG compass visualization"}
     scoring: {n: 16, d: "Scoring pipeline — dimensions, archetypes, risk flags, segments"}

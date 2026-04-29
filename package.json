@@ -29,7 +29,6 @@
     "typecheck": "tsc -b",
     "test": "bun test apps/web packages",
     "test:e2e": "bun run --filter @compass/e2e test",
-    "test:visual": "bun run --filter @compass/storybook test:visual",
     "test:storybook": "bun run --filter @compass/storybook test-storybook",
     "storybook": "bun run --filter @compass/storybook storybook",
     "build-storybook": "bun run --filter @compass/storybook build-storybook",
