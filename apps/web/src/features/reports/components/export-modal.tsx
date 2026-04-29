@@ -20,6 +20,7 @@ import {
   type ReportConfig,
 } from '@compass/types';
 import { useFocusTrap } from '../../../hooks/use-focus-trap';
+import { downloadFromUrl } from '../../../lib/download';
 import { fetchAndPrint } from '../../../lib/print-to-pdf';
 import { useReportGeneration } from '../hooks/use-report-generation';
 import type { ModalState } from './export-modal-utils';
@@ -138,12 +139,7 @@ export function ExportModal({
         return;
       }
 
-      const anchor = document.createElement('a');
-      anchor.href = generation.fileUrl;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
+      await downloadFromUrl(generation.fileUrl, filename);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Failed to download report.';

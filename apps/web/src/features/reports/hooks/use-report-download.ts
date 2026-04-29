@@ -5,6 +5,7 @@
 
 import { useCallback, useState } from 'react';
 import { getReportDownloadUrl } from '../services/report-api';
+import { downloadFromUrl } from '../../../lib/download';
 import { fetchAndPrint } from '../../../lib/print-to-pdf';
 
 export interface UseReportDownloadReturn {
@@ -69,12 +70,7 @@ export function useReportDownload(): UseReportDownloadReturn {
 
     try {
       const url = await getReportDownloadUrl(storagePath);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename ?? '';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+      await downloadFromUrl(url, filename ?? 'report');
     } catch (dlError) {
       const message =
         dlError instanceof Error ? dlError.message : 'Failed to download report.';
