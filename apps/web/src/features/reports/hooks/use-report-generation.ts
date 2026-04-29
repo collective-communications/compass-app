@@ -108,9 +108,26 @@ export function useReportGeneration(): UseReportGenerationReturn {
         const { reportId } = await createReport(config);
         reportIdRef.current = reportId;
 
-        // Invoke edge function to start generation; failure is non-fatal
+        // Invoke edge function to generate the file. The edge function returns
+        // the signed URL directly; the report row stores only the storage path.
         try {
-          await triggerReportGeneration(reportId);
+          const generationResult = await triggerReportGeneration(reportId);
+          const report = await getReportStatus(reportId);
+
+          setStatus(report.status);
+          setProgress(report.progress);
+          setFileSize(report.fileSize ?? generationResult.fileSize);
+          setPageCount(report.pageCount);
+
+          if (report.status === 'completed') {
+            setFileUrl(generationResult.signedUrl);
+            return;
+          }
+
+          if (report.status === 'failed') {
+            setError(report.error ?? 'Report generation failed.');
+            return;
+          }
         } catch (invokeError) {
           const message =
             invokeError instanceof Error ? invokeError.message : 'Failed to start report generation.';
@@ -119,6 +136,7 @@ export function useReportGeneration(): UseReportGenerationReturn {
           return;
         }
 
+        // Defensive fallback for any future async generation mode.
         startPolling(reportId);
       } catch (createError) {
         const message =
@@ -144,7 +162,7 @@ export function useReportGeneration(): UseReportGenerationReturn {
 
   // Cleanup on unmount
   useEffect(() => {
-    return () => {
+    return (): void => {
       stopPolling();
     };
   }, [stopPolling]);

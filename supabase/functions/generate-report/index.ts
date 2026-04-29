@@ -19,6 +19,7 @@
  *     "status":      "completed",
  *     "storagePath": string,  // Path within the "reports" storage bucket
  *     "signedUrl":   string,  // 24-hour signed download URL
+ *     "fileSize":    number,  // Rendered file size in bytes
  *     "generatedBy": string   // UUID of the authenticated user
  *   }
  *

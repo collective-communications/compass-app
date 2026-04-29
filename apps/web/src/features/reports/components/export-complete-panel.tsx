@@ -4,7 +4,7 @@
  */
 
 import type { ReactElement } from 'react';
-import { Download, CheckCircle2, AlertCircle, FileText, Copy, Plus } from 'lucide-react';
+import { Download, CheckCircle2, AlertCircle, FileText, Copy, Plus, Loader2 } from 'lucide-react';
 import { ReportFormat } from '@compass/types';
 import { formatFileSize } from './export-modal-utils';
 
@@ -16,7 +16,10 @@ interface ExportCompletePanelProps {
   pageCount: number | null;
   generationStatus: string | null;
   generationError: string | null;
+  downloadError: string | null;
+  isDownloading: boolean;
   linkCopied: boolean;
+  onDownload: () => void;
   onCopyLink: () => void;
   onNewExport: () => void;
   onReset: () => void;
@@ -30,7 +33,10 @@ export function ExportCompletePanel({
   pageCount,
   generationStatus,
   generationError,
+  downloadError,
+  isDownloading,
   linkCopied,
+  onDownload,
   onCopyLink,
   onNewExport,
   onReset,
@@ -66,14 +72,24 @@ export function ExportCompletePanel({
         {/* Actions */}
         <div className="flex w-full flex-col gap-2">
           {fileUrl !== null && (
-            <a
-              href={fileUrl}
-              download={filename}
-              className="flex items-center justify-center gap-2 rounded-md bg-[var(--color-interactive)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)] focus:ring-offset-2"
+            <button
+              type="button"
+              onClick={onDownload}
+              disabled={isDownloading}
+              className="flex items-center justify-center gap-2 rounded-md bg-[var(--color-interactive)] px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-[var(--color-interactive)] focus:ring-offset-2 disabled:opacity-50"
             >
-              <Download size={16} aria-hidden="true" />
-              Download {format.toUpperCase()}
-            </a>
+              {isDownloading ? (
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+              ) : (
+                <Download size={16} aria-hidden="true" />
+              )}
+              {isDownloading ? 'Preparing...' : `Download ${format.toUpperCase()}`}
+            </button>
+          )}
+          {downloadError !== null && (
+            <p className="rounded-md bg-[var(--severity-critical-bg)] px-3 py-2 text-xs text-[var(--severity-critical-text)]">
+              {downloadError}
+            </p>
           )}
           {fileUrl !== null && (
             <button

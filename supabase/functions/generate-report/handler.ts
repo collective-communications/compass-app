@@ -37,6 +37,7 @@ export type GenerateReportResult =
         status: 'completed';
         storagePath: string;
         signedUrl: string;
+        fileSize: number;
         generatedBy: string;
       };
     }
@@ -54,6 +55,15 @@ export type RenderFn = (
 // ─── Constants ──────────────────────────────────────────────────────────────
 
 const STAFF_ROLES = new Set(['ccc_admin', 'ccc_member', 'service_role']);
+
+const DEFAULT_REPORT_SECTIONS: NonNullable<ReportPayload['sections']> = [
+  { id: 'cover', label: 'Cover Page', included: true, locked: true },
+  { id: 'executive_summary', label: 'Executive Summary', included: true },
+  { id: 'compass_overview', label: 'Compass Overview', included: true },
+  { id: 'dimension_deep_dives', label: 'Dimension Deep Dives', included: true },
+  { id: 'segment_analysis', label: 'Segment Analysis', included: true },
+  { id: 'recommendations', label: 'Recommendations', included: true },
+];
 
 // ─── Storage ────────────────────────────────────────────────────────────────
 
@@ -128,6 +138,25 @@ async function enforceOrgAccess(
   return null;
 }
 
+/** Attach full section metadata from the report row's selected section IDs. */
+function applySelectedSections(
+  payload: ReportPayload,
+  selectedSectionIds: string[] | null,
+): ReportPayload {
+  if (!selectedSectionIds || selectedSectionIds.length === 0) {
+    return { ...payload, sections: DEFAULT_REPORT_SECTIONS };
+  }
+
+  const selected = new Set(selectedSectionIds);
+  return {
+    ...payload,
+    sections: DEFAULT_REPORT_SECTIONS.map((section) => ({
+      ...section,
+      included: section.locked === true || selected.has(section.id),
+    })),
+  };
+}
+
 // ─── Main ───────────────────────────────────────────────────────────────────
 
 /**
@@ -172,17 +201,18 @@ export async function generateReport(
 
   try {
     // Mark as generating
-    await updateReportStatus(client, reportId, 'generating');
+    await updateReportStatus(client, reportId, 'generating', { progress: 10 });
 
     // Assemble report data from survey scores, segments, recommendations
-    const payload = await assembleReportPayload(client, report.survey_id);
+    const assembledPayload = await assembleReportPayload(client, report.survey_id);
+    const payload = applySelectedSections(assembledPayload, report.sections);
 
     // Resolve renderer for the requested format and render to bytes. The
     // default path imports `./renderer.ts` lazily so Bun test runs (which
     // inject `opts.renderer`) don't pull in the DOCX/PPTX esm.sh deps.
     const render: RenderFn =
       opts.renderer ??
-      (async (p, r) => {
+      (async (p, r): Promise<RendererOutput> => {
         const { getRenderer } = await import('./renderer.ts');
         return getRenderer(r.format).render(p, r);
       });
@@ -202,6 +232,8 @@ export async function generateReport(
     await updateReportStatus(client, reportId, 'completed', {
       storage_path: storagePath,
       file_size: fileSize,
+      progress: 100,
+      client_visible: true,
     });
 
     return {
@@ -211,6 +243,7 @@ export async function generateReport(
         status: 'completed',
         storagePath,
         signedUrl,
+        fileSize,
         generatedBy: caller.userId,
       },
     };

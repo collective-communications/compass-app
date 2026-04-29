@@ -21,6 +21,18 @@ import {
   renderFooter,
 } from './sections.ts';
 
+type HtmlSection = {
+  id: string;
+  render: () => string;
+};
+
+function isSectionIncluded(payload: ReportPayload, sectionId: string): boolean {
+  if (!payload.sections || payload.sections.length === 0) return true;
+
+  const section = payload.sections.find((entry) => entry.id === sectionId);
+  return section ? section.included : false;
+}
+
 /**
  * Render a complete HTML document from the report payload.
  * Includes inline CSS for A4 layout, branding, and print styles.
@@ -31,6 +43,38 @@ export function renderReportHtml(payload: ReportPayload, report: ReportRow): str
     month: 'long',
     day: 'numeric',
   });
+
+  const sections: HtmlSection[] = [
+    {
+      id: 'cover',
+      render: () => renderCoverPage(payload, report, generatedDate),
+    },
+    {
+      id: 'executive_summary',
+      render: () => renderExecutiveSummary(payload),
+    },
+    {
+      id: 'compass_overview',
+      render: () => renderCompassOverview(payload),
+    },
+    {
+      id: 'dimension_deep_dives',
+      render: () => renderDimensionDeepDives(payload),
+    },
+    {
+      id: 'segment_analysis',
+      render: () => renderSegmentAnalysis(payload),
+    },
+    {
+      id: 'recommendations',
+      render: () => renderRecommendations(payload),
+    },
+  ];
+
+  const renderedSections = sections
+    .filter((section) => isSectionIncluded(payload, section.id))
+    .map((section) => section.render())
+    .join('\n');
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -43,12 +87,7 @@ export function renderReportHtml(payload: ReportPayload, report: ReportRow): str
   </style>
 </head>
 <body>
-  ${renderCoverPage(payload, report, generatedDate)}
-  ${renderExecutiveSummary(payload)}
-  ${renderCompassOverview(payload)}
-  ${renderDimensionDeepDives(payload)}
-  ${renderSegmentAnalysis(payload)}
-  ${renderRecommendations(payload)}
+  ${renderedSections}
   ${renderFooter(generatedDate)}
 </body>
 </html>`;

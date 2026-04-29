@@ -6,6 +6,15 @@
 import type { ReportConfig, ReportStatus, ReportFormat } from '@compass/types';
 import { getClient } from '../runtime';
 
+export interface ReportGenerationResult {
+  reportId: string;
+  status: 'completed';
+  storagePath: string;
+  signedUrl: string;
+  fileSize: number;
+  generatedBy: string;
+}
+
 export async function getReportStatus(reportId: string): Promise<ReportRow> {
   const supabase = getClient();
   const { data, error } = await supabase
@@ -35,6 +44,14 @@ export async function listReports(surveyId: string): Promise<ReportRow[]> {
 
 export async function createReport(config: ReportConfig): Promise<{ reportId: string }> {
   const supabase = getClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+
+  if (userError) throw userError;
+  if (!userId) {
+    throw new Error('Authenticated user is required to create a report.');
+  }
+
   const includedSectionIds = config.sections
     .filter((s) => s.included)
     .map((s) => s.id);
@@ -47,6 +64,9 @@ export async function createReport(config: ReportConfig): Promise<{ reportId: st
       status: 'queued',
       progress: 0,
       sections: includedSectionIds,
+      client_visible: true,
+      created_by: userId,
+      triggered_by: userId,
     })
     .select('id')
     .single();
@@ -56,13 +76,18 @@ export async function createReport(config: ReportConfig): Promise<{ reportId: st
   return { reportId: data.id as string };
 }
 
-export async function triggerReportGeneration(reportId: string): Promise<void> {
+export async function triggerReportGeneration(reportId: string): Promise<ReportGenerationResult> {
   const supabase = getClient();
-  const { error } = await supabase.functions.invoke('generate-report', {
+  const { data, error } = await supabase.functions.invoke<ReportGenerationResult>('generate-report', {
     body: { reportId },
   });
 
   if (error) throw error;
+  if (!data?.signedUrl) {
+    throw new Error('Report generation completed without a download URL.');
+  }
+
+  return data;
 }
 
 export async function deleteReport(reportId: string): Promise<void> {

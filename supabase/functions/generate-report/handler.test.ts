@@ -113,6 +113,7 @@ const reportRow = {
   format: 'pdf',
   status: 'queued',
   storage_path: null,
+  sections: null,
   client_visible: false,
   triggered_by: null,
   created_at: '2026-01-01T00:00:00Z',
@@ -382,5 +383,40 @@ describe('generateReport — baseline behavior preserved', () => {
     expect(result.status).toBe(409);
     const body = result.body as { error: string };
     expect(body.error).toBe('INVALID_STATE');
+  });
+
+  test('passes selected report sections to the renderer', async () => {
+    fromResults = [
+      {
+        data: {
+          ...reportRow,
+          sections: ['cover', 'recommendations'],
+        },
+        error: null,
+      },
+      ...happyPathStaffFixtures().slice(1),
+    ];
+
+    let renderedSections: Array<{ id: string; included: boolean }> | undefined;
+    const renderer: RenderFn = async (payload) => {
+      renderedSections = payload.sections;
+      return {
+        buffer: new Uint8Array([1, 2, 3]),
+        contentType: 'text/html',
+        extension: '.html',
+      };
+    };
+
+    const result = await generateReport(
+      makeClient(),
+      { reportId: REPORT_ID, caller: { userId: 'admin-1', role: 'ccc_admin' } },
+      { renderer },
+    );
+
+    expect(result.status).toBe(200);
+    expect(renderedSections).toBeDefined();
+    expect(renderedSections?.find((section) => section.id === 'cover')?.included).toBe(true);
+    expect(renderedSections?.find((section) => section.id === 'executive_summary')?.included).toBe(false);
+    expect(renderedSections?.find((section) => section.id === 'recommendations')?.included).toBe(true);
   });
 });

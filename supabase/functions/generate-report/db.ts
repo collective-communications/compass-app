@@ -9,6 +9,7 @@ export interface ReportRow {
   format: string;
   status: string;
   storage_path: string | null;
+  sections: string[] | null;
   client_visible: boolean;
   triggered_by: string | null;
   created_at: string;
@@ -36,12 +37,21 @@ export async function updateReportStatus(
   client: SupabaseClient,
   reportId: string,
   status: 'queued' | 'generating' | 'ready' | 'completed' | 'failed',
-  extra?: { storage_path?: string; file_size?: number; error?: string },
+  extra?: {
+    storage_path?: string;
+    file_size?: number;
+    error?: string;
+    progress?: number;
+    client_visible?: boolean;
+  },
 ): Promise<void> {
   const update: Record<string, unknown> = {
     status,
     updated_at: new Date().toISOString(),
   };
+  if (extra?.progress !== undefined) {
+    update.progress = extra.progress;
+  }
   if (extra?.storage_path) {
     update.storage_path = extra.storage_path;
   }
@@ -50,6 +60,9 @@ export async function updateReportStatus(
   }
   if (extra?.error) {
     update.error = extra.error;
+  }
+  if (extra?.client_visible !== undefined) {
+    update.client_visible = extra.client_visible;
   }
 
   const { error } = await client

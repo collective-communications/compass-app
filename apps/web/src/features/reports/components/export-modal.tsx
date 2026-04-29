@@ -20,6 +20,7 @@ import {
   type ReportConfig,
 } from '@compass/types';
 import { useFocusTrap } from '../../../hooks/use-focus-trap';
+import { fetchAndPrint } from '../../../lib/print-to-pdf';
 import { useReportGeneration } from '../hooks/use-report-generation';
 import type { ModalState } from './export-modal-utils';
 import { getCurrentStep, estimatePageCount, buildFilename } from './export-modal-utils';
@@ -48,6 +49,8 @@ export function ExportModal({
   const [format, setFormat] = useState<ReportFormat>(ReportFormat.PDF);
   const [sections, setSections] = useState<ReportSection[]>(getDefaultReportSections);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
 
   const generation = useReportGeneration();
 
@@ -58,6 +61,9 @@ export function ExportModal({
       : generation.isGenerating
         ? 'generating'
         : 'configure';
+  const currentStep = getCurrentStep(generation.progress);
+  const estimatedPages = estimatePageCount(sections);
+  const filename = buildFilename(format, surveyName);
 
   useFocusTrap(modalRef, isOpen);
 
@@ -65,7 +71,7 @@ export function ExportModal({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      return () => {
+      return (): void => {
         document.body.style.overflow = '';
       };
     }
@@ -88,6 +94,7 @@ export function ExportModal({
     setFormat(ReportFormat.PDF);
     setSections(getDefaultReportSections());
     setLinkCopied(false);
+    setDownloadError(null);
     onClose();
   }, [modalState, generation, onClose]);
 
@@ -103,6 +110,7 @@ export function ExportModal({
     setFormat(ReportFormat.PDF);
     setSections(getDefaultReportSections());
     setLinkCopied(false);
+    setDownloadError(null);
   }, [generation]);
 
   /** Copy the file URL to clipboard */
@@ -116,6 +124,34 @@ export function ExportModal({
       // Clipboard API may fail in insecure contexts — no-op
     }
   }, [generation.fileUrl]);
+
+  /** Download the completed report, using browser print for PDF output. */
+  const handleDownload = useCallback(async (): Promise<void> => {
+    if (generation.fileUrl === null) return;
+
+    setIsDownloading(true);
+    setDownloadError(null);
+
+    try {
+      if (format === ReportFormat.PDF) {
+        await fetchAndPrint(generation.fileUrl);
+        return;
+      }
+
+      const anchor = document.createElement('a');
+      anchor.href = generation.fileUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Failed to download report.';
+      setDownloadError(message);
+    } finally {
+      setIsDownloading(false);
+    }
+  }, [filename, format, generation.fileUrl]);
 
   /** Toggle a section's included state */
   const toggleSection = useCallback((sectionId: string): void => {
@@ -135,10 +171,6 @@ export function ExportModal({
     };
     await generation.generate(config);
   }, [surveyId, format, sections, generation]);
-
-  const currentStep = getCurrentStep(generation.progress);
-  const estimatedPages = estimatePageCount(sections);
-  const filename = buildFilename(format, surveyName);
 
   return (
     <>
@@ -226,7 +258,10 @@ export function ExportModal({
               pageCount={generation.pageCount}
               generationStatus={generation.status}
               generationError={generation.error}
+              downloadError={downloadError}
+              isDownloading={isDownloading}
               linkCopied={linkCopied}
+              onDownload={() => void handleDownload()}
               onCopyLink={() => void handleCopyLink()}
               onNewExport={handleNewExport}
               onReset={generation.reset}

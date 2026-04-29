@@ -48,6 +48,7 @@ const MOCK_REPORT = {
   format: 'docx',
   status: 'queued',
   storage_path: null,
+  sections: null,
   client_visible: false,
   triggered_by: 'usr-001',
   created_at: '2025-12-01T00:00:00Z',

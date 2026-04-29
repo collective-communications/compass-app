@@ -4,13 +4,14 @@
  * Download button is always visible on ready reports (critical for mobile access).
  */
 
-import type { ReactElement } from 'react';
+import type { MouseEvent, ReactElement } from 'react';
 import { Download, Loader2, AlertCircle } from 'lucide-react';
-import type { ReportStatus } from '@compass/types';
 import { formatDisplayDate } from '@compass/utils';
+import type { ReportRow } from '../services/report-api';
+import { useReportDownload } from '../hooks/use-report-download';
 
 interface ReportCardProps {
-  report: ReportStatus;
+  report: ReportRow;
   /** Whether this card is selected in the preview panel */
   isSelected: boolean;
   onSelect: () => void;
@@ -38,15 +39,33 @@ export function ReportCard({
   isSelected,
   onSelect,
 }: ReportCardProps): ReactElement {
+  const {
+    isLoading: isDownloading,
+    error: downloadError,
+    printPdf,
+    downloadFile,
+  } = useReportDownload();
   const isReady = report.status === 'completed';
   const isFailed = report.status === 'failed';
   const isInProgress = report.status === 'queued' || report.status === 'generating';
 
   const leftBorderColor = isReady
     ? 'border-l-[var(--severity-healthy-border)]'
-    : isFailed
-      ? 'border-l-[var(--severity-critical-border)]'
-      : 'border-l-transparent';
+      : isFailed
+        ? 'border-l-[var(--severity-critical-border)]'
+        : 'border-l-transparent';
+
+  async function handleDownload(event: MouseEvent<HTMLButtonElement>): Promise<void> {
+    event.stopPropagation();
+    if (report.storagePath === null) return;
+
+    if (report.format === 'pdf') {
+      await printPdf(report.storagePath);
+      return;
+    }
+
+    await downloadFile(report.storagePath, `report-${report.id}.${report.format}`);
+  }
 
   return (
     <div
@@ -74,16 +93,20 @@ export function ReportCard({
           <span className="text-sm text-[var(--text-secondary)]">{formatDisplayDate(report.createdAt, 'short')}</span>
         </div>
 
-        {isReady && report.fileUrl !== null && (
-          <a
-            href={report.fileUrl}
-            download
-            onClick={(e) => e.stopPropagation()}
+        {isReady && report.storagePath !== null && (
+          <button
+            type="button"
+            onClick={(event) => void handleDownload(event)}
+            disabled={isDownloading}
             aria-label={`Download ${report.format.toUpperCase()} report`}
-            className="relative z-10 rounded-md p-1.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--color-interactive)]"
+            className="relative z-10 rounded-md p-1.5 text-[var(--text-tertiary)] transition-colors hover:bg-[var(--grey-100)] hover:text-[var(--color-interactive)] disabled:opacity-50"
           >
-            <Download size={16} aria-hidden="true" />
-          </a>
+            {isDownloading ? (
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
+            ) : (
+              <Download size={16} aria-hidden="true" />
+            )}
+          </button>
         )}
       </div>
 
@@ -111,6 +134,13 @@ export function ReportCard({
           <span className="flex items-center gap-1 text-[var(--severity-critical-text)]">
             <AlertCircle size={12} aria-hidden="true" />
             {report.error ?? 'Generation failed'}
+          </span>
+        )}
+
+        {downloadError !== null && (
+          <span className="flex items-center gap-1 text-[var(--severity-critical-text)]">
+            <AlertCircle size={12} aria-hidden="true" />
+            {downloadError}
           </span>
         )}
       </div>
