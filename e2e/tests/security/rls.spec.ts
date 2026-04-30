@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
+import { ensureTestUser } from '../../helpers/auth';
 import { createAdminClient } from '../../helpers/db';
 
 /**
@@ -41,6 +42,7 @@ const EMAILS = {
   cccMember: 'member@collectivecommunication.ca',
   clientExecRiverValley: 'exec@rivervalleyhealth.ca',
   clientExecLakeside: 'exec@lakesideclinic.ca',
+  rlsMutationTarget: 'rls-target@rivervalleyhealth.ca',
 } as const;
 
 const ORG_IDS = {
@@ -130,51 +132,6 @@ async function deleteReport(reportId: string): Promise<void> {
   if (error) {
     throw new Error(`Failed to delete RLS report ${reportId}: ${error.message}`);
   }
-}
-
-async function getUserProfileByEmail(
-  email: string,
-  organizationId?: string,
-): Promise<{ id: string; role: string }> {
-  const supabase = createAdminClient();
-  const { data: profiles, error } = await supabase
-    .from('user_profiles')
-    .select('id, role, created_at')
-    .eq('email', email)
-    .order('created_at', { ascending: true })
-    .limit(10);
-
-  if (error || !profiles || profiles.length === 0) {
-    throw new Error(`Failed to resolve profile for ${email}: ${error?.message ?? 'no data'}`);
-  }
-
-  if (organizationId) {
-    const profileIds = profiles.map((profile) => profile.id as string);
-    const { data: memberships, error: membershipError } = await supabase
-      .from('org_members')
-      .select('user_id')
-      .eq('organization_id', organizationId)
-      .in('user_id', profileIds);
-
-    if (membershipError) {
-      throw new Error(`Failed to resolve membership for ${email}: ${membershipError.message}`);
-    }
-
-    const membershipIds = new Set(
-      (memberships ?? []).map((membership) => membership.user_id as string),
-    );
-    const matchedProfile = profiles.find((profile) => membershipIds.has(profile.id as string));
-    if (matchedProfile) {
-      return { id: matchedProfile.id as string, role: matchedProfile.role as string };
-    }
-  }
-
-  const profile = profiles[0];
-  if (!profile) {
-    throw new Error(`Failed to resolve profile for ${email}: no data`);
-  }
-
-  return { id: profile.id as string, role: profile.role as string };
 }
 
 async function getSeedDeploymentToken(): Promise<string> {
@@ -391,7 +348,11 @@ test.describe('@security RLS perimeter', () => {
     let targetId: string | null = null;
 
     try {
-      const target = await getUserProfileByEmail(EMAILS.clientExecRiverValley, ORG_IDS.riverValley);
+      const target = await ensureTestUser(
+        EMAILS.rlsMutationTarget,
+        'client_exec',
+        ORG_IDS.riverValley,
+      );
       targetId = target.id;
       await signInAs(client, EMAILS.cccMember);
 

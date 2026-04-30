@@ -101,6 +101,10 @@ export function resolveAnalyticsRoute(pathname: string): ResolvedAnalyticsRoute 
 }
 
 function getAnalyticsEndpoint(): string | null {
+  if (optionalEnv('VITE_ANALYTICS_DISABLED', '').toLowerCase() === 'true') {
+    return null;
+  }
+
   const supabaseUrl = optionalEnv('VITE_SUPABASE_URL', '').replace(/\/$/, '');
   return supabaseUrl ? `${supabaseUrl}/functions/v1/capture-analytics` : null;
 }

@@ -35,6 +35,15 @@ function restoreGlobalProperty(key: keyof typeof globalThis, descriptor?: Proper
   Reflect.deleteProperty(globalThis, key);
 }
 
+function restoreProcessEnv(key: string, value?: string): void {
+  if (value === undefined) {
+    delete process.env[key];
+    return;
+  }
+
+  process.env[key] = value;
+}
+
 describe('resolveAnalyticsRoute', () => {
   test('maps admin analytics to a safe route template', () => {
     expect(resolveAnalyticsRoute('/analytics')).toEqual({
@@ -187,6 +196,24 @@ describe('captureProductEvent', () => {
 });
 
 describe('captureRouteView', () => {
+  test('skips default capture when analytics is disabled by env', () => {
+    const { calls, transport } = makeTransport();
+    const previousDisabled = process.env.VITE_ANALYTICS_DISABLED;
+    const previousSupabaseUrl = process.env.VITE_SUPABASE_URL;
+
+    try {
+      process.env.VITE_ANALYTICS_DISABLED = 'true';
+      process.env.VITE_SUPABASE_URL = 'https://supabase.test';
+
+      captureRouteView('/analytics', null, { transport });
+
+      expect(calls).toHaveLength(0);
+    } finally {
+      restoreProcessEnv('VITE_ANALYTICS_DISABLED', previousDisabled);
+      restoreProcessEnv('VITE_SUPABASE_URL', previousSupabaseUrl);
+    }
+  });
+
   test('sends route view with safe route template and role dimensions', () => {
     const { calls, transport } = makeTransport();
 

@@ -50,6 +50,19 @@ export async function ensureTestUser(
     userId = data.user.id;
   }
 
+  const { error: profileError } = await supabase.from('user_profiles').upsert(
+    {
+      id: userId,
+      email,
+      role,
+    },
+    { onConflict: 'id' },
+  );
+
+  if (profileError) {
+    throw new Error(`Failed to upsert user_profiles: ${profileError.message}`);
+  }
+
   // Upsert org_members row
   const { error: memberError } = await supabase.from('org_members').upsert(
     {

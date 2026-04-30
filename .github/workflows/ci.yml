@@ -178,6 +178,7 @@ jobs:
           E2E_SUPABASE_ANON_JWT: ${{ secrets.E2E_SUPABASE_ANON_JWT }}
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_ANALYTICS_DISABLED: "true"
 
       - name: Upload blob report
         uses: actions/upload-artifact@v4
