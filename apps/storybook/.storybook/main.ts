@@ -37,6 +37,7 @@ const config: StorybookConfig = {
       ...config.resolve.alias,
       '@compass/compass': resolve(root, 'packages/compass/src/index.ts'),
       '@compass/scoring': resolve(root, 'packages/scoring/src/index.ts'),
+      '@compass/tokens/theme.css': resolve(root, 'packages/tokens/src/theme.css'),
       '@compass/tokens': resolve(root, 'packages/tokens/src/index.ts'),
       '@compass/types': resolve(root, 'packages/types/src/index.ts'),
       '@compass/ui': resolve(root, 'packages/ui/src/index.ts'),
@@ -54,6 +55,6 @@ const config: StorybookConfig = {
 
 export default config;
 
-function getAbsolutePath(value: string): any {
+function getAbsolutePath(value: string): string {
   return dirname(_require.resolve(join(value, "package.json")));
 }
