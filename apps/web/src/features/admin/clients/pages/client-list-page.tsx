@@ -1,6 +1,6 @@
 /**
  * Admin client list page.
- * Displays all organizations as cards with search, summary, and add-client action.
+ * Displays all organizations as cards with search and add-client action.
  * Route: /clients (admin bottom tab)
  */
 
@@ -11,7 +11,6 @@ import { useOrganizations } from '../hooks/use-organizations';
 import { ClientCard } from '../components/client-card';
 import { ClientSearchBar } from '../components/client-search-bar';
 import { AddClientModal } from '../components/add-client-modal';
-import { AnalyticsSummaryPanel } from '../../analytics';
 
 export interface ClientListPageProps {
   onSelectClient: (orgId: string) => void;
@@ -74,8 +73,6 @@ export function ClientListPage({ onSelectClient }: ClientListPageProps): ReactEl
           activeSurveys={activeSurveyCount}
         />
       </div>
-
-      <AnalyticsSummaryPanel />
 
       {isLoading && (
         <div className="py-12 text-center text-sm text-[var(--text-secondary)]">
